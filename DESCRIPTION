@@ -1,0 +1,22 @@
+Package: m7G
+Type: Package
+Title: What the Package Does (one line, title case)
+Version: 0.0.1
+Date: 2017-12-09
+Authors@R: person("Felix G.M.", "Ernst", email = "felix.g.m.ernst@outlook.com", role = c("aut", "cre"))
+Description:
+    What the package does (one paragraph).
+License: GPL-3
+Encoding: UTF-8
+Depends: R (>= 3.4.2)
+LazyData: true
+Suggests: testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Imports: methods,
+    BiocParallel,
+    Biostrings,
+    rtracklayer,
+    GenomicRanges,
+    assertive
