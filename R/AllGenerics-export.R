@@ -58,9 +58,6 @@ setGeneric (
 
 #' @name getExperimentData
 #' 
-#' @param .Object 
-#' @param number 
-#' 
 #' @export
 setGeneric ( 
   name= "getExperimentData",
@@ -70,8 +67,29 @@ setGeneric (
 
 # parsing ----------------------------------------------------------------------
 
+#' @name analyzeModifications
+#'
+#' @export
 setGeneric ( 
-  name= "parse",
+  name= "analyzeModifications",
   def=function(.Object,
-               number){standardGeneric("parse")} 
+               number,
+               modifications){standardGeneric("analyzeModifications")} 
+) 
+
+
+# modification parsing ---------------------------------------------------------
+
+
+#' @name parseMod
+#' 
+#' @title parseMod
+#' 
+#' @param object mod object 
+#' 
+#' @export
+setGeneric ( 
+  name= "parseMod",
+  def=function(object,
+               data){standardGeneric("parseMod")} 
 ) 

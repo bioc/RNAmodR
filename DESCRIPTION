@@ -1,4 +1,4 @@
-Package: m7G
+Package: RNAmod
 Type: Package
 Title: What the Package Does (one line, title case)
 Version: 0.0.1
@@ -10,13 +10,28 @@ License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
 LazyData: true
+Collate: 
+    'RNAmod.R'
+    'AllGenerics.R'
+    'AllGenerics-export.R'
+    'RNAModString.R'
+    'RNAmod-utils.R'
+    'class-RNAmod-type.R'
+    'class-RNAmod.R'
+    'methods-RNAmod-m3C.R'
+    'methods-RNAmod-m7G-D.R'
+    'methods-RNAmod-parse.R'
+    'methods-RNAmod-plot.R'
+    'methods-RNAmod.R'
+Imports: methods,
+    assertive,
+    Rsamtools,
+    BiocParallel,
+    Biostrings,
+    rtracklayer,
+    GenomicRanges
 Suggests: testthat,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-Imports: methods,
-    BiocParallel,
-    Biostrings,
-    rtracklayer,
-    GenomicRanges,
-    assertive
+RoxygenNote: 6.0.1

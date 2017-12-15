@@ -61,13 +61,47 @@ setMethod(
       do.call(c, x)
     }
   } 
-  dataList <- unname(dataList) # names not useful in unlisted result
-  elts <- stats::setNames(bamWhat(param), bamWhat(param))
+  ids <- .get_IDs_from_scanBamParam(dataList,param)
+  dataList <- unname(dataList) # names not valid for unlisting of result
+  elts <- stats::setNames(Rsamtools::bamWhat(param), Rsamtools::bamWhat(param))
   
   lst <- lapply(elts, function(elt) .unlist(lapply(dataList, "[[", elt)))
+  lst$ID <- ids
+  lst <- lst[c("ID"="ID",elts)]
   
   df <- do.call(S4Vectors::DataFrame, lst)
   return(df)
+}
+
+.get_IDs_from_scanBamParam <- function(dataList,param){
+  geneNames <- vector(mode = "list", 
+                      length=length(names(Rsamtools::bamWhich(param))))
+  # construct start-end part
+  # format = start-end
+  geneNames <- lapply(Rsamtools::bamWhich(param), function(x){
+    res <- S4Vectors::mcols(x)$ID
+    names(res) <- paste0(IRanges::start(x),"-",IRanges::end(x))
+    return(res)
+  })
+  # combine chromosome with start-end part
+  # format = chr:start-end
+  names(geneNames) <- names(Rsamtools::bamWhich(param))
+  for(i  in seq_along(geneNames)){
+    names(geneNames[[i]]) <- paste0(names(geneNames[i]),
+                                    ":",
+                                    names(geneNames[[i]]))
+  }
+  geneNames <- setNames(unlist(geneNames),unlist(lapply(geneNames, names)))
+  
+  # Repeat every "chr:start-end" = "ID" pair for number of reads mapped to this
+  # part
+  geneNames2 <- vector(mode="list",length(geneNames))
+  for(i in seq_along(geneNames)){
+    geneNames2[[i]] <- list(rep(geneNames[i],
+                                length(dataList[[names(geneNames[i])]]$seq)))
+  }
+  geneNames <- setNames(unlist(geneNames2),unlist(lapply(geneNames2, names)))
+  return(geneNames)
 }
 
 #' scans BAM files and converts them to DataFrame each 
@@ -120,16 +154,38 @@ setMethod(
 #' @importFrom GenomeInfoDb seqnames
 #' @importFrom Rsamtools ScanBamParam
 .assemble_scanBamParam <- function(gRangeInput,
-                                   quality){
-  gRangeList <- GRangesList()
-  for(i in 1:length(unique(GenomeInfoDb::seqnames(gRangeInput)))){
-    gRangeList <- append(gRangeList, GRangesList(gRangeInput[GenomeInfoDb::seqnames(gRangeInput) == unique(GenomeInfoDb::seqnames(gRangeInput))[i],]) )
+                                   quality,
+                                   acceptableChromIdent){
+  # ScanBamParam expects GRangesList each members matching a chromosome
+  gRangeList <- GenomicRanges::GRangesList()
+  listNames <- rep("",length(unique(GenomeInfoDb::seqnames(gRangeInput))))
+  for(i in seq_along(unique(GenomeInfoDb::seqnames(gRangeInput)))){
+    ident <- as.character(unique(GenomeInfoDb::seqnames(gRangeInput))[i])
+    if( ident %in% acceptableChromIdent ){
+      gRangeList <- append(gRangeList, GenomicRanges::GRangesList(gRangeInput[GenomeInfoDb::seqnames(gRangeInput) == ident,]) )
+      listNames[[i]] <- ident
+    } else {
+      warning("Not matching chromosome identifier in gff and bam file. ",
+              "Skipping data for chromosome '",ident,"'")
+    }
   }
-  names(gRangeList) <- unique(GenomeInfoDb::seqnames(gRangeInput))
+  names(gRangeList) <- listNames[listNames != ""]
+  
   which <- gRangeList
   what <- c("rname", "strand", "pos", "qwidth", "seq", "mapq")
   param <- Rsamtools::ScanBamParam(which=which, 
-                                   what=what, 
-                                   mapqFilter = quality)
+                                   what=what
+                                   # since tRNA and
+                                   # mapqFilter = quality
+                                   )
   return(param)
+}
+
+# Extracts sequence names aka. chromosome identifier from list of bam files
+.get_acceptable_chrom_ident <- function(bamFiles){
+  seqnames <- lapply(bamFiles, function(file){
+    res <- Rsamtools::idxstatsBam(file)
+    return(as.character(res$seqnames))
+  })
+  return(unique(unlist(seqnames)))
 }

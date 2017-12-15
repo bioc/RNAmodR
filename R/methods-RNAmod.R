@@ -14,11 +14,11 @@ NULL
 #' data("RNAmod_test", package = "RNAmod")
 #' 
 #' # All experiments
-#' getExperimentData(experiment)
+#' getSampleData(experiment)
 #' # One experiment as list
-#' getExperimentData(experiment, 1)
+#' getSampleData(experiment, 1)
 #' # Two experiments as data.frame
-#' getExperimentData(experiment, c(1,2))
+#' getSampleData(experiment, c(1,2))
 setMethod(
   f = "getExperimentData", 
   signature = signature(.Object = "RNAmod", 
@@ -31,10 +31,10 @@ setMethod(
 
 .get_experiment_data <- function(.Object,number){
   if( missing(number) || assertive::is_identical_to_false(number) ) {
-    return(.Object@.dataExperiments)
+    return(.Object@.dataSamples)
   }
   if( all(vapply(number,assertive::is_a_number,logical(1)))) {
-    df <- .Object@.dataExperiments
+    df <- .Object@.dataSamples
     if (nrow(df[df$ExperimentNo %in% number, ]) == 1) {
       ret <- as.list(df[df$ExperimentNo == number,])
       ret["ExperimentNo"] <- as.numeric(ret["ExperimentNo"])
