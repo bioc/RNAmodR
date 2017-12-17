@@ -176,3 +176,30 @@ setGeneric (
 )
 
 
+# comparison -------------------------------------------------------------------
+
+#' @name compareSample
+#'
+#' @title compareSample
+#' 
+#' @export
+setGeneric ( 
+  name= "compareSample",
+  def=function(.Object,
+               number,
+               modifications){standardGeneric("compareSample")} 
+)
+
+#' @name compareAsHeatmap
+#'
+#' @title compareAsHeatmap
+#' 
+#' @export
+setGeneric ( 
+  name= "compareAsHeatmap",
+  def=function(.Object,
+               number,
+               modifications,
+               genes){standardGeneric("compareAsHeatmap")} 
+)
+
