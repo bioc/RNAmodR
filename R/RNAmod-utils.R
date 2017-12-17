@@ -2,7 +2,6 @@
 NULL
 
 
-
 #' @rdname setupWorkEnvir
 #'
 #' @param experimentName a name for the experiment, e.g. "xyz"
@@ -32,9 +31,11 @@ setMethod(
     createFolder(dataFolder)
     createFolder(resultFolder)
     
-    file.copy(from = system.file("extdata", "example_experiment_layout.csv",
+    file.copy(from = system.file("extdata", 
+                                 "example_experiment_layout.csv",
                                  package = "RNAmod"),
-              to = paste0(dataFolder,"experiment_layout.csv") )
+              to = paste0(dataFolder,
+                          "experiment_layout.csv") )
     
     message(paste0("work enviroment '",experimentName,"' created."))
     
@@ -79,7 +80,11 @@ setMethod(
   # construct start-end part
   # format = start-end
   geneNames <- lapply(Rsamtools::bamWhich(param), function(x){
+    pos <- paste0(IRanges::start(x),"-",IRanges::end(x))
+    # If ID column is NA use Name column
     res <- S4Vectors::mcols(x)$ID
+    res[is.na(res)] <- S4Vectors::mcols(x[is.na(S4Vectors::mcols(x)$ID),])$Name
+    
     names(res) <- paste0(IRanges::start(x),"-",IRanges::end(x))
     return(res)
   })
@@ -166,7 +171,8 @@ setMethod(
       listNames[[i]] <- ident
     } else {
       warning("Not matching chromosome identifier in gff and bam file. ",
-              "Skipping data for chromosome '",ident,"'")
+              "Skipping data for chromosome '",ident,"'",
+              call. = FALSE)
     }
   }
   names(gRangeList) <- listNames[listNames != ""]

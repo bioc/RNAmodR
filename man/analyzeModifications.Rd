@@ -12,9 +12,9 @@ analyzeModifications(.Object, number, modifications)
   modifications)
 }
 \arguments{
-\item{.Object}{RNAmod.}
+\item{.Object}{a RNAmod object.}
 
-\item{number}{numeric.}
+\item{number}{a number defining an experiment.}
 
-\item{modifications}{character.}
+\item{modifications}{name of modification to be used for analysis.}
 }
