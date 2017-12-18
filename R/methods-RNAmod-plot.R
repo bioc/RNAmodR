@@ -31,6 +31,8 @@ setMethod(
     
     folder <- paste0(getOutputFolder(.Object),"Visualizations/")
     
+    
+    
     # get intersection of requested and available genes
     genesAvail <- intersect(rownames(se), genes)
     if(length(genesAvail) != length(genes)){
@@ -45,20 +47,31 @@ setMethod(
       }
     }
     
-    browser()
     positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions
     mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods
     gff <- .Object@.dataGFF
     fasta <- .Object@.dataFasta
     
     for(i in seq_along(genesAvail)){
-      .plot_gene_with_modifications(positions,mods,gff,fasta)
+      .plot_gene_with_modifications(genesAvail[[i]],positions,mods,gff,fasta)
     }
     
   }
 )
 
-.plot_gene_with_modifications <- function(positions,mods,gff,seq){
+.plot_gene_with_modifications <- function(geneName,positions,mods,gff,seq){
+  
+  
+  gff <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
+                S4Vectors::mcols(gff)$Name == geneName) |
+               (!is.na(S4Vectors::mcols(gff)$ID) & 
+                  S4Vectors::mcols(gff)$ID == geneName),]
+  seq <- getSeq(fasta,gff)[[1]]
+  browser()
+  
+  
+  
+  
   
 }
 

@@ -90,9 +90,11 @@ setMethod(
     
     # Save found modifications asSummarizedExperiment
     se <- .construct_SE_from_mod_result(experiment,df,gff,positions)
-    save(se, file = gsub(".gff",".RData",fileName))
-    message("Saved detected modifications as SummarizedExperiment: ",
-            gsub(".gff3",".RData",fileName))
+    setSummarizedExperiment(.Object,
+                            se,
+                            number,
+                            modifications)
+    message("Saved detected modifications as SummarizedExperiment.")
   }
 )
 

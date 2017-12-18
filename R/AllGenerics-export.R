@@ -65,6 +65,53 @@ setGeneric (
                number){standardGeneric("getExperimentData")} 
 ) 
 
+
+#' @name getSummarizedExperiment
+#' 
+#' @title returns one or more SummarizedExperiment
+#' 
+#' @description
+#' Global access to SummarizedExperiments stored by RpfExperiment. 
+#' \code{getSummarizedExperiment()} returns the result of experiment, whereas 
+#' \code{getSummarizedExperiments()}, is the vectorized version returning a
+#' list of experiment results.
+#' 
+#' @export
+setGeneric ( 
+  name= "getSummarizedExperiment",
+  def=function(.Object,
+               number, 
+               modification){standardGeneric("getSummarizedExperiment")} 
+) 
+
+#' @rdname  getSummarizedExperiment
+#' 
+#' @export
+setGeneric ( 
+  name= "getSummarizedExperiments",
+  def=function(.Object,
+               number, 
+               modification){standardGeneric("getSummarizedExperiments")} 
+) 
+
+#' @name setSummarizedExperiment
+#' 
+#' @title sets a SummarizedExperiment object
+#' 
+#' @description
+#' Saves/overwrites a SummarizedExperiment object for certain experiment and 
+#' passes the SummarizedExperiment object on to be saved to disk as .RData file
+#' in the \code{results\\SE} folder
+#' 
+#' @export
+setGeneric ( 
+  name= "setSummarizedExperiment",
+  def=function(.Object,
+               se,
+               number, 
+               modification ){standardGeneric("setSummarizedExperiment")} 
+) 
+
 # parsing ----------------------------------------------------------------------
 
 #' @name analyzeModifications
