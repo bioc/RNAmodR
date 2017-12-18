@@ -31,7 +31,7 @@ setMethod(
     
     folder <- paste0(getOutputFolder(.Object),"Visualizations/")
     
-    
+    se <- getSummarizedExperiment(.Object, number, modifications)
     
     # get intersection of requested and available genes
     genesAvail <- intersect(rownames(se), genes)

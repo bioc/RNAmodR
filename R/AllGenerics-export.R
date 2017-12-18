@@ -112,6 +112,30 @@ setGeneric (
                modification ){standardGeneric("setSummarizedExperiment")} 
 ) 
 
+#' @name getGff
+#' 
+#' @description getGff
+#' 
+#' @export
+setGeneric ( 
+  name= "getGff",
+  def=function(.Object,
+               number, 
+               modification){standardGeneric("getGff")} 
+) 
+
+#' @name setGff
+#' 
+#' @description setGff
+#' 
+#' @export
+setGeneric ( 
+  name= "setGff",
+  def=function(.Object,
+               number, 
+               modification){standardGeneric("setGff")} 
+) 
+
 # parsing ----------------------------------------------------------------------
 
 #' @name analyzeModifications

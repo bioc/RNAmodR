@@ -150,6 +150,7 @@ setMethod(
     se <- NULL
     
     folder <- fileName <- paste0(getOutputFolder(.Object),
+                                 "SE/",
                                  "RNAmod_",
                                  unique(experiment["SampleName"]),
                                  "_")
@@ -211,13 +212,16 @@ setMethod(
                         modification) {
     
     folder <- fileName <- paste0(getOutputFolder(.Object),
-                                 "RNAmod_",
-                                 unique(experiment["SampleName"]),
-                                 "_")
+                                 "SE/")
+    if(!assertive::is_dir(folder)){
+      dir.create(folder, recursive = TRUE)
+    }
     fileNames <- paste0(folder,
-                       modification,
-                       ".RData")
-    browser()
+                        "RNAmod_",
+                        unique(experiment["SampleName"]),
+                        "_",
+                        modification,
+                        ".RData")
     ses <- .split_se_for_each_modification(se,modification)
     for(i in seq_along(ses)){
       se <- ses[[i]]
@@ -270,5 +274,57 @@ setMethod(
     
     se <- .saveSummarizedExperiments(.Object, se, experiment, modification)
     return(invisible(se))
+  }
+)
+
+
+
+#' @rdname getGff
+#' 
+#' @title getGff
+#'
+#' @param .Object RNAmod. 
+#' @param number numeric. 
+#' @param modification character. 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+setMethod(
+  f = "getGff", 
+  signature = signature(.Object = "RNAmod", 
+                        number = "numeric",
+                        modification = "character"),
+  definition = function(.Object, 
+                        number,
+                        modification) {
+    
+  }
+)
+
+#' @rdname setGff
+#' 
+#' @title setGff
+#'
+#' @param .Object RNAmod. 
+#' @param gff GRanges. 
+#' @param number numeric. 
+#' @param modification character. 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+setMethod(
+  f = "setGff", 
+  signature = signature(.Object = "RNAmod", 
+                        gff = "GRanges", 
+                        number = "numeric",
+                        modification = "character"),
+  definition = function(.Object, 
+                        gff, 
+                        number,
+                        modification) {
   }
 )
