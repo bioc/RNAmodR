@@ -18,6 +18,7 @@ NULL
 #' @import rtracklayer
 #' @import Rsamtools
 #' @import GenomicRanges
+#' @import ggplot2
 NULL
 
 requireNamespace("BiocParallel")
@@ -37,3 +38,8 @@ RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript","mRNA","rRNA_gene","tRNA_gene",
                                     "internal_transcribed_spacer_region",
                                     "external_transcribed_spacer_region",
                                     "ncRNA_gene","snoRNA","snRNA_gene")
+
+
+.onLoad <- function(libname,pkgname){
+  options("RNAmod_sample_transcripts" = c("RDN18-1"))
+}

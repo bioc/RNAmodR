@@ -36,6 +36,6 @@ in the \code{results\\SE} folder
 
 \examples{
 \donttest{
-setSummarizedExperiment(experiment, se, 1)
+setSummarizedExperiment(experiment, se, 1, c("m7G"))
 }
 }

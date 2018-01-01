@@ -28,3 +28,29 @@ setGeneric (
                experiment, 
                modification ){standardGeneric(".saveSummarizedExperiments")} 
 ) 
+
+#' #' @title .loadGff
+#' #' 
+#' #' @description
+#' #' Loads saved gff3 as GRanges object from file
+#' setGeneric ( 
+#'   name= ".loadGff", 
+#'   def=function(.Object, 
+#'                experiment, 
+#'                modification,
+#'                failOnNonExist = TRUE){
+#'     standardGeneric(".loadGff")
+#'   } 
+#' ) 
+
+#' @title .saveGff
+#' 
+#' @description
+#' Saves GRanges object as gff3 file
+setGeneric ( 
+  name= ".saveGff", 
+  def=function(.Object, 
+               gff, 
+               experiment, 
+               modification ){standardGeneric(".saveGff")} 
+) 

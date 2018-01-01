@@ -26,21 +26,20 @@ setMethod(
     assertive::is_a_number(number)
     assertive::assert_all_are_non_empty_character(modifications)
     
-    # get experiment data and extract bam file path
+    # get experiment data and create outout folders
     experiment <- getExperimentData(.Object,number)
-    fileName <- paste0(getOutputFolder(.Object),
-                       "RNAmod_",
-                       unique(experiment["SampleName"]),
-                       "_",
-                       paste(modifications,collapse = "-"),
-                       ".gff3")
+    
+    
     message("Analyzing modifications for Sample '",
             unique(experiment["SampleName"]),
             "'...")
     
+    # add the default modification class, which is just used for handling read 
+    # positions (5'-end), but not modification detection.
+    modifications <- append("default",modifications)
     modClasses <- .load_mod_classes(modifications)
     message("Detecting modification types: '",
-            paste(names(modClasses), 
+            paste(names(modClasses[names(modClasses) != "default"]), 
                   collapse = "', '"),
             "'")
     
@@ -57,36 +56,42 @@ setMethod(
     
     # detect modifications in each file
     data <- lapply(files,
-                   FUN = .detect_mod,
+                   FUN = .get_positions,
                    gff,
-                   .Object@.dataFasta,
                    param,
                    modClasses)
     
-    # Merge data from all replicates
-    # Modifications:
-    mods <- lapply(modClasses,
-    # mods <- BiocParallel::bplapply(modClasses,
-                                   FUN = mergeModsOfReplicates,
-                                   gff,
-                                   .Object@.dataFasta,
-                                   lapply(data,"[[","mods"))
-    # Positions:
-    positions <- lapply(modClasses,
-    # positions <- BiocParallel::bplapply(modClasses,
-                   FUN = mergePositionsOfReplicates,
-                   gff,
-                   .Object@.dataFasta,
-                   lapply(data,"[[","positions"))
+    # Merge data from all replicates and detect modifications:
+    mod_positions <- vector(mode = "list", length = length(modClasses))
+    names(mod_positions) <- names(modClasses)
     
+    for(i in seq_along(modClasses)){
+      mod_positions[[i]] <- parseMod(modClasses[[i]],
+                                     gff,
+                                     .Object@.dataFasta,
+                                     data)
+    }
+    mod_positions <- mod_positions[!is.na(mod_positions)]
+    
+    positions <- vector(mode = "list", length = length(modClasses))
+    names(positions) <- names(modClasses)
+    for(i in seq_along(modClasses)){
+      positions[[i]] <- mergePositionsOfReplicates(modClasses[[i]],
+                                                   gff,
+                                                   .Object@.dataFasta,
+                                                   data)
+    }
+    positions <- positions[!is.na(positions)]
     
     # Construct DataFrame from found modifications
-    df <- .construct_DataFrame_from_mod_result(mods,gff)
+    df <- .construct_DataFrame_from_mod_result(mod_positions,gff)
     
     # Save found modifications as gff file
-    rtracklayer::export.gff3(GRanges(df), con = fileName)
-    message("Saved detected modifications as gff3 file in: ",
-            fileName)
+    setGff(.Object,
+           GRanges(df),
+           number,
+           modifications)
+    message("Saved detected modifications as gff3 file.")
     
     # Save found modifications asSummarizedExperiment
     se <- .construct_SE_from_mod_result(experiment,df,gff,positions)
@@ -113,24 +118,16 @@ setMethod(
                                " does not exist (",className,").",
                                call. = FALSE)
     )
-    if( !existsMethod("parseMod",signature(class(class),
-                                           "numeric",
-                                           "GRanges",
-                                           "DNAString",
-                                           "DataFrame") ) )
-      stop("Function parseMod() not defined for ",class(class))
-    if( !existsMethod("mergeModsOfReplicates",signature(class(class),
-                                                        "GRanges",
-                                                        "FaFile",
-                                                        "list") ) )
-      stop("Function mergeModsOfReplicates() not defined for ",class(class))
-    
     if( !existsMethod("convertReadsToPositions",signature(class(class),
                                                           "numeric",
                                                           "GRanges",
-                                                          "DNAString",
                                                           "DataFrame") ) )
       stop("Function convertReadsToPositions() not defined for ",class(class))
+    if( !existsMethod("parseMod",signature(class(class),
+                                           "GRanges",
+                                           "FaFile",
+                                           "list") ) )
+      stop("Function parseMod() not defined for ",class(class))
     if( !existsMethod("mergePositionsOfReplicates",signature(class(class),
                                                              "GRanges",
                                                              "FaFile",
@@ -145,11 +142,10 @@ setMethod(
 
 
 # detect modifications in each file
-.detect_mod <- function(bamFile,
-                        gff,
-                        fasta,
-                        param,
-                        modClasses){
+.get_positions <- function(bamFile,
+                           gff,
+                           param,
+                           modClasses){
   # Construct Dataframe from scanBam data
   bamData <- Rsamtools::scanBam(bamFile, param=param)
   bamData <- .convert_bam_to_DataFrame(bamData, param=param)
@@ -163,72 +159,43 @@ setMethod(
                               bamData$ID)
   
   # for testing
-  bamData <- bamData[grepl("RDN18",names(bamData))]
-  
-  mods <- lapply(bamData,
-                 # res <- BiocParallel::bplapply(bamData,
-                 FUN = .detect_mod_in_transcript,
-                 totalCounts,
-                 gff,
-                 fasta,
-                 modClasses)
-  names(mods) <- names(bamData)
+  # bamData <- bamData[names(bamData) %in% c("RDN18")]
+  bamData <- bamData[names(bamData) %in% c("tS(CGA)C")]
+  # bamData <- bamData[names(bamData) %in% c("RDN18","tS(CGA)C")]
   
   positions <- lapply(bamData,
-                 # res <- BiocParallel::bplapply(bamData,
-                 FUN = .get_positions_in_transcript,
-                 totalCounts,
-                 gff,
-                 fasta,
-                 modClasses)
+  # res <- BiocParallel::bplapply(bamData,
+                      FUN = .get_positions_in_transcript,
+                      totalCounts,
+                      gff,
+                      modClasses)
   names(positions) <- names(bamData)
-  return(list(mods = mods,
-              positions = positions))
-}
-
-# For each transcript check for all modifications 
-.detect_mod_in_transcript <- function(data,totalCounts,gff,fasta,mods){
-  # get ID, GRanges and sequence
-  ID <- unique(data$ID)
-  gff <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
-                S4Vectors::mcols(gff)$Name == ID) |
-               (!is.na(S4Vectors::mcols(gff)$ID) & 
-                  S4Vectors::mcols(gff)$ID == ID),]
-  seq <- getSeq(fasta,gff)[[1]]
-  
-  # Parse reads for all modifications based on sequence
-  resData <- vector(mode="list",length = length(mods))
-  for(i in seq_along(mods)){
-    resData[[i]] <- parseMod(mods[[i]],totalCounts,gff,seq,data)
-  }
-  names(resData) <- names(mods)
-  return(resData)
+  return(positions)
 }
 
 # For each transcript get positional data
 # This can be individually done for different modification types
-.get_positions_in_transcript <- function(data,totalCounts,gff,fasta,mods){
+.get_positions_in_transcript <- function(data,totalCounts,gff,mods){
   # get ID and GRanges
   ID <- unique(data$ID)
   gff <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
                 S4Vectors::mcols(gff)$Name == ID) |
                (!is.na(S4Vectors::mcols(gff)$ID) & 
                   S4Vectors::mcols(gff)$ID == ID),]
-  seq <- getSeq(fasta,gff)[[1]]
   
   # Parse reads for all modifications based on sequence
   resData <- vector(mode="list",length = length(mods))
-  for(i in seq_along(mods)){
-    resData[[i]] <- convertReadsToPositions(mods[[i]],totalCounts,gff,seq,data)
-  }
   names(resData) <- names(mods)
+  for(i in seq_along(mods)){
+    resData[[i]] <- convertReadsToPositions(mods[[i]],totalCounts,gff,data)
+  }
+  resData <- resData[!is.na(resData)]
   return(resData)
 }
 
 # Construct DataFrame from RNAmod results per modification from individual
 # gene results
 .construct_DataFrame_from_mod_result <- function(data,gff){
-  
   modTypes <- names(data)
   for(j in seq_along(modTypes)){
     modType <- data[[j]]
@@ -242,6 +209,7 @@ setMethod(
     chrom <- as.character(seqnames(g))
     
     for(i in seq_along(genes)){
+      browser()
       genesDf[[i]]$strand <- strand[[i]]
       genesDf[[i]]$chrom <- chrom[[i]]
       genesDf[[i]]$Parent <- genes[[i]]
@@ -256,8 +224,7 @@ setMethod(
   df <- do.call(rbind,genesDf)
   df <- df[,c("chrom","start","end","strand","source","type","score","ID",
               "Parent","RNAmod_type","RNAmod_signal","RNAmod_signal_sd",
-              "RNAmod_p.value","RNAmod_p.value.sd","RNAmod_nReplicates",
-              "RNAmod_inNReplicate")]
+              "RNAmod_p.value","RNAmod_nbReplicates")]
   
   df$source <- factor(df$source)
   df$type <- factor(df$type)
@@ -272,9 +239,7 @@ setMethod(
                   RNAmod_signal = vapply(gene,"[[",numeric(1),"signal"),
                   RNAmod_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
                   RNAmod_p.value = vapply(gene,"[[",numeric(1),"p.value"),
-                  RNAmod_p.value.sd = vapply(gene,"[[",numeric(1),"p.value.sd"),
-                  RNAmod_nReplicates = vapply(gene,"[[",numeric(1),"replicates"),
-                  RNAmod_inNReplicate = (vapply(gene,"[[",numeric(1),"replicates")-vapply(gene,"[[",numeric(1),"undetectedInNReplicate")))
+                  RNAmod_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
   return(df)
 }
 
@@ -323,13 +288,14 @@ setMethod(
   SummarizedExperiment::rowData(se)$mods <- geneMods
   
   # Save read position data in SE
+  posTypes <- names(positions)
   genePos <- lapply(rownames,
                      function(name){
-                       res <- lapply(modTypes, 
-                                     function(modType){
-                                       positions[[modType]][[name]]
+                       res <- lapply(posTypes, 
+                                     function(posType){
+                                       positions[[posType]][[name]]
                        })
-                       names(res) <- modTypes
+                       names(res) <- posTypes
                        return(res)
                      })
   names(genePos) <- rownames

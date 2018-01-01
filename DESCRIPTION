@@ -17,10 +17,11 @@ Collate:
     'RNAModString.R'
     'RNAmod-utils.R'
     'class-RNAmod-type.R'
+    'class-RNAmod-D.R'
+    'class-RNAmod-default.R'
+    'class-RNAmod-m3C.R'
+    'class-RNAmod-m7G.R'
     'class-RNAmod.R'
-    'methods-RNAmod-D.R'
-    'methods-RNAmod-m3C.R'
-    'methods-RNAmod-m7G.R'
     'methods-RNAmod-parse.R'
     'methods-RNAmod-plot.R'
     'methods-RNAmod.R'
@@ -30,7 +31,8 @@ Imports: methods,
     BiocParallel,
     Biostrings,
     rtracklayer,
-    GenomicRanges
+    GenomicRanges,
+    ggplot2
 Suggests: testthat,
     knitr,
     rmarkdown

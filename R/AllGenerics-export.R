@@ -132,6 +132,7 @@ setGeneric (
 setGeneric ( 
   name= "setGff",
   def=function(.Object,
+               gff,
                number, 
                modification){standardGeneric("setGff")} 
 ) 
@@ -151,47 +152,6 @@ setGeneric (
 
 # modification parsing ---------------------------------------------------------
 
-
-#' @name parseMod
-#' 
-#' @title parseMod
-#' 
-#' @param object mod object 
-#' @param counts total counts in the BAM file containing the data
-#' @param gff a GRanges object for a single gene
-#' @param seq a DNAString object for a single gene
-#' @param data the read data as DataFrame for a single gene
-#' 
-#' @export
-setGeneric ( 
-  name= "parseMod",
-  def=function(object,
-               counts,
-               gff,
-               seq,
-               data){standardGeneric("parseMod")} 
-) 
-
-
-#' @name mergeModsOfReplicates
-#' 
-#' @title mergeModsOfReplicates
-#' 
-#' @param object mod object 
-#' @param gff a GRanges object
-#' @param seq a DNAStringSet object
-#' @param res the results for individual replicates
-#' 
-#' @export
-setGeneric ( 
-  name= "mergeModsOfReplicates",
-  def=function(object,
-               gff,
-               seq,
-               data){standardGeneric("mergeModsOfReplicates")} 
-) 
-
-
 #' @name convertReadsToPositions
 #' 
 #' @title convertReadsToPositions
@@ -207,8 +167,26 @@ setGeneric (
   def=function(object,
                counts,
                gff,
-               seq,
                data){standardGeneric("convertReadsToPositions")} 
+) 
+
+#' @name parseMod
+#' 
+#' @title parseMod
+#' 
+#' @param object mod object 
+#' @param counts total counts in the BAM file containing the data
+#' @param gff a GRanges object for a single gene
+#' @param seq a DNAString object for a single gene
+#' @param data the read data as DataFrame for a single gene
+#' 
+#' @export
+setGeneric ( 
+  name= "parseMod",
+  def=function(object,
+               gff,
+               seq,
+               data){standardGeneric("parseMod")} 
 ) 
 
 #' @name mergePositionsOfReplicates

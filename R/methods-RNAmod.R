@@ -222,17 +222,21 @@ setMethod(
                         "_",
                         modification,
                         ".RData")
-    ses <- .split_se_for_each_modification(se,modification)
-    for(i in seq_along(ses)){
-      se <- ses[[i]]
-      save(se, file = fileNames[[i]])
-    }
+    
+    .save_single_ses(.split_se_for_each_modification(se,modification), fileNames)
     return(se)
   }
 )
 
 .split_se_for_each_modification <- function(se,modification){
-  return(list("1" = se))
+  return(list(rep(se,length(modification))))
+}
+
+.save_single_ses <- function(ses,fileNames){
+  for(i in seq_along(ses)){
+    se <- ses[[i]]
+    save(se, file = fileNames[[i]])
+  }
 }
 
 
@@ -248,7 +252,7 @@ setMethod(
 #'
 #' @examples
 #' \donttest{
-#' setSummarizedExperiment(experiment, se, 1)
+#' setSummarizedExperiment(experiment, se, 1, c("m7G"))
 #' }
 setMethod(
   f = "setSummarizedExperiment", 
@@ -277,54 +281,125 @@ setMethod(
   }
 )
 
-
-
-#' @rdname getGff
 #' 
-#' @title getGff
-#'
-#' @param .Object RNAmod. 
-#' @param number numeric. 
-#' @param modification character. 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-setMethod(
-  f = "getGff", 
-  signature = signature(.Object = "RNAmod", 
-                        number = "numeric",
-                        modification = "character"),
-  definition = function(.Object, 
-                        number,
-                        modification) {
-    
-  }
-)
-
-#' @rdname setGff
 #' 
-#' @title setGff
+#' #' @rdname getGff
+#' #' 
+#' #' @title getGff
+#' #'
+#' #' @param .Object RNAmod. 
+#' #' @param number numeric. 
+#' #' @param modification character. 
+#' #'
+#' #' @return
+#' #' @export
+#' #'
+#' #' @examples
+#' setMethod(
+#'   f = "getGff", 
+#'   signature = signature(.Object = "RNAmod", 
+#'                         number = "numeric",
+#'                         modification = "character"),
+#'   definition = function(.Object, 
+#'                         number,
+#'                         modification) {
+#'     
+#'   }
+#' )
+
+
+
+
+#' @title .saveGff
+#' 
+#' @description
+#' Saves GRanges object as gff3 file file
 #'
-#' @param .Object RNAmod. 
-#' @param gff GRanges. 
-#' @param number numeric. 
-#' @param modification character. 
+#' @param .Object an RNAmod object 
+#' @param gff a GRanges object 
+#' @param experiment a list containing data for one experiment
+#' @param modification name of modification, one or more character 
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return GRanges object
 setMethod(
-  f = "setGff", 
+  f = ".saveGff", 
   signature = signature(.Object = "RNAmod", 
                         gff = "GRanges", 
-                        number = "numeric",
+                        experiment = "list",
                         modification = "character"),
   definition = function(.Object, 
                         gff, 
+                        experiment,
+                        modification) {
+    
+    folder <- fileName <- paste0(getOutputFolder(.Object),
+                                 "gff/")
+    if(!assertive::is_dir(folder)){
+      dir.create(folder, recursive = TRUE)
+    }
+    fileNames <- paste0(folder,
+                        "RNAmod_",
+                        unique(experiment["SampleName"]),
+                        "_",
+                        modification,
+                        ".gff3")
+    .save_single_gffs(.split_gff_for_each_modification(gff,modification),
+                      fileNames)
+    return(gff)
+  }
+)
+
+.split_gff_for_each_modification <- function(gff,modification){
+  return(list(rep(gff,length(modification))))
+}
+
+
+.save_single_gffs <- function(gffs,fileNames){
+  for(i in seq_along(gffs)){
+    gff <- gffs[[i]]
+    rtracklayer::export.gff3(gff, con = fileNames[[i]])
+  }
+}
+
+#' @rdname setGff
+#'
+#' @title setGff
+#'
+#' @param .Object RNAmod.
+#' @param gff GRanges.
+#' @param number numeric.
+#' @param modification character.
+#'
+#' @return GRanges object
+#' @export
+#'
+#' @examples
+#' \donttest{
+#' setGff(experiment, gff, 1, c("m7G"))
+#' }
+setMethod(
+  f = "setGff",
+  signature = signature(.Object = "RNAmod",
+                        gff = "GRanges",
+                        number = "numeric",
+                        modification = "character"),
+  definition = function(.Object,
+                        gff,
                         number,
                         modification) {
+    assertive::assert_all_are_non_empty_character(modification)
+    
+    experiment <- getExperimentData(.Object, number)
+    
+    if( assertive::is_a_bool(experiment)) {
+      if( assertive::is_false(experiment) ) {
+        stop("Incorrect experiment identifier given: ",
+             number,
+             call. = FALSE)
+      }
+    }
+    
+    gff <- .saveGff(.Object, gff, experiment, modification)
+    return(invisible(gff))
   }
 )

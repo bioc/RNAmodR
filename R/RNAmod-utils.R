@@ -195,3 +195,18 @@ setMethod(
   })
   return(unique(unlist(seqnames)))
 }
+
+# Check if name exists in any parent env apart from global env
+.where <- function(name, n = 1) {
+  env = parent.frame( n = n)
+  while(!identical(env, sys.frame(which = 0))) {
+    if (exists(name, envir = env, inherits = FALSE)) {
+      # success case
+      return(env)
+    }
+    # inspect parent
+    n <- n + 1
+    env <- parent.frame(n = n)
+  }
+  stop("Can't find ", name, call. = FALSE)
+}
