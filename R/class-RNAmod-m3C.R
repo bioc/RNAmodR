@@ -15,7 +15,9 @@ RNAMOD_M3C_SIGMA_THRESHOLD <- 5
 #'
 #' @examples
 setClass("mod_m3C",
-         contains = "mod")
+         contains = "mod",
+         prototype = list(modType = "m3C")
+)
 
 
 #' @rdname convertReadsToPositions

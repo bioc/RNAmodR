@@ -13,7 +13,8 @@ NULL
 #' @examples
 setClass("mod",
          contains = "VIRTUAL",
-         slots = c(plotType = "character"),
+         slots = c(plotType = "character",
+                   modType = "character"),
          prototype = list(plotType = "default")
 )
 
@@ -26,20 +27,34 @@ setMethod(
 )
 
 
-#' getPlotType
+#' @rdname mod-accessors
 #'
-#' @return character defining the plot type for this modification
+#' @return character defining the plot type for this modification class
 #' @export
 #'
 #' @examples
 #' \donttest{
 #' getPlotType(mod)
+#' getModType(mod)
 #' }
 setMethod(
   f = "getPlotType", 
   signature = signature(object = "mod"),
   definition = function(object) {
     return(object@plotType)
+  }
+)
+
+#' @rdname mod-accessors
+#'
+#' @return character defining the modification type for this modification
+#' class
+#' @export
+setMethod(
+  f = "getModType", 
+  signature = signature(object = "mod"),
+  definition = function(object) {
+    return(object@modType)
   }
 )
 

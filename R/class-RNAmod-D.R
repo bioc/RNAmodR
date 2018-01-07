@@ -15,7 +15,9 @@ RNAMOD_D_SIGMA_THRESHOLD <- 5
 #'
 #' @examples
 setClass("mod_D",
-         contains = "mod")
+         contains = "mod",
+         prototype = list(modType = "D")
+)
 
 
 #' @rdname convertReadsToPositions

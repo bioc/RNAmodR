@@ -180,11 +180,11 @@ setGeneric (
                modifications){standardGeneric("analyzeModifications")} 
 ) 
 
-# modtype accessors
+# modtype accessors ------------------------------------------------------------
 
-#' @name getPlotType
+#' @name mod-accessors
 #' 
-#' @title getPlotType
+#' @title Accessor for 'mod' class
 #' 
 #' @param object mod object 
 #' 
@@ -192,6 +192,14 @@ setGeneric (
 setGeneric ( 
   name= "getPlotType",
   def=function(object){standardGeneric("getPlotType")} 
+) 
+
+#' @rdname mod-accessors
+#' 
+#' @export
+setGeneric ( 
+  name= "getModType",
+  def=function(object){standardGeneric("getModType")} 
 ) 
 
 
@@ -255,18 +263,28 @@ setGeneric (
 
 # modification visualization ---------------------------------------------------
 
-
-#' @name visualizeModifications
+#' @name getModPlot
 #'
-#' @title visualizeModifications
+#' @title getModPlot
 #' 
 #' @export
 setGeneric ( 
-  name= "visualizeModifications",
+  name= "getModPlot",
   def=function(.Object,
                number,
                modifications,
-               genes){standardGeneric("visualizeModifications")} 
+               gene){standardGeneric("getModPlot")} 
+)
+
+#' @rdname getModPlot
+#' 
+#' @export
+setGeneric ( 
+  name= "saveModPlot",
+  def=function(.Object,
+               number,
+               modifications,
+               genes){standardGeneric("saveModPlot")} 
 )
 
 

@@ -15,7 +15,8 @@ RNAMOD_M7G_SIGMA_THRESHOLD <- 5
 #'
 #' @examples
 setClass("mod_m7G",
-         contains = "mod"
+         contains = "mod",
+         prototype = list(modType = "m7G")
 )
 
 
