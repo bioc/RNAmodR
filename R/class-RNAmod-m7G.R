@@ -15,7 +15,8 @@ RNAMOD_M7G_SIGMA_THRESHOLD <- 5
 #'
 #' @examples
 setClass("mod_m7G",
-         contains = "mod")
+         contains = "mod"
+)
 
 
 #' @rdname convertReadsToPositions
@@ -103,10 +104,8 @@ setMethod(
   browser()
   
   # get sequence of transcript and subset gff for single transcript data
-  gff <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
-                S4Vectors::mcols(gff)$Name == ID) |
-               (!is.na(S4Vectors::mcols(gff)$ID) & 
-                  S4Vectors::mcols(gff)$ID == ID),]
+  gff <- .subset_gff_for_unique_transcript(gff, ID)
+  
   strand <- unique(as.character(strand(gff)))
   seq <- getSeq(fafile,gff)[[1]]
   

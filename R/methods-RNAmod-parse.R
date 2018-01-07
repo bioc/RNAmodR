@@ -103,43 +103,6 @@ setMethod(
   }
 )
 
-# load classes for modification analysis
-.load_mod_classes <- function(modifications){
-  
-  modClasses <- vector(mode = "list", length = length(modifications))
-  for(i in seq_along(modifications)){
-    className <- paste0("mod_",modifications[[i]])
-    
-    # try to create modification detection classes
-    tryCatch(
-      class <- new(className),
-      error = function(e) stop("Class for detecting ",
-                               modifications[[1]],
-                               " does not exist (",className,").",
-                               call. = FALSE)
-    )
-    if( !existsMethod("convertReadsToPositions",signature(class(class),
-                                                          "numeric",
-                                                          "GRanges",
-                                                          "DataFrame") ) )
-      stop("Function convertReadsToPositions() not defined for ",class(class))
-    if( !existsMethod("parseMod",signature(class(class),
-                                           "GRanges",
-                                           "FaFile",
-                                           "list") ) )
-      stop("Function parseMod() not defined for ",class(class))
-    if( !existsMethod("mergePositionsOfReplicates",signature(class(class),
-                                                             "GRanges",
-                                                             "FaFile",
-                                                             "list") ) )
-      stop("Function mergePositionsOfReplicates() not defined for ",class(class))
-    modClasses[[i]] <- class
-  }
-  names(modClasses) <- modifications
-  
-  return(modClasses)
-}
-
 
 # detect modifications in each file
 .get_positions <- function(bamFile,
@@ -178,10 +141,7 @@ setMethod(
 .get_positions_in_transcript <- function(data,totalCounts,gff,mods){
   # get ID and GRanges
   ID <- unique(data$ID)
-  gff <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
-                S4Vectors::mcols(gff)$Name == ID) |
-               (!is.na(S4Vectors::mcols(gff)$ID) & 
-                  S4Vectors::mcols(gff)$ID == ID),]
+  gff <- .subset_gff_for_unique_transcript(gff, ID)
   
   # Parse reads for all modifications based on sequence
   resData <- vector(mode="list",length = length(mods))

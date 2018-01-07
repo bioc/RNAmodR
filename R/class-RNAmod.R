@@ -239,6 +239,8 @@ setMethod(
 #' getInputFolder(experiment)
 #' getOutputFolder(experiment)
 #' getExperimentName(experiment)
+#' head(getGFF(experiment))
+#' getFasta(experiment)
 #' }
 setMethod(
   f = "getInputFolder",
@@ -265,5 +267,25 @@ setMethod(
   signature = signature(.Object = "RNAmod"),
   definition = function(.Object){
     return(.Object@experimentName)
+  }
+)
+#' @rdname RNAmod-Accessors
+#'
+#' @export
+setMethod(
+  f = "getGFF",
+  signature = signature(.Object = "RNAmod"),
+  definition = function(.Object){
+    return(.Object@.dataGFF)
+  }
+)
+#' @rdname RNAmod-Accessors
+#'
+#' @export
+setMethod(
+  f = "getFasta",
+  signature = signature(.Object = "RNAmod"),
+  definition = function(.Object){
+    return(.Object@.dataFasta)
   }
 )

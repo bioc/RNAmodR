@@ -6,9 +6,13 @@
 \alias{getInputFolder}
 \alias{getOutputFolder}
 \alias{getExperimentName}
+\alias{getGFF}
+\alias{getFasta}
 \alias{getInputFolder,RNAmod-method}
 \alias{getOutputFolder,RNAmod-method}
 \alias{getExperimentName,RNAmod-method}
+\alias{getGFF,RNAmod-method}
+\alias{getFasta,RNAmod-method}
 \title{Accessors for RNAmod Object}
 \usage{
 getInputFolder(.Object)
@@ -17,20 +21,33 @@ getOutputFolder(.Object)
 
 getExperimentName(.Object)
 
+getGFF(.Object)
+
+getFasta(.Object)
+
 \S4method{getInputFolder}{RNAmod}(.Object)
 
 \S4method{getOutputFolder}{RNAmod}(.Object)
 
 \S4method{getExperimentName}{RNAmod}(.Object)
+
+\S4method{getGFF}{RNAmod}(.Object)
+
+\S4method{getFasta}{RNAmod}(.Object)
 }
 \arguments{
 \item{.Object}{a RNAmod object}
 }
 \value{
-*Folder: the requested folder path
+\code{getInputFolder}, \code{getOutputFolder}: the requested folder path
 
-*Name: the title of the experiment collection. This is also the path 
-identifier, which is expected to contain the data and source folder.
+\code{getExperimentName}: the title of the experiment collection. This is 
+also the path identifier, which is expected to contain the data and source 
+folder.
+
+\code{getGFF}: the information of the input gff file as GRanges object
+
+\code{getFasta}: the link to the fasta file as FaFile class
 }
 \description{
 Accessors for RNAmod Object
@@ -42,5 +59,7 @@ data("RNAmod_test", package = "RNAmod")
 getInputFolder(experiment)
 getOutputFolder(experiment)
 getExperimentName(experiment)
+head(getGFF(experiment))
+getFasta(experiment)
 }
 }

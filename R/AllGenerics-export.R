@@ -13,10 +13,15 @@ NULL
 #' @param .Object a RNAmod object
 #'
 #' @return 
-#' *Folder: the requested folder path
+#' \code{getInputFolder}, \code{getOutputFolder}: the requested folder path
 #' 
-#' *Name: the title of the experiment collection. This is also the path 
-#' identifier, which is expected to contain the data and source folder.
+#' \code{getExperimentName}: the title of the experiment collection. This is 
+#' also the path identifier, which is expected to contain the data and source 
+#' folder.
+#' 
+#' \code{getGFF}: the information of the input gff file as GRanges object
+#' 
+#' \code{getFasta}: the link to the fasta file as FaFile class
 NULL
 
 #' @rdname RNAmod-Accessors
@@ -40,6 +45,20 @@ setGeneric (
   name= "getExperimentName",
   def=function(.Object ){standardGeneric("getExperimentName")} 
 ) 
+#' @rdname RNAmod-Accessors
+#' 
+#' @export
+setGeneric ( 
+  name= "getGFF",
+  def=function(.Object ){standardGeneric("getGFF")} 
+) 
+#' @rdname RNAmod-Accessors
+#' 
+#' @export
+setGeneric ( 
+  name= "getFasta",
+  def=function(.Object ){standardGeneric("getFasta")} 
+) 
 
 
 #' @title setupWorkEnvir
@@ -51,6 +70,18 @@ setGeneric (
 setGeneric ( 
   name= "setupWorkEnvir", 
   def=function(experimentName){standardGeneric("setupWorkEnvir")} 
+) 
+
+#' @title matchFastaToGff
+#' 
+#' @description
+#' title
+#' 
+#' @export
+setGeneric ( 
+  name= "matchFastaToGff", 
+  def=function(inputFasta,
+               inputGFF){standardGeneric("matchFastaToGff")} 
 ) 
 
 
@@ -147,6 +178,20 @@ setGeneric (
   def=function(.Object,
                number,
                modifications){standardGeneric("analyzeModifications")} 
+) 
+
+# modtype accessors
+
+#' @name getPlotType
+#' 
+#' @title getPlotType
+#' 
+#' @param object mod object 
+#' 
+#' @export
+setGeneric ( 
+  name= "getPlotType",
+  def=function(object){standardGeneric("getPlotType")} 
 ) 
 
 

@@ -12,6 +12,8 @@ NULL
 #'
 #' @return
 #' @export
+#' 
+#' @import ggplot2
 #'
 #' @examples
 setMethod(
@@ -47,37 +49,90 @@ setMethod(
       }
     }
     
-    positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions
+    positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions[[1]]
     mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods
     gff <- .Object@.dataGFF
     fasta <- .Object@.dataFasta
     
+    modClasses <- .load_mod_classes(modifications)
+    
     for(i in seq_along(genesAvail)){
-      .plot_gene_with_modifications(genesAvail[[i]],positions,mods,gff,fasta)
+      .plot_gene_with_modifications(genesAvail[[i]],positions,mods,gff,fasta,modClasses)
     }
     
   }
 )
 
-.plot_gene_with_modifications <- function(geneName,positions,mods,gff,seq){
-  
-  
-  gff <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
+.plot_gene_with_modifications <- function(geneName,positions,mods,gff,seq,modClasses){
+  gff_sub <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
                 S4Vectors::mcols(gff)$Name == geneName) |
                (!is.na(S4Vectors::mcols(gff)$ID) & 
                   S4Vectors::mcols(gff)$ID == geneName),]
-  seq <- getSeq(fasta,gff)[[1]]
+  seq <- Rsamtools::getSeq(fasta,gff_sub)[[1]]
+  
+  # create description layer plot
+  layer <- .create_layer_data(gff,gff_sub)
+  # layerPlot <- .get_gene_plot(geneName, layer)
   browser()
   
+  # get data for different plot types
+  posData <- .aggregate_pos_data(positions,modClasses)
+  modData <- .aggregate_mod_data(mods,modClasses)
   
-  
-  
+  dataPlots <- lapply(names(posData), function(type){
+    pos <- posData[[type]]
+    mods <- posData[[type]]
+    
+    plot <- .get_mod_plot(pos,mods)
+    
+  })
   
 }
 
 
+# returns a data.frame with the coordinates for plotting gene features
+.create_layer_data <- function(gRanges,gRangeSelected){
+  columns <- c("type","ID","Name","Parent")
+  gRangeSelected <- gRangeSelected[,columns]
+  gRanges <- gRanges[,columns]
+  gRanges <- IRanges::subsetByOverlaps(gRanges, gRangeSelected)
+  gRanges <- gRanges[as.character(S4Vectors::mcols(gRanges)$type) != "chromosome",]
+  
+  if( length(gRanges) == 0){
+    return(NULL)
+  }
+  df <- S4Vectors::mcols(gRanges)[,c("type","ID","Name")]
+  df$start <- BiocGenerics::start(gRanges)
+  df$end <- BiocGenerics::end(gRanges)
+  df$strand <- BiocGenerics::strand(gRanges)
+  df <- as.data.frame(df)
+  return(df)
+}
 
+# aggregates the position data for plotting of different plot types
+.aggregate_pos_data <- function(positions, modClasses){
+  plotTypes <- vapply(modClasses, getPlotType, character(1))
+  plotTypes <- unique(plotTypes)
+  posData <- lapply(plotTypes, function(type){
+    if(is.null(positions[[type]])){
+      stop("Positions data not available for type '",
+           type,
+           "'",
+           .Call = FALSE)
+    }
+    positions[[type]]
+  })
+  names(posData) <- plotTypes
+  return(posData)
+}
 
+# returns a plot showing all modifications on one type of position data
+.get_read_plot <- function(pos,mods){
+  requireNamespace("ggplot2", quietly = TRUE)
+  
+  plot <- ggplot(posData[[1]], aes_(x = ~pos, y = ~mean)) +
+    geom_bar(stat = "identity")
+}
 
 
 .get_read_plot <- function(df, 
@@ -195,7 +250,98 @@ setMethod(
 
 
 
-
+#' @title .get_gene_plot
+#' 
+#' @description
+#' returns a plot for the gene description
+#'
+#' @param geneName the name of the gene
+#' @param dfLayer the data.frame containing the data for plotting the annotation
+#' of gene, CDS and uORFS
+#' @param xlim limits on the x axis
+#' 
+#' @return ggplot
+#' 
+#' @import ggplot2
+.get_gene_plot <- function(geneName, 
+                           dfLayer){
+  requireNamespace("ggplot2", quietly = TRUE)
+  ymin <- 0
+  ymin2 <- 0
+  
+  arrowObj <- arrow(ends = "last", type = "closed")
+  if( unique(dfLayer$strand) == "-" ){
+    arrowObj <- arrow(ends = "first", type = "closed")
+  }
+  
+  plot <- ggplot() +
+    theme_minimal() +
+    theme(legend.position = "none") +
+    .get_read_line_colours() +
+    scale_y_discrete(geneName) +
+    labs(y = "none", x = "") + 
+    xlim(xlim)
+  # plot chromosome
+  plot <- plot + geom_segment(aes_(x = xlim[1],
+                                   y = ~ymin2, 
+                                   xend = xlim[2], 
+                                   yend = ~ymin2, 
+                                   colour = "chromosome"), 
+                              size = 1, 
+                              arrow = arrowObj)
+  # plot gene
+  plot <- plot + geom_segment(aes_(x = dfLayer[dfLayer$type == "gene","start"], 
+                                   y = ~ymin2,
+                                   xend = dfLayer[dfLayer$type == "gene","end"], 
+                                   yend = ~ymin2, 
+                                   colour = "gene"), 
+                              size = 3)
+  # plot mRNA
+  plot <- plot + geom_segment(aes_(x = dfLayer[dfLayer$type == "mRNA","start"], 
+                                   y = ~ymin2, 
+                                   xend = dfLayer[dfLayer$type == "mRNA","end"], 
+                                   yend = ~ymin2, 
+                                   colour = "mRNA"), 
+                              size = 1.5)
+  # plot CDS
+  plot <- plot + geom_segment(aes_(x = dfLayer[dfLayer$type == "CDS","start"], 
+                                   y = ~ymin2, xend = dfLayer[dfLayer$type == "CDS","end"], 
+                                   yend = ~ymin2, 
+                                   colour = "CDS"), 
+                              size = 2.0)
+  if( ("five_prime_UTR" %in% dfLayer$type) ){
+    # plot CDS
+    plot <- plot + geom_segment(aes_(x = dfLayer[dfLayer$type == "five_prime_UTR","start"], 
+                                     y = ~ymin2, 
+                                     xend = dfLayer[dfLayer$type == "five_prime_UTR","end"], 
+                                     yend = ~ymin2, 
+                                     colour = "five_prime_UTR"), 
+                                size = 1.0)
+  }
+  if( ("three_prime_UTR" %in% dfLayer$type) ){
+    # plot CDS
+    plot <- plot + geom_segment(aes_(x = dfLayer[dfLayer$type == "three_prime_UTR","start"], 
+                                     y = ~ymin2, 
+                                     xend = dfLayer[dfLayer$type == "three_prime_UTR","end"], 
+                                     yend = ~ymin2, 
+                                     colour = "three_prime_UTR"), 
+                                size = 1.0)
+  }
+  if( ("biological_region" %in% dfLayer$type) ){
+    uORFdata <- dfLayer[dfLayer$type == "biological_region",]
+    for(i in seq_len(nrow(uORFdata))){
+      # plot CDS
+      plot <- plot + geom_segment(aes_(x = uORFdata[i,"start"], 
+                                       y = ~ymin2, 
+                                       xend = uORFdata[i,"end"], 
+                                       yend = ~ymin2, 
+                                       colour = "uORF"), 
+                                  size = 2.0)
+    }
+  }
+  
+  return(plot)
+}
 
 
 

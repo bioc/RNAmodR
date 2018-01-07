@@ -12,7 +12,10 @@ NULL
 #'
 #' @examples
 setClass("mod",
-         contains = "VIRTUAL")
+         contains = "VIRTUAL",
+         slots = c(plotType = "character"),
+         prototype = list(plotType = "default")
+)
 
 setMethod(
   f = "show", 
@@ -21,6 +24,26 @@ setMethod(
     
   }
 )
+
+
+#' getPlotType
+#'
+#' @return character defining the plot type for this modification
+#' @export
+#'
+#' @examples
+#' \donttest{
+#' getPlotType(mod)
+#' }
+setMethod(
+  f = "getPlotType", 
+  signature = signature(object = "mod"),
+  definition = function(object) {
+    return(object@plotType)
+  }
+)
+
+
 
 
 .plot_sample_data <- function(baseData,testData,name){

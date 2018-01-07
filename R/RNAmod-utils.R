@@ -64,7 +64,8 @@ setMethod(
   } 
   ids <- .get_IDs_from_scanBamParam(dataList,param)
   dataList <- unname(dataList) # names not valid for unlisting of result
-  elts <- stats::setNames(Rsamtools::bamWhat(param), Rsamtools::bamWhat(param))
+  elts <- stats::setNames(Rsamtools::bamWhat(param), 
+                          Rsamtools::bamWhat(param))
   
   lst <- lapply(elts, function(elt) .unlist(lapply(dataList, "[[", elt)))
   lst$ID <- ids
@@ -210,3 +211,63 @@ setMethod(
   }
   stop("Can't find ", name, call. = FALSE)
 }
+
+# subsets a gRanges object for entries concerning a single ID
+# - Name/ID for parent entry
+# - al childs based on Parent name equals ID
+.subset_gff_for_unique_transcript <- function(gff, ID){
+  res <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
+                S4Vectors::mcols(gff)$Name == ID) |
+               (!is.na(S4Vectors::mcols(gff)$ID) & 
+                  S4Vectors::mcols(gff)$ID == ID) |
+               (!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
+                  as.character(S4Vectors::mcols(gff)$Parent) == ID),]
+  return(res)
+}
+
+
+
+#' @rdname matchFastaToGff
+#'
+#' @param inputFasta fasta file to be used for renaming
+#' @param inputGFF gff file containing gene, mRNA and CDS annotation data
+#'
+#' @return TRUE
+#' @export
+#' 
+#' @import Biostrings
+#' @import rtracklayer
+setMethod(
+  f = "matchFastaToGff", 
+  signature = signature(inputFasta = "character", 
+                        inputGFF = "character"),
+  definition = function(inputFasta , 
+                        inputGFF){
+    requireNamespace("Biostrings", quietly = TRUE)
+    requireNamespace("rtracklayer", quietly = TRUE)
+    assertive::assert_all_are_existing_files(c(inputFasta,inputGFF))
+    
+    fsa <- readDNAStringSet(inputFasta)
+    gff <- import.gff3(inputGFF)
+    
+    # number of chromosomes and sequences have to match
+    if( !assertive::are_same_length(names(fsa), unique(rtracklayer::chrom(gff)))){
+      stop("Fasta and GFF file don't have matching number of sequences/",
+           "sequence identifiers. Please make sure that the number of ",
+           "fasta sequences matches the number of unique chromosome ",
+           "identifiers in the GFF file. The names of the fasta ",
+           "sequences will be overridden with the chromosomal ",
+           "identifier from the GFF file.",
+           call. = FALSE)
+    }
+    
+    names(fsa) <- unique(chrom(gff))
+    
+    fileName <- gsub(".fsa","_fixed.fsa",inputFasta)
+    writeXStringSet(fsa, fileName)
+    
+    message(paste0("Fasta file ", fileName, " written."))
+    
+    return(invisible(TRUE))
+  }
+)

@@ -15,7 +15,9 @@ Collate:
     'AllGenerics.R'
     'AllGenerics-export.R'
     'RNAModString.R'
+    'RNAmod-utils-preparations.R'
     'RNAmod-utils.R'
+    'assertions.R'
     'class-RNAmod-type.R'
     'class-RNAmod-D.R'
     'class-RNAmod-default.R'
@@ -32,7 +34,10 @@ Imports: methods,
     Biostrings,
     rtracklayer,
     GenomicRanges,
-    ggplot2
+    ggplot2,
+    GenomeInfoDb,
+    S4Vectors,
+    BiocGenerics
 Suggests: testthat,
     knitr,
     rmarkdown

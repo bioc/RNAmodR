@@ -1,0 +1,177 @@
+---
+title: "RNAmod: pre-mapping preparation of genome and annotation"
+author: "Felix G.M. Ernst"
+date: "`r Sys.Date()`"
+output: 
+    rmarkdown::html_document:
+        toc: true
+        toc_float: true
+        df_print: paged
+vignette: >
+  %\VignetteIndexEntry{RNAmod - pre-mapping preparation of genome and annotation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction
+
+```{r tRNA}
+library(RNAmod)
+
+matchFastaToGff <- function(gfffile, fafile){
+  gff <- rtracklayer::import.gff3(gfffile)
+  fsa <- Biostrings::readDNAStringSet(fafile)
+  names(fsa) <- unique(as.character(rtracklayer::chrom(gff)))
+  Biostrings::writeXStringSet(fsa, fafile)
+}
+```
+
+# Converting tRNA and rRNA genes to seperate chromosomes
+
+## sacCer3
+
+```{r sacCer3}
+folder <- "genomes/sacCer3/"
+gfffile <- "genomes/sacCer3/sacCer3_R64-2-1.gff3"
+fafile <- "genomes/sacCer3/sacCer3_R64-2-1.fasta"
+matchFastaToGff(gfffile,fafile)
+
+gff <- rtracklayer::import.gff3(gfffile)
+RDN25 <- S4Vectors::mcols(gff[grepl("RDN25",S4Vectors::mcols(gff)$ID),])$ID
+RDN18 <- S4Vectors::mcols(gff[grepl("RDN18",S4Vectors::mcols(gff)$ID),])$ID
+RDN58 <- S4Vectors::mcols(gff[grepl("RDN58",S4Vectors::mcols(gff)$ID),])$ID
+
+rRNAFiles <- convertGeneToChrom(gfffile,
+                                fafile,
+                                c(RDN25,RDN18,RDN58),
+                                "rRNA",
+                                appendToOriginal = TRUE)
+
+tRNAFiles <- convertGeneTypeToChrom(rRNAFiles[["out_gfffile"]],
+                                    rRNAFiles[["out_fafile"]],
+                                    c("tRNA_gene"),
+                                    "tRNA",
+                                    appendToOriginal = TRUE)
+
+script <- paste0("cat %s/*_mask_* > %s\n",
+               "dos2unix %s\n",
+               "bedtools maskfasta -mc N -fi %s -bed %s -fo %s\n",
+               "cp %s %s")
+script <- gettextf(script,
+                   dirname(tRNAFiles[["out_fafile"]]),
+       paste0(dirname(tRNAFiles[["out_fafile"]]),"/sacCer3_R64-2-1_mask.gff3"),
+       tRNAFiles[["out_fafile"]],
+       tRNAFiles[["out_fafile"]],
+       paste0(dirname(tRNAFiles[["out_fafile"]]),"/sacCer3_R64-2-1_mask.gff3"),
+       paste0(dirname(tRNAFiles[["out_fafile"]]),"/sacCer3_R64-2-1_masked.fasta"),
+       tRNAFiles[["out_gfffile"]],
+       "sacCer3_R64-2-1_masked.gff3")
+message("# Run this in command line:\n\n",
+        script)
+
+```
+
+## E. coli
+
+```{r eco}
+folder <- "genomes/Eco/"
+gfffile <- "genomes/Eco/eco_MG1655.gff3"
+fafile <- "genomes/Eco/eco_MG1655.fasta"
+matchFastaToGff(gfffile,fafile)
+
+rRNAFiles <- convertGeneTypeToChrom(gfffile,
+                                    fafile,
+                                    "rRNA",
+                                    "rRNA",
+                                    appendToOriginal = TRUE)
+
+tRNAFiles <- convertGeneTypeToChrom(rRNAFiles[["out_gfffile"]],
+                                    rRNAFiles[["out_fafile"]],
+                                    c("tRNA_gene"),
+                                    "tRNA",
+                                    appendToOriginal = TRUE)
+
+lapply(list(rRNAFiles[["mask_gfffile"]],
+            tRNAFiles[["mask_gfffile"]]),
+       function(file){
+         g <- rtracklayer::import.gff3(file)
+         S4Vectors::mcols(g)$score <- 1000
+         file <- gsub("gff3","bed",file)
+         rtracklayer::export.bed(g,file)
+       })
+
+script <- paste0("cat *.bed > %s\n",
+               "dos2unix %s\n",
+               "bedtools maskfasta -mc N -fi %s -bed %s -fo %s\n",
+               "cp %s %s\n")
+script <- gettextf(script,
+       "sacCer3_R64-2-1_mask.bed",
+       tRNAFiles[["out_fafile"]],
+       tRNAFiles[["out_fafile"]],
+       "sacCer3_R64-2-1_mask.bed",
+       "sacCer3_R64-2-1_masked.fasta",
+       tRNAFiles[["out_gfffile"]],
+       "sacCer3_R64-2-1_masked.gff3")
+message("# Run this in command line:\n\n",
+        script)
+
+```
+
+
+
+```{r GRCh38}
+folder <- "genomes/GRCh38/"
+gfffile <- "genomes/GRCh38/GRCh38_latest_genomic.gff"
+fafile <- "genomes/GRCh38/GRCh38_latest_genomic.fasta"
+matchFastaToGff(gfffile,fafile)
+
+rRNAFiles <- convertGeneTypeToChrom(gfffile,
+                                    fafile,
+                                    "rRNA",
+                                    "rRNA",
+                                    appendToOriginal = TRUE)
+
+tRNAFiles <- convertGeneTypeToChrom(rRNAFiles[["out_gfffile"]],
+                                    rRNAFiles[["out_fafile"]],
+                                    c("tRNA_gene"),
+                                    "tRNA",
+                                    appendToOriginal = TRUE)
+
+lapply(list(rRNAFiles[["mask_gfffile"]],
+            tRNAFiles[["mask_gfffile"]]),
+       function(file){
+         g <- rtracklayer::import.gff3(file)
+         S4Vectors::mcols(g)$score <- 1000
+         file <- gsub("gff3","bed",file)
+         rtracklayer::export.bed(g,file)
+       })
+
+script <- paste0("cat *.bed > %s\n",
+               "dos2unix %s\n",
+               "bedtools maskfasta -mc N -fi %s -bed %s -fo %s\n",
+               "cp %s %s\n")
+script <- gettextf(script,
+       "sacCer3_R64-2-1_mask.bed",
+       tRNAFiles[["out_fafile"]],
+       tRNAFiles[["out_fafile"]],
+       "sacCer3_R64-2-1_mask.bed",
+       "sacCer3_R64-2-1_masked.fasta",
+       tRNAFiles[["out_gfffile"]],
+       "sacCer3_R64-2-1_masked.gff3")
+message("# Run this in command line:\n\n",
+        script)
+
+```
+
+# Session info
+
+```{r sessionInfo}
+sessionInfo()
+```
