@@ -63,6 +63,7 @@ tRNAFiles <- convertGeneTypeToChrom(rRNAFiles[["out_gfffile"]],
 script <- paste0("cat %s/*_mask_* > %s\n",
                "dos2unix %s\n",
                "bedtools maskfasta -mc N -fi %s -bed %s -fo %s\n",
+               "cp %s %s\n",
                "cp %s %s")
 script <- gettextf(script,
                    dirname(tRNAFiles[["out_fafile"]]),
@@ -72,7 +73,9 @@ script <- gettextf(script,
        paste0(dirname(tRNAFiles[["out_fafile"]]),"/sacCer3_R64-2-1_mask.gff3"),
        paste0(dirname(tRNAFiles[["out_fafile"]]),"/sacCer3_R64-2-1_masked.fasta"),
        tRNAFiles[["out_gfffile"]],
-       "sacCer3_R64-2-1_masked.gff3")
+       "sacCer3_R64-2-1_masked.gff3",
+       tRNAFiles[["out_fafile"]],
+       "sacCer3_R64-2-1_masked.fasta")
 message("# Run this in command line:\n\n",
         script)
 
