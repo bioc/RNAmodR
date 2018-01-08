@@ -1,9 +1,11 @@
 #' @include RNAmod.R
 NULL
 
-RNAMOD_PLOT_POS_WIDTH <- 0.5
+RNAMOD_PLOT_POS_WIDTH <- 1
 RNAMOD_PLOT_LAYER_HEIGHT <- 50
 RNAMOD_PLOT_DATA_HEIGHT <- 100
+RNAMOD_PLOT_FOCUS_WINDOW <- 50
+RNAMOD_PLOT_MM_TO_INCH_F <- 0.03937008
 
 #' @name getModPlot
 #' 
@@ -29,24 +31,24 @@ RNAMOD_PLOT_DATA_HEIGHT <- 100
 setMethod(
   f = "getModPlot", 
   signature = signature(.Object = "RNAmod",
-                        number = "numeric",
+                        se = "SummarizedExperiment",
                         modifications = "character",
                         gene = "character"),
   definition = function(.Object,
-                        number,
+                        se,
                         modifications,
                         gene,
                         focus){
     # Check input
-    assertive::is_a_number(number)
-    assertive::assert_all_are_non_empty_character(modifications)
-    assertive::assert_all_are_non_empty_character(genes)
-    assertive::assert_is_a_bool(focus)
+    .check_plot_input(se,
+                      modifications,
+                      gene,
+                      focus,
+                      "pdf")
     
-    se <- getSummarizedExperiment(.Object, number, modifications)
     # get intersection of requested and available genes
-    genesAvail <- intersect(rownames(se), genes)
-    if(length(genesAvail) != length(genes)){
+    genesAvail <- intersect(rownames(se), gene)
+    if(length(genesAvail) != length(gene)){
       if(length(genesAvail) > 0){
         warning("No information available for the following genes: '",
                 paste0(setdiff(genes,genesAvail), collapse = "', '"),"'",
@@ -61,29 +63,45 @@ setMethod(
     assertive::assert_is_a_non_empty_string(genesAvail)
     
     positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions[[1]]
-    mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods
+    mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods[[1]]
     gff <- .Object@.dataGFF
     fasta <- .Object@.dataFasta
     
     modClasses <- .load_mod_classes(modifications)
     if(!focus){
-      plot <- .plot_gene_with_modifications(genesAvail[[i]],
+      plot <- .plot_gene_with_modifications(genesAvail,
                                             positions,
                                             mods,
                                             gff,
                                             fasta,
                                             modClasses)
+      plot <- plot$plot
     } else {
-      plot <- .plot_per_modifications(genesAvail[[i]],
+      plot <- .plot_per_modifications(genesAvail,
                                       positions,
                                       mods,
                                       gff,
                                       fasta,
                                       modClasses)
+      plot <- plot$plot[[1]]
     }
-    return(plot$plot)
+    return(plot)
   }
 )
+
+.check_plot_input <- function(se,
+                              modifications,
+                              genes,
+                              focus,
+                              filetype){
+  assertive::assert_all_are_non_empty_character(modifications)
+  assertive::assert_all_are_non_empty_character(genes)
+  assertive::assert_is_a_bool(focus)
+  checkFileTypes <- c("pdf","png")
+  if(!assertive::is_subset(filetype, checkFileTypes))
+    stop("Unsupported file type '",filetype,"'",
+         .call = FALSE)
+}
 
 
 #' @rdname getModPlot
@@ -95,31 +113,30 @@ setMethod(
 setMethod(
   f = "saveModPlot", 
   signature = signature(.Object = "RNAmod",
-                        number = "numeric",
+                        se = "SummarizedExperiment",
                         modifications = "character",
                         genes = "character"),
   definition = function(.Object,
-                        number,
+                        se,
                         modifications,
                         genes,
-                        focus){
+                        focus,
+                        filetype){
     # Check input
-    assertive::is_a_number(number)
-    assertive::assert_all_are_non_empty_character(modifications)
-    assertive::assert_all_are_non_empty_character(genes)
-    assertive::assert_is_a_bool(focus)
+    .check_plot_input(se,
+                      modifications,
+                      genes,
+                      focus,
+                      filetype)
     
     # create folder
-    experiment <- getExperimentData(.Object,
-                                    number)
     folder <- paste0(getOutputFolder(.Object),
                      "ModPlots/",
-                     unique(experiment$SampleName),
+                     unique(SummarizedExperiment::colData(se)$SampleName),
                      "/")
     if(!assertive::is_dir(folder)){
       dir.create(folder, recursive = TRUE)
     }
-    se <- getSummarizedExperiment(.Object, number, modifications)
     
     # get intersection of requested and available genes
     genesAvail <- intersect(rownames(se), genes)
@@ -153,11 +170,12 @@ setMethod(
         names <- paste0(paste(modifications, collapse = "-"),
                         "_",
                         genesAvail[[i]])
-        .save_gene_mod_plot(folder,
+        .save_gene_mod_plot(filetype,
+                            folder,
                             names,
-                            plot$plot,
-                            plot$width,
-                            plot$height)
+                            list(plot$plot),
+                            list(plot$width),
+                            list(plot$height))
       }
     } else {
       for(i in seq_along(genesAvail)){
@@ -170,14 +188,14 @@ setMethod(
         names <- paste0(genesAvail[[i]],
                         "_",
                         plot$names)
-        .save_gene_mod_plot(folder,
+        .save_gene_mod_plot(filetype,
+                            folder,
                             names,
                             plot$plot,
                             plot$width,
                             plot$height)
       }
     }
-    message("done.")
     return(invisible(TRUE))
   }
 )
@@ -200,8 +218,8 @@ setMethod(
   layer <- .create_layer_data(gff,gff_sub)
   
   # get data for different plot types
-  posData <- .aggregate_pos_data(gff_sub,positions,modClasses,lim)
-  modData <- .aggregate_mod_data(mods,modClasses,lim)
+  posData <- .aggregate_pos_data(gff_sub,positions,modClasses)
+  modData <- .aggregate_mod_data(mods,modClasses)
   
   # to inhibit plotting by grid.arrange
   grDevices::pdf(file = NULL)
@@ -253,59 +271,64 @@ setMethod(
   layer <- .create_layer_data(gff,gff_sub)
   
   # get data for different plot types
-  posData <- .aggregate_pos_data(gff_sub,positions,modClasses,lim)
-  modData <- .aggregate_mod_data(mods,modClasses,lim)
+  posData <- .aggregate_pos_data(gff_sub,positions,modClasses)
+  modData <- .aggregate_mod_data(mods,modClasses)
   modData <- lapply(names(modData), function(x){
     y <- modData[[x]]
     y$plotType <- x
     y
   })
   modData <- do.call(rbind,modData)
-  browser()
-  
-  
-  # to inhibit plotting by grid.arrange
-  grDevices::pdf(file = NULL)
   
   plots <- lapply(1:nrow(modData), function(i){
     mod <- modData[i,]
     pos <- posData[[mod$plotType]]
     
+    # focus on a modification
+    localStart <- pos[pos$pos == mods$start,"localPos"] - RNAMOD_PLOT_FOCUS_WINDOW
+    localEnd <- pos[pos$pos == mods$end,"localPos"] + RNAMOD_PLOT_FOCUS_WINDOW
+    pos <- pos[pos$localPos > localStart & pos$localPos < localEnd,]
     
+    # to inhibit plotting by grid.arrange
+    grDevices::pdf(file = NULL)
     
+    # get plots
     # layerPlot <- .get_gene_plot(geneName, layer)
     layerPlot <- list()
     plot <- .get_mod_plot(pos,mod)
     
     nrow <- length(layerPlot) + 1
-    width <- 40 + nrow(pos[[1]]) * RNAMOD_PLOT_POS_WIDTH
+    width <- 40 + nrow(pos) * RNAMOD_PLOT_POS_WIDTH
     height <- RNAMOD_PLOT_LAYER_HEIGHT + 
       RNAMOD_PLOT_DATA_HEIGHT
     
     # grid <- gridExtra::grid.arrange(plot, layerPlot, nrow = nrow)
     grid <- gridExtra::grid.arrange(plot, nrow = nrow)
+    
+    # to inhibit plotting by grid.arrange
+    grDevices::dev.off()
+    browser()
     return(list(plot = grid,
                 width = width,
-                height = height))
+                height = height,
+                names = rownames(mod)))
   })
   plot <- lapply(plots, "[[","plot")
   width <- lapply(plots, "[[","width")
   height <- lapply(plots, "[[","height")
-  
-  # to inhibit plotting by grid.arrange
-  grDevices::dev.off()
+  names <- lapply(plots, "[[","names")
   
   return(list(plot = plot,
               width = width,
-              height = height))
+              height = height,
+              names = names))
 }
-
 
 
 # data aggregation function ----------------------------------------------------
 
 # aggregates the position data for plotting of different plot types
-.aggregate_pos_data <- function(gff,data, modClasses,lim){
+.aggregate_pos_data <- function(gff,data, modClasses){
   plotTypes <- vapply(modClasses, getPlotType, character(1))
   plotTypes <- unique(plotTypes)
   data <- lapply(plotTypes, function(type, data){
@@ -328,7 +351,7 @@ setMethod(
 }
 
 # aggregates the modification data
-.aggregate_mod_data <- function(data, modClasses,lim){
+.aggregate_mod_data <- function(data, modClasses){
   modTypes <- vapply(modClasses, getModType, character(1))
   modTypes <- unique(modTypes)
   data <- lapply(modTypes, function(type, data){
@@ -356,36 +379,33 @@ setMethod(
     n <- floor(diff / 100)
     as.numeric(c(x,unlist(lapply(1:n,function(z){100*z})),round(max(lim))))
   }
+  # prepare mod data
+  mods$localStart <- pos[pos$pos == mods$start,"localPos"]
+  mods$localEnd <- pos[pos$pos == mods$end,"localPos"]
+  mods$vStart <- max(pos[pos$localPos < mods$localStart+10 &
+                           pos$localPos > mods$localStart-10,"mean"])*1.01
+  modsPositions <- mods[mods$start == mods$end,]
+  modsArea<- mods[mods$start != mods$end,]
   
+  # initial plot setup
   plot <- ggplot(pos, aes_(x = ~localPos, y = ~mean)) +
     scale_x_continuous(name = "position of transcript [nt]") +
     scale_y_continuous(name = "mean(number of read ends)",
                        labels = scales::scientific,
                        limits = c(NA,max(pos$mean)*1.25)) +
-    theme_minimal()
+    theme_bw()
   
-  # prepare mod data
-  mods$localStart <- pos[pos$pos == mods$start,"localPos"]
-  mods$localEnd <- pos[pos$pos == mods$end,"localPos"]
-  mods$vStart <- max(pos[pos$localPos < mods$localStart+10 &
-                       pos$localPos > mods$localStart-10,"mean"])*1.01
-  modsPositions <- mods[mods$start == mods$end,]
-  modsArea<- mods[mods$start != mods$end,]
-  
-  
+  # plot modifications for an area
   if( nrow(modsArea) > 0){
-  }
-  plot <- geom_bar(stat = "identity")
-  if( nrow(modsPositions) > 0){
-    plot <- plot + geom_segment(data = as.data.frame(modsPositions),
-                                mapping = aes_(x = ~localStart,
-                                               y = ~vStart,
-                                               xend = ~localStart,
-                                               yend = Inf,
-                                               colour = ~RNAmod_type)) +
-      scale_colour_brewer(name = "modification\ntype",
-                          palette = "Set1") 
     
+  }
+  
+  # plot position data
+  plot <- plot + geom_bar(stat = "identity")
+  
+  # plot modifications for a single position
+  if( nrow(modsPositions) > 0){
+    # setup p value text
     p_text <- unlist(lapply( modsPositions$RNAmod_p.value, function(p){
       if( p < 0.0001){
         return(paste0("< ",0.0001))
@@ -393,7 +413,7 @@ setMethod(
         return(paste0(": ",round(p, digits = 4)))
       }
     }))
-    
+    # setup modification labels
     label <- paste0(modsPositions$RNAmod_type,
                     "\n",
                     rownames(modsPositions),
@@ -402,12 +422,22 @@ setMethod(
                     " (p ",
                     p_text,
                     ")")
-    plot <- plot + annotate("label",
-                            x = modsPositions$localStart,
-                            y = Inf,
-                            label = label,
-                            vjust = "inward",
-                            size = 3)
+    
+    # plot modification marker
+    plot <- plot + geom_segment(data = as.data.frame(modsPositions),
+                                mapping = aes_(x = ~localStart,
+                                               y = ~vStart,
+                                               xend = ~localStart,
+                                               yend = Inf,
+                                               colour = ~RNAmod_type)) +
+      scale_colour_brewer(name = "modification\ntype",
+                          palette = "Set1") +
+      annotate("label",
+               x = modsPositions$localStart,
+               y = Inf,
+               label = label,
+               vjust = "inward",
+               size = 3)
   }
   
   return(plot)
@@ -542,14 +572,26 @@ setMethod(
 }
 
 
-
-
-
-
-
 # plot saving ------------------------------------------------------------------
 
-.save_gene_mod_plot <- function(folder,names,plot,width,height){
+#' save modification plots to file
+#'
+#' @param filetype "png" or "pdf"
+#' @param folder vector of the folders to save to
+#' @param names vector of the names to use to describe the file
+#' @param plot vector of the plots to save
+#' @param width vector of the width to use
+#' @param height vector of the height to use
+#'
+#' @importFrom grDevices cairo_pdf png dev.off
+#' @importFrom ggplot2 ggsave
+#' @importFrom graphics plot
+.save_gene_mod_plot <- function(filetype,
+                                folder,
+                                names,
+                                plot,
+                                width,
+                                height){
   # check that for all plot all values are available
   x <- c(length(names),
          length(plot),
@@ -559,25 +601,60 @@ setMethod(
     stop("Not the same number of names, plots, height and width values ",
          "provided.",
          .call = TRUE)
+  width <- unlist(width)
+  height <- unlist(height)
   assertive::assert_all_are_non_empty_character(names)
   assertive::assert_all_are_whole_numbers(width)
   assertive::assert_all_are_whole_numbers(height)
+  if(!assertive::is_a_number(getOption("RNAmod_dpi")))
+    options("RNAmod_dpi",as.numeric(getOption("RNAmod_dpi")[[1]]))
+  dpi <- getOption("RNAmod_dpi")
   
   fileNames <- paste0(folder,
                      "RNAmod_",
                      names,
-                     ".pdf")
+                     ".",
+                     filetype)
   for(i in 1:seq_along(length(fileNames))){
-    
-    
-    ggplot2::ggsave(plot[[i]],
-                    filename = fileNames[[i]],
-                    units = "mm",
-                    width = width[[i]],
-                    height = height[[i]])
-    message("Saving mod plot for gene '",names[[i]],"'")
+    if(filetype == "pdf"){
+      if(assertive::r_has_cairo_capability() ){
+        grDevices::cairo_pdf(fileNames[[i]],
+                             width = (width[[i]]*RNAMOD_PLOT_MM_TO_INCH_F),
+                             height = (height[[i]]*RNAMOD_PLOT_MM_TO_INCH_F))
+        graphics::plot(plot[[i]])
+        grDevices::dev.off()
+      } else {
+        ggplot2::ggsave(plot[[i]],
+                        filename = fileNames[[i]],
+                        units = "mm",
+                        width = width[[i]],
+                        height = height[[i]])
+      }
+    }
+    if(filetype == "png"){
+      if( assertive::r_has_cairo_capability() ){
+        grDevices::png(fileNames[[i]],
+                       units = "px",
+                       width = (width[[i]]*
+                                  RNAMOD_PLOT_MM_TO_INCH_F*
+                                  dpi),
+                       height = (height[[i]]*
+                                   RNAMOD_PLOT_MM_TO_INCH_F*
+                                   dpi),
+                       type = "cairo-png")
+        graphics::plot(plot[[i]])
+        grDevices::dev.off()
+      } else {
+        ggplot2::ggsave(plot[[i]],
+                        filename = fileNames[[i]],
+                        units = "mm",
+                        width = width[[i]],
+                        height = height[[i]],
+                        dpi = dpi)
+      }
+    }
+    message("Saving mod plot for '",names[[i]],"'")
   }
 }
-
 
 

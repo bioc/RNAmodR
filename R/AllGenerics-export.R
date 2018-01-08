@@ -271,7 +271,7 @@ setGeneric (
 setGeneric ( 
   name= "getModPlot",
   def=function(.Object,
-               number,
+               se,
                modifications,
                gene,
                focus = FALSE){standardGeneric("getModPlot")} 
@@ -283,10 +283,11 @@ setGeneric (
 setGeneric ( 
   name= "saveModPlot",
   def=function(.Object,
-               number,
+               se,
                modifications,
                genes,
-               focus = FALSE){standardGeneric("saveModPlot")} 
+               focus = FALSE,
+               filetype = "pdf"){standardGeneric("saveModPlot")} 
 )
 
 
