@@ -9,15 +9,15 @@
 \alias{saveModPlot,RNAmod,numeric,character,character-method}
 \title{getModPlot}
 \usage{
-getModPlot(.Object, number, modifications, gene)
+getModPlot(.Object, number, modifications, gene, focus = FALSE)
 
-saveModPlot(.Object, number, modifications, genes)
+saveModPlot(.Object, number, modifications, genes, focus = FALSE)
 
 \S4method{getModPlot}{RNAmod,numeric,character,character}(.Object, number,
-  modifications, gene)
+  modifications, gene, focus = FALSE)
 
 \S4method{saveModPlot}{RNAmod,numeric,character,character}(.Object, number,
-  modifications, genes)
+  modifications, genes, focus = FALSE)
 }
 \arguments{
 \item{.Object}{a RNAmod object.}

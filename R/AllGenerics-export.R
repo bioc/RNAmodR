@@ -273,7 +273,8 @@ setGeneric (
   def=function(.Object,
                number,
                modifications,
-               gene){standardGeneric("getModPlot")} 
+               gene,
+               focus = FALSE){standardGeneric("getModPlot")} 
 )
 
 #' @rdname getModPlot
@@ -284,7 +285,8 @@ setGeneric (
   def=function(.Object,
                number,
                modifications,
-               genes){standardGeneric("saveModPlot")} 
+               genes,
+               focus = FALSE){standardGeneric("saveModPlot")} 
 )
 
 

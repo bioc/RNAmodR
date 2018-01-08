@@ -34,6 +34,7 @@ setMethod(
                         gff,
                         data) {
     browser()
+    # fill up empty positions
     strand <- as.character(strand(gff))
     if(strand == "-"){
       pos <- data$pos + data$qwidth - 1
