@@ -255,7 +255,12 @@ setMethod(
   # get data for different plot types
   posData <- .aggregate_pos_data(gff_sub,positions,modClasses,lim)
   modData <- .aggregate_mod_data(mods,modClasses,lim)
-  
+  modData <- lapply(names(modData), function(x){
+    y <- modData[[x]]
+    y$plotType <- x
+    y
+  })
+  modData <- do.call(rbind,modData)
   browser()
   
   
@@ -264,7 +269,7 @@ setMethod(
   
   plots <- lapply(1:nrow(modData), function(i){
     mod <- modData[i,]
-    pos <- posData[[getPlotType(modClasses[[mod$RNAmod_type]])]]
+    pos <- posData[[mod$plotType]]
     
     
     
