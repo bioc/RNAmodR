@@ -102,7 +102,6 @@ setMethod(
 # merge positions in one transcript
 .analyze_transcript <- function(ID,data,gff,fafile){
   data <- .get_m7G_data(ID,data)
-  browser()
   
   # get sequence of transcript and subset gff for single transcript data
   gff <- .subset_gff_for_unique_transcript(gff, ID)
@@ -137,11 +136,12 @@ setMethod(
   # name the locations based on sequence position
   names(modifications) <- paste0("G_",loc)
   modifications <-  modifications[!vapply(modifications,is.null,logical(1))]
+  if(length(modifications) == 0) return(NULL)
   return(modifications)
 }
 
 .check_for_m7G <- function(location, data, strand, name = NULL){
-  # if( location == 456158){
+  # if( location == 1575){
   #   browser()
   # }
   
@@ -156,10 +156,12 @@ setMethod(
   # merge data for positions
   
   testData <- lapply(data,function(dataPerReplicate){
+    dataPerReplicate <- dataPerReplicate[dataPerReplicate != 0]
     return(dataPerReplicate[names(dataPerReplicate) == testLocation])
   })
   testData <- unlist(testData)
   baseData <- lapply(data,function(dataPerReplicate){
+    dataPerReplicate <- dataPerReplicate[dataPerReplicate != 0]
     # This might also be an option
     # return(dataPerReplicate[names(dataPerReplicate) < (location+50) & 
     #               names(dataPerReplicate) > (location-50) &
@@ -189,10 +191,19 @@ setMethod(
   
   # Since normality of distribution can not be assumed use the MWU
   # generate p.value for single position
-  p.value <- wilcox.test(baseData, testData)$p.value
+  p.value <- suppressWarnings(wilcox.test(baseData, testData)$p.value)
   
-  if( sigStrength.mean > RNAMOD_M7G_SIGMA_THRESHOLD &&
-        p.value < RNAMOD_M7G_P_THRESHOLD  ){
+  useP <- getOption("RNAmod_use_p")
+  if(!assertive::is_a_bool(useP)){
+    useP <- as.logical(useP[[1]])
+    warning("The option 'RNAmod_use_p' is not a single logical value. ",
+            "Please set 'RNAmod_use_p' to TRUE or FALSE.",
+            .call = FALSE)
+  }
+  if( (sigStrength.mean > RNAMOD_M7G_SIGMA_THRESHOLD &&
+       p.value < RNAMOD_M7G_P_THRESHOLD) ||
+      (sigStrength.mean > RNAMOD_M7G_SIGMA_THRESHOLD &&
+       !useP) ){
   # if( sigStrength.mean > RNAMOD_M7G_SIGMA_THRESHOLD  ){
     
     # if location is among sample location (name is not null)

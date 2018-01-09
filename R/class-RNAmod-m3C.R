@@ -154,10 +154,12 @@ setMethod(
   # merge data for positions
   
   testData <- lapply(data,function(dataPerReplicate){
+    dataPerReplicate <- dataPerReplicate[dataPerReplicate != 0]
     return(dataPerReplicate[names(dataPerReplicate) == testLocation])
   })
   testData <- unlist(testData)
   baseData <- lapply(data,function(dataPerReplicate){
+    dataPerReplicate <- dataPerReplicate[dataPerReplicate != 0]
     # This might also be an option
     # return(dataPerReplicate[names(dataPerReplicate) < (location+50) & 
     #               names(dataPerReplicate) > (location-50) &
@@ -187,10 +189,19 @@ setMethod(
   
   # Since normality of distribution can not be assumed use the MWU
   # generate p.value for single position
-  p.value <- wilcox.test(baseData, testData)$p.value
+  p.value <- suppressWarnings(wilcox.test(baseData, testData)$p.value)
   
-  if( sigStrength.mean > RNAMOD_M3C_SIGMA_THRESHOLD &&
-      p.value < RNAMOD_M3C_P_THRESHOLD  ){
+  useP <- getOption("RNAmod_use_p")
+  if(!assertive::is_a_bool(useP)){
+    useP <- as.logical(useP[[1]])
+    warning("The option 'RNAmod_use_p' is not a single logical value. ",
+            "Please set 'RNAmod_use_p' to TRUE or FALSE.",
+            .call = FALSE)
+  }
+  if( (sigStrength.mean > RNAMOD_M3C_SIGMA_THRESHOLD &&
+       p.value < RNAMOD_M3C_P_THRESHOLD) || 
+      (sigStrength.mean > RNAMOD_M3C_SIGMA_THRESHOLD &&
+       !useP)){
     # if( sigStrength.mean > RNAMOD_M3C_SIGMA_THRESHOLD  ){
     
     # if location is among sample location (name is not null)

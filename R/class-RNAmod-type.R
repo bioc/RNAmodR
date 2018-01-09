@@ -87,7 +87,7 @@ setMethod(
   
   # create file path 
   folder <- paste0(getOutputFolder(object),
-                   "sample/")
+                   "SamplePos/")
   if(!assertive::is_dir(folder)){
     dir.create(folder, recursive = TRUE)
   }
@@ -105,7 +105,8 @@ setMethod(
 # converts the position on a transcript from start to end, to the correct
 # genomic position
 .convert_local_to_global_locations <- function(gff, loc){
-  browser()
+  # browser()
+  # Intron handling needs to be added
   strand <- unique(as.character(strand(gff)))
   if(strand == "-"){
     locations <- (end(gff) - loc) + 1

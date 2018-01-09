@@ -170,14 +170,14 @@ setGeneric (
 
 # parsing ----------------------------------------------------------------------
 
-#' @name analyzeModifications
+#' @name parseForModifications
 #'
 #' @export
 setGeneric ( 
-  name= "analyzeModifications",
+  name= "parseForModifications",
   def=function(.Object,
                number,
-               modifications){standardGeneric("analyzeModifications")} 
+               modifications){standardGeneric("parseForModifications")} 
 ) 
 
 # modtype accessors ------------------------------------------------------------

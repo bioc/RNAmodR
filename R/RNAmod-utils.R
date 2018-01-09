@@ -222,6 +222,11 @@ setMethod(
                   S4Vectors::mcols(gff)$ID == ID) |
                (!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
                   as.character(S4Vectors::mcols(gff)$Parent) == ID),]
+  if(length(res) != 1){
+    stop("Error gff annotation. Non unique ID detected: ",
+         ID,
+         .call = FALSE)
+  }
   return(res)
 }
 

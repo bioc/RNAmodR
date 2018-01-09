@@ -194,6 +194,7 @@ setMethod(
          "with the chromosomal identifier from the GFF file.",
          call. = FALSE)
   }
+  
   # if identifies already match skip renaming
   if( all(names(fsa) == unique(rtracklayer::chrom(gff)))){
     return(inputFasta)

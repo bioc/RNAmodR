@@ -104,11 +104,15 @@ convertGeneToChrom <- function(gfffile,
                       S4Vectors::mcols(gff)$ID %in% paste0(genes,"_mRNA")) |
                    (!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
                       as.character(S4Vectors::mcols(gff)$Parent) %in% paste0(genes,"_mRNA")),]
+  
   # Remove all entries part of the subset
-  gff_updated <- gff[(!is.na(S4Vectors::mcols(gff)$Name) &
-                        !(S4Vectors::mcols(gff)$Name %in% S4Vectors::mcols(gff_sub)$Name)) |
-                       (!is.na(S4Vectors::mcols(gff)$ID) &
-                          !(S4Vectors::mcols(gff)$ID %in% S4Vectors::mcols(gff_sub)$ID)),]
+  gff_trim <- IRanges::subsetByOverlaps(gff, 
+                                        gff_sub,
+                                        type = "equal")
+  gff_trim <- IRanges::subsetByOverlaps(gff, 
+                                        gff_trim,
+                                        type = "equal",
+                                        invert = TRUE)
   
   # extract the coding sequences of all features
   seqs <- .extract_exon_sequences(gff_sub,fa)
@@ -131,22 +135,27 @@ convertGeneToChrom <- function(gfffile,
                                                  ident, 
                                                  gfffile,
                                                  "Saved extracted gff3 file: ")
+  resultFiles[["convert_fafile"]] <- .write_fa(fa_seq_exon, 
+                                               ident, 
+                                               fafile,
+                                               "Saved extracted fasta file: ")
   resultFiles[["mask_gfffile"]] <- .write_gff(gff_sub, 
                                               paste0("mask_",
                                                      ident), 
                                               gfffile,
                                               "Saved mask gff3 file: ")
-  resultFiles[["convert_fafile"]] <- .write_fa(fa_seq_exon, 
-                                               ident, 
-                                               fafile,
-                                               "Saved extracted fasta file: ")
+  resultFiles[["trim_gfffile"]] <- .write_gff(gff_trim, 
+                                              paste0("trim_",
+                                                     ident), 
+                                              gfffile,
+                                              "Saved trimmed gff3 file: ")
   
   if(appendToOriginal){
     resultFiles[["out_fafile"]] <- appendFastaFiles(resultFiles[["in_fafile"]],
                                                     resultFiles[["convert_fafile"]],
                                                     ident = ident,
                                                     msg = "Saved appended fasta file: ")
-    resultFiles[["out_gfffile"]] <- appendGFF(resultFiles[["in_gfffile"]],
+    resultFiles[["out_gfffile"]] <- appendGFF(resultFiles[["trim_gfffile"]],
                                               resultFiles[["convert_gfffile"]],
                                               ident = ident,
                                               msg = "Saved appended gff3 file: ")
@@ -386,12 +395,14 @@ appendFastaFiles <- function(..., ident, msg){
   fas <- lapply(files, readDNAStringSet)
   fa <- do.call(append, fas)
   
-  ident <- paste0("merge_",ident)
+  ident <- paste0("append_",ident)
   
   return(.write_fa(fa,ident,files[[1]],msg))
 }
 
 #' @rdname appendFastaFiles
+#' 
+#' @export
 #' 
 #' @examples
 appendGFF <- function(..., ident, msg){
@@ -433,26 +444,7 @@ appendGFF <- function(..., ident, msg){
                                 strand = strand,
                                 DF)
   
-  ident <- paste0("merge_",ident)
+  ident <- paste0("append_",ident)
   
   return(.write_gff(gff,ident,files[[1]],msg))
-}
-
-maskGene <- function(gfffile,
-                     fafile,
-                     gff_updated,
-                     gff_removed,
-                     ident){
-  # Check inputs
-  assertive::assert_all_are_existing_files(gfffile)
-  assertive::assert_all_are_existing_files(fafile)
-  
-  
-  out_fafile
-  
-  res <- list(out_gfffile = .write_gff(gff_updated, 
-                                       paste0("masked_",ident), 
-                                       gfffile,
-                                       "Saved masked gff3 file: "),
-              out_fafile = out_fafile)
 }

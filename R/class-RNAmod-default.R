@@ -33,7 +33,6 @@ setMethod(
                         counts,
                         gff,
                         data) {
-    browser()
     # fill up empty positions
     strand <- as.character(strand(gff))
     if(strand == "-"){
@@ -43,6 +42,12 @@ setMethod(
     }
     # Normalize counts per positions against million of reads in BamFile
     posData <- table(pos)/(counts/10^6)
+    
+    # spread table with zero values to the length of transcript
+    posData <- setNames(as.double(unlist(lapply(1:width(gff), function(i){
+      if(length(posData[names(posData) == i]) == 0) return(0)
+      posData[names(posData) == i]
+    }))),1:width(gff))
     
     return(posData)
   }

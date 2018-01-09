@@ -2,9 +2,9 @@
 NULL
 
 
-#' @name analyzeModifications
+#' @name parseForModifications
 #' 
-#' @title analyzeModifications
+#' @title parseForModifications
 #'
 #' @param .Object a RNAmod object. 
 #' @param number a number defining an experiment. 
@@ -15,7 +15,7 @@ NULL
 #'
 #' @examples
 setMethod(
-  f = "analyzeModifications", 
+  f = "parseForModifications", 
   signature = signature(.Object = "RNAmod",
                         number = "numeric",
                         modifications = "character"),
@@ -30,18 +30,19 @@ setMethod(
     experiment <- getExperimentData(.Object,number)
     
     
-    message("Analyzing modifications for Sample '",
+    message("Searching for modifications in sample '",
             unique(experiment["SampleName"]),
             "'...")
     
     # add the default modification class, which is just used for handling read 
     # positions (5'-end), but not modification detection.
-    modifications <- append("default",modifications)
-    modClasses <- .load_mod_classes(modifications)
+    modClasses <- .load_mod_classes(append("default",modifications))
     message("Detecting modification types: '",
             paste(names(modClasses[names(modClasses) != "default"]), 
                   collapse = "', '"),
             "'")
+    
+    # browser()
     
     # extract gene boundaries
     gff <- .Object@.dataGFF
@@ -60,6 +61,11 @@ setMethod(
                    gff,
                    param,
                    modClasses)
+    data <- data[!is.null(data)]
+    if(length(data) == 0){
+      stop("No reads detected in any bam file",
+           .call = FALSE)
+    }
     
     # Merge data from all replicates and detect modifications:
     mod_positions <- vector(mode = "list", length = length(modClasses))
@@ -72,6 +78,13 @@ setMethod(
                                      data)
     }
     mod_positions <- mod_positions[!is.na(mod_positions)]
+    nMods <- lapply(mod_positions, function(modPerTypes){
+      sum(unlist(lapply(modPerTypes,length)))
+    })
+    if( sum(unlist(nMods)) == 0){
+      stop("No modifications detected. Aborting...",
+           .call = FALSE)
+    }
     
     positions <- vector(mode = "list", length = length(modClasses))
     names(positions) <- names(modClasses)
@@ -121,11 +134,26 @@ setMethod(
   bamData <- S4Vectors::split(bamData,
                               bamData$ID)
   
+  # browser()
   # for testing
-  # bamData <- bamData[names(bamData) %in% c("RDN18")]
-  bamData <- bamData[names(bamData) %in% c("tS(CGA)C")]
-  # bamData <- bamData[names(bamData) %in% c("RDN18","tS(CGA)C")]
+  # m7G 
+  # bamData <- bamData[names(bamData) %in% c("RDN18-1")]
+  # bamData <- bamData[names(bamData) %in% c("tC(GCA)B")]
   
+  # D 
+  bamData <- bamData[names(bamData) %in% c("tS(CGA)C")]
+  
+  # combination
+  # bamData <- bamData[names(bamData) %in% c("RDN18-1",
+  #                                          "tS(CGA)C",
+  #                                          "tC(GCA)B")]
+  
+  if(length(bamData) == 0){
+    warning("No reads detected in bam file '",
+            bamFile,
+            "'")
+    return(NULL)
+  }
   positions <- lapply(bamData,
   # res <- BiocParallel::bplapply(bamData,
                       FUN = .get_positions_in_transcript,
@@ -138,16 +166,16 @@ setMethod(
 
 # For each transcript get positional data
 # This can be individually done for different modification types
-.get_positions_in_transcript <- function(data,totalCounts,gff,mods){
+.get_positions_in_transcript <- function(data,totalCounts,gff,modClasses){
   # get ID and GRanges
   ID <- unique(data$ID)
   gff <- .subset_gff_for_unique_transcript(gff, ID)
   
   # Parse reads for all modifications based on sequence
-  resData <- vector(mode="list",length = length(mods))
-  names(resData) <- names(mods)
-  for(i in seq_along(mods)){
-    resData[[i]] <- convertReadsToPositions(mods[[i]],totalCounts,gff,data)
+  resData <- vector(mode="list",length = length(modClasses))
+  names(resData) <- names(modClasses)
+  for(i in seq_along(modClasses)){
+    resData[[i]] <- convertReadsToPositions(modClasses[[i]],totalCounts,gff,data)
   }
   resData <- resData[!is.na(resData)]
   return(resData)
@@ -169,7 +197,6 @@ setMethod(
     chrom <- as.character(seqnames(g))
     
     for(i in seq_along(genes)){
-      browser()
       genesDf[[i]]$strand <- strand[[i]]
       genesDf[[i]]$chrom <- chrom[[i]]
       genesDf[[i]]$Parent <- genes[[i]]
