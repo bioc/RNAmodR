@@ -25,6 +25,12 @@ create RNAmod
 ```{r tRNA}
 mod <- RNAmod("test",
               "experiment_layout.csv",
-              "sacCer3_R64-2-1.gff3",
-              "sacCer3_R64-2-1.fasta")
+              "sacCer3_R64-2-1_masked.gff3",
+              "sacCer3_R64-2-1_masked.fasta")
+
+parseForModifications(mod,1,"m7G")
+
+gene <- "RDN18-1"
+saveModPlot(mod,se,"m7G",gene)
+saveModPlot(mod,se,"m7G",gene,focus = TRUE)
 ```

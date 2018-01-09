@@ -47,12 +47,28 @@ gff <- rtracklayer::import.gff3(gfffile)
 RDN25 <- S4Vectors::mcols(gff[grepl("RDN25",S4Vectors::mcols(gff)$ID),])$ID
 RDN18 <- S4Vectors::mcols(gff[grepl("RDN18",S4Vectors::mcols(gff)$ID),])$ID
 RDN58 <- S4Vectors::mcols(gff[grepl("RDN58",S4Vectors::mcols(gff)$ID),])$ID
+RNDmt <- c(S4Vectors::mcols(gff[grepl("Q0020",S4Vectors::mcols(gff)$ID),])$ID,
+           S4Vectors::mcols(gff[grepl("Q0158",S4Vectors::mcols(gff)$ID),])$ID)
 
 rRNAFiles <- convertGeneToChrom(gfffile,
                                 fafile,
-                                c(RDN25,RDN18,RDN58),
+                                c(RDN25,RDN18,RDN58,RNDmt),
                                 "rRNA",
                                 appendToOriginal = TRUE)
+
+# Manually remove any trace of rRNA genes from gff file
+gff <- rtracklayer::import.gff3(rRNAFiles[["in_gfffile"]])
+gff_rRNA <- gff[S4Vectors::mcols(gff)$type == "rRNA_gene",]
+gff_rRNA <- IRanges::subsetByOverlaps(gff, 
+                                      gff_rRNA,
+                                      minoverlap = 0,
+                                      type = "equal",
+                                      invert = TRUE)
+rtracklayer::export.gff3(gff_rRNA,rRNAFiles[["in_gfffile"]])
+rRNAFiles[["out_gfffile"]] <- appendGFF(resultFiles[["in_gfffile"]],
+                                        resultFiles[["convert_gfffile"]],
+                                        ident = ident,
+                                        msg = "Saved appended gff file: ")
 
 tRNAFiles <- convertGeneTypeToChrom(rRNAFiles[["out_gfffile"]],
                                     rRNAFiles[["out_fafile"]],
@@ -74,7 +90,7 @@ script <- gettextf(script,
        paste0(dirname(tRNAFiles[["out_fafile"]]),"/sacCer3_R64-2-1_masked.fasta"),
        tRNAFiles[["out_gfffile"]],
        "sacCer3_R64-2-1_masked.gff3",
-       tRNAFiles[["out_fafile"]],
+       paste0(dirname(tRNAFiles[["out_fafile"]]),"/sacCer3_R64-2-1_masked.fasta"),
        "sacCer3_R64-2-1_masked.fasta")
 message("# Run this in command line:\n\n",
         script)
