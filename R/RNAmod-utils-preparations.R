@@ -251,19 +251,19 @@ convertGeneToChrom <- function(gfffile,
   BiocGenerics::strand(gff_parents) <- "+"
   
   # chromosome names
-  chrom_names <- .reverse_unique_seqnames(.get_unique_seqnames(gff_parents))
+  chrom_names <- .reverse_unique_seqnames(.get_unique_seqnames(gff_children))
   chrom_names <- .condense_chrom_names(chrom_names)
   
   # update/create and combine GRanges
+  gff_children <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
+                                        ranges = IRanges::ranges(gff_parents),
+                                        strand = as.character(BiocGenerics::strand(gff_parents)),
+                                        S4Vectors::mcols(gff_children))
   gff_parents <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
                                         ranges = IRanges::ranges(gff_parents),
                                         strand = as.character(BiocGenerics::strand(gff_parents)),
                                         S4Vectors::mcols(gff_parents))
   
-  gff_children <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
-                                        ranges = IRanges::ranges(gff_parents),
-                                        strand = as.character(BiocGenerics::strand(gff_parents)),
-                                        S4Vectors::mcols(gff_children))
   gff_c <- c(gff_parents,gff_children)
   gff_c <- sort(gff_c)
   
@@ -272,7 +272,6 @@ convertGeneToChrom <- function(gfffile,
 
 # create new fasta file
 .update_seqs <- function(seqs){
-  
   # remove brackets from chrom names
   chrom_names <- .reverse_unique_seqnames(names(seqs))
   chrom_names <- .condense_chrom_names(chrom_names)
@@ -283,6 +282,7 @@ convertGeneToChrom <- function(gfffile,
 
 # remove special character from chromosome names
 .condense_chrom_names <- function(names){
+  # remove unnecessary additions
   res <- lapply(names, function(x){
     x <- gsub("_CDS","",x)
     x <- gsub("_noncoding_exon","",x)
@@ -290,6 +290,20 @@ convertGeneToChrom <- function(gfffile,
     x
   })
   names(res) <- names(names)
+  # remove duplicated naming elements
+  for(i in seq_along(res[[1]])){
+    x <- unique(c(res$ID[[i]],res$Name[[i]],res$gene[[i]]))
+    x <- x[x != ""]
+    res$ID[[i]] <- x[1]
+    res$Name[[i]] <- x[2]
+    res$gene[[i]] <- x[3]
+  }
+  res <- lapply(res, function(x){
+    x[is.na(x)] <- ""
+    x
+  })
+  
+  # condense naming elements intro string
   res <- paste0(res$ID,
                 "_",
                 res$Name,
@@ -297,6 +311,11 @@ convertGeneToChrom <- function(gfffile,
                 res$gene)
   res <- gsub("_$","",res)
   res <- gsub("^_","",res)
+  res <- gsub("_$","",res)
+  res <- gsub("^_","",res)
+  
+  # escape unsupported characters in chromnames
+  res <- gsub("(?![a-zA-Z0-9.:^*$@!+_?-|]).","-",res, perl = TRUE)
   return(res)
 }
 
