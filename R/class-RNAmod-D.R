@@ -115,6 +115,7 @@ setMethod(
   # detect all G positions
   loc <- stringr::str_locate_all(as.character(seq), "U")
   loc <- loc[[1]][,"start"]
+  if(length(loc) == 0) return(NULL)
   
   # Convert local G position to global positions
   locations <- .convert_local_to_global_locations(gff, loc)
@@ -137,16 +138,14 @@ setMethod(
                           name)
   
   # name the locations based on sequence position
+  if(length(modifications) == 0) return(NULL)
   names(modifications) <- paste0("U_",loc)
   modifications <-  modifications[!vapply(modifications,is.null,logical(1))]
+  if(length(modifications) == 0) return(NULL)
   return(modifications)
 }
 
 .check_for_D <- function(location, data, strand, name = NULL){
-  # if( location == 456158){
-  #   browser()
-  # }
-  
   # D expects a high number of reads at the N+1 position
   if(as.character(strand) == "-"){
     testLocation <- location-1
@@ -200,7 +199,7 @@ setMethod(
     useP <- as.logical(useP[[1]])
     warning("The option 'RNAmod_use_p' is not a single logical value. ",
             "Please set 'RNAmod_use_p' to TRUE or FALSE.",
-            .call = FALSE)
+            call. = FALSE)
   }
   if( (sigStrength.mean > RNAMOD_D_SIGMA_THRESHOLD &&
        p.value < RNAMOD_D_P_THRESHOLD) || 

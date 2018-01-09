@@ -1,6 +1,7 @@
 #' @include class-RNAmod-type.R
 NULL
 
+RNAMOD_M7G_SCAN_WINDOW_WIDTH <- 200
 RNAMOD_M7G_P_THRESHOLD <- 0.05
 RNAMOD_M7G_SIGMA_THRESHOLD <- 5
 
@@ -112,6 +113,7 @@ setMethod(
   # detect all G positions
   loc <- stringr::str_locate_all(as.character(seq), "G")
   loc <- loc[[1]][,"start"]
+  if(length(loc) == 0) return(NULL)
   
   # Convert local G position to global positions
   locations <- .convert_local_to_global_locations(gff, loc)
@@ -132,7 +134,8 @@ setMethod(
                           data,
                           strand,
                           name)
-  
+
+  if(length(modifications) == 0) return(NULL)
   # name the locations based on sequence position
   names(modifications) <- paste0("G_",loc)
   modifications <-  modifications[!vapply(modifications,is.null,logical(1))]
@@ -163,8 +166,8 @@ setMethod(
   baseData <- lapply(data,function(dataPerReplicate){
     dataPerReplicate <- dataPerReplicate[dataPerReplicate != 0]
     # This might also be an option
-    # return(dataPerReplicate[names(dataPerReplicate) < (location+50) & 
-    #               names(dataPerReplicate) > (location-50) &
+    # return(dataPerReplicate[names(dataPerReplicate) < (testLocation+RNAMOD_M7G_SCAN_WINDOW_WIDTH) &
+    #               names(dataPerReplicate) > (testLocation-RNAMOD_M7G_SCAN_WINDOW_WIDTH) &
     #               names(dataPerReplicate) != testLocation])
     
     return(dataPerReplicate[names(dataPerReplicate) != testLocation])
@@ -177,7 +180,7 @@ setMethod(
     return(NULL)
   }
   # if no reads can be used comparison
-  if(length(baseData) < (3 * nbSamples)){
+  if(length(baseData) < (2 * nbSamples)){
     return(NULL)
   }
   
@@ -198,11 +201,12 @@ setMethod(
     useP <- as.logical(useP[[1]])
     warning("The option 'RNAmod_use_p' is not a single logical value. ",
             "Please set 'RNAmod_use_p' to TRUE or FALSE.",
-            .call = FALSE)
+            call. = FALSE)
   }
-  if( (sigStrength.mean > RNAMOD_M7G_SIGMA_THRESHOLD &&
+  threshold <- RNAMOD_M7G_SIGMA_THRESHOLD
+  if( (sigStrength.mean > threshold &&
        p.value < RNAMOD_M7G_P_THRESHOLD) ||
-      (sigStrength.mean > RNAMOD_M7G_SIGMA_THRESHOLD &&
+      (sigStrength.mean > threshold &&
        !useP) ){
   # if( sigStrength.mean > RNAMOD_M7G_SIGMA_THRESHOLD  ){
     

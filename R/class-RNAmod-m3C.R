@@ -115,6 +115,7 @@ setMethod(
   # detect all G positions
   loc <- stringr::str_locate_all(as.character(seq), "C")
   loc <- loc[[1]][,"start"]
+  if(length(loc) == 0) return(NULL)
   
   # Convert local G position to global positions
   locations <- .convert_local_to_global_locations(gff, loc)
@@ -136,9 +137,11 @@ setMethod(
                           strand,
                           name)
   
+  if(length(modifications) == 0) return(NULL)
   # name the locations based on sequence position
   names(modifications) <- paste0("G_",loc)
   modifications <-  modifications[!vapply(modifications,is.null,logical(1))]
+  if(length(modifications) == 0) return(NULL)
   return(modifications)
 }
 
@@ -196,7 +199,7 @@ setMethod(
     useP <- as.logical(useP[[1]])
     warning("The option 'RNAmod_use_p' is not a single logical value. ",
             "Please set 'RNAmod_use_p' to TRUE or FALSE.",
-            .call = FALSE)
+            call. = FALSE)
   }
   if( (sigStrength.mean > RNAMOD_M3C_SIGMA_THRESHOLD &&
        p.value < RNAMOD_M3C_P_THRESHOLD) || 

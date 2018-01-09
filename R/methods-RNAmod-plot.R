@@ -101,7 +101,7 @@ setMethod(
   checkFileTypes <- c("pdf","png")
   if(!assertive::is_subset(filetype, checkFileTypes))
     stop("Unsupported file type '",filetype,"'",
-         .call = FALSE)
+         call. = FALSE)
 }
 
 
@@ -339,7 +339,7 @@ setMethod(
       stop("Positions data not available for type '",
            type,
            "'",
-           .Call = FALSE)
+           call. = FALSE)
     }
     res <- data[[type]]
     if( as.character(BiocGenerics::strand(gff)) == "-"){
@@ -383,16 +383,18 @@ setMethod(
     as.numeric(c(x,unlist(lapply(1:n,function(z){100*z})),round(max(lim))))
   }
   # prepare mod data
-  mods$localStart <- pos[pos$pos == mods$start,"localPos"]
-  mods$localEnd <- pos[pos$pos == mods$end,"localPos"]
-  mods$vStart <- max(pos[pos$localPos < mods$localStart+10 &
-                           pos$localPos > mods$localStart-10,"mean"])*1.01
+  mods$localStart <- pos[pos$pos %in% mods$start,"localPos"]
+  mods$localEnd <- pos[pos$pos %in% mods$end,"localPos"]
+  mods$vStart <- unlist(lapply(mods$localStart, function(x){
+    max(pos[pos$localPos < x+3 &
+              pos$localPos > x-3,"mean"])*1.01
+  }))
   modsPositions <- mods[mods$start == mods$end,]
   modsArea<- mods[mods$start != mods$end,]
   
   # tmp fix
-  pos$letters <- letters[1:nrow(pos)]
-  # pos$letters <- letters
+  # pos$letters <- letters[1:nrow(pos)]
+  pos$letters <- letters
  
   # scale_x_discrete(label = letters)
   # # plot gene
@@ -613,7 +615,7 @@ setMethod(
   if(!all( abs(x - mean(x)) < .Machine$double.eps ^ 0.5 ))
     stop("Not the same number of names, plots, height and width values ",
          "provided.",
-         .call = TRUE)
+         call. = TRUE)
   width <- unlist(width)
   height <- unlist(height)
   assertive::assert_all_are_non_empty_character(names)

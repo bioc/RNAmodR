@@ -64,7 +64,7 @@ setMethod(
     data <- data[!is.null(data)]
     if(length(data) == 0){
       stop("No reads detected in any bam file",
-           .call = FALSE)
+           call. = FALSE)
     }
     
     # Merge data from all replicates and detect modifications:
@@ -83,7 +83,7 @@ setMethod(
     })
     if( sum(unlist(nMods)) == 0){
       stop("No modifications detected. Aborting...",
-           .call = FALSE)
+           call. = FALSE)
     }
     
     positions <- vector(mode = "list", length = length(modClasses))
@@ -141,7 +141,7 @@ setMethod(
   # bamData <- bamData[names(bamData) %in% c("tC(GCA)B")]
   
   # D 
-  bamData <- bamData[names(bamData) %in% c("tS(CGA)C")]
+  # bamData <- bamData[names(bamData) %in% c("tS(CGA)C")]
   
   # combination
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
@@ -184,31 +184,53 @@ setMethod(
 # Construct DataFrame from RNAmod results per modification from individual
 # gene results
 .construct_DataFrame_from_mod_result <- function(data,gff){
+  
   modTypes <- names(data)
-  for(j in seq_along(modTypes)){
+  l <- lapply(seq_along(modTypes), function(j){
     modType <- data[[j]]
     genes <- names(modType)
     genesDf <- lapply(modType,
                       .get_dataframe_per_gene)
+    nMods <- unlist(lapply(genesDf, function(df){
+      nrow(df)
+    }))
+    if( sum(nMods) == 0 ) return(NULL)
     
-    g <- gff[S4Vectors::mcols(gff)$ID %in% genes |
-               S4Vectors::mcols(gff)$Name %in% genes]
-    strand <- as.character(strand(g))
-    chrom <- as.character(seqnames(g))
+    # This way os selection matches to one construting the initial read
+    # DataFrame
+    g <- gff[as.character(S4Vectors::mcols(gff)$ID) %in% genes |
+               (as.character(S4Vectors::mcols(gff)$Name) %in% genes &
+                  is.na(as.character(S4Vectors::mcols(gff)$ID)))]
+    S4Vectors::mcols(gff)[is.na(as.character(S4Vectors::mcols(gff)$ID))]$ID <- 
+      S4Vectors::mcols(gff)[is.na(as.character(S4Vectors::mcols(gff)$ID))]$Name
+    S4Vectors::mcols(g)$ID <- factor(S4Vectors::mcols(g)$ID, levels = genes)
+    g <- g[order(S4Vectors::mcols(g)$ID)]
     
-    for(i in seq_along(genes)){
-      genesDf[[i]]$strand <- strand[[i]]
-      genesDf[[i]]$chrom <- chrom[[i]]
-      genesDf[[i]]$Parent <- genes[[i]]
-      genesDf[[i]]$source <- rep("RNAmodR",nrow(genesDf[[i]]))
-      genesDf[[i]]$type <- rep("RNAMOD",nrow(genesDf[[i]]))
-      genesDf[[i]]$RNAmod_type <- rep(modTypes[j],nrow(genesDf[[i]]))
-      genesDf[[i]]$score <- genesDf[[i]]$RNAmod_signal
-      genesDf[[i]]$ID <- paste0(genesDf[[i]]$Parent,"_",genesDf[[i]]$ID)
-    }
+    strand <- as.character(BiocGenerics::strand(g))
+    chrom <- as.character(GenomeInfoDb::seqnames(g))
+    genesDf <- lapply(seq_along(genes), function(i){
+      if(nrow(genesDf[[i]]) == 0) return(NULL)
+      df <- genesDf[[i]]
+      df$strand <- strand[[i]]
+      df$chrom <- chrom[[i]]
+      df$Parent <- genes[[i]]
+      df$source <- rep("RNAmodR",nrow(df))
+      df$type <- rep("RNAMOD",nrow(df))
+      df$RNAmod_type <- rep(modTypes[j],nrow(df))
+      df$score <- df$RNAmod_signal
+      df$ID <- paste0(df$Parent,"_",df$ID)
+      return(df)
+    })
+    genesDf <- genesDf[!vapply(genesDf, is.null, logical(1))]
+    if(length(genesDf) == 0) return(NULL)
+    return(do.call(rbind,genesDf))
+  })
+  l <- l[!vapply(l, is.null, logical(1))]
+  if(length(l) == 0){
+    stop("No modifications detected. Aborting...",
+         call. = FALSE)
   }
-  
-  df <- do.call(rbind,genesDf)
+  df <- do.call(rbind,l)
   df <- df[,c("chrom","start","end","strand","source","type","score","ID",
               "Parent","RNAmod_type","RNAmod_signal","RNAmod_signal_sd",
               "RNAmod_p.value","RNAmod_nbReplicates")]

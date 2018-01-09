@@ -225,7 +225,7 @@ setMethod(
   if(length(res) != 1){
     stop("Error gff annotation. Non unique ID detected: ",
          ID,
-         .call = FALSE)
+         call. = FALSE)
   }
   return(res)
 }

@@ -238,8 +238,6 @@ convertGeneToChrom <- function(gfffile,
 
 # create new gff annotations
 .update_gff_subset <- function(gff_sub, seqs){
-  
-  
   # subset gff to parents and childs
   gff_children <- gff_sub[.get_unique_seqnames(gff_sub) %in% names(seqs)]
   gff_children <- gff_children[!duplicated(as.character(S4Vectors::mcols(gff_children)$Name))]
@@ -251,7 +249,7 @@ convertGeneToChrom <- function(gfffile,
   if( length(gff_children) != length(gff_parents) |
       length(seqs) != length(gff_children)){
     warnings("Mismatching number of annotations and sequences",
-             .call = FALSe)
+             call. = FALSE)
   }
   
   # setup coordinates for genes based on seqs as chromosomes
