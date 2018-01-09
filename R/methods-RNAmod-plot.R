@@ -3,6 +3,7 @@ NULL
 
 RNAMOD_PLOT_POS_WIDTH <- 1
 RNAMOD_PLOT_LAYER_HEIGHT <- 50
+RNAMOD_PLOT_SEQ_SIZE <- 1
 RNAMOD_PLOT_DATA_HEIGHT <- 100
 RNAMOD_PLOT_FOCUS_WINDOW <- 50
 RNAMOD_PLOT_MM_TO_INCH_F <- 0.03937008
@@ -213,6 +214,8 @@ setMethod(
                    (!is.na(S4Vectors::mcols(gff)$ID) & 
                       S4Vectors::mcols(gff)$ID == geneName),]
   seq <- Rsamtools::getSeq(fasta,gff_sub)[[1]]
+  letters <- strsplit(gsub("([[:alnum:]]{1})", "\\1 ", 
+                           as.character(seq)), " ")[[1]]
   
   # create description layer plot
   layer <- .create_layer_data(gff,gff_sub)
@@ -228,14 +231,14 @@ setMethod(
     pos <- posData[[type]]
     mods <- modData[[type]]
     
-    plot <- .get_mod_plot(pos,mods)
+    plot <- .get_mod_plot(pos,mods,letters)
     return(plot)
   })
-  layerPlot <- .get_gene_plot(geneName, layer, posData[[1]], seq)
-  #layerPlot <- list()
+  #layerPlot <- .get_gene_plot(geneName, layer, posData[[1]])
+  layerPlot <- list()
   
   nrow <- length(layerPlot) + length(dataPlots)
-  width <- 40 + nrow(posData[[1]]) * RNAMOD_PLOT_POS_WIDTH
+  width <- 80 + nrow(posData[[1]]) * RNAMOD_PLOT_POS_WIDTH
   height <- length(layerPlot) * RNAMOD_PLOT_LAYER_HEIGHT + 
     length(dataPlots) * RNAMOD_PLOT_DATA_HEIGHT
   
@@ -266,6 +269,7 @@ setMethod(
                    (!is.na(S4Vectors::mcols(gff)$ID) & 
                       S4Vectors::mcols(gff)$ID == geneName),]
   seq <- Rsamtools::getSeq(fasta,gff_sub)[[1]]
+  letters <- strsplit(gsub("([[:alnum:]]{1})", "\\1 ", as.character(seq)), " ")[[1]]
   
   # create description layer plot
   layer <- .create_layer_data(gff,gff_sub)
@@ -293,12 +297,12 @@ setMethod(
     grDevices::pdf(file = NULL)
     
     # get plots
-    # layerPlot <- .get_gene_plot(geneName, layer, pos, seq)
+    # layerPlot <- .get_gene_plot(geneName, layer, pos)
     layerPlot <- list()
-    plot <- .get_mod_plot(pos,mod)
+    plot <- .get_mod_plot(pos,mod,letters)
     
     nrow <- length(layerPlot) + 1
-    width <- 40 + nrow(pos) * RNAMOD_PLOT_POS_WIDTH
+    width <- 80 + nrow(pos) * RNAMOD_PLOT_POS_WIDTH
     height <- RNAMOD_PLOT_LAYER_HEIGHT + 
       RNAMOD_PLOT_DATA_HEIGHT
     
@@ -307,7 +311,6 @@ setMethod(
     
     # to inhibit plotting by grid.arrange
     grDevices::dev.off()
-    browser()
     return(list(plot = grid,
                 width = width,
                 height = height,
@@ -368,7 +371,7 @@ setMethod(
 # modification visualization ---------------------------------------------------
 
 # returns a plot showing all modifications on one type of position data
-.get_mod_plot <- function(pos,mods){
+.get_mod_plot <- function(pos,mods,letters){
   requireNamespace("ggplot2", quietly = TRUE)
   
   break_FUN <- function(lim){
@@ -387,9 +390,17 @@ setMethod(
   modsPositions <- mods[mods$start == mods$end,]
   modsArea<- mods[mods$start != mods$end,]
   
+  # tmp fix
+  pos$letters <- letters[1:nrow(pos)]
+  # pos$letters <- letters
+ 
+  # scale_x_discrete(label = letters)
+  # # plot gene
+  
   # initial plot setup
-  plot <- ggplot(pos, aes_(x = ~localPos, y = ~mean)) +
-    scale_x_continuous(name = "position of transcript [nt]") +
+  plot <- ggplot(pos, aes_(x = ~localPos, y = ~mean, label = ~letters)) +
+    scale_x_continuous(name = "position of transcript [nt]",
+                       expand = c(0,10)) +
     scale_y_continuous(name = "mean(number of read ends)",
                        labels = scales::scientific,
                        limits = c(NA,max(pos$mean)*1.25)) +
@@ -401,7 +412,10 @@ setMethod(
   }
   
   # plot position data
-  plot <- plot + geom_bar(stat = "identity")
+  plot <- plot + geom_bar(stat = "identity") +
+    geom_text(mapping = aes_(y = 0),
+              vjust = 1.5,
+              size = RNAMOD_PLOT_SEQ_SIZE)
   
   # plot modifications for a single position
   if( nrow(modsPositions) > 0){
@@ -429,7 +443,8 @@ setMethod(
                                                y = ~vStart,
                                                xend = ~localStart,
                                                yend = Inf,
-                                               colour = ~RNAmod_type)) +
+                                               colour = ~RNAmod_type),
+                                inherit.aes = FALSE) +
       scale_colour_brewer(name = "modification\ntype",
                           palette = "Set1") +
       annotate("label",
@@ -468,8 +483,7 @@ setMethod(
 # returns a plot showing all the gene annotation layers
 .get_gene_plot <- function(geneName, 
                            layer,
-                           pos,
-                           seq){
+                           pos){
   requireNamespace("ggplot2", quietly = TRUE)
   
   xlim <- c(min(pos$localPos),max(pos$localPos))
@@ -492,7 +506,6 @@ setMethod(
                                    yend = ~ymin2, 
                                    colour = "chromosome"), 
                               size = 1)
-  # # plot gene
   # plot <- plot + geom_segment(aes_(x = layer[layer$type == "gene","start"], 
   #                                  y = ~ymin2,
   #                                  xend = layer[layer$type == "gene","end"], 
