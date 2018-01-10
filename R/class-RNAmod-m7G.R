@@ -2,9 +2,9 @@
 NULL
 
 RNAMOD_M7G_ROLLING_MEAN_WINDOW_WIDTH <- 9
-RNAMOD_M7G_BASE_WINDOW_WIDTH <- 100
+RNAMOD_M7G_ARREST_RATE <- 0.95
 RNAMOD_M7G_P_THRESHOLD <- 0.05
-RNAMOD_M7G_SIGMA_THRESHOLD <- 10
+RNAMOD_M7G_SIGMA_THRESHOLD <- 3
 
 
 #' @rdname mod
@@ -104,6 +104,11 @@ setMethod(
 # merge positions in one transcript
 .analyze_transcript <- function(ID,data,gff,fafile){
   data <- .get_m7G_data(ID,data)
+  # do not take into account position 1
+  data <- lapply(data, function(x){
+    x[as.numeric(names(x)) == 1] <- 0
+    x
+  })
   
   # get sequence of transcript and subset gff for single transcript data
   gff <- .subset_gff_for_unique_transcript(gff, ID)
@@ -113,11 +118,6 @@ setMethod(
   loc <- stringr::str_locate_all(as.character(seq), "G")
   loc <- loc[[1]][,"start"]
   if(length(loc) == 0) return(NULL)
-  
-  # return only G position
-  data <- lapply(data, function(x){
-    x[loc]
-  })
   
   # Convert local G position to global positions
   locations <- .convert_local_to_global_locations(gff, loc)
@@ -182,42 +182,30 @@ setMethod(
 
 .check_for_m7G <- function(location, 
                            data, 
-                           arrestData, 
+                           arrestData,
                            name = NULL){
   # if( location == 1575){
   #   browser()
   # }
   
-  # number of replicates
-  nbSamples <- length(data)
-  
-  # merge data for positions
-  # data on the N+1 location
-  testData <- .aggregate_location_data(data, (location+1))
-  # data on the arrect direction
-  testArrestData <- .aggregate_location_data(arrestData, location)
-  # base data to compare against
-  baseData <- .aggregate_not_location_data(data, (location+1))
-  
   locTest <- .calc_m7G_test_values(location,
-                                   testData,
-                                   baseData,
-                                   testArrestData,
-                                   nbSamples)
+                                   data,
+                                   arrestData)
   # If insufficient data is present
   if(is.null(locTest)) return(NULL)
   
   # dynamic threshold based on the noise of the signal (high sd)
-  threshold <- RNAMOD_M7G_SIGMA_THRESHOLD + locTest$thresholdAddition
-  if(!.validate_m7G_pos(threshold, 
-                       RNAMOD_M7G_P_THRESHOLD, 
-                       locTest$sig.mean, 
-                       locTest$p.value) ) return(NULL)
+  if(!.validate_m7G_pos(RNAMOD_M7G_SIGMA_THRESHOLD, 
+                        RNAMOD_M7G_P_THRESHOLD, 
+                        locTest$sig.mean, 
+                        locTest$p.value) ) return(NULL)
   
   # browser()
   # if location is among sample location (name is not null)
   # plot the data
   if(!is.null(name)){
+    testData <- .aggregate_location_data(data, (location+1))
+    baseData <- .aggregate_not_location_data(data, (location+1))
     .plot_sample_data(.create_plot_data(testData,
                                         baseData,
                                         paste0(name,location)), 
@@ -229,7 +217,58 @@ setMethod(
               signal = locTest$sig.mean,
               signal.sd = locTest$sig.sd,
               p.value = locTest$p.value,
-              nbsamples = nbSamples))
+              nbsamples = locTest$n))
+}
+
+.calc_m7G_test_values <- function(location,
+                                  data,
+                                  arrestData,
+                                  locs){
+  # do not take into account position 1
+  if(location == 1) return(NULL)
+  
+  # merge data for positions
+  # data on the N+1 location
+  testData <- .aggregate_location_data(data, (location+1))
+  # data on the arrect direction
+  testArrestData <- .aggregate_location_data(arrestData, location)
+  # base data to compare against
+  # use only G position
+  baseData <- .aggregate_not_location_data(data, (location+1))
+  
+  # number of replicates
+  n <- length(data)
+  # if not enough data is present
+  if(length(testData) == 0 | 
+     length(baseData) < (3*n)) return(NULL)
+  # No read arrest detectable
+  if( sum(testArrestData) < 0 ) return(NULL)
+  # To low arrest detectable
+  testArrest <- length(testArrestData[testArrestData >= RNAMOD_M7G_ARREST_RATE])
+  if( length(testArrestData) != testArrest ) {
+    return(NULL)
+  }
+  
+  # get test values
+  # overall mean and sd
+  mean <-  mean(baseData)
+  sd <-  stats::sd(baseData)
+  thresholdAddition <- abs(sd %/% mean)
+    
+  # Use the sigma level as value for signal strength
+  sig <- (as.numeric(as.character(testData)) - mean) %/% sd
+  sig.mean <- mean(sig)
+  sig.sd <- stats::sd(sig)
+  # Since normality of distribution can not be assumed use the MWU
+  # generate p.value for single position
+  p.value <- suppressWarnings(wilcox.test(baseData, testData)$p.value)
+  
+  return(list(thresholdAddition = thresholdAddition,
+              sig = sig,
+              sig.mean = sig.mean,
+              sig.sd = sig.sd,
+              p.value = p.value,
+              n = n))
 }
 
 .aggregate_location_data <- function(data, 
@@ -254,39 +293,6 @@ setMethod(
                               as.numeric(names(dataPerReplicate)) > (location-width) &
                               as.numeric(names(dataPerReplicate)) != location])
   }))
-}
-
-.calc_m7G_test_values <- function(location,
-                                  testData,
-                                  baseData,
-                                  testArrestData,
-                                  n){
-  
-  if(length(testData) == 0 | 
-     length(baseData) < (3 * n)) return(NULL)
-  
-  # No read arrest detectable
-  if( sum(testArrestData) < 0 ) return(NULL)
-  
-  # get test values
-  # overall mean and sd
-  mean <-  mean(baseData)
-  sd <-  stats::sd(baseData)
-  thresholdAddition <- abs(sd %/% mean)
-    
-  # Use the sigma level as value for signal strength
-  sig <- (as.numeric(as.character(testData)) - mean) %/% sd
-  sig.mean <- mean(sig)
-  sig.sd <- stats::sd(sig)
-  # Since normality of distribution can not be assumed use the MWU
-  # generate p.value for single position
-  p.value <- suppressWarnings(wilcox.test(baseData, testData)$p.value)
-  
-  return(list(thresholdAddition = thresholdAddition,
-              sig = sig,
-              sig.mean = sig.mean,
-              sig.sd = sig.sd,
-              p.value = p.value))
 }
 
 .validate_m7G_pos <- function(sig.threshold, 

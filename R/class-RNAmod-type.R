@@ -70,9 +70,7 @@ setMethod(
     geom_jitter(width = 0.1) +
     scale_x_discrete(name = "position") + 
     scale_colour_brewer(palette = "Set1",
-                        name = "position\ndata",
-                        label = c("base" = "Base data",
-                                  "pos" = "Position data"))
+                        name = "position\ndata")
   plot2 <- plot + scale_y_log10(name = "counts per position", 
                                 labels = scales::scientific)
   plot <- plot + scale_y_continuous(name = "counts per position", 
