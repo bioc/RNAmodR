@@ -89,6 +89,7 @@ convertGeneToChrom <- function(gfffile,
   checkGenes <- c(unique(S4Vectors::mcols(gff)$ID),
                   unique(S4Vectors::mcols(gff)$Name))
   checkGenes <- unique(checkGenes)
+  assertive::assert_is_non_empty(genes)
   assertive::assert_is_subset(genes, checkGenes)
   # browser()
   # create gff subset
@@ -104,6 +105,10 @@ convertGeneToChrom <- function(gfffile,
                       S4Vectors::mcols(gff)$ID %in% paste0(genes,"_mRNA")) |
                    (!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
                       as.character(S4Vectors::mcols(gff)$Parent) %in% paste0(genes,"_mRNA")),]
+  if(length(gff_sub) == 0){
+    stop("No genes found in supplied gff file with the given genes names.",
+         call. = FALSE)
+  }
   
   # Remove all entries part of the subset
   gff_trim <- IRanges::subsetByOverlaps(gff, 
@@ -165,14 +170,11 @@ convertGeneToChrom <- function(gfffile,
 
 # merge seq_identifier
 .get_unique_seqnames <- function(gff){
-  res <- lapply(gff, function(g){
-    as.character(paste0(S4Vectors::mcols(g)$ID,
-                        RNAMOD_SEP_SEQNAMES,
-                        S4Vectors::mcols(g)$Name,
-                        RNAMOD_SEP_SEQNAMES,
-                        S4Vectors::mcols(g)$gene))
-  })
-  return(unlist(res))
+  paste0(S4Vectors::mcols(gff)$ID,
+         RNAMOD_SEP_SEQNAMES,
+         S4Vectors::mcols(gff)$Name,
+         RNAMOD_SEP_SEQNAMES,
+         S4Vectors::mcols(gff)$gene)
 }
 
 # split seq_identifier
@@ -195,14 +197,20 @@ convertGeneToChrom <- function(gfffile,
   exons <- gff_sub[S4Vectors::mcols(gff_sub)$type %in% c("CDS",
                                                          "noncoding_exon",
                                                          "exon")]
+  
   # get sequences for exons
   exons_seq <- Biostrings::getSeq(fa,exons)
   names(exons_seq) <- .get_unique_seqnames(exons)
   
-  # get unqiue names and iterate and merge split sequences
+  # get unique names and iterate and merge split sequences
   uniq_gene_names <- unique(names(exons_seq))
   seqs <- Biostrings::DNAStringSet(lapply(uniq_gene_names, function(name){
     seq <- exons_seq[BiocGenerics::which(names(exons_seq) == name)]
+    strand <- unique(as.character(BiocGenerics::strand(exons[.get_unique_seqnames(exons) == name])))
+    # If strand == "-" intron sequences are in reverse order
+    if(strand == "-"){
+      return(BiocGenerics::unlist(rev(seq)))
+    }
     return(BiocGenerics::unlist(seq))
   }))
   # rename sequences to match parent sequence

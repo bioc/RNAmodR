@@ -64,10 +64,10 @@ gff_rRNA <- IRanges::subsetByOverlaps(gff,
                                       minoverlap = 0,
                                       type = "equal",
                                       invert = TRUE)
-rtracklayer::export.gff3(gff_rRNA,rRNAFiles[["in_gfffile"]])
-rRNAFiles[["out_gfffile"]] <- appendGFF(resultFiles[["in_gfffile"]],
-                                        resultFiles[["convert_gfffile"]],
-                                        ident = ident,
+rtracklayer::export.gff3(gff_rRNA,rRNAFiles[["out_gfffile"]])
+rRNAFiles[["out_gfffile"]] <- appendGFF(rRNAFiles[["out_gfffile"]],
+                                        rRNAFiles[["convert_gfffile"]],
+                                        ident = "clean",
                                         msg = "Saved appended gff file: ")
 
 tRNAFiles <- convertGeneTypeToChrom(rRNAFiles[["out_gfffile"]],
