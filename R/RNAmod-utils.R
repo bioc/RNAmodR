@@ -276,3 +276,14 @@ setMethod(
     return(invisible(TRUE))
   }
 )
+
+.getUseP <- function(){
+  useP <- getOption("RNAmod_use_p")
+  if(!assertive::is_a_bool(useP)){
+    useP <- as.logical(useP[[1]])
+    warning("The option 'RNAmod_use_p' is not a single logical value. ",
+            "Please set 'RNAmod_use_p' to TRUE or FALSE.",
+            call. = FALSE)
+  }
+  useP
+}

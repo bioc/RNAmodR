@@ -1,9 +1,10 @@
 #' @include class-RNAmod-type.R
 NULL
 
-RNAMOD_M7G_SCAN_WINDOW_WIDTH <- 200
+RNAMOD_M7G_ROLLING_MEAN_WINDOW_WIDTH <- 9
+RNAMOD_M7G_BASE_WINDOW_WIDTH <- 100
 RNAMOD_M7G_P_THRESHOLD <- 0.05
-RNAMOD_M7G_SIGMA_THRESHOLD <- 5
+RNAMOD_M7G_SIGMA_THRESHOLD <- 10
 
 
 #' @rdname mod
@@ -106,8 +107,6 @@ setMethod(
   
   # get sequence of transcript and subset gff for single transcript data
   gff <- .subset_gff_for_unique_transcript(gff, ID)
-  
-  strand <- unique(as.character(strand(gff)))
   seq <- getSeq(fafile,gff)[[1]]
   
   # detect all G positions
@@ -128,11 +127,44 @@ setMethod(
     name <- paste0(ID,
                    "_m7G_")
   }
+  
+  # Calculate a rolling mean to reduce noise artefacts
+  # rolling_mean <- function(x,
+  #                          n=RNAMOD_M7G_ROLLING_MEAN_WINDOW_WIDTH){
+  #   y <- setNames(filter(x,rep(1/n,n), sides=2),names(x))
+  #   y[is.na(y)] <- x[is.na(y)]
+  #   return(y)
+  # }
+  # meanData <- lapply(data, rolling_mean)
+  # Testing per position will be done against the arrest difference data
+  # .get_arrest_diff <- function(i){
+  #   x <- data[[i]]
+  #   y <- unlist(lapply(seq_along(x), function(j){
+  #     x[j]-meanData[[i]][j]
+  #   }))
+  #   setNames(y,names(x))
+  # }
+  # data <- lapply(seq_along(data), .get_arrest_diff)
+  
+  # Calculate the arrest rate per position
+  .get_arrest_rate <- function(x){
+    y <- unlist(lapply(seq_along(x), function(i){
+      a <- x[i]
+      b <- x[i+1]
+      if(is.na(b) || b == 0) return(-1)
+      if( a <= b ) return(1-a/b)
+      if(a == 0) return(-1)
+      return(-b/a)
+    }))
+    setNames(y,names(x))
+  }
+  arrestData <- lapply(data, .get_arrest_rate)
+  
   # Retrieve m7G positions
   modifications <- lapply(locations,
                           .check_for_m7G,
                           data,
-                          strand,
+                          arrestData,
                           name)
 
   if(length(modifications) == 0) return(NULL)
@@ -143,89 +175,132 @@ setMethod(
   return(modifications)
 }
 
-.check_for_m7G <- function(location, data, strand, name = NULL){
+.check_for_m7G <- function(location, 
+                           data, 
+                           arrestData, 
+                           name = NULL){
   # if( location == 1575){
   #   browser()
   # }
   
-  # m7G expects a high number of reads at the N+1 position
-  if(as.character(strand) == "-"){
-    testLocation <- location-1
-  } else {
-    testLocation <- location+1
-  }
   # number of replicates
   nbSamples <- length(data)
+  
   # merge data for positions
+  # data on the N+1 location
+  testData <- .aggregate_location_data(data, (location+1))
+  # data on the arrect direction
+  testArrestData <- .aggregate_location_data(arrestData, location)
+  # base data to compare against
+  baseData <- .aggregate_not_location_data(data, (location+1))
   
-  testData <- lapply(data,function(dataPerReplicate){
-    dataPerReplicate <- dataPerReplicate[dataPerReplicate != 0]
-    return(dataPerReplicate[names(dataPerReplicate) == testLocation])
-  })
-  testData <- unlist(testData)
-  baseData <- lapply(data,function(dataPerReplicate){
-    dataPerReplicate <- dataPerReplicate[dataPerReplicate != 0]
-    # This might also be an option
-    # return(dataPerReplicate[names(dataPerReplicate) < (testLocation+RNAMOD_M7G_SCAN_WINDOW_WIDTH) &
-    #               names(dataPerReplicate) > (testLocation-RNAMOD_M7G_SCAN_WINDOW_WIDTH) &
-    #               names(dataPerReplicate) != testLocation])
+  locTest <- .calc_m7G_test_values(location,
+                                   testData,
+                                   baseData,
+                                   testArrestData,
+                                   nbSamples)
+  # If insufficient data is present
+  if(is.null(locTest)) return(NULL)
+  
+  # dynamic threshold based on the noise of the signal (high sd)
+  threshold <- RNAMOD_M7G_SIGMA_THRESHOLD + locTest$thresholdAddition
+  if(!.validate_m7G_pos(threshold, 
+                       RNAMOD_M7G_P_THRESHOLD, 
+                       locTest$sig.mean, 
+                       locTest$p.value) ) return(NULL)
+  
+  # browser()
+  # if location is among sample location (name is not null)
+  # plot the data
+  if(!is.null(name)){
+    .plot_sample_data(.create_plot_data(testData,
+                                        baseData,
+                                        paste0(name,location)), 
+                      paste0(name,location))
+  }
     
-    return(dataPerReplicate[names(dataPerReplicate) != testLocation])
-  })
-  baseData <- unlist(baseData)
-  # Fill missing positions with 0?
+  # Return data
+  return(list(location = location,
+              signal = locTest$sig.mean,
+              signal.sd = locTest$sig.sd,
+              p.value = locTest$p.value,
+              nbsamples = nbSamples))
+}
+
+.aggregate_location_data <- function(data, 
+                                     location){
+  unlist(lapply(data,function(dataPerReplicate){
+    dataPerReplicate <- dataPerReplicate[dataPerReplicate > 0]
+    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) == location])
+  }))
+}
+.aggregate_not_location_data <- function(data,
+                                         location){
+  unlist(lapply(data,function(dataPerReplicate){
+    dataPerReplicate <- dataPerReplicate[dataPerReplicate > 0]
+    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) != location])
+  }))
+}
+.aggregate_area_data <- function(data, 
+                                 location, 
+                                 width){
+  unlist(lapply(data,function(dataPerReplicate){
+    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) < (location+width) &
+                              as.numeric(names(dataPerReplicate)) > (location-width) &
+                              as.numeric(names(dataPerReplicate)) != location])
+  }))
+}
+
+.calc_m7G_test_values <- function(location,
+                                  testData,
+                                  baseData,
+                                  testArrestData,
+                                  n){
   
-  # if no read is at the expected location
-  if(length(testData) == 0){
-    return(NULL)
-  }
-  # if no reads can be used comparison
-  if(length(baseData) < (2 * nbSamples)){
-    return(NULL)
-  }
+  if(length(testData) == 0 | 
+     length(baseData) < (3 * n)) return(NULL)
   
+  # No read arrest detectable
+  if( sum(testArrestData) < 0 ) return(NULL)
+  
+  # get test values
   # overall mean and sd
-  sd <-  stats::sd(unlist(baseData))
-  mean <-  mean(unlist(baseData))
+  mean <-  mean(baseData)
+  sd <-  stats::sd(baseData)
+  thresholdAddition <- abs(sd %/% mean)
+    
   # Use the sigma level as value for signal strength
-  sigStrength <- (as.numeric(as.character(testData)) - mean) %/% sd
-  sigStrength.mean <- mean(sigStrength)
-  sigStrength.sd <- stats::sd(sigStrength)
-  
+  sig <- (as.numeric(as.character(testData)) - mean) %/% sd
+  sig.mean <- mean(sig)
+  sig.sd <- stats::sd(sig)
   # Since normality of distribution can not be assumed use the MWU
   # generate p.value for single position
   p.value <- suppressWarnings(wilcox.test(baseData, testData)$p.value)
   
-  useP <- getOption("RNAmod_use_p")
-  if(!assertive::is_a_bool(useP)){
-    useP <- as.logical(useP[[1]])
-    warning("The option 'RNAmod_use_p' is not a single logical value. ",
-            "Please set 'RNAmod_use_p' to TRUE or FALSE.",
-            call. = FALSE)
-  }
-  threshold <- RNAMOD_M7G_SIGMA_THRESHOLD
-  if( (sigStrength.mean > threshold &&
-       p.value < RNAMOD_M7G_P_THRESHOLD) ||
-      (sigStrength.mean > threshold &&
-       !useP) ){
-  # if( sigStrength.mean > RNAMOD_M7G_SIGMA_THRESHOLD  ){
-    
-    # if location is among sample location (name is not null)
-    # plot the data
-    if(!is.null(name)){
-      .plot_sample_data(baseData, 
-                        testData, 
-                        paste0(name,location))
-    }
-    
-    # Return data
-    return(list(location = location,
-                signal = sigStrength.mean,
-                signal.sd = sigStrength.sd,
-                p.value = p.value,
-                nbsamples = nbSamples))
-  }
-  return(NULL)
+  return(list(thresholdAddition = thresholdAddition,
+              sig = sig,
+              sig.mean = sig.mean,
+              sig.sd = sig.sd,
+              p.value = p.value))
+}
+
+.validate_m7G_pos <- function(sig.threshold, 
+                              p.threshold, 
+                              sig, 
+                              p.value){
+  ((sig > sig.threshold &&
+      p.value <= p.threshold) ||
+     (sig > sig.threshold &&
+        !.getUseP()))
+}
+
+.create_plot_data <- function(testData, baseData, name){
+  data.frame(x = c(rep(name,(length(testData) + 
+                               length(baseData)))),
+             y = c(testData, 
+                   baseData),
+             group = c(rep("Position",length(testData)), 
+                       rep("Base", length(baseData))))
 }
 
 #' @rdname mergePositionsOfReplicates

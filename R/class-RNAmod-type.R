@@ -61,13 +61,8 @@ setMethod(
 
 
 
-.plot_sample_data <- function(baseData,testData,name){
+.plot_sample_data <- function(df,name){
   requireNamespace("ggplot2", quietly = TRUE)
-  
-  # merge data
-  df <- data.frame(x = c(rep(name,length(testData) + length(baseData))),
-                   y = c(testData, baseData),
-                   group = c(rep("pos",length(testData)), rep("base", length(baseData))))
   
   # plot data and create grid
   plot <- ggplot(df, aes_(x = ~x, y = ~y, colour = ~group)) +
@@ -78,8 +73,10 @@ setMethod(
                         name = "position\ndata",
                         label = c("base" = "Base data",
                                   "pos" = "Position data"))
-  plot2 <- plot + scale_y_log10(name = "counts per position", labels = scales::scientific)
-  plot <- plot + scale_y_continuous(name = "counts per position", labels = scales::scientific)
+  plot2 <- plot + scale_y_log10(name = "counts per position", 
+                                labels = scales::scientific)
+  plot <- plot + scale_y_continuous(name = "counts per position", 
+                                    labels = scales::scientific)
   grid <- gridExtra::grid.arrange(plot, plot2, nrow = 1, ncol = 2)
   
   # Resurrect calling RNAmod object to get the output folder

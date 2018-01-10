@@ -382,22 +382,9 @@ setMethod(
     n <- floor(diff / 100)
     as.numeric(c(x,unlist(lapply(1:n,function(z){100*z})),round(max(lim))))
   }
-  # prepare mod data
-  mods$localStart <- pos[pos$pos %in% mods$start,"localPos"]
-  mods$localEnd <- pos[pos$pos %in% mods$end,"localPos"]
-  mods$vStart <- unlist(lapply(mods$localStart, function(x){
-    max(pos[pos$localPos < x+3 &
-              pos$localPos > x-3,"mean"])*1.01
-  }))
-  modsPositions <- mods[mods$start == mods$end,]
-  modsArea<- mods[mods$start != mods$end,]
   
-  # tmp fix
-  # pos$letters <- letters[1:nrow(pos)]
-  pos$letters <- letters
- 
-  # scale_x_discrete(label = letters)
-  # # plot gene
+  # focusing on positions
+  pos$letters <- letters[1:nrow(pos)]
   
   # initial plot setup
   plot <- ggplot(pos, aes_(x = ~localPos, y = ~mean, label = ~letters)) +
@@ -408,10 +395,7 @@ setMethod(
                        limits = c(NA,max(pos$mean)*1.25)) +
     theme_bw()
   
-  # plot modifications for an area
-  if( nrow(modsArea) > 0){
-    
-  }
+  
   
   # plot position data
   plot <- plot + geom_bar(stat = "identity") +
@@ -419,43 +403,62 @@ setMethod(
               vjust = 1.5,
               size = RNAMOD_PLOT_SEQ_SIZE)
   
-  # plot modifications for a single position
-  if( nrow(modsPositions) > 0){
-    # setup p value text
-    p_text <- unlist(lapply( modsPositions$RNAmod_p.value, function(p){
-      if( p < 0.0001){
-        return(paste0("< ",0.0001))
-      } else {
-        return(paste0(": ",round(p, digits = 4)))
-      }
-    }))
-    # setup modification labels
-    label <- paste0(modsPositions$RNAmod_type,
-                    "\n",
-                    rownames(modsPositions),
-                    "\n \u03C3: ",
-                    modsPositions$RNAmod_signal,
-                    " (p ",
-                    p_text,
-                    ")")
+  # if no mod data available
+  if(is.null(mods)) return(plot)
+  
+  # prepare mod data
+  mods$localStart <- pos[pos$pos %in% mods$start,"localPos"]
+  mods$localEnd <- pos[pos$pos %in% mods$end,"localPos"]
+  mods$vStart <- unlist(lapply(mods$localStart, function(x){
+    max(pos[pos$localPos < x+3 &
+              pos$localPos > x-3,"mean"])*1.01
+  }))
+  modsPositions <- mods[mods$start == mods$end,]
+  modsArea<- mods[mods$start != mods$end,]
+  
+  # plot modifications for an area
+  if( nrow(modsArea) > 0){
     
-    # plot modification marker
-    plot <- plot + geom_segment(data = as.data.frame(modsPositions),
-                                mapping = aes_(x = ~localStart,
-                                               y = ~vStart,
-                                               xend = ~localStart,
-                                               yend = Inf,
-                                               colour = ~RNAmod_type),
-                                inherit.aes = FALSE) +
-      scale_colour_brewer(name = "modification\ntype",
-                          palette = "Set1") +
-      annotate("label",
-               x = modsPositions$localStart,
-               y = Inf,
-               label = label,
-               vjust = "inward",
-               size = 3)
   }
+  
+  # if no mod data available
+  if( nrow(modsPositions) == 0) return(plot)
+    
+  # plot modifications for single positions each
+  # setup p value text
+  p_text <- unlist(lapply( modsPositions$RNAmod_p.value, function(p){
+    if( p < 0.0001){
+      return(paste0("< ",0.0001))
+    } else {
+      return(paste0(": ",round(p, digits = 4)))
+    }
+  }))
+  # setup modification labels
+  label <- paste0(modsPositions$RNAmod_type,
+                  "\n",
+                  rownames(modsPositions),
+                  "\n \u03C3: ",
+                  modsPositions$RNAmod_signal,
+                  " (p ",
+                  p_text,
+                  ")")
+  
+  # plot modification marker
+  plot <- plot + geom_segment(data = as.data.frame(modsPositions),
+                              mapping = aes_(x = ~localStart,
+                                             y = ~vStart,
+                                             xend = ~localStart,
+                                             yend = Inf,
+                                             colour = ~RNAmod_type),
+                              inherit.aes = FALSE) +
+    scale_colour_brewer(name = "modification\ntype",
+                        palette = "Set1") +
+    annotate("label",
+             x = modsPositions$localStart,
+             y = Inf,
+             label = label,
+             vjust = "inward",
+             size = 3)
   
   return(plot)
 }
