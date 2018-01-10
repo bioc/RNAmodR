@@ -113,10 +113,10 @@ setMethod(
   loc <- stringr::str_locate_all(as.character(seq), "G")
   loc <- loc[[1]][,"start"]
   if(length(loc) == 0) return(NULL)
-  
-  # return only G position
+  # remove data on pos 1
   data <- lapply(data, function(x){
-    x[loc]
+    x[as.numeric(names(x)) == 1] <- 0
+    x
   })
   
   # Convert local G position to global positions
@@ -170,6 +170,7 @@ setMethod(
                           .check_for_m7G,
                           data,
                           arrestData,
+                          locations,
                           name)
 
   if(length(modifications) == 0) return(NULL)
@@ -182,7 +183,8 @@ setMethod(
 
 .check_for_m7G <- function(location, 
                            data, 
-                           arrestData, 
+                           arrestData,
+                           locs, 
                            name = NULL){
   # if( location == 1575){
   #   browser()
@@ -197,7 +199,10 @@ setMethod(
   # data on the arrect direction
   testArrestData <- .aggregate_location_data(arrestData, location)
   # base data to compare against
-  baseData <- .aggregate_not_location_data(data, (location+1))
+  # use only G position
+  baseData <- .aggregate_not_location_data(lapply(data, function(x){
+    x[as.numeric(names(x)) %in% (locs+1)]
+  }), (location+1))
   
   locTest <- .calc_m7G_test_values(location,
                                    testData,
@@ -263,7 +268,7 @@ setMethod(
                                   n){
   
   if(length(testData) == 0 | 
-     length(baseData) < (3 * n)) return(NULL)
+     length(baseData) < n) return(NULL)
   
   # No read arrest detectable
   if( sum(testArrestData) < 0 ) return(NULL)
