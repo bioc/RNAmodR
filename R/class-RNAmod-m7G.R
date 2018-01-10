@@ -107,12 +107,17 @@ setMethod(
   
   # get sequence of transcript and subset gff for single transcript data
   gff <- .subset_gff_for_unique_transcript(gff, ID)
-  seq <- getSeq(fafile,gff)[[1]]
+  seq <- .get_seq_for_unique_transcript(gff,fafile,ID)
   
   # detect all G positions
   loc <- stringr::str_locate_all(as.character(seq), "G")
   loc <- loc[[1]][,"start"]
   if(length(loc) == 0) return(NULL)
+  
+  # return only G position
+  data <- lapply(data, function(x){
+    x[loc]
+  })
   
   # Convert local G position to global positions
   locations <- .convert_local_to_global_locations(gff, loc)

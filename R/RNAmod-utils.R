@@ -287,3 +287,11 @@ setMethod(
   }
   useP
 }
+
+.get_seq_for_unique_transcript <- function(gff,fafile,ID){
+  seq <- getSeq(fafile,gff)
+  if(as.character(BiocGenerics::strand(gff)) == "-"){
+    return(unlist(rev(seq)))
+  }
+  return(unlist(seq))
+}

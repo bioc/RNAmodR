@@ -336,7 +336,9 @@ setMethod(
   plotTypes <- unique(plotTypes)
   data <- lapply(plotTypes, function(type, data){
     if(is.null(data[[type]])){
-      stop("Positions data not available for type '",
+      stop("No positions data not available for '",
+           S4Vectors::mcols(gff)$ID,
+           "' in type '",
            type,
            "'",
            call. = FALSE)
