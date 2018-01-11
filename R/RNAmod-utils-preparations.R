@@ -19,12 +19,13 @@ RNAMOD_SEP_SEQNAMES <- "---"
 #' @export
 #' 
 #' @importFrom S4Vectors mcols Rle
-#' @importFrom rtracklayer import.gff3 export.gff3
+#' @importFrom rtracklayer import.gff3 export.gff3 chrom
 #' @importFrom Rsamtools FaFile indexFa getSeq
 #' @importFrom GenomeInfoDb seqnames
 #' @importFrom stringr str_split
 #' @importFrom BiocGenerics which unlist width start end strand
 #' @import Biostrings
+#' @import tRNAscan2GRanges
 #'
 #' @examples
 #' \donttest{
@@ -109,6 +110,8 @@ convertGeneToChrom <- function(gfffile,
     stop("No genes found in supplied gff file with the given genes names.",
          call. = FALSE)
   }
+  gff_sub <- gff_sub[order(rtracklayer::chrom(gff_sub), 
+                           BiocGenerics::start(gff_sub))]
   
   # Remove all entries part of the subset
   gff_trim <- IRanges::subsetByOverlaps(gff, 
@@ -121,6 +124,117 @@ convertGeneToChrom <- function(gfffile,
   
   # extract the coding sequences of all features
   seqs <- .extract_exon_sequences(gff_sub,fa)
+  
+  # remove indistinguishable sequences (applies usually to tRNA, rRNA and such)
+  gff_exon <- .cluster_results_gff(gff_sub,seqs)
+  fa_seq_exon <- .cluster_results_seqs(seqs)
+  
+  # create new gff annotation and fasta sequences
+  gff_exon <- .update_gff_subset(gff_exon,fa_seq_exon)
+  fa_seq_exon <- .update_seqs(fa_seq_exon)
+  
+  # save input file names
+  resultFiles <- c()
+  resultFiles[["in_gfffile"]] <- gfffile
+  resultFiles[["in_fafile"]] <- fafile
+  
+  # save subset as single gff and fasta file
+  resultFiles[["convert_gfffile"]] <- .write_gff(gff_exon, 
+                                                 ident, 
+                                                 gfffile,
+                                                 "Saved extracted gff3 file: ")
+  resultFiles[["convert_fafile"]] <- .write_fa(fa_seq_exon, 
+                                               ident, 
+                                               fafile,
+                                               "Saved extracted fasta file: ")
+  resultFiles[["mask_gfffile"]] <- .write_gff(gff_sub, 
+                                              paste0("mask_",
+                                                     ident), 
+                                              gfffile,
+                                              "Saved mask gff3 file: ")
+  resultFiles[["trim_gfffile"]] <- .write_gff(gff_trim, 
+                                              paste0("trim_",
+                                                     ident), 
+                                              gfffile,
+                                              "Saved trimmed gff3 file: ")
+  
+  if(appendToOriginal){
+    resultFiles[["out_fafile"]] <- appendFastaFiles(resultFiles[["in_fafile"]],
+                                                    resultFiles[["convert_fafile"]],
+                                                    ident = ident,
+                                                    msg = "Saved appended fasta file: ")
+    resultFiles[["out_gfffile"]] <- appendGFF(resultFiles[["trim_gfffile"]],
+                                              resultFiles[["convert_gfffile"]],
+                                              ident = ident,
+                                              msg = "Saved appended gff3 file: ")
+  }
+  return(invisible(resultFiles))
+}
+
+#' @rdname convertGeneToChrom
+#'
+#' @param genes 
+#' 
+#' @export
+converttRNAscanToChrom <- function(gfffile,
+                                   fafile,
+                                   tRNAscanfile,
+                                   ident,
+                                   appendToOriginal = FALSE){
+  # Check inputs
+  assertive::assert_all_are_existing_files(gfffile)
+  assertive::assert_all_are_existing_files(fafile)
+  assertive::assert_all_are_existing_files(tRNAscanfile)
+  assertive::assert_is_a_non_empty_string(ident)
+  assertive::assert_is_a_bool(appendToOriginal)
+  
+  # Load files
+  gff <- rtracklayer::import.gff3(gfffile)
+  fa <- Rsamtools::FaFile(fafile)
+  
+  # load tRNAscan data
+  browser()
+  tRNAscan <- tRNAscan2GRanges::tRNAScan2GRanges(tRNAscanfile)
+  
+  # subset gff by GRanges boundaries
+  gff_sub <- IRanges::subsetByOverlaps(gff, 
+                                       tRNAscan,
+                                       type = "within")
+  if(length(gff_sub) == 0){
+    stop("No overlap found in supplied gff and tRNAscan file.",
+         call. = FALSE)
+  }
+  gff_sub <- gff_sub[order(rtracklayer::chrom(gff_sub), 
+                           BiocGenerics::start(gff_sub))]
+  
+  # Remove all entries part of the subset
+  gff_trim <- IRanges::subsetByOverlaps(gff, 
+                                        gff_sub,
+                                        type = "equal")
+  gff_trim <- IRanges::subsetByOverlaps(gff, 
+                                        gff_trim,
+                                        type = "equal",
+                                        invert = TRUE)
+  
+  # extract the coding sequences of all features
+  seqs <- .extract_exon_sequences(gff_sub,fa)
+  
+  # Add CCA to end, if the CCA end is not encoded
+  if(length(tRNAscan) != length(seqs)){
+    stop("Something went wrong. Unequal number of tRNA and corresponding ",
+         "sequences returned.",
+         call. = FALSE)
+  }
+  CCAseq <- DNAStringSet(lapply(S4Vectors::mcols(tRNAscan)$CCA.end, function(bool){
+    if(!bool) return(DNAString("CCA"))
+    DNAString("")
+  }))
+  tmp <- DNAStringSet(lapply(seq_along(names(seqs)), function(i){
+    d <- DNAStringSet(list(seqs[[i]],CCAseq[[i]]))
+    unlist(d)
+  }))
+  names(tmp) <- names(seqs)
+  seqs <- tmp
   
   # remove indistinguishable sequences (applies usually to tRNA, rRNA and such)
   gff_exon <- .cluster_results_gff(gff_sub,seqs)

@@ -76,7 +76,6 @@ setMethod(
                                             gff,
                                             fasta,
                                             modClasses)
-      plot <- plot$plot
     } else {
       plot <- .plot_per_modifications(genesAvail,
                                       positions,
@@ -84,9 +83,8 @@ setMethod(
                                       gff,
                                       fasta,
                                       modClasses)
-      plot <- plot$plot[[1]]
     }
-    return(plot)
+    return(plot$plot[[1]])
   }
 )
 
@@ -153,49 +151,50 @@ setMethod(
       }
     }
     
-    positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions[[1]]
-    mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods[[1]]
+    browser()
+    positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions
+    mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods
     gff <- .Object@.dataGFF
     fasta <- .Object@.dataFasta
     
     modClasses <- .load_mod_classes(modifications)
     
-    if(!focus){
-      for(i in seq_along(genesAvail)){
+    
+    for(i in seq_along(genesAvail)){
+      if(length(positions[[i]][!vapply(positions[[i]],is.null,logical(1))]) == 0){
+        message("Skipping plot for '",
+                genesAvail[[i]],
+                "'. No position data available.")
+        next
+      }
+      
+      if(!focus){
         plot <- .plot_gene_with_modifications(genesAvail[[i]],
-                                              positions,
-                                              mods,
+                                              positions[[i]],
+                                              mods[[i]],
                                               gff,
                                               fasta,
                                               modClasses)
         names <- paste0(paste(modifications, collapse = "-"),
                         "_",
                         genesAvail[[i]])
-        .save_gene_mod_plot(filetype,
-                            folder,
-                            names,
-                            list(plot$plot),
-                            list(plot$width),
-                            list(plot$height))
-      }
-    } else {
-      for(i in seq_along(genesAvail)){
+      } else {
         plot <- .plot_per_modifications(genesAvail[[i]],
-                                        positions,
-                                        mods,
+                                        positions[[i]],
+                                        mods[[i]],
                                         gff,
                                         fasta,
                                         modClasses)
         names <- paste0(genesAvail[[i]],
                         "_",
                         plot$names)
-        .save_gene_mod_plot(filetype,
-                            folder,
-                            names,
-                            plot$plot,
-                            plot$width,
-                            plot$height)
       }
+      .save_gene_mod_plot(filetype,
+                          folder,
+                          names,
+                          plot$plot,
+                          plot$width,
+                          plot$height)
     }
     return(invisible(TRUE))
   }
@@ -251,9 +250,9 @@ setMethod(
   # to inhibit plotting by grid.arrange
   grDevices::dev.off()
   
-  return(list(plot = grid,
-              width = width,
-              height = height))
+  return(list(plot = list(grid),
+              width = list(width),
+              height = list(height)))
 }
 
 # plot per modification --------------------------------------------------------
@@ -637,7 +636,7 @@ setMethod(
                      filetype)
   for(i in 1:seq_along(length(fileNames))){
     if(filetype == "pdf"){
-      if(assertive::r_has_cairo_capability() ){
+      if(assertive::r_has_cairo_capability() & getOption("RNAmod_use_cairo") ){
         grDevices::cairo_pdf(fileNames[[i]],
                              width = (width[[i]]*RNAMOD_PLOT_MM_TO_INCH_F),
                              height = (height[[i]]*RNAMOD_PLOT_MM_TO_INCH_F))
@@ -648,11 +647,12 @@ setMethod(
                         filename = fileNames[[i]],
                         units = "mm",
                         width = width[[i]],
-                        height = height[[i]])
+                        height = height[[i]],
+                        limitsize = FALSE)
       }
     }
     if(filetype == "png"){
-      if( assertive::r_has_cairo_capability() ){
+      if( assertive::r_has_cairo_capability() & getOption("RNAmod_use_cairo") ){
         grDevices::png(fileNames[[i]],
                        units = "px",
                        width = (width[[i]]*
@@ -670,7 +670,8 @@ setMethod(
                         units = "mm",
                         width = width[[i]],
                         height = height[[i]],
-                        dpi = dpi)
+                        dpi = dpi,
+                        limitsize = FALSE)
       }
     }
     message("Saving mod plot for '",names[[i]],"'")

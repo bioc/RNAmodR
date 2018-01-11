@@ -46,5 +46,6 @@ RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
 .onLoad <- function(libname,pkgname){
   options("RNAmod_sample_transcripts" = c("RDN18-1"))
   options("RNAmod_dpi" = 600)
+  options("RNAmod_use_cairo" = TRUE)
   options("RNAmod_use_p" = TRUE)
 }

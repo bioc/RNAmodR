@@ -39,8 +39,9 @@ matchFastaToGff <- function(gfffile, fafile){
 
 ```{r sacCer3}
 folder <- "genomes/sacCer3/"
-gfffile <- "genomes/sacCer3/sacCer3_R64-2-1.gff3"
-fafile <- "genomes/sacCer3/sacCer3_R64-2-1.fasta"
+gfffile <- paste0(folder,"sacCer3_R64-2-1.gff3")
+fafile <- paste0(folder,"sacCer3_R64-2-1.fasta")
+tRNAscanfile <- paste0(folder,"sacCer3-tRNAs.ss.sort")
 matchFastaToGff(gfffile,fafile)
 
 gff <- rtracklayer::import.gff3(gfffile)
@@ -70,11 +71,17 @@ rRNAFiles[["out_gfffile"]] <- appendGFF(rRNAFiles[["out_gfffile"]],
                                         ident = "clean",
                                         msg = "Saved appended gff file: ")
 
-tRNAFiles <- convertGeneTypeToChrom(rRNAFiles[["out_gfffile"]],
+tRNAFiles <- converttRNAscanToChrom(rRNAFiles[["out_gfffile"]],
                                     rRNAFiles[["out_fafile"]],
-                                    c("tRNA_gene"),
-                                    "tRNA",
+                                    tRNAscanfile,
+                                    "tRNAscan",
                                     appendToOriginal = TRUE)
+
+# tRNAFiles <- convertGeneTypeToChrom(rRNAFiles[["out_gfffile"]],
+#                                     rRNAFiles[["out_fafile"]],
+#                                     c("tRNA_gene"),
+#                                     "tRNA",
+#                                     appendToOriginal = TRUE)
 
 script <- paste0("cat %s/*_mask_* > %s\n",
                "dos2unix %s\n",

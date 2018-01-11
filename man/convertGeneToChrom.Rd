@@ -4,12 +4,16 @@
 \alias{convertGeneToChrom}
 \alias{convertGeneTypeToChrom}
 \alias{convertGeneToChrom}
+\alias{converttRNAscanToChrom}
 \title{convert gene sequences to individual chromosomes}
 \usage{
 convertGeneTypeToChrom(gfffile, fafile, geneTypes, ident,
   appendToOriginal = FALSE)
 
 convertGeneToChrom(gfffile, fafile, genes, ident, appendToOriginal = FALSE)
+
+converttRNAscanToChrom(gfffile, fafile, tRNAscanfile, ident,
+  appendToOriginal = FALSE)
 }
 \arguments{
 \item{gfffile}{}
@@ -21,6 +25,8 @@ convertGeneToChrom(gfffile, fafile, genes, ident, appendToOriginal = FALSE)
 \item{ident}{}
 
 \item{appendToOriginal}{}
+
+\item{genes}{}
 
 \item{genes}{}
 }

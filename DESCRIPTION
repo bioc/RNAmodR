@@ -1,16 +1,19 @@
 Package: RNAmod
 Type: Package
 Title: What the Package Does (one line, title case)
-Version: 0.0.1
-Date: 2017-12-09
-Authors@R: person("Felix G.M.", "Ernst", email = "felix.g.m.ernst@outlook.com", role = c("aut", "cre"))
+Version: 0.1
+Date: 2018-01-11
+Authors@R: person("Felix G.M.", 
+                  "Ernst", 
+                  email = "felix.g.m.ernst@outlook.com", 
+                  role = c("aut", "cre"))
 Description:
     What the package does (one paragraph).
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
 LazyData: true
-Collate: 
+Collate:
     'RNAmod.R'
     'AllGenerics.R'
     'AllGenerics-export.R'
@@ -37,7 +40,8 @@ Imports: methods,
     ggplot2,
     GenomeInfoDb,
     S4Vectors,
-    BiocGenerics
+    BiocGenerics,
+    tRNAscan2GRanges
 Suggests: testthat,
     knitr,
     rmarkdown
