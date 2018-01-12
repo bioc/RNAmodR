@@ -358,13 +358,20 @@ setMethod(
 .aggregate_mod_data <- function(data, modClasses){
   modTypes <- vapply(modClasses, getModType, character(1))
   modTypes <- unique(modTypes)
-  data <- lapply(modTypes, function(type, data){
+  # get modifications which are requested based on type
+  data <- lapply(modTypes, function(type){
     if(nrow(data[data$RNAmod_type == type,]) == 0){
       return(NULL)
     }
     data[data$RNAmod_type == type,]
-  }, data)
+  })
+  # set name of plot type
   names(data) <- vapply(modClasses, getPlotType, character(1))
+  # aggregated data based on plot type
+  data <- setNames(lapply(unique(names(data)), function(name){
+    do.call(rbind, data[names(data) == name])
+  })
+  ,unique(names(data)))
   return(data)
 }
 
@@ -373,6 +380,7 @@ setMethod(
 
 # returns a plot showing all modifications on one type of position data
 .get_mod_plot <- function(pos,mods,letters){
+  browser()
   requireNamespace("ggplot2", quietly = TRUE)
   
   break_FUN <- function(lim){
@@ -414,6 +422,9 @@ setMethod(
     max(pos[pos$localPos < x+3 &
               pos$localPos > x-3,"mean"])*1.01
   }))
+  mods$vStart2 <- unlist(lapply(mods$localStart, function(x){
+    pos[pos$localPos == x,"mean"])*1.05
+  }))
   modsPositions <- mods[mods$start == mods$end,]
   modsArea<- mods[mods$start != mods$end,]
   
@@ -435,31 +446,37 @@ setMethod(
     }
   }))
   # setup modification labels
-  label <- paste0(modsPositions$RNAmod_type,
-                  "\n",
-                  rownames(modsPositions),
-                  "\n \u03C3: ",
-                  modsPositions$RNAmod_signal,
-                  " (p ",
-                  p_text,
-                  ")")
+  modsPositions$label <- paste0(modsPositions$RNAmod_type,
+                                "\n",
+                                rownames(modsPositions),
+                                "\n \u03C3: ",
+                                modsPositions$RNAmod_signal,
+                                " (p ",
+                                p_text,
+                                ")")
   
   # plot modification marker
-  plot <- plot + geom_segment(data = as.data.frame(modsPositions),
-                              mapping = aes_(x = ~localStart,
-                                             y = ~vStart,
-                                             xend = ~localStart,
-                                             yend = Inf,
-                                             colour = ~RNAmod_type),
-                              inherit.aes = FALSE) +
+  plot <- plot + plot + geom_segment(data = as.data.frame(modsPositions),
+                                     mapping = aes_(x = ~localStart,
+                                                    y = ~vStart2,
+                                                    xend = ~localStart,
+                                                    yend = ~vStart,
+                                                    colour = ~RNAmod_type),
+                                     inherit.aes = FALSE) +
     scale_colour_brewer(name = "modification\ntype",
                         palette = "Set1") +
-    annotate("label",
-             x = modsPositions$localStart,
-             y = Inf,
-             label = label,
-             vjust = "inward",
-             size = 3)
+    ggrepel::geom_label_repel(data = as.data.frame(modsPositions),
+                              mapping = aes_(x = ~localStart,
+                                             y = ~vStart,
+                                             label = label),
+                              segment.color = 'grey50',
+                              box.padding = 0.35,
+                              point.padding = 0,
+                              direction = "x",
+                              ylim = c(max(modsPositions$vStart+
+                                             modsPositions$vStart2),
+                                       NA),
+                              size = 3)
   
   return(plot)
 }
@@ -654,14 +671,13 @@ setMethod(
     if(filetype == "png"){
       if( assertive::r_has_cairo_capability() & getOption("RNAmod_use_cairo") ){
         grDevices::png(fileNames[[i]],
-                       units = "px",
+                       units = "in",
                        width = (width[[i]]*
-                                  RNAMOD_PLOT_MM_TO_INCH_F*
-                                  dpi),
+                                  RNAMOD_PLOT_MM_TO_INCH_F),
                        height = (height[[i]]*
-                                   RNAMOD_PLOT_MM_TO_INCH_F*
-                                   dpi),
-                       type = "cairo-png")
+                                   RNAMOD_PLOT_MM_TO_INCH_F),
+                       type = "cairo-png",
+                       res = dpi)
         graphics::plot(plot[[i]])
         grDevices::dev.off()
       } else {

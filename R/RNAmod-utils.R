@@ -230,7 +230,7 @@ setMethod(
   return(res)
 }
 
-
+# sequence handling ------------------------------------------------------------
 
 #' @rdname matchFastaToGff
 #'
@@ -256,7 +256,8 @@ setMethod(
     gff <- import.gff3(inputGFF)
     
     # number of chromosomes and sequences have to match
-    if( !assertive::are_same_length(names(fsa), unique(rtracklayer::chrom(gff)))){
+    if( !assertive::are_same_length(names(fsa), 
+                                    unique(rtracklayer::chrom(gff)))){
       stop("Fasta and GFF file don't have matching number of sequences/",
            "sequence identifiers. Please make sure that the number of ",
            "fasta sequences matches the number of unique chromosome ",
@@ -277,7 +278,23 @@ setMethod(
   }
 )
 
-.getUseP <- function(){
+# retrieve concats DNAStrings based on the strand
+.get_seq_for_unique_transcript <- function(gff,fafile,ID){
+  if(length(unique(as.character(BiocGenerics::strand(gff)))) != 1) {
+    stop("Ambigeous type of GRanges given. Expects only one strand.",
+         call. = FALSE)
+  }
+  seq <- getSeq(fafile,gff)
+  if(as.character(BiocGenerics::strand(gff)) == "-"){
+    return(unlist(rev(seq)))
+  }
+  return(unlist(seq))
+}
+
+# option retrieval -------------------------------------------------------------
+
+# whether to use a p value for detection or not
+.get_use_p <- function(){
   useP <- getOption("RNAmod_use_p")
   if(!assertive::is_a_bool(useP)){
     useP <- as.logical(useP[[1]])
@@ -288,10 +305,15 @@ setMethod(
   useP
 }
 
-.get_seq_for_unique_transcript <- function(gff,fafile,ID){
-  seq <- getSeq(fafile,gff)
-  if(as.character(BiocGenerics::strand(gff)) == "-"){
-    return(unlist(rev(seq)))
+
+.get_color_palette <- function(){
+  palette <- getOption("RNAmod_palette")
+  if(!assertive::is_a_string(palette)){
+    palette <- RNAMOD_DEFAULT_PALETTE
+    warning("The option 'RNAmod_palette' is not a single string. ",
+            "Please set 'RNAmod_palette' to a valid palette identifier using ",
+            "a single string.",
+            call. = FALSE)
   }
-  return(unlist(seq))
+  palette
 }

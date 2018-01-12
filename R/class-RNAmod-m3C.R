@@ -1,8 +1,10 @@
 #' @include class-RNAmod-type.R
 NULL
 
+RNAMOD_M3C_ROLLING_MEAN_WINDOW_WIDTH <- 9
+RNAMOD_M3C_ARREST_RATE <- 0.95
 RNAMOD_M3C_P_THRESHOLD <- 0.05
-RNAMOD_M3C_SIGMA_THRESHOLD <- 5
+RNAMOD_M3C_SIGMA_THRESHOLD <- 3
 
 
 #' @rdname mod
@@ -73,7 +75,7 @@ setMethod(
     # detect modification per transcript
     res <- lapply(IDs,
                   # res <- bplapply(IDs,
-                  FUN = .analyze_transcript,
+                  FUN = .analyze_m3C_transcript,
                   data,
                   gff,
                   seq)
@@ -100,19 +102,19 @@ setMethod(
 
 
 # merge positions in one transcript
-.analyze_transcript <- function(ID,data,gff,fafile){
+.analyze_m3C_transcript <- function(ID,data,gff,fafile){
   data <- .get_m3C_data(ID,data)
-  # browser()
+  # do not take into account position 1
+  data <- lapply(data, function(x){
+    x[as.numeric(names(x)) == 1] <- 0
+    x
+  })
   
   # get sequence of transcript and subset gff for single transcript data
-  gff <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
-                S4Vectors::mcols(gff)$Name == ID) |
-               (!is.na(S4Vectors::mcols(gff)$ID) & 
-                  S4Vectors::mcols(gff)$ID == ID),]
-  strand <- unique(as.character(strand(gff)))
-  seq <- getSeq(fafile,gff)[[1]]
+  gff <- .subset_gff_for_unique_transcript(gff, ID)
+  seq <- .get_seq_for_unique_transcript(gff,fafile,ID)
   
-  # detect all G positions
+  # detect all C positions
   loc <- stringr::str_locate_all(as.character(seq), "C")
   loc <- loc[[1]][,"start"]
   if(length(loc) == 0) return(NULL)
@@ -130,99 +132,134 @@ setMethod(
     name <- paste0(ID,
                    "_m3C_")
   }
+  
+  # Calculate the arrest rate per position
+  arrestData <- lapply(data, .get_arrest_rate)
+  
   # Retrieve m3C positions
   modifications <- lapply(locations,
                           .check_for_m3C,
                           data,
-                          strand,
+                          arrestData,
                           name)
   
   if(length(modifications) == 0) return(NULL)
   # name the locations based on sequence position
-  names(modifications) <- paste0("G_",loc)
+  names(modifications) <- paste0("C_",loc)
   modifications <-  modifications[!vapply(modifications,is.null,logical(1))]
   if(length(modifications) == 0) return(NULL)
   return(modifications)
 }
 
-.check_for_m3C <- function(location, data, strand, name = NULL){
-  # m3C expects a high number of reads at the N+1 position
-  if(as.character(strand) == "-"){
-    testLocation <- location-1
-  } else {
-    testLocation <- location+1
+.check_for_m3C <- function(location, 
+                           data, 
+                           arrestData,
+                           name = NULL){
+  # if( location == ){
+  #   browser()
+  # }
+  
+  locTest <- .calc_m3C_test_values(location,
+                                   data,
+                                   arrestData)
+  # If insufficient data is present
+  if(is.null(locTest)) return(NULL)
+  
+  # dynamic threshold based on the noise of the signal (high sd)
+  if(!.validate_m3C_pos(RNAMOD_M3C_SIGMA_THRESHOLD, 
+                        RNAMOD_M3C_P_THRESHOLD, 
+                        locTest$sig.mean, 
+                        locTest$p.value) ) return(NULL)
+  
+  # browser()
+  # if location is among sample location (name is not null)
+  # plot the data
+  if(!is.null(name)){
+    testData <- .aggregate_location_data(data, (location+1))
+    baseData <- .aggregate_not_location_data(data, (location+1))
+    .plot_sample_data(.create_m3C_plot_data(testData,
+                                            baseData,
+                                            paste0(name,location)), 
+                      paste0(name,location))
   }
-  # number of replicates
-  nbSamples <- length(data)
+  
+  # Return data
+  return(list(location = location,
+              signal = locTest$sig.mean,
+              signal.sd = locTest$sig.sd,
+              p.value = locTest$p.value,
+              nbsamples = locTest$n))
+}
+
+.calc_m3C_test_values <- function(location,
+                                  data,
+                                  arrestData,
+                                  locs){
+  # do not take into account position 1
+  if(location == 1) return(NULL)
+  
   # merge data for positions
+  # data on the N+1 location
+  testData <- .aggregate_location_data(data, (location+1))
+  testData <- testData[testData > 0]
+  # data on the arrect direction
+  testArrestData <- .aggregate_location_data(arrestData, location)
+  # base data to compare against
+  # use only G position
+  baseData <- .aggregate_not_location_data(data, (location+1))
   
-  testData <- lapply(data,function(dataPerReplicate){
-    dataPerReplicate <- dataPerReplicate[dataPerReplicate != 0]
-    return(dataPerReplicate[names(dataPerReplicate) == testLocation])
-  })
-  testData <- unlist(testData)
-  baseData <- lapply(data,function(dataPerReplicate){
-    dataPerReplicate <- dataPerReplicate[dataPerReplicate != 0]
-    # This might also be an option
-    # return(dataPerReplicate[names(dataPerReplicate) < (location+50) & 
-    #               names(dataPerReplicate) > (location-50) &
-    #               names(dataPerReplicate) != testLocation])
-    
-    return(dataPerReplicate[names(dataPerReplicate) != testLocation])
-  })
-  baseData <- unlist(baseData)
-  # Fill missing positions with 0?
-  
-  # if no read is at the expected location
-  if(length(testData) == 0){
-    return(NULL)
-  }
-  # if no reads can be used comparison
-  if(length(baseData) < (3 * nbSamples)){
+  # number of replicates
+  n <- length(data)
+  # if not enough data is present
+  if(length(testData) == 0 | 
+     length(baseData) < (3*n)) return(NULL)
+  # No read arrest detectable
+  if( sum(testArrestData) < 0 ) return(NULL)
+  # To low arrest detectable
+  testArrest <- length(testArrestData[testArrestData >= RNAMOD_M3C_ARREST_RATE])
+  if( length(testArrestData) != testArrest ) {
     return(NULL)
   }
   
+  # get test values
   # overall mean and sd
-  sd <-  stats::sd(unlist(baseData))
-  mean <-  mean(unlist(baseData))
-  # Use the sigma level as value for signal strength
-  sigStrength <- (as.numeric(as.character(testData)) - mean) %/% sd
-  sigStrength.mean <- mean(sigStrength)
-  sigStrength.sd <- stats::sd(sigStrength)
+  mean <-  mean(baseData)
+  sd <-  stats::sd(baseData)
+  thresholdAddition <- abs(sd %/% mean)
   
+  # Use the sigma level as value for signal strength
+  sig <- (as.numeric(as.character(testData)) - mean) %/% sd
+  sig.mean <- mean(sig)
+  sig.sd <- stats::sd(sig)
   # Since normality of distribution can not be assumed use the MWU
   # generate p.value for single position
   p.value <- suppressWarnings(wilcox.test(baseData, testData)$p.value)
   
-  useP <- getOption("RNAmod_use_p")
-  if(!assertive::is_a_bool(useP)){
-    useP <- as.logical(useP[[1]])
-    warning("The option 'RNAmod_use_p' is not a single logical value. ",
-            "Please set 'RNAmod_use_p' to TRUE or FALSE.",
-            call. = FALSE)
-  }
-  if( (sigStrength.mean > RNAMOD_M3C_SIGMA_THRESHOLD &&
-       p.value < RNAMOD_M3C_P_THRESHOLD) || 
-      (sigStrength.mean > RNAMOD_M3C_SIGMA_THRESHOLD &&
-       !useP)){
-    # if( sigStrength.mean > RNAMOD_M3C_SIGMA_THRESHOLD  ){
-    
-    # if location is among sample location (name is not null)
-    # plot the data
-    if(!is.null(name)){
-      .plot_sample_data(baseData, 
-                        testData, 
-                        paste0(name,location))
-    }
-    
-    # Return data
-    return(list(location = location,
-                signal = sigStrength.mean,
-                signal.sd = sigStrength.sd,
-                p.value = p.value,
-                nbsamples = nbSamples))
-  }
-  return(NULL)
+  return(list(thresholdAddition = thresholdAddition,
+              sig = sig,
+              sig.mean = sig.mean,
+              sig.sd = sig.sd,
+              p.value = p.value,
+              n = n))
+}
+
+.validate_m3C_pos <- function(sig.threshold, 
+                              p.threshold, 
+                              sig, 
+                              p.value){
+  ((sig > sig.threshold &&
+      p.value <= p.threshold) ||
+     (sig > sig.threshold &&
+        !.get_use_p()))
+}
+
+.create_m3C_plot_data <- function(testData, baseData, name){
+  data.frame(x = c(rep(name,(length(testData) + 
+                               length(baseData)))),
+             y = c(testData, 
+                   baseData),
+             group = c(rep("Position",length(testData)), 
+                       rep("Baseline", length(baseData))))
 }
 
 #' @rdname mergePositionsOfReplicates

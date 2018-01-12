@@ -28,9 +28,13 @@ mod <- RNAmod("test",
               "sacCer3_R64-2-1_masked.gff3",
               "sacCer3_R64-2-1_masked.fasta")
 
-parseForModifications(mod,1,"m7G")
+modifications <- c("m7G","D","m3C")
+parseForModifications(mod,1,modifications)
+se <- getSummarizedExperiment(mod,1,modifications)
 
-gene <- "RDN18-1"
-saveModPlot(mod,se,"m7G",gene)
-saveModPlot(mod,se,"m7G",gene,focus = TRUE)
+tRNA <- rownames(se)[grepl("t", rownames(se), fixed = TRUE)]
+rRNA <- c("RDN18-1","RDN25-1")
+
+saveModPlot(mod,se,modifications,c(tRNA,rRNA))
+saveModPlot(mod,se,modifications,c(tRNA,rRNA),focus = TRUE)
 ```

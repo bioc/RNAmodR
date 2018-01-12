@@ -75,7 +75,7 @@ setMethod(
     # detect modification per transcript
     res <- lapply(IDs,
     # res <- bplapply(IDs,
-                  FUN = .analyze_transcript,
+                  FUN = .analyze_m7G_transcript,
                   data,
                   gff,
                   seq)
@@ -102,7 +102,7 @@ setMethod(
 
 
 # merge positions in one transcript
-.analyze_transcript <- function(ID,data,gff,fafile){
+.analyze_m7G_transcript <- function(ID,data,gff,fafile){
   data <- .get_m7G_data(ID,data)
   # do not take into account position 1
   data <- lapply(data, function(x){
@@ -134,35 +134,11 @@ setMethod(
   }
   
   # Calculate a rolling mean to reduce noise artefacts
-  # rolling_mean <- function(x,
-  #                          n=RNAMOD_M7G_ROLLING_MEAN_WINDOW_WIDTH){
-  #   y <- setNames(filter(x,rep(1/n,n), sides=2),names(x))
-  #   y[is.na(y)] <- x[is.na(y)]
-  #   return(y)
-  # }
-  # meanData <- lapply(data, rolling_mean)
+  # meanData <- lapply(data, RNAMOD_M7G_ROLLING_MEAN_WINDOW_WIDTH)
   # Testing per position will be done against the arrest difference data
-  # .get_arrest_diff <- function(i){
-  #   x <- data[[i]]
-  #   y <- unlist(lapply(seq_along(x), function(j){
-  #     x[j]-meanData[[i]][j]
-  #   }))
-  #   setNames(y,names(x))
-  # }
-  # data <- lapply(seq_along(data), .get_arrest_diff)
+  # data <- lapply(seq_along(data), .get_arrest_diff, meanData)
   
   # Calculate the arrest rate per position
-  .get_arrest_rate <- function(x){
-    y <- unlist(lapply(seq_along(x), function(i){
-      a <- x[i]
-      b <- x[i+1]
-      if(is.na(b) || b == 0) return(-1)
-      if( a <= b ) return(1-a/b)
-      if(a == 0) return(-1)
-      return(-b/a)
-    }))
-    setNames(y,names(x))
-  }
   arrestData <- lapply(data, .get_arrest_rate)
   
   # Retrieve m7G positions
@@ -206,9 +182,9 @@ setMethod(
   if(!is.null(name)){
     testData <- .aggregate_location_data(data, (location+1))
     baseData <- .aggregate_not_location_data(data, (location+1))
-    .plot_sample_data(.create_plot_data(testData,
-                                        baseData,
-                                        paste0(name,location)), 
+    .plot_sample_data(.create_m7G_plot_data(testData,
+                                            baseData,
+                                            paste0(name,location)), 
                       paste0(name,location))
   }
     
@@ -230,6 +206,7 @@ setMethod(
   # merge data for positions
   # data on the N+1 location
   testData <- .aggregate_location_data(data, (location+1))
+  testData <- testData[testData > 0]
   # data on the arrect direction
   testArrestData <- .aggregate_location_data(arrestData, location)
   # base data to compare against
@@ -271,30 +248,6 @@ setMethod(
               n = n))
 }
 
-.aggregate_location_data <- function(data, 
-                                     location){
-  unlist(lapply(data,function(dataPerReplicate){
-    dataPerReplicate <- dataPerReplicate[dataPerReplicate > 0]
-    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) == location])
-  }))
-}
-.aggregate_not_location_data <- function(data,
-                                         location){
-  unlist(lapply(data,function(dataPerReplicate){
-    dataPerReplicate <- dataPerReplicate[dataPerReplicate > 0]
-    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) != location])
-  }))
-}
-.aggregate_area_data <- function(data, 
-                                 location, 
-                                 width){
-  unlist(lapply(data,function(dataPerReplicate){
-    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) < (location+width) &
-                              as.numeric(names(dataPerReplicate)) > (location-width) &
-                              as.numeric(names(dataPerReplicate)) != location])
-  }))
-}
-
 .validate_m7G_pos <- function(sig.threshold, 
                               p.threshold, 
                               sig, 
@@ -302,16 +255,16 @@ setMethod(
   ((sig > sig.threshold &&
       p.value <= p.threshold) ||
      (sig > sig.threshold &&
-        !.getUseP()))
+        !.get_use_p()))
 }
 
-.create_plot_data <- function(testData, baseData, name){
+.create_m7G_plot_data <- function(testData, baseData, name){
   data.frame(x = c(rep(name,(length(testData) + 
                                length(baseData)))),
              y = c(testData, 
                    baseData),
              group = c(rep("Position",length(testData)), 
-                       rep("Base", length(baseData))))
+                       rep("Baseline", length(baseData))))
 }
 
 #' @rdname mergePositionsOfReplicates

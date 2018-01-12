@@ -6,7 +6,8 @@ NULL
 #' @param .Object a RNAmod object
 #' @param number optional number to return results for one experiment only
 #'
-#' @return a list containg the information on the experiment or a data.frame with all the information
+#' @return a list containg the information on the experiment or a data.frame 
+#' with all the information
 #' 
 #' @export
 #'
@@ -77,16 +78,12 @@ setMethod(
                         number,
                         modification) {
     assertive::assert_all_are_non_empty_character(modification)
-    if( !assertive::is_scalar(number)) 
-    {
-      stop(paste0("Multiple numbers provided. only one excepted"))
+    if( !assertive::is_scalar(number)){
+      stop(paste0("Multiple numbers provided. only one excepted.",
+                  call. = FALSE))
     }
     experiment <- getExperimentData(.Object, number)
-    
-    if( assertive::is_a_bool(experiment)) if( assertive::is_false(experiment) ) 
-    {
-      stop(paste0("Incorrect experiment identifier given: ",number))
-    }
+    .check_for_experiment(experiment, number)
     return(.loadSummarizedExperiment(.Object, 
                                      experiment, 
                                      modification, 
@@ -110,12 +107,10 @@ setMethod(
     assertive::assert_all_are_whole_numbers(number)
     assertive::assert_all_are_non_empty_character(modification)
     
-    ses <- lapply(number, function(x,.Object)
-      {
+    ses <- lapply(number, function(x){
         getSummarizedExperiment(.Object, 
                                 x)
-      },
-      .Object)
+      })
     names(ses) <- number
     return(ses)
   }
@@ -134,6 +129,8 @@ setMethod(
 #' the file does not exist or just return FALSE for further evaluation
 #'
 #' @return SummarizedExperiment
+#' 
+#' @importFrom S4Vectors SimpleList
 setMethod(
   f = ".loadSummarizedExperiment", 
   signature = signature(.Object = "RNAmod", 
@@ -157,33 +154,65 @@ setMethod(
     fileNames <- paste0(folder,
                         modification,
                         ".RData")
-    
-    ses <- lapply(fileNames,function(fileName){
-      if(assertive::is_existing_file(fileName)) {
-        load(fileName)
-        return(se)
-      } else {
-        if( failOnNonExist ) {
-          stop("SummarizedExperiment file can not be loaded, since it does not ",
-               "exist at the expected location:\n",
-               fileName,
-               call. = FALSE)
-        }
-      }
-      return(FALSE)
+    assertive::assert_all_are_existing_files(fileNames)
+    ses <- lapply(fileNames,function(file){
+      load(file)
+      return(se)
     })
-    
-    if( any(vapply(ses)) ){
-      
-    }
-    
     se <- .merge_se_for_modifications(ses,modification)
     return(se)
   }
 )
 
+# check for equality of all elements of a list
+.ident <- function(l){
+  all(vapply(l, function(x){identical(x,l[[length(l)]])}, logical(1)))
+}
+
 .merge_se_for_modifications <- function(ses,modification){
-  return(ses[[1]])
+  rowColNames <- lapply(ses, function(se){
+    colnames(SummarizedExperiment::rowData(se))
+    })
+  if(!.ident(rowColNames))
+    stop("SummarizedExperiments are not compatible. ",
+         "Incompatible rowData columns.",
+         call. = FALSE)
+  if(!.ident(lapply(ses, rownames)))
+    stop("SummarizedExperiments are not compatible. ",
+         "Incompatible rownames.",
+         call. = FALSE)
+  colColNames <- lapply(ses, function(se){
+    colnames(SummarizedExperiment::colData(se))
+    })
+  if(!.ident(colColNames))
+    stop("SummarizedExperiments are not compatible. ",
+         "Incompatible colData columns.",
+         call. = FALSE)
+  colRowNames <- lapply(ses, function(se){
+    rownames(SummarizedExperiment::colData(se))
+    })
+  if(!.ident(colRowNames))
+    stop("SummarizedExperiments are not compatible. ",
+         "Incompatible colData rownames.",
+         call. = FALSE)
+  # get combined assays data
+  assayData <- lapply(ses, SummarizedExperiment::assays)
+  # get combined mod data
+  mods <- lapply(ses, function(se){
+    SummarizedExperiment::rowData(se)$mods
+  })
+  mods <- lapply(seq_along(mods[[1]]), function(i){
+    m <- lapply(seq_along(mods), function(j){
+      mods[[j]][[i]]
+    })
+    do.call(rbind, m)
+  })
+  
+  # Construct joind SummarizedExperiment
+  se <- ses[[1]]
+  SummarizedExperiment::assays(se) <- do.call(c, assayData)
+  SummarizedExperiment::rowData(se)$mods <- mods
+  return(se)
 }
 
 
@@ -211,11 +240,12 @@ setMethod(
                         experiment,
                         modification) {
     
-    folder <- fileName <- paste0(getOutputFolder(.Object),
-                                 "SE/")
+    folder <- paste0(getOutputFolder(.Object),
+                     "SE/")
     if(!assertive::is_dir(folder)){
       dir.create(folder, recursive = TRUE)
     }
+    browser()
     fileNames <- paste0(folder,
                         "RNAmod_",
                         unique(experiment["SampleName"]),
@@ -223,13 +253,22 @@ setMethod(
                         modification,
                         ".RData")
     
-    .save_single_ses(.split_se_for_each_modification(se,modification), fileNames)
+    .save_single_ses(.split_se_for_each_modification(se,modification), 
+                     fileNames)
     return(se)
   }
 )
 
 .split_se_for_each_modification <- function(se,modification){
-  return(list(rep(se,length(modification))))
+  ses <- lapply(modification, function(type){
+    tmp <- se
+    assays(tmp) <- assays(se)[type]
+    rowData(tmp)$mods <- lapply(rowData(tmp)$mods, function(df){
+      df[df$RNAmod_type == type,]
+    })
+    return(tmp)
+  })
+  return(ses)
 }
 
 .save_single_ses <- function(ses,fileNames){
@@ -267,48 +306,103 @@ setMethod(
     assertive::assert_all_are_non_empty_character(modification)
     
     experiment <- getExperimentData(.Object, number)
-    
-    if( assertive::is_a_bool(experiment)) {
-      if( assertive::is_false(experiment) ) {
-        stop("Incorrect experiment identifier given: ",
-             number,
-             call. = FALSE)
-      }
-    }
+    .check_for_experiment(experiment, number)
     
     se <- .saveSummarizedExperiments(.Object, se, experiment, modification)
     return(invisible(se))
   }
 )
 
+.check_for_experiment <- function(experiment, number){
+  if( assertive::is_a_bool(experiment)) {
+    if( assertive::is_false(experiment) ) {
+      stop("Incorrect experiment identifier given: ",
+           number,
+           call. = FALSE)
+    }
+  }
+}
+
+
+#' @rdname getGff
+#'
+#' @title getGff
+#'
+#' @param .Object RNAmod.
+#' @param number numeric.
+#' @param modification character.
+#'
+#' @return
+#' @export
 #' 
-#' 
-#' #' @rdname getGff
-#' #' 
-#' #' @title getGff
-#' #'
-#' #' @param .Object RNAmod. 
-#' #' @param number numeric. 
-#' #' @param modification character. 
-#' #'
-#' #' @return
-#' #' @export
-#' #'
-#' #' @examples
-#' setMethod(
-#'   f = "getGff", 
-#'   signature = signature(.Object = "RNAmod", 
-#'                         number = "numeric",
-#'                         modification = "character"),
-#'   definition = function(.Object, 
-#'                         number,
-#'                         modification) {
-#'     
-#'   }
-#' )
+#' @importFrom GenomeInfoDb seqnames
+#' @importFrom rtracklayer import.gff3
+#' @importFrom IRanges ranges
+#' @importFrom S4Vectors mcols
+#' @importFrom BiocGenerics strand
+#'
+#' @examples
+setMethod(
+  f = "getGff",
+  signature = signature(.Object = "RNAmod",
+                        number = "numeric",
+                        modification = "character"),
+  definition = function(.Object,
+                        number,
+                        modification) {
+    assertive::assert_all_are_non_empty_character(modification)
+    experiment <- getExperimentData(.Object, number)
+    .check_for_experiment(experiment, number)
+    
+    fileNames <- .get_gff_filenames(.Object,
+                                    unique(experiment["SampleName"]),
+                                    modification)
+    assertive::assert_all_are_existing_files(fileNames)
+    gffs <- lapply(fileNames, rtracklayer::import.gff3)
+    return(.merge_GRanges(gffs))
+  }
+)
 
+.get_gff_filenames <- function(.Object,sampleName,modification){
+  folder <- paste0(getOutputFolder(.Object),
+                   "gff/")
+  paste0(folder,
+         "RNAmod_",
+         sampleName,
+         "_",
+         modification,
+         ".gff3")
+}
 
-
+.merge_GRanges <- function(gffs){
+  # get chromosome names
+  chrom_names <- lapply(gffs, function(g){as.character(GenomeInfoDb::seqnames(g))})
+  chrom_names <- unlist(chrom_names)
+  # get ranges
+  ranges <- do.call(c, lapply(gffs, IRanges::ranges))
+  # get strand information
+  strand <- unlist(lapply(gffs, function(g){as.character(BiocGenerics::strand(g))}))
+  # get mcols and check identity
+  mcols <- lapply(gffs, S4Vectors::mcols)
+  if(!.ident(lapply(mcols, colnames)))
+    stop("gff files are not compatible. Incompatible metadata columns.",
+         call. = FALSE)
+  mcols <- do.call(rbind, lapply(gffs, S4Vectors::mcols))
+  # check overall compatibility
+  lengths <- append(lapply(list(chrom_names,
+                         ranges,
+                         strand), length),
+                    list(nrow(mcols)))
+  if(!.ident(lengths))
+    stop("gff files are not compatible. Incompatible data.",
+         call. = FALSE)
+  # create GRanges
+  gff <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
+                                ranges = ranges,
+                                strand = strand,
+                                mcols)
+  return(gff)
+}
 
 #' @title .saveGff
 #' 
@@ -321,6 +415,8 @@ setMethod(
 #' @param modification name of modification, one or more character 
 #'
 #' @return GRanges object
+#' 
+#' @importFrom rtracklayer export.gff3
 setMethod(
   f = ".saveGff", 
   signature = signature(.Object = "RNAmod", 
@@ -331,18 +427,12 @@ setMethod(
                         gff, 
                         experiment,
                         modification) {
-    
-    folder <- fileName <- paste0(getOutputFolder(.Object),
-                                 "gff/")
-    if(!assertive::is_dir(folder)){
+    fileNames <- .get_gff_filenames(.Object,
+                                    unique(experiment["SampleName"]),
+                                    modification)
+    if(!assertive::is_dir(dirname(fileNames))){
       dir.create(folder, recursive = TRUE)
     }
-    fileNames <- paste0(folder,
-                        "RNAmod_",
-                        unique(experiment["SampleName"]),
-                        "_",
-                        modification,
-                        ".gff3")
     .save_single_gffs(.split_gff_for_each_modification(gff,modification),
                       fileNames)
     return(gff)
@@ -350,7 +440,10 @@ setMethod(
 )
 
 .split_gff_for_each_modification <- function(gff,modification){
-  return(list(rep(gff,length(modification))))
+  gffs <- lapply(modification, function(type){
+    gff[S4Vectors::mcols(gff)$RNAmod_type == type]
+  })
+  return(gffs)
 }
 
 
@@ -404,6 +497,8 @@ setMethod(
   }
 )
 
+# modification class handling --------------------------------------------------
+
 # load classes for modification analysis
 .load_mod_classes <- function(modifications){
   
@@ -433,7 +528,8 @@ setMethod(
                                                              "GRanges",
                                                              "FaFile",
                                                              "list") ) )
-      stop("Function mergePositionsOfReplicates() not defined for ",class(class))
+      stop("Function mergePositionsOfReplicates() not defined for ",
+           class(class))
     modClasses[[i]] <- class
   }
   names(modClasses) <- modifications

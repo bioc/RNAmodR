@@ -42,8 +42,6 @@ setMethod(
                   collapse = "', '"),
             "'")
     
-    # browser()
-    
     # extract gene boundaries
     gff <- .Object@.dataGFF
     gff <- gff[S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_CONTAINING_FEATURES,]
@@ -77,7 +75,13 @@ setMethod(
                                      .Object@.dataFasta,
                                      data)
     }
+    # General cleanup
     mod_positions <- mod_positions[!is.na(mod_positions)]
+    # Specific cleanup
+    mod_positions <- lapply(mod_positions, function(modPerTypes){
+      modPerTypes[!vapply(modPerTypes,is.null,logical(1))]
+    })
+    # check if any modification could be detected
     nMods <- lapply(mod_positions, function(modPerTypes){
       sum(unlist(lapply(modPerTypes,length)))
     })
@@ -86,6 +90,7 @@ setMethod(
            call. = FALSE)
     }
     
+    # Merge position data
     positions <- vector(mode = "list", length = length(modClasses))
     names(positions) <- names(modClasses)
     for(i in seq_along(modClasses)){
@@ -95,7 +100,6 @@ setMethod(
                                                    data)
     }
     positions <- positions[!is.na(positions)]
-    
     # Construct DataFrame from found modifications
     df <- .construct_DataFrame_from_mod_result(mod_positions,gff)
     
@@ -107,7 +111,7 @@ setMethod(
     message("Saved detected modifications as gff3 file.")
     
     # Save found modifications asSummarizedExperiment
-    se <- .construct_SE_from_mod_result(experiment,df,gff,positions)
+    se <- .construct_SE_from_mod_result(experiment,gff,df,positions)
     setSummarizedExperiment(.Object,
                             se,
                             number,
@@ -141,7 +145,13 @@ setMethod(
   # bamData <- bamData[names(bamData) %in% c("tC(GCA)B")]
   
   # D 
+  # bamData <- bamData[names(bamData) %in% c("tH(GUG)E1")]
+  # bamData <- bamData[names(bamData) %in% c("tI(AAU)B")]
+  # bamData <- bamData[names(bamData) %in% c("tD(GUC)B")]
+  
+  # m3C
   # bamData <- bamData[names(bamData) %in% c("tS(CGA)C")]
+  # bamData <- bamData[names(bamData) %in% c("RDN25-1")]
   
   # combination
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
@@ -243,31 +253,76 @@ setMethod(
 # Construct DataFrame from RNAmod results per gene
 .get_dataframe_per_gene <- function(gene){
   df <- S4Vectors::DataFrame(start = vapply(gene,"[[",numeric(1),"location"),
-                  end = vapply(gene,"[[",numeric(1),"location"),
-                  ID = names(gene),
-                  RNAmod_signal = vapply(gene,"[[",numeric(1),"signal"),
-                  RNAmod_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
-                  RNAmod_p.value = vapply(gene,"[[",numeric(1),"p.value"),
-                  RNAmod_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
+              end = vapply(gene,"[[",numeric(1),"location"),
+              ID = names(gene),
+              RNAmod_signal = vapply(gene,"[[",numeric(1),"signal"),
+              RNAmod_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
+              RNAmod_p.value = vapply(gene,"[[",numeric(1),"p.value"),
+              RNAmod_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
   return(df)
 }
 
 
-.construct_SE_from_mod_result <- function(experiment,data,gff,positions){
-  # col- and rownames
+.construct_SE_from_mod_result <- function(experiment,gff,data,positions){
+  # rownames and colnames(modTypes)
   modTypes <- unique(data$RNAmod_type)
   rownames <- S4Vectors::mcols(gff)$ID
-  rownames[is.na(rownames)] <- S4Vectors::mcols(gff[is.na(S4Vectors::mcols(gff)$ID),])$Name
+  rownames[is.na(rownames)] <- 
+    S4Vectors::mcols(gff[is.na(S4Vectors::mcols(gff)$ID),])$Name
   
-  # dims
-  nrow <- length(gff)
-  ncol <- 1
+  # generate col- and rowdata
+  colData <- experiment[, c(colnames(experiment)[1:3])]
+  colData <- colData[1,]
+  rowData <- gff
   
-  # assays
-  geneMods <- lapply(rownames,
-                     function(name){
-                       return(data[data$Parent == name,])
-                     })
+  # generate additional row data
+  geneMods <- .get_mod_data_per_row(rownames, data)
+  genePos <- .get_position_data_per_row(rownames, positions)
+  
+  # generate assay data
+  assays <- .get_assay_data(modTypes, geneMods, rownames)
+    
+  # construct SE
+  se <- SummarizedExperiment::SummarizedExperiment(assays = assays,
+                                                   colData = colData,
+                                                   rowData = rowData)
+  # Modify SE to include DataFrame on modified positions
+  SummarizedExperiment::rowData(se)$mods <- geneMods
+  # Save read position data in SE
+  SummarizedExperiment::rowData(se)$positions <- genePos
+  
+  return(se)
+}
+
+# return a modification result per rowname. can be an empty result
+.get_mod_data_per_row <- function(rownames, data){
+  mod <- lapply(rownames,
+                function(name){
+                  return(data[data$Parent == name,])
+                })
+  names(mod) <- rownames
+  return(mod)
+}
+
+# return a position result per rowname. can be an empty result
+.get_position_data_per_row <- function(rownames, positions){
+  posTypes <- names(positions)
+  pos <- lapply(rownames,
+                function(name){
+                  res <- lapply(posTypes, 
+                                function(posType){
+                                  positions[[posType]][[name]]
+                                })
+                  names(res) <- posTypes
+                  return(res)
+                })
+  names(pos) <- rownames
+  return(pos)
+}
+
+# generate a list of named lists per modification
+.get_assay_data <- function(modTypes, geneMods, rownames){
+  nrow <- length(rownames)
   assays <-  lapply(modTypes,
                     function(modType){
                       mods <- lapply(geneMods, 
@@ -278,37 +333,9 @@ setMethod(
                       data <- vapply(mods,nrow,numeric(1))
                       return(matrix(data,
                                     nrow,
-                                    dimnames = list(rownames,
-                                                    modType)))
+                                    dimnames = list(rownames)))
                     })         
   names(assays) <- modTypes
   assays <- S4Vectors::SimpleList(assays)
-  
-  # col- and rowdata
-  colData <- experiment[, c(colnames(experiment)[1:3])]
-  colData <- colData[!duplicated(colData),]
-  rowData <- gff
-  
-  # construct SE
-  se <- SummarizedExperiment::SummarizedExperiment(assays = assays,
-                                                   colData = colData,
-                                                   rowData = rowData)
-  # Modify SE to include DataFrame on modified positions
-  SummarizedExperiment::rowData(se)$mods <- geneMods
-  
-  # Save read position data in SE
-  posTypes <- names(positions)
-  genePos <- lapply(rownames,
-                     function(name){
-                       res <- lapply(posTypes, 
-                                     function(posType){
-                                       positions[[posType]][[name]]
-                       })
-                       names(res) <- posTypes
-                       return(res)
-                     })
-  names(genePos) <- rownames
-  SummarizedExperiment::rowData(se)$positions <- genePos
-  
-  return(se)
+  return(assays)
 }
