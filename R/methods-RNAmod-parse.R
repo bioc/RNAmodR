@@ -68,11 +68,10 @@ setMethod(
     # Merge data from all replicates and detect modifications:
     mod_positions <- vector(mode = "list", length = length(modClasses))
     names(mod_positions) <- names(modClasses)
-    
     for(i in seq_along(modClasses)){
       mod_positions[[i]] <- parseMod(modClasses[[i]],
                                      gff,
-                                     .Object@.dataFasta,
+                                     force(.Object@.dataFasta),
                                      data)
     }
     # General cleanup
@@ -146,7 +145,7 @@ setMethod(
   
   # D 
   # bamData <- bamData[names(bamData) %in% c("tH(GUG)E1")]
-  # bamData <- bamData[names(bamData) %in% c("tI(AAU)B")]
+  bamData <- bamData[names(bamData) %in% c("tI(AAU)B")]
   # bamData <- bamData[names(bamData) %in% c("tD(GUC)B")]
   
   # m3C
@@ -157,6 +156,9 @@ setMethod(
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "tS(CGA)C",
   #                                          "tC(GCA)B")]
+  # if( getOption("RNAmod_debug") ){
+  #   bamData <- bamData[names(bamData) %in% getOption("RNAmod_debug_transcripts")]
+  # }
   
   if(length(bamData) == 0){
     warning("No reads detected in bam file '",
@@ -194,7 +196,6 @@ setMethod(
 # Construct DataFrame from RNAmod results per modification from individual
 # gene results
 .construct_DataFrame_from_mod_result <- function(data,gff){
-  
   modTypes <- names(data)
   l <- lapply(seq_along(modTypes), function(j){
     modType <- data[[j]]
@@ -233,7 +234,9 @@ setMethod(
     })
     genesDf <- genesDf[!vapply(genesDf, is.null, logical(1))]
     if(length(genesDf) == 0) return(NULL)
-    return(do.call(rbind,genesDf))
+    res <- do.call(rbind,genesDf)
+    res <- res[order(res$start),]
+    return(res)
   })
   l <- l[!vapply(l, is.null, logical(1))]
   if(length(l) == 0){

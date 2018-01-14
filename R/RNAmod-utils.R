@@ -291,6 +291,16 @@ setMethod(
   return(unlist(seq))
 }
 
+
+# debug helper -----------------------------------------------------------------
+
+.print_location_info <- function(location, locs){
+  message("location: ",location," //locs: ",paste(locs,collapse = ","))
+}
+.print_transcript_info <- function(ID, iterationN){
+  message(ID, " - iteration: ",iterationN)
+}
+
 # option retrieval -------------------------------------------------------------
 
 # whether to use a p value for detection or not
@@ -316,4 +326,17 @@ setMethod(
             call. = FALSE)
   }
   palette
+}
+
+
+.get_transcript_max_iteration <- function(){
+  iterations <- getOption("RNAmod_transcript_max_iteration")
+  if(!assertive::is_a_number(iterations)){
+    iterations <- RNAMOD_DEFAULT_TRANSCRIPT_MAX_ITERATIONS
+    warning("The option 'RNAmod_transcript_max_iteration' is not a single ",
+            "number. Please set 'RNAmod_palette' to a valid palette ",
+            "identifier using a single string.",
+            call. = FALSE)
+  }
+  iterations
 }

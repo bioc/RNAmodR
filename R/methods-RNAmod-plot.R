@@ -8,14 +8,14 @@ RNAMOD_PLOT_DATA_HEIGHT <- 100
 RNAMOD_PLOT_FOCUS_WINDOW <- 50
 RNAMOD_PLOT_MM_TO_INCH_F <- 0.03937008
 
-#' @name getModPlot
+#' @rdname getModPlot
 #' 
 #' @aliases getModPlot saveModPlots
 #' 
-#' @title visualization of modifications
+#' @title Visualization of modifications
 #' 
 #' @param .Object a RNAmod object. 
-#' @param number a number defining an experiment. 
+#' @param se a SummarizedExperiment containg the experimental data. 
 #' @param modifications name of modification to be used for analysis. 
 #' @param gene a single gene name
 #'
@@ -109,6 +109,7 @@ setMethod(
 #' @export
 #' 
 #' @import ggplot2
+#' @importFrom ggrepel geom_label_repel
 setMethod(
   f = "saveModPlot", 
   signature = signature(.Object = "RNAmod",
@@ -151,7 +152,7 @@ setMethod(
       }
     }
     
-    browser()
+    # browser()
     positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions
     mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods
     gff <- .Object@.dataGFF
@@ -167,7 +168,6 @@ setMethod(
                 "'. No position data available.")
         next
       }
-      
       if(!focus){
         plot <- .plot_gene_with_modifications(genesAvail[[i]],
                                               positions[[i]],
@@ -179,6 +179,12 @@ setMethod(
                         "_",
                         genesAvail[[i]])
       } else {
+        if(nrow(mods[[i]]) == 0){
+          message("Skipping plot for '",
+                  genesAvail[[i]],
+                  "'. No modification data available.")
+          next
+        }
         plot <- .plot_per_modifications(genesAvail[[i]],
                                         positions[[i]],
                                         mods[[i]],
@@ -215,12 +221,12 @@ setMethod(
   seq <- Rsamtools::getSeq(fasta,gff_sub)[[1]]
   letters <- strsplit(gsub("([[:alnum:]]{1})", "\\1 ", 
                            as.character(seq)), " ")[[1]]
-  
   # create description layer plot
   layer <- .create_layer_data(gff,gff_sub)
   
   # get data for different plot types
   posData <- .aggregate_pos_data(gff_sub,positions,modClasses)
+  mods <- mods[order(mods$start),]
   modData <- .aggregate_mod_data(mods,modClasses)
   
   # to inhibit plotting by grid.arrange
@@ -268,13 +274,15 @@ setMethod(
                    (!is.na(S4Vectors::mcols(gff)$ID) & 
                       S4Vectors::mcols(gff)$ID == geneName),]
   seq <- Rsamtools::getSeq(fasta,gff_sub)[[1]]
-  letters <- strsplit(gsub("([[:alnum:]]{1})", "\\1 ", as.character(seq)), " ")[[1]]
+  letters <- strsplit(gsub("([[:alnum:]]{1})", "\\1 ", 
+                           as.character(seq)), " ")[[1]]
   
   # create description layer plot
   layer <- .create_layer_data(gff,gff_sub)
   
   # get data for different plot types
   posData <- .aggregate_pos_data(gff_sub,positions,modClasses)
+  mods <- mods[order(mods$start),]
   modData <- .aggregate_mod_data(mods,modClasses)
   modData <- lapply(names(modData), function(x){
     y <- modData[[x]]
@@ -288,7 +296,8 @@ setMethod(
     pos <- posData[[mod$plotType]]
     
     # focus on a modification
-    localStart <- pos[pos$pos == mods$start,"localPos"] - RNAMOD_PLOT_FOCUS_WINDOW
+    localStart <- pos[pos$pos == mods$start,"localPos"] - 
+      RNAMOD_PLOT_FOCUS_WINDOW
     localEnd <- pos[pos$pos == mods$end,"localPos"] + RNAMOD_PLOT_FOCUS_WINDOW
     pos <- pos[pos$localPos > localStart & pos$localPos < localEnd,]
     
@@ -380,7 +389,6 @@ setMethod(
 
 # returns a plot showing all modifications on one type of position data
 .get_mod_plot <- function(pos,mods,letters){
-  browser()
   requireNamespace("ggplot2", quietly = TRUE)
   
   break_FUN <- function(lim){
@@ -401,10 +409,8 @@ setMethod(
                        expand = c(0,10)) +
     scale_y_continuous(name = "mean(number of read ends)",
                        labels = scales::scientific,
-                       limits = c(NA,max(pos$mean)*1.25)) +
+                       limits = c(NA,max(pos$mean)*1.3)) +
     theme_bw()
-  
-  
   
   # plot position data
   plot <- plot + geom_bar(stat = "identity") +
@@ -418,12 +424,11 @@ setMethod(
   # prepare mod data
   mods$localStart <- pos[pos$pos %in% mods$start,"localPos"]
   mods$localEnd <- pos[pos$pos %in% mods$end,"localPos"]
-  mods$vStart <- unlist(lapply(mods$localStart, function(x){
-    max(pos[pos$localPos < x+3 &
-              pos$localPos > x-3,"mean"])*1.01
+  mods$y <- unlist(lapply(mods$localStart, function(x){
+    pos[pos$localPos == x,"mean"]*1.02
   }))
-  mods$vStart2 <- unlist(lapply(mods$localStart, function(x){
-    pos[pos$localPos == x,"mean"])*1.05
+  mods$yend <- unlist(lapply(mods$localStart, function(x){
+    max(pos$mean)
   }))
   modsPositions <- mods[mods$start == mods$end,]
   modsArea<- mods[mods$start != mods$end,]
@@ -454,27 +459,26 @@ setMethod(
                                 " (p ",
                                 p_text,
                                 ")")
-  
   # plot modification marker
-  plot <- plot + plot + geom_segment(data = as.data.frame(modsPositions),
-                                     mapping = aes_(x = ~localStart,
-                                                    y = ~vStart2,
-                                                    xend = ~localStart,
-                                                    yend = ~vStart,
-                                                    colour = ~RNAmod_type),
-                                     inherit.aes = FALSE) +
-    scale_colour_brewer(name = "modification\ntype",
+  plot <- plot + geom_segment(data = as.data.frame(modsPositions),
+                              mapping = aes_(x = ~localStart,
+                                             y = ~y,
+                                             xend = ~localStart,
+                                             yend = ~yend,
+                                             colour = ~RNAmod_type),
+                              inherit.aes = FALSE) +
+    scale_colour_brewer(name = "Modification\ntype",
                         palette = "Set1") +
     ggrepel::geom_label_repel(data = as.data.frame(modsPositions),
                               mapping = aes_(x = ~localStart,
-                                             y = ~vStart,
-                                             label = label),
+                                             y = ~yend,
+                                             label = modsPositions$label),
                               segment.color = 'grey50',
-                              box.padding = 0.35,
+                              min.segment.length = 0,
+                              box.padding = 0.3,
                               point.padding = 0,
                               direction = "x",
-                              ylim = c(max(modsPositions$vStart+
-                                             modsPositions$vStart2),
+                              ylim = c(max(pos$mean)*1.07,
                                        NA),
                               size = 3)
   

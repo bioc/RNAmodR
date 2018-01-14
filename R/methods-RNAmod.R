@@ -1,7 +1,9 @@
 #' @include RNAmod.R
 NULL
 
-#' @describeIn getExperimentData
+#' @rdname getExperimentData
+#' 
+#' @title getExperimentData
 #' 
 #' @param .Object a RNAmod object
 #' @param number optional number to return results for one experiment only
@@ -159,8 +161,7 @@ setMethod(
       load(file)
       return(se)
     })
-    se <- .merge_se_for_modifications(ses,modification)
-    return(se)
+    return(.merge_se_for_modifications(ses,modification))
   }
 )
 
@@ -170,6 +171,9 @@ setMethod(
 }
 
 .merge_se_for_modifications <- function(ses,modification){
+  # If only one SummarizedExperiment, return directly
+  if(length(ses) == 1) return(ses[[1]])
+  #
   rowColNames <- lapply(ses, function(se){
     colnames(SummarizedExperiment::rowData(se))
     })
@@ -245,7 +249,6 @@ setMethod(
     if(!assertive::is_dir(folder)){
       dir.create(folder, recursive = TRUE)
     }
-    browser()
     fileNames <- paste0(folder,
                         "RNAmod_",
                         unique(experiment["SampleName"]),
@@ -260,6 +263,9 @@ setMethod(
 )
 
 .split_se_for_each_modification <- function(se,modification){
+  # If only one SummarizedExperiment, return directly
+  if(length(modification) == 1) return(list(se))
+  #
   ses <- lapply(modification, function(type){
     tmp <- se
     assays(tmp) <- assays(se)[type]
@@ -375,6 +381,8 @@ setMethod(
 }
 
 .merge_GRanges <- function(gffs){
+  # If only one GRanges, return directly
+  if(length(gffs) == 1) return(gffs[[1]])
   # get chromosome names
   chrom_names <- lapply(gffs, function(g){as.character(GenomeInfoDb::seqnames(g))})
   chrom_names <- unlist(chrom_names)
@@ -430,7 +438,8 @@ setMethod(
     fileNames <- .get_gff_filenames(.Object,
                                     unique(experiment["SampleName"]),
                                     modification)
-    if(!assertive::is_dir(dirname(fileNames))){
+    folder <- unique(dirname(fileNames))
+    if(!assertive::is_dir(folder)){
       dir.create(folder, recursive = TRUE)
     }
     .save_single_gffs(.split_gff_for_each_modification(gff,modification),
@@ -440,6 +449,9 @@ setMethod(
 )
 
 .split_gff_for_each_modification <- function(gff,modification){
+  # If only one GRanges, return directly
+  if(length(modification) == 1) return(list(gff))
+  #
   gffs <- lapply(modification, function(type){
     gff[S4Vectors::mcols(gff)$RNAmod_type == type]
   })

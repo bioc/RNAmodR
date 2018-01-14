@@ -4,6 +4,7 @@
 \name{getModPlot}
 \alias{getModPlot}
 \alias{saveModPlot}
+\alias{getModPlot,RNAmod,SummarizedExperiment,character,character-method}
 \alias{getModPlot}
 \alias{saveModPlots}
 \alias{saveModPlot,RNAmod,SummarizedExperiment,character,character-method}
@@ -24,11 +25,11 @@ saveModPlot(.Object, se, modifications, genes, focus = FALSE,
 \arguments{
 \item{.Object}{a RNAmod object.}
 
+\item{se}{a SummarizedExperiment containg the experimental data.}
+
 \item{modifications}{name of modification to be used for analysis.}
 
 \item{gene}{a single gene name}
-
-\item{number}{a number defining an experiment.}
 }
 \value{
 a grid of layer plot and any mod plot

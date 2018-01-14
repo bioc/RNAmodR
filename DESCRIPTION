@@ -8,44 +8,48 @@ Authors@R: person("Felix G.M.",
                   email = "felix.g.m.ernst@outlook.com", 
                   role = c("aut", "cre"))
 Description:
-    What the package does (one paragraph).
+  What the package does (one paragraph).
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
 LazyData: true
-Collate:
-    'RNAmod.R'
-    'AllGenerics.R'
-    'AllGenerics-export.R'
-    'RNAModString.R'
-    'RNAmod-utils-preparations.R'
-    'RNAmod-utils.R'
-    'assertions.R'
-    'class-RNAmod-type.R'
-    'class-RNAmod-D.R'
-    'class-RNAmod-default.R'
-    'class-RNAmod-m3C.R'
-    'class-RNAmod-m7G.R'
-    'class-RNAmod.R'
-    'methods-RNAmod-parse.R'
-    'methods-RNAmod-plot.R'
-    'methods-RNAmod.R'
-Imports: methods,
-    assertive,
-    Rsamtools,
-    BiocParallel,
-    Biostrings,
-    rtracklayer,
-    GenomicRanges,
-    ggplot2,
-    GenomeInfoDb,
-    S4Vectors,
-    BiocGenerics,
-    tRNAscan2GRanges
+Collate: 
+  'RNAmod.R'
+  'AllGenerics.R'
+  'AllGenerics-export.R'
+  'RNAModString.R'
+  'RNAmod-utils-preparations.R'
+  'RNAmod-utils.R'
+  'assertions.R'
+  'class-RNAmod-type.R'
+  'class-RNAmod-D.R'
+  'class-RNAmod-default.R'
+  'class-RNAmod-m3C.R'
+  'class-RNAmod-m7G.R'
+  'class-RNAmod.R'
+  'methods-RNAmod-compare.R'
+  'methods-RNAmod-parse.R'
+  'methods-RNAmod-plot.R'
+  'methods-RNAmod.R'
+  'methods-RNAmodR-analysis.R'
+Imports:
+  methods,
+  assertive,
+  Rsamtools,
+  BiocParallel,
+  Biostrings,
+  rtracklayer,
+  GenomicRanges,
+  ggplot2,
+  GenomeInfoDb,
+  S4Vectors,
+  BiocGenerics,
+  tRNAscan2GRanges,
+  ggrepel
 Suggests: testthat,
-    knitr,
-    rmarkdown
+  knitr,
+  rmarkdown
 Remotes:
-  FelixErnst/tRNAscan2GRanges@dev
+  FelixErnst/tRNAscan2GRanges@master
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1

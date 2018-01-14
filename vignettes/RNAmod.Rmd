@@ -30,6 +30,7 @@ mod <- RNAmod("test",
 
 modifications <- c("m7G","D","m3C")
 parseForModifications(mod,1,modifications)
+
 se <- getSummarizedExperiment(mod,1,modifications)
 
 tRNA <- rownames(se)[grepl("t", rownames(se), fixed = TRUE)]

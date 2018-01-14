@@ -486,6 +486,8 @@ converttRNAscanToChrom <- function(gfffile,
 
 #' @name appendFastaFiles
 #' 
+#' @title appendFastaFiles
+#' 
 #' @aliases appendFastaFiles appendGFF
 #' 
 #' @description

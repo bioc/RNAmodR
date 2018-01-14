@@ -290,6 +290,28 @@ setGeneric (
                filetype = "pdf"){standardGeneric("saveModPlot")} 
 )
 
+#' @name heatmapModifications
+#'
+#' @export
+setGeneric (
+  name= "heatmapModifications",
+  def=function(.Object,
+               se,
+               modifications,
+               genes){standardGeneric("heatmapModifications")}
+)
+
+#' @rdname heatmapModifications
+#'
+#' @export
+setGeneric (
+  name= "saveHeatmapModifications",
+  def=function(.Object,
+               se,
+               modifications,
+               genes){standardGeneric("saveHeatmapModifications")}
+)
+
 
 # comparison -------------------------------------------------------------------
 
