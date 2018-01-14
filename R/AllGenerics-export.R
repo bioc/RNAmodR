@@ -211,8 +211,8 @@ setGeneric (
 #' 
 #' @param object mod object 
 #' @param counts total counts in the BAM file containing the data
-#' @param gff a GRanges object for a single gene
-#' @param data the read data as DataFrame for a single gene
+#' @param gff a GRanges object for the genome
+#' @param data list of DataFrame containg the read data
 #' 
 #' @export
 setGeneric ( 
@@ -229,16 +229,16 @@ setGeneric (
 #' 
 #' @param object mod object 
 #' @param counts total counts in the BAM file containing the data
-#' @param gff a GRanges object for a single gene
-#' @param seq a DNAString object for a single gene
-#' @param data the read data as DataFrame for a single gene
+#' @param gff a GRanges object for the genome
+#' @param fafile a FaFile object for the genome
+#' @param data list of DataFrame containg the read data
 #' 
 #' @export
 setGeneric ( 
   name= "parseMod",
   def=function(object,
                gff,
-               seq,
+               fafile,
                data){standardGeneric("parseMod")} 
 ) 
 
@@ -247,16 +247,16 @@ setGeneric (
 #' @title mergePositionsOfReplicates
 #' 
 #' @param object mod object 
-#' @param gff a GRanges object for a single gene
-#' @param seq a DNAString object for a single gene
-#' @param data the read data as DataFrame for a single gene
+#' @param gff a GRanges object for the genome
+#' @param fafile a FaFile object for the genome
+#' @param data list of DataFrame containg the read data
 #' 
 #' @export
 setGeneric ( 
   name= "mergePositionsOfReplicates",
   def=function(object,
                gff,
-               seq,
+               fafile,
                data){standardGeneric("mergePositionsOfReplicates")} 
 ) 
 

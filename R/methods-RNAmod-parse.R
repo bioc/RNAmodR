@@ -71,7 +71,7 @@ setMethod(
     for(i in seq_along(modClasses)){
       mod_positions[[i]] <- parseMod(modClasses[[i]],
                                      gff,
-                                     force(.Object@.dataFasta),
+                                     .Object@.dataFasta,
                                      data)
     }
     # General cleanup
@@ -145,7 +145,7 @@ setMethod(
   
   # D 
   # bamData <- bamData[names(bamData) %in% c("tH(GUG)E1")]
-  bamData <- bamData[names(bamData) %in% c("tI(AAU)B")]
+  # bamData <- bamData[names(bamData) %in% c("tI(AAU)B")]
   # bamData <- bamData[names(bamData) %in% c("tD(GUC)B")]
   
   # m3C

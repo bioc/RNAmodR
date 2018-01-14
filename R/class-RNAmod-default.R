@@ -69,11 +69,11 @@ setMethod(
   f = "parseMod",
   signature = signature(object = "mod_default",
                         gff = "GRanges",
-                        seq = "FaFile",
+                        fafile = "FaFile",
                         data = "list"),
   definition = function(object,
                         gff,
-                        seq,
+                        fafile,
                         data) {
     return(NA)
   }
@@ -92,11 +92,11 @@ setMethod(
   f = "mergePositionsOfReplicates",
   signature = signature(object = "mod_default",
                         gff = "GRanges",
-                        seq = "FaFile",
+                        fafile = "FaFile",
                         data = "list"),
   definition = function(object,
                         gff,
-                        seq,
+                        fafile,
                         data) {
     # Process only genes found in all datasets
     IDs <- lapply(data,names)

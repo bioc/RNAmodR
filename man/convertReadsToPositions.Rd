@@ -30,9 +30,9 @@ convertReadsToPositions(object, counts, gff, data)
 
 \item{counts}{total counts in the BAM file containing the data}
 
-\item{gff}{a GRanges object for a single gene}
+\item{gff}{a GRanges object for the genome}
 
-\item{data}{the read data as DataFrame for a single gene}
+\item{data}{list of DataFrame containg the read data}
 }
 \description{
 \code{mod_D}: calls the default method

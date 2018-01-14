@@ -156,7 +156,13 @@ setMethod(
     fileNames <- paste0(folder,
                         modification,
                         ".RData")
-    assertive::assert_all_are_existing_files(fileNames)
+    fileNames <- fileNames[vapply(fileNames, 
+                                  assertive::is_existing_file,
+                                  logical(1))]
+    if(length(fileNames) == 0){
+      stop("No result gff files found.",
+           call. = FALSE)
+    }
     ses <- lapply(fileNames,function(file){
       load(file)
       return(se)
@@ -243,11 +249,15 @@ setMethod(
                         se, 
                         experiment,
                         modification) {
-    
     folder <- paste0(getOutputFolder(.Object),
                      "SE/")
     if(!assertive::is_dir(folder)){
       dir.create(folder, recursive = TRUE)
+    }
+    modification <- intersect(modification,names(assays(se)))
+    if( length(modification) == 0 ){
+      stop("No modification data found, while saving SummarizedExperiment.",
+           call. = FALSE)
     }
     fileNames <- paste0(folder,
                         "RNAmod_",
@@ -255,7 +265,6 @@ setMethod(
                         "_",
                         modification,
                         ".RData")
-    
     .save_single_ses(.split_se_for_each_modification(se,modification), 
                      fileNames)
     return(se)
@@ -266,14 +275,14 @@ setMethod(
   # If only one SummarizedExperiment, return directly
   if(length(modification) == 1) return(list(se))
   #
-  ses <- lapply(modification, function(type){
+  ses <- BiocParallel::bplapply(modification, function(type, se){
     tmp <- se
     assays(tmp) <- assays(se)[type]
     rowData(tmp)$mods <- lapply(rowData(tmp)$mods, function(df){
       df[df$RNAmod_type == type,]
     })
     return(tmp)
-  })
+  }, se)
   return(ses)
 }
 
@@ -363,7 +372,13 @@ setMethod(
     fileNames <- .get_gff_filenames(.Object,
                                     unique(experiment["SampleName"]),
                                     modification)
-    assertive::assert_all_are_existing_files(fileNames)
+    fileNames <- fileNames[vapply(fileNames, 
+                                  assertive::is_existing_file,
+                                  logical(1))]
+    if(length(fileNames) == 0){
+      stop("No result gff files found.",
+           call. = FALSE)
+    }
     gffs <- lapply(fileNames, rtracklayer::import.gff3)
     return(.merge_GRanges(gffs))
   }
@@ -462,7 +477,9 @@ setMethod(
 .save_single_gffs <- function(gffs,fileNames){
   for(i in seq_along(gffs)){
     gff <- gffs[[i]]
-    rtracklayer::export.gff3(gff, con = fileNames[[i]])
+    if(!is.null(gff) && length(gff) > 0){
+      rtracklayer::export.gff3(gff, con = fileNames[[i]])
+    }
   }
 }
 

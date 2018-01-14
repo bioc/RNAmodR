@@ -10,24 +10,24 @@
 \alias{parseMod,mod_m7G,GRanges,FaFile,list-method}
 \title{parseMod}
 \usage{
-parseMod(object, gff, seq, data)
+parseMod(object, gff, fafile, data)
 
-\S4method{parseMod}{mod_D,GRanges,FaFile,list}(object, gff, seq, data)
+\S4method{parseMod}{mod_D,GRanges,FaFile,list}(object, gff, fafile, data)
 
-\S4method{parseMod}{mod_default,GRanges,FaFile,list}(object, gff, seq, data)
+\S4method{parseMod}{mod_default,GRanges,FaFile,list}(object, gff, fafile, data)
 
-\S4method{parseMod}{mod_m3C,GRanges,FaFile,list}(object, gff, seq, data)
+\S4method{parseMod}{mod_m3C,GRanges,FaFile,list}(object, gff, fafile, data)
 
-\S4method{parseMod}{mod_m7G,GRanges,FaFile,list}(object, gff, seq, data)
+\S4method{parseMod}{mod_m7G,GRanges,FaFile,list}(object, gff, fafile, data)
 }
 \arguments{
 \item{object}{mod object}
 
-\item{gff}{a GRanges object for a single gene}
+\item{gff}{a GRanges object for the genome}
 
-\item{seq}{a DNAString object for a single gene}
+\item{fafile}{a FaFile object for the genome}
 
-\item{data}{the read data as DataFrame for a single gene}
+\item{data}{list of DataFrame containg the read data}
 
 \item{counts}{total counts in the BAM file containing the data}
 }

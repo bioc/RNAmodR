@@ -10,28 +10,28 @@
 \alias{mergePositionsOfReplicates,mod_m7G,GRanges,FaFile,list-method}
 \title{mergePositionsOfReplicates}
 \usage{
-mergePositionsOfReplicates(object, gff, seq, data)
+mergePositionsOfReplicates(object, gff, fafile, data)
 
 \S4method{mergePositionsOfReplicates}{mod_D,GRanges,FaFile,list}(object, gff,
-  seq, data)
+  fafile, data)
 
 \S4method{mergePositionsOfReplicates}{mod_default,GRanges,FaFile,list}(object,
-  gff, seq, data)
+  gff, fafile, data)
 
 \S4method{mergePositionsOfReplicates}{mod_m3C,GRanges,FaFile,list}(object, gff,
-  seq, data)
+  fafile, data)
 
 \S4method{mergePositionsOfReplicates}{mod_m7G,GRanges,FaFile,list}(object, gff,
-  seq, data)
+  fafile, data)
 }
 \arguments{
 \item{object}{mod object}
 
-\item{gff}{a GRanges object for a single gene}
+\item{gff}{a GRanges object for the genome}
 
-\item{seq}{a DNAString object for a single gene}
+\item{fafile}{a FaFile object for the genome}
 
-\item{data}{the read data as DataFrame for a single gene}
+\item{data}{list of DataFrame containg the read data}
 }
 \description{
 \code{mod_D}

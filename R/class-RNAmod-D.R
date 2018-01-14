@@ -62,11 +62,11 @@ setMethod(
   f = "parseMod",
   signature = signature(object = "mod_D",
                         gff = "GRanges",
-                        seq = "FaFile",
+                        fafile = "FaFile",
                         data = "list"),
   definition = function(object,
                         gff,
-                        seq,
+                        fafile,
                         data) {
     message("Parsing data for D modifications...")
     # browser()
@@ -75,12 +75,12 @@ setMethod(
     IDs <- Reduce(intersect, IDs)
     
     # detect modification per transcript
-    res <- lapply(IDs,
-    # res <- bplapply(IDs,
-                  FUN = .analyze_D_transcript_prep,
-                  data = data,
-                  gff = gff,
-                  fafile = seq)
+    # res <- lapply(IDs,
+    res <- BiocParallel::bplapply(IDs,
+                                  FUN = .analyze_D_transcript_prep,
+                                  data = data,
+                                  gff = gff,
+                                  fafile = fafile)
     names(res) <- IDs
     res <- res[!is.null(res)]
     
@@ -126,19 +126,10 @@ setMethod(
   if(length(locations) == 0) return(NULL)
   # Convert local T position to global positions
   globalLocations <- .convert_local_to_global_locations(gff, locations)
-  # if a transcript is encountered having ID present in the global variable
-  # RNAmod_sample_transcript trigger sample plotting to access quality on
-  # know locations
-  # ID %in% options("RNAmod_sample_transcripts")
-  name <- NULL
-  if(ID %in% options("RNAmod_sample_transcripts")){
-    name <- paste0(ID,
-                   "_D_")
-  }
+  
   res <- .analyze_D_transcript(ID = ID,
                                data = data,
                                globalLocations = globalLocations,
-                               name = name,
                                iterationN = 1)
   res <- res[order(as.numeric(unlist(lapply(res, "[[", "location"))))]
   return(res)
@@ -148,7 +139,6 @@ setMethod(
 .analyze_D_transcript <- function(ID,
                                   data,
                                   globalLocations,
-                                  name,
                                   iterationN){
   if( iterationN > .get_transcript_max_iteration()) return(NULL)
   # debug
@@ -160,7 +150,6 @@ setMethod(
   modifications <- lapply(globalLocations,
                           .check_for_D,
                           data,
-                          name,
                           globalLocations)
   if(length(modifications) == 0) return(NULL)
   # name the locations based on sequence position
@@ -176,7 +165,6 @@ setMethod(
   return(append(modifications,.analyze_D_transcript(ID = ID,
                                             data = data,
                                             globalLocations = globalLocations,
-                                            name = name,
                                             (iterationN+1))))
 }
 
@@ -193,7 +181,6 @@ setMethod(
 # check for D at given position
 .check_for_D <- function(location, 
                          data,
-                         name = NULL,
                          locs){
   # short cut if amount of data is not sufficient
   if( is.null(.do_D_pretest(location,
@@ -202,7 +189,6 @@ setMethod(
   if(length(locs[locs == (location-1)]) != 0) {
     locTestPre <- .check_for_D((location-1), 
                                .mask_data(data, location),
-                               name = NULL,
                                locs[locs != location])
     if(!is.null(locTestPre)){
       # udpate data accordingly
@@ -213,7 +199,6 @@ setMethod(
   if(length(locs[locs == (location+1)]) != 0) {
     locTestPost <- .check_for_D((location+1), 
                                 .mask_data(data, location),
-                                name = NULL,
                                 locs[locs != location])
     if(!is.null(locTestPost)){
       # udpate data accordingly
@@ -242,16 +227,6 @@ setMethod(
   # debug
   if( getOption("RNAmod_debug") ){
     .print_location_info(paste(location,"_yes"), locs)
-  }
-  # if location is among sample location (name is not null)
-  # plot the data
-  if(!is.null(name)){
-    testData <- .aggregate_location_data(data, (location+1))
-    baseData <- .aggregate_not_location_data(data, (location+1))
-    .plot_sample_data(.create_D_plot_data(testData,
-                                          baseData,
-                                          paste0(name,location)), 
-                      paste0(name,location))
   }
   # Return data
   return(list(location = location,
@@ -362,11 +337,11 @@ setMethod(
   f = "mergePositionsOfReplicates",
   signature = signature(object = "mod_D",
                         gff = "GRanges",
-                        seq = "FaFile",
+                        fafile = "FaFile",
                         data = "list"),
   definition = function(object,
                         gff,
-                        seq,
+                        fafile,
                         data) {
     return(NA)
   }
