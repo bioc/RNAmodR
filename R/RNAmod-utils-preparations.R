@@ -193,13 +193,23 @@ converttRNAscanToChrom <- function(gfffile,
   fa <- Rsamtools::FaFile(fafile)
   
   # load tRNAscan data
+  tRNAscan <- tRNAscan2GRanges::tRNAscan2GRanges(tRNAscanfile)
+  # fix chromosome names
   browser()
-  tRNAscan <- tRNAscan2GRanges::tRNAScan2GRanges(tRNAscanfile)
+  chrN <- length(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))))
+  chrom_names <- as.character(GenomeInfoDb::seqnames(gff))[seq_len(chrN)]
+  if(chrN == length(chrom_names)){
+    
+    tRNAscan <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
+                         ranges = IRanges::ranges(tRNAscan),
+                         strand = as.character(BiocGenerics::strand(tRNAscan)),
+                         S4Vectors::mcols(tRNAscan))
+  }
   
   # subset gff by GRanges boundaries
-  gff_sub <- IRanges::subsetByOverlaps(gff, 
-                                       tRNAscan,
-                                       type = "within")
+  gff_sub <- suppressWarnings(IRanges::subsetByOverlaps(gff, 
+                                                        tRNAscan,
+                                                        type = "within"))
   if(length(gff_sub) == 0){
     stop("No overlap found in supplied gff and tRNAscan file.",
          call. = FALSE)
@@ -216,28 +226,29 @@ converttRNAscanToChrom <- function(gfffile,
                                         type = "equal",
                                         invert = TRUE)
   
-  # extract the coding sequences of all features
-  seqs <- .extract_exon_sequences(gff_sub,fa)
+  # extract the coding sequences of tRNA
+  seqs <- tRNAscan$seq
   
   # Add CCA to end, if the CCA end is not encoded
-  if(length(tRNAscan) != length(seqs)){
-    stop("Something went wrong. Unequal number of tRNA and corresponding ",
-         "sequences returned.",
-         call. = FALSE)
-  }
   CCAseq <- DNAStringSet(lapply(S4Vectors::mcols(tRNAscan)$CCA.end, function(bool){
     if(!bool) return(DNAString("CCA"))
     DNAString("")
   }))
-  tmp <- DNAStringSet(lapply(seq_along(names(seqs)), function(i){
+  tmp <- DNAStringSet(lapply(seq_along(length(seqs)), function(i){
     d <- DNAStringSet(list(seqs[[i]],CCAseq[[i]]))
     unlist(d)
   }))
-  names(tmp) <- names(seqs)
+  names(tmp) <- paste0("tRNA_",
+                       tRNAscan$type,
+                       "-",
+                       tRNAscan$anticodon,
+                       "-",
+                       tRNAscan$no)
   seqs <- tmp
   
   # remove indistinguishable sequences (applies usually to tRNA, rRNA and such)
-  gff_exon <- .cluster_results_gff(gff_sub,seqs)
+  tRNA_sub<- tRNAscan[,!(colnames(S4Vectors::mcols(tRNAscan)) %in% c("seq","str"))]
+  gff_exon <- .cluster_results_gff(tRNA_sub,seqs)
   fa_seq_exon <- .cluster_results_seqs(seqs)
   
   # create new gff annotation and fasta sequences
@@ -362,7 +373,7 @@ converttRNAscanToChrom <- function(gfffile,
 .update_gff_subset <- function(gff_sub, seqs){
   # subset gff to parents and childs
   gff_children <- gff_sub[.get_unique_seqnames(gff_sub) %in% names(seqs)]
-  gff_children <- gff_children[!duplicated(as.character(S4Vectors::mcols(gff_children)$Name))]
+  gff_children <- gff_children[!duplicated(.get_unique_seqnames(gff_children))]
   gff_parents <- gff_sub[(!is.na(as.character(S4Vectors::mcols(gff_sub)$ID)) &
                            as.character(S4Vectors::mcols(gff_sub)$ID) %in% as.character(S4Vectors::mcols(gff_children)$Parent)) |
                            (!is.na(as.character(S4Vectors::mcols(gff_sub)$Name)) &
