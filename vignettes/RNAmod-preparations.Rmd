@@ -108,8 +108,9 @@ message("# Run this in command line:\n\n",
 
 ```{r eco}
 folder <- "genomes/Eco/"
-gfffile <- "genomes/Eco/eco_MG1655.gff3"
-fafile <- "genomes/Eco/eco_MG1655.fasta"
+gfffile <- paste0(folder,"eco_MG1655.gff3")
+fafile <- paste0(folder,"eco_MG1655.fasta")
+tRNAscanfile <- paste0(folder,"eschColi_K_12_MG1655-tRNAs.ss.sort")
 matchFastaToGff(gfffile,fafile)
 
 rRNAFiles <- convertGeneTypeToChrom(gfffile,
@@ -118,10 +119,24 @@ rRNAFiles <- convertGeneTypeToChrom(gfffile,
                                     "rRNA",
                                     appendToOriginal = TRUE)
 
-tRNAFiles <- convertGeneTypeToChrom(rRNAFiles[["out_gfffile"]],
+# Manually remove any trace of rRNA genes from gff file
+gff <- rtracklayer::import.gff3(rRNAFiles[["in_gfffile"]])
+gff_rRNA <- gff[S4Vectors::mcols(gff)$type == "rRNA",]
+gff_rRNA <- IRanges::subsetByOverlaps(gff, 
+                                      gff_rRNA,
+                                      minoverlap = 0,
+                                      type = "equal",
+                                      invert = TRUE)
+rtracklayer::export.gff3(gff_rRNA,rRNAFiles[["out_gfffile"]])
+rRNAFiles[["out_gfffile"]] <- appendGFF(rRNAFiles[["out_gfffile"]],
+                                        rRNAFiles[["convert_gfffile"]],
+                                        ident = "clean",
+                                        msg = "Saved appended gff file: ")
+
+tRNAFiles <- converttRNAscanToChrom(rRNAFiles[["out_gfffile"]],
                                     rRNAFiles[["out_fafile"]],
-                                    c("tRNA_gene"),
-                                    "tRNA",
+                                    tRNAscanfile,
+                                    "tRNAscan",
                                     appendToOriginal = TRUE)
 
 lapply(list(rRNAFiles[["mask_gfffile"]],
@@ -154,8 +169,9 @@ message("# Run this in command line:\n\n",
 
 ```{r GRCh38}
 folder <- "genomes/GRCh38/"
-gfffile <- "genomes/GRCh38/GRCh38_latest_genomic.gff"
-fafile <- "genomes/GRCh38/GRCh38_latest_genomic.fasta"
+gfffile <- paste0(folder,"GRCh38_latest_genomic.gff")
+fafile <- paste0(folder,"GRCh38_latest_genomic.fna")
+tRNAscanfile <- paste0(folder,"hg38-tRNAs.ss.sort")
 matchFastaToGff(gfffile,fafile)
 
 rRNAFiles <- convertGeneTypeToChrom(gfffile,
