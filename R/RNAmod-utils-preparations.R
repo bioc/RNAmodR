@@ -179,7 +179,6 @@ converttRNAscanToChrom <- function(gfffile,
                                    ident,
                                    appendToOriginal = FALSE){
   # Check inputs
-  browser()
   assertive::assert_all_are_existing_files(gfffile)
   assertive::assert_all_are_existing_files(fafile)
   assertive::assert_all_are_existing_files(tRNAscanfile)
@@ -190,23 +189,31 @@ converttRNAscanToChrom <- function(gfffile,
   fa <- Rsamtools::FaFile(fafile)
   # load tRNAscan data
   tRNAscan <- tRNAscan2GRanges::tRNAscan2GFF(tRNAscanfile)
-  # fix chromosome names of tRNAscan
+  # test if chromosome names of tRNAscan need to be fixed
   chromTest <- intersect(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))),
                          unique(as.character(GenomeInfoDb::seqnames(gff))))
   if(!identical(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))), 
                 chromTest)){
+    # if yes
+    # construct a translation library
     chrN <- length(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))))
-    chrom_names <- as.character(GenomeInfoDb::seqnames(gff))[seq_len(chrN)]
-    if(chrN == length(chrom_names)){
-      tRNAscan <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
-                                         ranges = IRanges::ranges(tRNAscan),
-                                         strand = as.character(BiocGenerics::strand(tRNAscan)),
-                                         S4Vectors::mcols(tRNAscan))
-    }
+    chrom_names <- unique(as.character(GenomeInfoDb::seqnames(gff)))[seq_len(chrN)]
+    names(chrom_names) <- unique(as.character(GenomeInfoDb::seqnames(tRNAscan)))
+    # get new chromosome names
+    newChromNames <- unlist(lapply(GenomeInfoDb::seqnames(tRNAscan), function(x){
+      chrom_names[names(chrom_names) == x]
+    }))
+    # create updated tRNAscan object for subsetting
+    tRNAscan_new <- GenomicRanges::GRanges(S4Vectors::Rle(newChromNames),
+                                       ranges = IRanges::ranges(tRNAscan),
+                                       strand = as.character(BiocGenerics::strand(tRNAscan)),
+                                       S4Vectors::mcols(tRNAscan))
+  } else {
+    tRNAscan_new <- tRNAscan
   }
   # Remove all entries from the original gff, which are part of the tRNAscan
   gff_subset <- suppressWarnings(IRanges::subsetByOverlaps(gff, 
-                                                           tRNAscan,
+                                                           tRNAscan_new,
                                                            type = "within"))
   if(length(gff_subset) == 0){
     stop("No overlap found in supplied gff and tRNAscan file.",
@@ -228,7 +235,7 @@ converttRNAscanToChrom <- function(gfffile,
     if(!bool) return(DNAString("CCA"))
     DNAString("")
   }))
-  seqs_subset <- DNAStringSet(lapply(seq_len(length(seqs)), function(i){
+  seqs_subset <- DNAStringSet(lapply(seq_len(length(seqs_subset)), function(i){
     d <- DNAStringSet(list(seqs_subset[[i]],CCAseq[[i]]))
     unlist(d)
   }))
@@ -242,12 +249,18 @@ converttRNAscanToChrom <- function(gfffile,
                                            "tRNA_str"))]
   seqs_subset_clustered <- .cluster_results_seqs(seqs_subset)
   # create new gff annotation
+  browser()
   tRNA_subset_clustered <- 
-    tRNA_subset_clustered[tRNAnames %in% names(seqs_subset_clustered),]
+    tRNA_subset_clustered[tRNA_subset_clustered$ID %in% names(seqs_subset_clustered),]
   tRNA_subset_clustered <-
     tRNA_subset_clustered[, colnames(S4Vectors::mcols(tRNA_subset_clustered))
                           %in% c("source", "type", "score",
                                  "phase", "ID", "Name", "gene")]
+  tRNA_subset_clustered <- GenomicRanges::GRanges(
+    S4Vectors::Rle(tRNA_subset_clustered$ID),
+    ranges = IRanges::ranges(tRNA_subset_clustered),
+    strand = as.character(BiocGenerics::strand(tRNA_subset_clustered)),
+    S4Vectors::mcols(tRNA_subset_clustered))
   # get the aggregated file names
   fileNames <- .get_file_names(gfffile,
                                fafile,
