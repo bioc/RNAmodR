@@ -103,45 +103,35 @@ convertGeneToChrom <- function(gfffile,
   gff_subset_clustered <- .update_gff_subset(gff_subset_clustered,
                                              seqs_subset_clustered)
   seqs_subset_clustered <- .update_seqs(seqs_subset_clustered)
-  
   # get the aggregated file names
   fileNames <- .get_file_names(gfffile,
                                fafile,
                                ident)
-  # save subset as single gff and fasta file
-  .write_gff(gff_subset_clustered, 
-             fileNames[["convert_gfffile"]]
-             "Saved extracted gff3 file: ")
-  .write_fa(seqs_subset_clustered, 
-            resultFiles[["convert_fafile"]]
-            "Saved extracted fasta file: ")
-  # save the masking gff annotation, which can be used for masking sequences 
-  # with bedtools
-  .write_gff(gff_subset, 
-             resultFiles[["mask_gfffile"]],
-             "Saved mask gff3 file: ")
-  # save the reduced gff annotation file, which can be used for further steps
-  .write_gff(gff_trimmed, 
-             resultFiles[["trim_gfffile"]],
-             "Saved trimmed gff3 file: ")
+  # write general output to files
+  .write_output(gff_subset_clustered,
+                seqs_subset_clustered,
+                gff_subset,
+                gff_trimmed,
+                fileNames)
   # if appendToOriginal == TRUE saved appended version of the original files
   # with the clustered subset files
   if(appendToOriginal){
-    resultFiles[["out_fafile"]] <- 
-      appendFastaFiles(resultFiles[["in_fafile"]],
-                       resultFiles[["convert_fafile"]],
+    fileNames[["out_fafile"]] <- 
+      appendFastaFiles(fileNames[["in_fafile"]],
+                       fileNames[["convert_fafile"]],
                        ident = ident,
                        msg = "Saved appended fasta file: ")
-    resultFiles[["out_gfffile"]] <- 
-      appendGFF(resultFiles[["trim_gfffile"]],
-                resultFiles[["convert_gfffile"]],
+    fileNames[["out_gfffile"]] <- 
+      appendGFF(fileNames[["trim_gfffile"]],
+                fileNames[["convert_gfffile"]],
                 ident = ident,
                 msg = "Saved appended gff3 file: ")
   }
   # return file names
-  return(invisible(resultFiles))
+  return(invisible(fileNames))
 }
 
+# get a subset off gff annotation from ID, name or parent
 .get_gff_subset <-  function(gff, genes){
   # create gff subset
   gff_sub <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
@@ -155,7 +145,8 @@ convertGeneToChrom <- function(gfffile,
                    (!is.na(S4Vectors::mcols(gff)$ID) & 
                       S4Vectors::mcols(gff)$ID %in% paste0(genes,"_mRNA")) |
                    (!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
-                      as.character(S4Vectors::mcols(gff)$Parent) %in% paste0(genes,"_mRNA")),]
+                      as.character(S4Vectors::mcols(gff)$Parent) %in% 
+                      paste0(genes,"_mRNA")),]
   if(length(gff_sub) == 0){
     stop("No genes found in supplied gff file with the given genes names.",
          call. = FALSE)
@@ -164,7 +155,7 @@ convertGeneToChrom <- function(gfffile,
                            BiocGenerics::start(gff_sub))]
   gff_sub
 }
-
+# get the trimmed gff annotation
 .get_trimmed_gff <- function(gff, gff_subset){
   gff_trimmed <- IRanges::subsetByOverlaps(gff, 
                                            gff_subset,
@@ -176,9 +167,6 @@ convertGeneToChrom <- function(gfffile,
   gff_trimmed
 }
 
-.get_file_names <- function(){
-  
-}
 
 #' @rdname convertGeneToChrom
 #'
@@ -191,6 +179,7 @@ converttRNAscanToChrom <- function(gfffile,
                                    ident,
                                    appendToOriginal = FALSE){
   # Check inputs
+  browser()
   assertive::assert_all_are_existing_files(gfffile)
   assertive::assert_all_are_existing_files(fafile)
   assertive::assert_all_are_existing_files(tRNAscanfile)
@@ -202,13 +191,18 @@ converttRNAscanToChrom <- function(gfffile,
   # load tRNAscan data
   tRNAscan <- tRNAscan2GRanges::tRNAscan2GFF(tRNAscanfile)
   # fix chromosome names of tRNAscan
-  chrN <- length(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))))
-  chrom_names <- as.character(GenomeInfoDb::seqnames(gff))[seq_len(chrN)]
-  if(chrN == length(chrom_names)){
-    tRNAscan <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
-                         ranges = IRanges::ranges(tRNAscan),
-                         strand = as.character(BiocGenerics::strand(tRNAscan)),
-                         S4Vectors::mcols(tRNAscan))
+  chromTest <- intersect(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))),
+                         unique(as.character(GenomeInfoDb::seqnames(gff))))
+  if(!identical(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))), 
+                chromTest)){
+    chrN <- length(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))))
+    chrom_names <- as.character(GenomeInfoDb::seqnames(gff))[seq_len(chrN)]
+    if(chrN == length(chrom_names)){
+      tRNAscan <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
+                                         ranges = IRanges::ranges(tRNAscan),
+                                         strand = as.character(BiocGenerics::strand(tRNAscan)),
+                                         S4Vectors::mcols(tRNAscan))
+    }
   }
   # Remove all entries from the original gff, which are part of the tRNAscan
   gff_subset <- suppressWarnings(IRanges::subsetByOverlaps(gff, 
@@ -239,14 +233,7 @@ converttRNAscanToChrom <- function(gfffile,
     unlist(d)
   }))
   # set new names which become chromosome names
-  tRNAnames <- paste0("tRNA_",
-                      tRNAscan$tRNA_type,
-                      "-",
-                      tRNAscan$tRNA_anticodon,
-                      "-",
-                      GenomeInfoDb::seqnames(tRNAscan),
-                      "-",
-                      tRNAscan$no)
+  tRNAnames <- tRNAscan$ID
   names(seqs_subset) <- tRNAnames
   # remove indistinguishable sequences from tRNAscan
   # get clustered subset
@@ -255,47 +242,35 @@ converttRNAscanToChrom <- function(gfffile,
                                            "tRNA_str"))]
   seqs_subset_clustered <- .cluster_results_seqs(seqs_subset)
   # create new gff annotation
-  tRNA_subset_clustered <- tRNA_subset_clustered[tRNAnames %in% 
-                                                   names(seqs_subset_clustered),]
-  tRNA_subset_clustered <- tRNA_subset_clustered[,colnames(S4Vectors::mcols(tRNA_subset_clustered)) 
-                                                 %in% 
-                                                   c("source","type","score","phase","ID","Name","gene")]
-  tRNA_subset_clustered$ID <- GenomeInfoDb::seqnames(tRNA_subset_clustered)
-  tRNA_subset_clustered$Name <- NA
-  tRNA_subset_clustered$gene <- NA
+  tRNA_subset_clustered <- 
+    tRNA_subset_clustered[tRNAnames %in% names(seqs_subset_clustered),]
+  tRNA_subset_clustered <-
+    tRNA_subset_clustered[, colnames(S4Vectors::mcols(tRNA_subset_clustered))
+                          %in% c("source", "type", "score",
+                                 "phase", "ID", "Name", "gene")]
   # get the aggregated file names
   fileNames <- .get_file_names(gfffile,
                                fafile,
                                ident)
-  # save subset as single gff and fasta file
-  .write_gff(tRNA_subset_clustered, 
-             fileNames[["convert_gfffile"]]
-             "Saved extracted gff3 file: ")
-  .write_fa(seqs_subset_clustered, 
-            resultFiles[["convert_fafile"]]
-            "Saved extracted fasta file: ")
-  # save the masking gff annotation, which can be used for masking sequences 
-  # with bedtools
-  .write_gff(gff_subset, 
-             resultFiles[["mask_gfffile"]],
-             "Saved mask gff3 file: ")
-  # save the reduced gff annotation file, which can be used for further steps
-  .write_gff(gff_trimmed, 
-             resultFiles[["trim_gfffile"]],
-             "Saved trimmed gff3 file: ")
+  .write_output(tRNA_subset_clustered,
+                seqs_subset_clustered,
+                gff_subset,
+                gff_trimmed,
+                fileNames)
   if(appendToOriginal){
-    resultFiles[["out_fafile"]] <- appendFastaFiles(resultFiles[["in_fafile"]],
-                                                    resultFiles[["convert_fafile"]],
-                                                    ident = ident,
-                                                    msg = "Saved appended fasta file: ")
-    resultFiles[["out_gfffile"]] <- appendGFF(resultFiles[["trim_gfffile"]],
-                                              resultFiles[["convert_gfffile"]],
-                                              ident = ident,
-                                              msg = "Saved appended gff3 file: ")
+    fileNames[["out_fafile"]] <- appendFastaFiles(fileNames[["in_fafile"]],
+                                          fileNames[["convert_fafile"]],
+                                          ident = ident,
+                                          msg = "Saved appended fasta file: ")
+    fileNames[["out_gfffile"]] <- appendGFF(fileNames[["trim_gfffile"]],
+                                          fileNames[["convert_gfffile"]],
+                                          ident = ident,
+                                          msg = "Saved appended gff3 file: ")
   }
-  return(invisible(resultFiles))
+  return(invisible(fileNames))
 }
 
+# identifing annotations and manipulations identifiers -------------------------
 # merge seq_identifier
 .get_unique_seqnames <- function(gff){
   paste0(S4Vectors::mcols(gff)$ID,
@@ -317,107 +292,6 @@ converttRNAscanToChrom <- function(gfffile,
   return(list(ID = ID,
               Name = Name,
               gene = gene))
-}
-
-# extract the exons sequences and merges them into one per gene
-.extract_exon_sequences <- function(gff_sub, fa){
-  # subset to exons only
-  exons <- gff_sub[S4Vectors::mcols(gff_sub)$type %in% c("CDS",
-                                                         "noncoding_exon",
-                                                         "exon")]
-  
-  # get sequences for exons
-  exons_seq <- Biostrings::getSeq(fa,exons)
-  names(exons_seq) <- .get_unique_seqnames(exons)
-  
-  # get unique names and iterate and merge split sequences
-  uniq_gene_names <- unique(names(exons_seq))
-  seqs <- Biostrings::DNAStringSet(lapply(uniq_gene_names, function(name){
-    seq <- exons_seq[BiocGenerics::which(names(exons_seq) == name)]
-    strand <- unique(as.character(BiocGenerics::strand(exons[.get_unique_seqnames(exons) == name])))
-    # If strand == "-" intron sequences are in reverse order
-    if(strand == "-"){
-      return(BiocGenerics::unlist(rev(seq)))
-    }
-    return(BiocGenerics::unlist(seq))
-  }))
-  # rename sequences to match parent sequence
-  names(seqs) <- uniq_gene_names
-  # names(seqs) <- gsub("_CDS","",names(seqs))
-  # names(seqs) <- gsub("_noncoding_exon","",names(seqs))
-  return(seqs)
-}
-
-# removed duplicated sequences
-.cluster_results_gff <- function(gff_sub,seqs){
-  # get duplicated sequences must match reverse of first function call in
-  # .combine_gff_subset_with_seqs
-  duplicated_seq_names <- names(seqs[duplicated(seqs)])
-  duplicated_seq_names <- append(duplicated_seq_names,
-                                 gsub("_CDS","",duplicated_seq_names))
-  duplicated_seq_names <- append(duplicated_seq_names,
-                                 gsub("_noncoding_exon","",duplicated_seq_names))
-  duplicated_seq_names <- append(duplicated_seq_names,
-                                 gsub("_exon","",duplicated_seq_names))
-  duplicated_seq_names <- unique(duplicated_seq_names)
-  gff_sub <- gff_sub[!(.get_unique_seqnames(gff_sub) %in% duplicated_seq_names)]
-  return(gff_sub)
-}
-.cluster_results_seqs <- function(seqs){
-  return(seqs[!duplicated(seqs)])
-}
-
-
-
-# create new gff annotations
-.update_gff_subset <- function(gff_sub, seqs){
-  # subset gff to parents and childs
-  gff_children <- gff_sub[.get_unique_seqnames(gff_sub) %in% names(seqs)]
-  gff_children <- gff_children[!duplicated(.get_unique_seqnames(gff_children))]
-  gff_parents <- gff_sub[(!is.na(as.character(S4Vectors::mcols(gff_sub)$ID)) &
-                           as.character(S4Vectors::mcols(gff_sub)$ID) %in% as.character(S4Vectors::mcols(gff_children)$Parent)) |
-                           (!is.na(as.character(S4Vectors::mcols(gff_sub)$Name)) &
-                           as.character(S4Vectors::mcols(gff_sub)$Name) %in% as.character(S4Vectors::mcols(gff_children)$Parent))]
-  
-  if( length(gff_children) != length(gff_parents) |
-      length(seqs) != length(gff_children)){
-    warnings("Mismatching number of annotations and sequences",
-             call. = FALSE)
-  }
-  
-  # setup coordinates for genes based on seqs as chromosomes
-  BiocGenerics::start(gff_parents) <- 1
-  BiocGenerics::end(gff_parents) <- BiocGenerics::width(seqs)
-  BiocGenerics::strand(gff_parents) <- "+"
-  
-  # chromosome names
-  chrom_names <- .reverse_unique_seqnames(.get_unique_seqnames(gff_children))
-  chrom_names <- .condense_chrom_names(chrom_names)
-  
-  # update/create and combine GRanges
-  gff_children <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
-                                        ranges = IRanges::ranges(gff_parents),
-                                        strand = as.character(BiocGenerics::strand(gff_parents)),
-                                        S4Vectors::mcols(gff_children))
-  gff_parents <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
-                                        ranges = IRanges::ranges(gff_parents),
-                                        strand = as.character(BiocGenerics::strand(gff_parents)),
-                                        S4Vectors::mcols(gff_parents))
-  
-  gff_c <- c(gff_parents,gff_children)
-  gff_c <- sort(gff_c)
-  
-  return(gff_c)
-}
-
-# create new fasta file
-.update_seqs <- function(seqs){
-  # remove brackets from chrom names
-  chrom_names <- .reverse_unique_seqnames(names(seqs))
-  chrom_names <- .condense_chrom_names(chrom_names)
-  names(seqs) <- chrom_names
-  
-  return(seqs)
 }
 
 # remove special character from chromosome names
@@ -442,7 +316,6 @@ converttRNAscanToChrom <- function(gfffile,
     x[is.na(x)] <- ""
     x
   })
-  
   # condense naming elements intro string
   res <- paste0(res$ID,
                 "_",
@@ -453,47 +326,187 @@ converttRNAscanToChrom <- function(gfffile,
   res <- gsub("^_","",res)
   res <- gsub("_$","",res)
   res <- gsub("^_","",res)
-  
   # escape unsupported characters in chromnames
   res <- gsub("(?![a-zA-Z0-9.:^*$@!+_?-|]).","-",res, perl = TRUE)
   return(res)
 }
 
-# write gff file
-.write_gff <- function(gff, ident, gfffile, message){
-  fileEnding <- ".gff3"
-  fileName <- paste0(dirname(gfffile),"/",
-                     unlist(stringr::str_split(basename(gfffile),fileEnding))[1],
-                     "_",
-                     ident,
-                     fileEnding)
+# getting sequences ------------------------------------------------------------
+# extract the exons sequences and merges them into one per gene
+.extract_exon_sequences <- function(gff_sub, fa){
+  # subset to exons only
+  exons <- gff_sub[S4Vectors::mcols(gff_sub)$type %in% c("CDS",
+                                                         "noncoding_exon",
+                                                         "exon")]
+  # get sequences for exons
+  exons_seq <- Biostrings::getSeq(fa,exons)
+  names(exons_seq) <- .get_unique_seqnames(exons)
+  # get unique names and iterate and merge split sequences
+  uniq_gene_names <- unique(names(exons_seq))
+  seqs <- Biostrings::DNAStringSet(lapply(uniq_gene_names, function(name){
+    seq <- exons_seq[BiocGenerics::which(names(exons_seq) == name)]
+    strand <- unique(as.character(BiocGenerics::strand(exons[.get_unique_seqnames(exons) == name])))
+    # If strand == "-" intron sequences are in reverse order
+    if(strand == "-"){
+      return(BiocGenerics::unlist(rev(seq)))
+    }
+    return(BiocGenerics::unlist(seq))
+  }))
+  # rename sequences to match parent sequence
+  names(seqs) <- uniq_gene_names
+  # names(seqs) <- gsub("_CDS","",names(seqs))
+  # names(seqs) <- gsub("_noncoding_exon","",names(seqs))
+  return(seqs)
+}
+
+# clustering of annotations and sequneces --------------------------------------
+# removed duplicated sequences
+.cluster_results_gff <- function(gff_sub,seqs){
+  # get duplicated sequences must match reverse of first function call in
+  # .combine_gff_subset_with_seqs
+  duplicated_seq_names <- names(seqs[duplicated(seqs)])
+  duplicated_seq_names <- append(duplicated_seq_names,
+                                 gsub("_CDS","",duplicated_seq_names))
+  duplicated_seq_names <- append(duplicated_seq_names,
+                                 gsub("_noncoding_exon","",duplicated_seq_names))
+  duplicated_seq_names <- append(duplicated_seq_names,
+                                 gsub("_exon","",duplicated_seq_names))
+  duplicated_seq_names <- unique(duplicated_seq_names)
+  gff_sub <- gff_sub[!(.get_unique_seqnames(gff_sub) %in% duplicated_seq_names)]
+  return(gff_sub)
+}
+.cluster_results_seqs <- function(seqs){
+  return(seqs[!duplicated(seqs)])
+}
+
+# matching annotations and sequences -------------------------------------------
+# create new gff annotations
+.update_gff_subset <- function(gff_sub, seqs){
+  # subset gff to parents and childs
+  gff_children <- gff_sub[.get_unique_seqnames(gff_sub) %in% names(seqs)]
+  gff_children <- gff_children[!duplicated(.get_unique_seqnames(gff_children))]
+  gff_parents <- gff_sub[(!is.na(as.character(S4Vectors::mcols(gff_sub)$ID)) &
+                         as.character(S4Vectors::mcols(gff_sub)$ID) %in% 
+                          as.character(S4Vectors::mcols(gff_children)$Parent)) |
+                         (!is.na(as.character(S4Vectors::mcols(gff_sub)$Name)) &
+                         as.character(S4Vectors::mcols(gff_sub)$Name) %in% 
+                           as.character(S4Vectors::mcols(gff_children)$Parent))]
+  if( length(gff_children) != length(gff_parents) |
+      length(seqs) != length(gff_children)){
+    warnings("Mismatching number of annotations and sequences",
+             call. = FALSE)
+  }
+  # setup coordinates for genes based on seqs as chromosomes
+  BiocGenerics::start(gff_parents) <- 1
+  BiocGenerics::end(gff_parents) <- BiocGenerics::width(seqs)
+  BiocGenerics::strand(gff_parents) <- "+"
+  # chromosome names
+  chrom_names <- .reverse_unique_seqnames(.get_unique_seqnames(gff_children))
+  chrom_names <- .condense_chrom_names(chrom_names)
+  # update/create and combine GRanges
+  gff_children <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
+                                        ranges = IRanges::ranges(gff_parents),
+                                        strand = as.character(BiocGenerics::strand(gff_parents)),
+                                        S4Vectors::mcols(gff_children))
+  gff_parents <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
+                                        ranges = IRanges::ranges(gff_parents),
+                                        strand = as.character(BiocGenerics::strand(gff_parents)),
+                                        S4Vectors::mcols(gff_parents))
+  gff_c <- c(gff_parents,gff_children)
+  gff_c <- sort(gff_c)
+  return(gff_c)
+}
+# create new fasta file
+.update_seqs <- function(seqs){
+  # remove brackets from chrom names
+  chrom_names <- .reverse_unique_seqnames(names(seqs))
+  chrom_names <- .condense_chrom_names(chrom_names)
+  names(seqs) <- chrom_names
+  return(seqs)
+}
+
+# writing files of files -------------------------------------------------------
+# create filenames
+.get_file_names <- function(gfffile,
+                            fafile,
+                            ident){
+  fileEndingFa <- ".fa"
+  fileEndingGFF <- ".gff"
+  fileNames <- list(in_fafile = fafile,
+                    in_gfffile = gfffile)
+  fileNames[["convert_gfffile"]] <- .get_file_name(gfffile, 
+                                                   fileEndingGFF, 
+                                                   ident)
   
+  fileNames[["convert_fafile"]] <- .get_file_name(fafile, 
+                                                  fileEndingFa, 
+                                                  ident)
+  fileNames[["mask_gfffile"]] <- .get_file_name(gfffile, 
+                                                fileEndingGFF, 
+                                                ident,
+                                                "mask")
+  fileNames[["trim_gfffile"]] <- .get_file_name(gfffile, 
+                                                fileEndingGFF, 
+                                                ident,
+                                                "trim")
+  fileNames
+}
+.get_file_name <- function(file, fileending, ident, modString = ""){
+  if(modString != "") modString <- paste0(modString,"_")
+  paste0(dirname(file),"/",
+         unlist(stringr::str_split(basename(file),fileending))[1],
+         "_",
+         modString,
+         ident,
+         fileending,
+         unlist(stringr::str_split(basename(file),fileending))[2])
+}
+
+# write output
+.write_output <- function(gff_subset_clustered,
+                          seqs_subset_clustered,
+                          gff_subset,
+                          gff_trimmed,
+                          fileNames){
+  # save subset as single gff and fasta file
+  .write_gff(gff_subset_clustered, 
+             fileNames[["convert_gfffile"]],
+             "Saved extracted gff3 file: ")
+  .write_fa(seqs_subset_clustered, 
+            fileNames[["convert_fafile"]],
+            "Saved extracted fasta file: ")
+  # save the masking gff annotation, which can be used for masking sequences 
+  # with bedtools
+  .write_gff(gff_subset, 
+             fileNames[["mask_gfffile"]],
+             "Saved mask gff3 file: ")
+  # save the reduced gff annotation file, which can be used for further steps
+  .write_gff(gff_trimmed, 
+             fileNames[["trim_gfffile"]],
+             "Saved trimmed gff3 file: ")
+}
+
+# write gff file
+.write_gff <- function(gff, fileName, message){
   # remove brackets from chrom names
   chrom_names <- as.character(GenomeInfoDb::seqnames(gff))
   gff <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
                                 ranges = IRanges::ranges(gff),
                                 strand = as.character(BiocGenerics::strand(gff)),
                                 S4Vectors::mcols(gff))
-  
   rtracklayer::export.gff3(gff,con = fileName)
   message(message,fileName)
-  return(fileName)
+  return(invisible(fileName))
 }
 
 # write fasta file
-.write_fa <- function(seqs, ident, fafile, message){
-  fileEnding <- ".fa"
-  fileName <- paste0(dirname(fafile),"/",
-                     unlist(stringr::str_split(basename(fafile),fileEnding))[1],
-                     "_",
-                     ident,
-                     fileEnding,
-                     unlist(stringr::str_split(basename(fafile),fileEnding))[2])
+.write_fa <- function(seqs, fileName, message){
   Biostrings::writeXStringSet(seqs,filepath = fileName)
   message(message,fileName)
-  return(fileName)
+  return(invisible(fileName))
 }
 
+# appending two or more fasta/gff files ----------------------------------------
 
 #' @name appendFastaFiles
 #' 
@@ -525,12 +538,14 @@ converttRNAscanToChrom <- function(gfffile,
 appendFastaFiles <- function(..., ident, msg){
   files <- as.character(unlist(list(...)))
   assertive::assert_all_are_existing_files(files)
-  fas <- lapply(files, readDNAStringSet)
-  fa <- do.call(append, fas)
-  
-  ident <- paste0("append_",ident)
-  
-  return(.write_fa(fa,ident,files[[1]],msg))
+  seqs <- lapply(files, readDNAStringSet)
+  seq <- do.call(append, seqs)
+  return(.write_fa(seq,
+                   .get_file_name(files[[1]],
+                                  ".fa",
+                                  ident,
+                                  "append"),
+                   msg))
 }
 
 #' @rdname appendFastaFiles
@@ -570,14 +585,15 @@ appendGFF <- function(..., ident, msg){
     d[,colnames]
   })
   DF <- do.call(rbind, DF)
-  
   # construct new gff file
   gff <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
                                 ranges = ranges,
                                 strand = strand,
                                 DF)
-  
-  ident <- paste0("append_",ident)
-  
-  return(.write_gff(gff,ident,files[[1]],msg))
+  return(.write_gff(gff,
+                    .get_file_name(files[[1]],
+                                   ".gff",
+                                   ident,
+                                   "append"),
+                    msg))
 }
