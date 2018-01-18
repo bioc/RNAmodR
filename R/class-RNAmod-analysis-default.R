@@ -1,23 +1,23 @@
-#' @include class-RNAmod-type.R
+#' @include class-RNAmod-analysis-type.R
 NULL
 
 #' @rdname mod
 #'
 #' @description 
-#' \code{mod_m7G}
+#' \code{analysis_default}
 #'
 #' @return
 #' @export
 #'
 #' @examples
-setClass("mod_default",
+setClass("analysis_default",
          contains = "mod")
 
 
 #' @rdname convertReadsToPositions
 #'
 #' @description
-#' \code{mod_m7G}: calls the default method
+#' \code{analysis_default}: calls the default method
 #'
 #' @return
 #' @export
@@ -25,7 +25,7 @@ setClass("mod_default",
 #' @examples
 setMethod(
   f = "convertReadsToPositions",
-  signature = signature(object = "mod_default",
+  signature = signature(object = "analysis_default",
                         counts = "numeric",
                         gff = "GRanges",
                         data = "DataFrame"),
@@ -57,7 +57,7 @@ setMethod(
 #' @rdname parseMod
 #' 
 #' @description 
-#' \code{mod_m7G}
+#' \code{analysis_default}
 #' 
 #' @return
 #' @export
@@ -67,7 +67,7 @@ setMethod(
 #' @examples
 setMethod(
   f = "parseMod",
-  signature = signature(object = "mod_default",
+  signature = signature(object = "analysis_default",
                         gff = "GRanges",
                         fafile = "FaFile",
                         data = "list"),
@@ -82,7 +82,7 @@ setMethod(
 #' @rdname mergePositionsOfReplicates
 #'
 #' @description
-#' \code{mod_m7G}
+#' \code{analysis_default}
 #'
 #' @return
 #' @export
@@ -90,7 +90,7 @@ setMethod(
 #' @examples
 setMethod(
   f = "mergePositionsOfReplicates",
-  signature = signature(object = "mod_default",
+  signature = signature(object = "analysis_default",
                         gff = "GRanges",
                         fafile = "FaFile",
                         data = "list"),

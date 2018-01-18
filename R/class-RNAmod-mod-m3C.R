@@ -1,31 +1,31 @@
-#' @include class-RNAmod-type.R
+#' @include class-RNAmod-mod-type.R
 NULL
 
-RNAMOD_M7G_ROLLING_MEAN_WINDOW_WIDTH <- 9
-RNAMOD_M7G_ARREST_RATE <- 0.95
-RNAMOD_M7G_P_THRESHOLD <- 0.05
-RNAMOD_M7G_SIGMA_THRESHOLD <- 3
+RNAMOD_M3C_ROLLING_MEAN_WINDOW_WIDTH <- 9
+RNAMOD_M3C_ARREST_RATE <- 0.95
+RNAMOD_M3C_P_THRESHOLD <- 0.05
+RNAMOD_M3C_SIGMA_THRESHOLD <- 3
 
 
 #' @rdname mod
 #'
 #' @description 
-#' \code{mod_m7G}
+#' \code{mod_m3C}
 #'
 #' @return
 #' @export
 #'
 #' @examples
-setClass("mod_m7G",
+setClass("mod_m3C",
          contains = "mod",
-         prototype = list(modType = "m7G")
+         prototype = list(modType = "m3C")
 )
 
 
 #' @rdname convertReadsToPositions
 #'
 #' @description
-#' \code{mod_m7G}: calls the default method
+#' \code{mod_m3C}: calls the default method
 #'
 #' @return
 #' @export
@@ -33,7 +33,7 @@ setClass("mod_m7G",
 #' @examples
 setMethod(
   f = "convertReadsToPositions",
-  signature = signature(object = "mod_m7G",
+  signature = signature(object = "mod_m3C",
                         counts = "numeric",
                         gff = "GRanges",
                         data = "DataFrame"),
@@ -49,7 +49,7 @@ setMethod(
 #' @rdname parseMod
 #' 
 #' @description 
-#' \code{mod_m7G}
+#' \code{mod_m3C}
 #' 
 #' @return
 #' @export
@@ -60,7 +60,7 @@ setMethod(
 #' @examples
 setMethod(
   f = "parseMod",
-  signature = signature(object = "mod_m7G",
+  signature = signature(object = "mod_m3C",
                         gff = "GRanges",
                         fafile = "FaFile",
                         data = "list"),
@@ -68,7 +68,7 @@ setMethod(
                         gff,
                         fafile,
                         data) {
-    message("Parsing data for m7G modifications...")
+    message("Parsing data for m3C modifications...")
     # browser()
     # Process only genes found in all datasets
     IDs <- lapply(data,names)
@@ -77,7 +77,7 @@ setMethod(
     # detect modification per transcript
     # res <- lapply(IDs,
     res <- BiocParallel::bplapply(IDs,
-                                  FUN = .analyze_M7G_transcript_prep,
+                                  FUN = .analyze_M3C_transcript_prep,
                                   data = data,
                                   gff = gff,
                                   fafile = fafile)
@@ -94,15 +94,15 @@ setMethod(
 
 # returns the position data for m7G analysis.
 # each entry in list a result for a gene of all replicates
-.get_M7G_data <- function(ID,data){
+.get_M3C_data <- function(ID,data){
   res <- lapply(data,function(x){
     return(x[[ID]][["default"]])
   })
   return(res)
 }
 
-# detect and merge modification positions in one transcript
-.analyze_M7G_transcript_prep <- function(ID,
+# merge positions in one transcript
+.analyze_M3C_transcript_prep <- function(ID,
                                          data,
                                          gff,
                                          fafile){
@@ -111,7 +111,7 @@ setMethod(
     .print_transcript_info(paste(ID," prep"), "")
   }
   
-  data <- .get_M7G_data(ID,data)
+  data <- .get_M3C_data(ID,data)
   # do not take into account position 1
   data <- lapply(data, function(x){
     x[as.numeric(names(x)) == 1] <- 0
@@ -120,14 +120,14 @@ setMethod(
   # get sequence of transcript and subset gff for single transcript data
   gff <- .subset_gff_for_unique_transcript(gff, ID)
   seq <- .get_seq_for_unique_transcript(gff,fafile,ID)
-  # detect all G positions
-  locations <- stringr::str_locate_all(as.character(seq), "G")
+  # detect all C positions
+  locations <- stringr::str_locate_all(as.character(seq), "C")
   locations <- locations[[1]][,"start"]
   if(length(locations) == 0) return(NULL)
-  # Convert local G position to global positions
+  # Convert local C position to global positions
   globalLocations <- .convert_local_to_global_locations(gff, locations)
   
-  res <- .analyze_M7G_transcript(ID = ID,
+  res <- .analyze_M3C_transcript(ID = ID,
                                  data = data,
                                  globalLocations = globalLocations,
                                  iterationN = 1)
@@ -136,7 +136,7 @@ setMethod(
 }
 
 # merge positions in one transcript
-.analyze_M7G_transcript <- function(ID,
+.analyze_M3C_transcript <- function(ID,
                                     data,
                                     globalLocations,
                                     iterationN){
@@ -146,14 +146,14 @@ setMethod(
     .print_transcript_info(paste(ID," detect"), iterationN)
   }
   
-  # Retrieve m7G positions
+  # Retrieve m3C positions
   modifications <- lapply(globalLocations,
-                          .check_for_M7G,
+                          .check_for_M3C,
                           data,
                           globalLocations)
   if(length(modifications) == 0) return(NULL)
   # name the locations based on sequence position
-  names(modifications) <- paste0(ID,"_G_",globalLocations)
+  names(modifications) <- paste0(ID,"_C_",globalLocations)
   modifications <-  modifications[!vapply(modifications,is.null,logical(1))]
   if(length(modifications) == 0) return(NULL)
   # check if by masking found modifications positions additional positions are
@@ -162,10 +162,10 @@ setMethod(
   # do not take into account positions found as modification
   data <- .mask_data(data, modLocations)
   globalLocations <- globalLocations[!(globalLocations %in% modLocations)]
-  return(append(modifications,.analyze_M7G_transcript(ID = ID,
-                                        data = data,
-                                        globalLocations = globalLocations,
-                                        (iterationN+1))))
+  return(append(modifications,.analyze_M3C_transcript(ID = ID,
+                                            data = data,
+                                            globalLocations = globalLocations,
+                                            (iterationN+1))))
 }
 
 # mask data for know modification locations
@@ -173,21 +173,21 @@ setMethod(
 .mask_data <- function(data, modLocations){
   lapply(data, function(x){
     x[as.numeric(names(x)) %in% (modLocations+1)] <- 
-      x[as.numeric(names(x)) %in% (modLocations+1)]*(1-RNAMOD_M7G_ARREST_RATE)
+      x[as.numeric(names(x)) %in% (modLocations+1)]*(1-RNAMOD_M3C_ARREST_RATE)
     x
   })
 }
 
-# check for m7G at given position
-.check_for_M7G <- function(location, 
+# check for m3C at given position
+.check_for_M3C <- function(location, 
                            data,
                            locs){
   # short cut if amount of data is not sufficient
-  if( is.null(.do_M7G_pretest(location,
-                            data))) return(NULL)
+  if( is.null(.do_M3C_pretest(location,
+                              data))) return(NULL)
   # If potential modification right in front of current location
   if(length(locs[locs == (location-1)]) != 0) {
-    locTestPre <- .check_for_M7G((location-1), 
+    locTestPre <- .check_for_M3C((location-1), 
                                  .mask_data(data, location),
                                  locs[locs != location])
     if(!is.null(locTestPre)){
@@ -197,7 +197,7 @@ setMethod(
   }
   # If potential modification right after of current location
   if(length(locs[locs == (location+1)]) != 0) {
-    locTestPost <- .check_for_M7G((location+1), 
+    locTestPost <- .check_for_M3C((location+1), 
                                   .mask_data(data, location),
                                   locs[locs != location])
     if(!is.null(locTestPost)){
@@ -208,14 +208,14 @@ setMethod(
   # Calculate the arrest rate per position
   arrestData <- lapply(data, .get_arrest_rate)
   # get test result for the current location
-  locTest <- .calc_M7G_test_values(location,
+  locTest <- .calc_M3C_test_values(location,
                                    data,
                                    arrestData)
   # If insufficient data is present
   if(is.null(locTest)) return(NULL)
   # dynamic threshold based on the noise of the signal (high sd)
-  if(!.validate_M7G_pos(RNAMOD_M7G_SIGMA_THRESHOLD, 
-                        RNAMOD_M7G_P_THRESHOLD, 
+  if(!.validate_M3C_pos(RNAMOD_M3C_SIGMA_THRESHOLD, 
+                        RNAMOD_M3C_P_THRESHOLD, 
                         locTest$sig.mean, 
                         locTest$p.value) ) {
     # debug
@@ -237,7 +237,7 @@ setMethod(
 }
 
 # check if any data is available to proceed with test
-.do_M7G_pretest <- function(location,
+.do_M3C_pretest <- function(location,
                             data){
   # do not take into account position 1
   if(location == 1) return(NULL)
@@ -259,12 +259,12 @@ setMethod(
               baseData = baseData))
 }
 
-# test for m7G at current location
-.calc_M7G_test_values <- function(location,
+# test for m3C at current location
+.calc_M3C_test_values <- function(location,
                                   data,
                                   arrestData){
   # short cut if amount of data is not sufficient
-  pretestData <- .do_M7G_pretest(location,
+  pretestData <- .do_M3C_pretest(location,
                                  data)
   if(is.null(pretestData)) return(NULL)
   
@@ -278,7 +278,7 @@ setMethod(
   # No read arrest detectable
   if( sum(testArrestData) < 0 ) return(NULL)
   # To low arrest detectable
-  testArrest <- length(testArrestData[testArrestData >= RNAMOD_M7G_ARREST_RATE])
+  testArrest <- length(testArrestData[testArrestData >= RNAMOD_M3C_ARREST_RATE])
   if( length(testArrestData) != testArrest ) {
     return(NULL)
   }
@@ -301,7 +301,7 @@ setMethod(
 }
 
 # call yes or nor position
-.validate_M7G_pos <- function(sig.threshold, 
+.validate_M3C_pos <- function(sig.threshold, 
                               p.threshold, 
                               sig, 
                               p.value){
@@ -312,7 +312,7 @@ setMethod(
 }
 
 # create data.frame for sample plotting
-.create_M7G_plot_data <- function(testData, baseData, name){
+.create_M3C_plot_data <- function(testData, baseData, name){
   data.frame(x = c(rep(name,(length(testData) + 
                                length(baseData)))),
              y = c(testData, 
@@ -324,7 +324,7 @@ setMethod(
 #' @rdname mergePositionsOfReplicates
 #'
 #' @description
-#' \code{mod_m7G}
+#' \code{mod_m3C}
 #'
 #' @return
 #' @export
@@ -332,7 +332,7 @@ setMethod(
 #' @examples
 setMethod(
   f = "mergePositionsOfReplicates",
-  signature = signature(object = "mod_m7G",
+  signature = signature(object = "mod_m3C",
                         gff = "GRanges",
                         fafile = "FaFile",
                         data = "list"),
