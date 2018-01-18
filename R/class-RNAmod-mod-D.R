@@ -1,31 +1,31 @@
-#' @include class-RNAmod-type.R
+#' @include class-RNAmod-mod-type.R
 NULL
 
-RNAMOD_M3C_ROLLING_MEAN_WINDOW_WIDTH <- 9
-RNAMOD_M3C_ARREST_RATE <- 0.95
-RNAMOD_M3C_P_THRESHOLD <- 0.05
-RNAMOD_M3C_SIGMA_THRESHOLD <- 3
+RNAMOD_D_ROLLING_MEAN_WINDOW_WIDTH <- 9
+RNAMOD_D_ARREST_RATE <- 0.95
+RNAMOD_D_P_THRESHOLD <- 0.05
+RNAMOD_D_SIGMA_THRESHOLD <- 3
 
 
 #' @rdname mod
 #'
 #' @description 
-#' \code{mod_m3C}
+#' \code{mod_D}
 #'
 #' @return
 #' @export
 #'
 #' @examples
-setClass("mod_m3C",
+setClass("mod_D",
          contains = "mod",
-         prototype = list(modType = "m3C")
+         prototype = list(modType = "D")
 )
 
 
 #' @rdname convertReadsToPositions
 #'
 #' @description
-#' \code{mod_m3C}: calls the default method
+#' \code{mod_D}: calls the default method
 #'
 #' @return
 #' @export
@@ -33,7 +33,7 @@ setClass("mod_m3C",
 #' @examples
 setMethod(
   f = "convertReadsToPositions",
-  signature = signature(object = "mod_m3C",
+  signature = signature(object = "mod_D",
                         counts = "numeric",
                         gff = "GRanges",
                         data = "DataFrame"),
@@ -49,7 +49,7 @@ setMethod(
 #' @rdname parseMod
 #' 
 #' @description 
-#' \code{mod_m3C}
+#' \code{mod_D}
 #' 
 #' @return
 #' @export
@@ -60,7 +60,7 @@ setMethod(
 #' @examples
 setMethod(
   f = "parseMod",
-  signature = signature(object = "mod_m3C",
+  signature = signature(object = "mod_D",
                         gff = "GRanges",
                         fafile = "FaFile",
                         data = "list"),
@@ -68,7 +68,7 @@ setMethod(
                         gff,
                         fafile,
                         data) {
-    message("Parsing data for m3C modifications...")
+    message("Parsing data for D modifications...")
     # browser()
     # Process only genes found in all datasets
     IDs <- lapply(data,names)
@@ -77,7 +77,7 @@ setMethod(
     # detect modification per transcript
     # res <- lapply(IDs,
     res <- BiocParallel::bplapply(IDs,
-                                  FUN = .analyze_M3C_transcript_prep,
+                                  FUN = .analyze_D_transcript_prep,
                                   data = data,
                                   gff = gff,
                                   fafile = fafile)
@@ -92,9 +92,9 @@ setMethod(
   }
 )
 
-# returns the position data for m7G analysis.
+# returns the position data for D analysis.
 # each entry in list a result for a gene of all replicates
-.get_M3C_data <- function(ID,data){
+.get_D_data <- function(ID,data){
   res <- lapply(data,function(x){
     return(x[[ID]][["default"]])
   })
@@ -102,16 +102,16 @@ setMethod(
 }
 
 # merge positions in one transcript
-.analyze_M3C_transcript_prep <- function(ID,
-                                         data,
-                                         gff,
-                                         fafile){
+.analyze_D_transcript_prep <- function(ID,
+                                       data,
+                                       gff,
+                                       fafile){
   # debug
   if( getOption("RNAmod_debug") ){
     .print_transcript_info(paste(ID," prep"), "")
   }
   
-  data <- .get_M3C_data(ID,data)
+  data <- .get_D_data(ID,data)
   # do not take into account position 1
   data <- lapply(data, function(x){
     x[as.numeric(names(x)) == 1] <- 0
@@ -120,40 +120,40 @@ setMethod(
   # get sequence of transcript and subset gff for single transcript data
   gff <- .subset_gff_for_unique_transcript(gff, ID)
   seq <- .get_seq_for_unique_transcript(gff,fafile,ID)
-  # detect all C positions
-  locations <- stringr::str_locate_all(as.character(seq), "C")
+  # detect all T positions
+  locations <- stringr::str_locate_all(as.character(seq), "T")
   locations <- locations[[1]][,"start"]
   if(length(locations) == 0) return(NULL)
-  # Convert local C position to global positions
+  # Convert local T position to global positions
   globalLocations <- .convert_local_to_global_locations(gff, locations)
   
-  res <- .analyze_M3C_transcript(ID = ID,
-                                 data = data,
-                                 globalLocations = globalLocations,
-                                 iterationN = 1)
+  res <- .analyze_D_transcript(ID = ID,
+                               data = data,
+                               globalLocations = globalLocations,
+                               iterationN = 1)
   res <- res[order(as.numeric(unlist(lapply(res, "[[", "location"))))]
   return(res)
 }
 
 # merge positions in one transcript
-.analyze_M3C_transcript <- function(ID,
-                                    data,
-                                    globalLocations,
-                                    iterationN){
+.analyze_D_transcript <- function(ID,
+                                  data,
+                                  globalLocations,
+                                  iterationN){
   if( iterationN > .get_transcript_max_iteration()) return(NULL)
   # debug
   if( getOption("RNAmod_debug") ){
     .print_transcript_info(paste(ID," detect"), iterationN)
   }
   
-  # Retrieve m3C positions
+  # Retrieve D positions
   modifications <- lapply(globalLocations,
-                          .check_for_M3C,
+                          .check_for_D,
                           data,
                           globalLocations)
   if(length(modifications) == 0) return(NULL)
   # name the locations based on sequence position
-  names(modifications) <- paste0(ID,"_C_",globalLocations)
+  names(modifications) <- paste0(ID,"_U_",globalLocations)
   modifications <-  modifications[!vapply(modifications,is.null,logical(1))]
   if(length(modifications) == 0) return(NULL)
   # check if by masking found modifications positions additional positions are
@@ -162,7 +162,7 @@ setMethod(
   # do not take into account positions found as modification
   data <- .mask_data(data, modLocations)
   globalLocations <- globalLocations[!(globalLocations %in% modLocations)]
-  return(append(modifications,.analyze_M3C_transcript(ID = ID,
+  return(append(modifications,.analyze_D_transcript(ID = ID,
                                             data = data,
                                             globalLocations = globalLocations,
                                             (iterationN+1))))
@@ -173,23 +173,23 @@ setMethod(
 .mask_data <- function(data, modLocations){
   lapply(data, function(x){
     x[as.numeric(names(x)) %in% (modLocations+1)] <- 
-      x[as.numeric(names(x)) %in% (modLocations+1)]*(1-RNAMOD_M3C_ARREST_RATE)
+      x[as.numeric(names(x)) %in% (modLocations+1)]*(1-RNAMOD_D_ARREST_RATE)
     x
   })
 }
 
-# check for m3C at given position
-.check_for_M3C <- function(location, 
-                           data,
-                           locs){
+# check for D at given position
+.check_for_D <- function(location, 
+                         data,
+                         locs){
   # short cut if amount of data is not sufficient
-  if( is.null(.do_M3C_pretest(location,
-                              data))) return(NULL)
+  if( is.null(.do_D_pretest(location,
+                            data))) return(NULL)
   # If potential modification right in front of current location
   if(length(locs[locs == (location-1)]) != 0) {
-    locTestPre <- .check_for_M3C((location-1), 
-                                 .mask_data(data, location),
-                                 locs[locs != location])
+    locTestPre <- .check_for_D((location-1), 
+                               .mask_data(data, location),
+                               locs[locs != location])
     if(!is.null(locTestPre)){
       # udpate data accordingly
       data <- .mask_data(data, (location-1))
@@ -197,9 +197,9 @@ setMethod(
   }
   # If potential modification right after of current location
   if(length(locs[locs == (location+1)]) != 0) {
-    locTestPost <- .check_for_M3C((location+1), 
-                                  .mask_data(data, location),
-                                  locs[locs != location])
+    locTestPost <- .check_for_D((location+1), 
+                                .mask_data(data, location),
+                                locs[locs != location])
     if(!is.null(locTestPost)){
       # udpate data accordingly
       data <- .mask_data(data, (location+1))
@@ -208,16 +208,16 @@ setMethod(
   # Calculate the arrest rate per position
   arrestData <- lapply(data, .get_arrest_rate)
   # get test result for the current location
-  locTest <- .calc_M3C_test_values(location,
-                                   data,
-                                   arrestData)
+  locTest <- .calc_D_test_values(location,
+                                 data,
+                                 arrestData)
   # If insufficient data is present
   if(is.null(locTest)) return(NULL)
   # dynamic threshold based on the noise of the signal (high sd)
-  if(!.validate_M3C_pos(RNAMOD_M3C_SIGMA_THRESHOLD, 
-                        RNAMOD_M3C_P_THRESHOLD, 
-                        locTest$sig.mean, 
-                        locTest$p.value) ) {
+  if(!.validate_D_pos(RNAMOD_D_SIGMA_THRESHOLD, 
+                      RNAMOD_D_P_THRESHOLD, 
+                      locTest$sig.mean, 
+                      locTest$p.value) ) {
     # debug
     if( getOption("RNAmod_debug") ){
       .print_location_info(paste(location,"_no"),locs)
@@ -237,8 +237,8 @@ setMethod(
 }
 
 # check if any data is available to proceed with test
-.do_M3C_pretest <- function(location,
-                            data){
+.do_D_pretest <- function(location,
+                          data){
   # do not take into account position 1
   if(location == 1) return(NULL)
   
@@ -259,13 +259,13 @@ setMethod(
               baseData = baseData))
 }
 
-# test for m3C at current location
-.calc_M3C_test_values <- function(location,
-                                  data,
-                                  arrestData){
+# test for D at current location
+.calc_D_test_values <- function(location,
+                                data,
+                                arrestData){
   # short cut if amount of data is not sufficient
-  pretestData <- .do_M3C_pretest(location,
-                                 data)
+  pretestData <- .do_D_pretest(location,
+                               data)
   if(is.null(pretestData)) return(NULL)
   
   # data from pretest
@@ -278,14 +278,16 @@ setMethod(
   # No read arrest detectable
   if( sum(testArrestData) < 0 ) return(NULL)
   # To low arrest detectable
-  testArrest <- length(testArrestData[testArrestData >= RNAMOD_M3C_ARREST_RATE])
+  testArrest <- length(testArrestData[testArrestData >= RNAMOD_D_ARREST_RATE])
   if( length(testArrestData) != testArrest ) {
     return(NULL)
   }
+  
   # get test values
   # overall mean and sd
   mean <-  mean(baseData)
   sd <-  stats::sd(baseData)
+  
   # Use the sigma level as value for signal strength
   sig <- (as.numeric(as.character(testData)) - mean) %/% sd
   sig.mean <- mean(sig)
@@ -293,6 +295,7 @@ setMethod(
   # Since normality of distribution can not be assumed use the MWU
   # generate p.value for single position
   p.value <- suppressWarnings(wilcox.test(baseData, testData)$p.value)
+  
   return(list(sig = sig,
               sig.mean = sig.mean,
               sig.sd = sig.sd,
@@ -301,7 +304,7 @@ setMethod(
 }
 
 # call yes or nor position
-.validate_M3C_pos <- function(sig.threshold, 
+.validate_D_pos <- function(sig.threshold, 
                               p.threshold, 
                               sig, 
                               p.value){
@@ -312,7 +315,7 @@ setMethod(
 }
 
 # create data.frame for sample plotting
-.create_M3C_plot_data <- function(testData, baseData, name){
+.create_D_plot_data <- function(testData, baseData, name){
   data.frame(x = c(rep(name,(length(testData) + 
                                length(baseData)))),
              y = c(testData, 
@@ -324,7 +327,7 @@ setMethod(
 #' @rdname mergePositionsOfReplicates
 #'
 #' @description
-#' \code{mod_m3C}
+#' \code{mod_D}
 #'
 #' @return
 #' @export
@@ -332,7 +335,7 @@ setMethod(
 #' @examples
 setMethod(
   f = "mergePositionsOfReplicates",
-  signature = signature(object = "mod_m3C",
+  signature = signature(object = "mod_D",
                         gff = "GRanges",
                         fafile = "FaFile",
                         data = "list"),

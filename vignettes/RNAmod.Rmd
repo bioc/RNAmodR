@@ -31,11 +31,17 @@ mod <- RNAmod("test",
 modifications <- c("m7G","D","m3C")
 parseForModifications(mod,1,modifications)
 
-se <- getSummarizedExperiment(mod,1,modifications)
+se1 <- getSummarizedExperiment(mod,1,modifications)
+se2 <- getSummarizedExperiment(mod,2,modifications)
+se3 <- getSummarizedExperiment(mod,3,modifications)
 
-tRNA <- rownames(se)[grepl("t", rownames(se), fixed = TRUE)]
+tRNA <- rownames(se1)[grepl("t", rownames(se1), fixed = TRUE)]
 rRNA <- c("RDN18-1","RDN25-1")
 
-saveModPlot(mod,se,modifications,c(tRNA,rRNA))
-saveModPlot(mod,se,modifications,c(tRNA,rRNA),focus = TRUE)
+saveModPlot(mod,se1,modifications,c(rRNA))
+saveModPlot(mod,se2,modifications,c(rRNA))
+saveModPlot(mod,se3,modifications,c(rRNA))
+saveModPlot(mod,se1,modifications,c(tRNA),filetype = "png")
+saveModPlot(mod,se2,modifications,c(tRNA),filetype = "png")
+saveModPlot(mod,se3,modifications,c(tRNA),filetype = "png")
 ```
