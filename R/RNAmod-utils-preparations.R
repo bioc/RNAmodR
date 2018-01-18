@@ -204,13 +204,18 @@ converttRNAscanToChrom <- function(gfffile,
       chrom_names[names(chrom_names) == x]
     }))
     # create updated tRNAscan object for subsetting
-    tRNAscan_new <- GenomicRanges::GRanges(S4Vectors::Rle(newChromNames),
-                                       ranges = IRanges::ranges(tRNAscan),
-                                       strand = as.character(BiocGenerics::strand(tRNAscan)),
-                                       S4Vectors::mcols(tRNAscan))
+    tRNAscan_new <- GenomicRanges::GRanges(
+      S4Vectors::Rle(newChromNames),
+      ranges = IRanges::ranges(tRNAscan),
+      strand = as.character(BiocGenerics::strand(tRNAscan)),
+      S4Vectors::mcols(tRNAscan))
   } else {
     tRNAscan_new <- tRNAscan
   }
+  # Because tRNA His does not exactly overlap, enlarge the boundaries each by
+  # 3 nt
+  start(tRNAscan_new) <- start(tRNAscan_new) - 3
+  end(tRNAscan_new) <- end(tRNAscan_new) + 3
   # Remove all entries from the original gff, which are part of the tRNAscan
   gff_subset <- suppressWarnings(IRanges::subsetByOverlaps(gff, 
                                                            tRNAscan_new,
@@ -240,8 +245,7 @@ converttRNAscanToChrom <- function(gfffile,
     unlist(d)
   }))
   # set new names which become chromosome names
-  tRNAnames <- tRNAscan$ID
-  names(seqs_subset) <- tRNAnames
+  names(seqs_subset) <- tRNAscan$ID
   # remove indistinguishable sequences from tRNAscan
   # get clustered subset
   tRNA_subset_clustered <- tRNAscan[,!(colnames(S4Vectors::mcols(tRNAscan)) %in%
@@ -249,9 +253,13 @@ converttRNAscanToChrom <- function(gfffile,
                                            "tRNA_str"))]
   seqs_subset_clustered <- .cluster_results_seqs(seqs_subset)
   # create new gff annotation
-  browser()
   tRNA_subset_clustered <- 
-    tRNA_subset_clustered[tRNA_subset_clustered$ID %in% names(seqs_subset_clustered),]
+    tRNA_subset_clustered[which(tRNA_subset_clustered$ID 
+                                %in% names(seqs_subset_clustered)),]
+  tRNA_subset_clustered <- .reset_coord(tRNA_subset_clustered, 
+                                        seqs_subset_clustered)
+  if( is.null(tRNA_subset_clustered$Name)) tRNA_subset_clustered$Name <- NA
+  if( is.null(tRNA_subset_clustered$gene)) tRNA_subset_clustered$gene <- NA
   tRNA_subset_clustered <-
     tRNA_subset_clustered[, colnames(S4Vectors::mcols(tRNA_subset_clustered))
                           %in% c("source", "type", "score",
@@ -261,6 +269,7 @@ converttRNAscanToChrom <- function(gfffile,
     ranges = IRanges::ranges(tRNA_subset_clustered),
     strand = as.character(BiocGenerics::strand(tRNA_subset_clustered)),
     S4Vectors::mcols(tRNA_subset_clustered))
+  
   # get the aggregated file names
   fileNames <- .get_file_names(gfffile,
                                fafile,
@@ -340,8 +349,13 @@ converttRNAscanToChrom <- function(gfffile,
   res <- gsub("_$","",res)
   res <- gsub("^_","",res)
   # escape unsupported characters in chromnames
-  res <- gsub("(?![a-zA-Z0-9.:^*$@!+_?-|]).","-",res, perl = TRUE)
-  return(res)
+  return(.fix_chrom_names(res))
+}
+# escape unsupported characters in chromnames
+.fix_chrom_names <- function(x){
+  gsub("(?![a-zA-Z0-9.:^*$@!+_?-|]).","-",
+       x, 
+       perl = TRUE)
 }
 
 # getting sequences ------------------------------------------------------------
@@ -410,9 +424,7 @@ converttRNAscanToChrom <- function(gfffile,
              call. = FALSE)
   }
   # setup coordinates for genes based on seqs as chromosomes
-  BiocGenerics::start(gff_parents) <- 1
-  BiocGenerics::end(gff_parents) <- BiocGenerics::width(seqs)
-  BiocGenerics::strand(gff_parents) <- "+"
+  gff_parents <- .reset_coord(gff_parents, seqs)
   # chromosome names
   chrom_names <- .reverse_unique_seqnames(.get_unique_seqnames(gff_children))
   chrom_names <- .condense_chrom_names(chrom_names)
@@ -436,6 +448,13 @@ converttRNAscanToChrom <- function(gfffile,
   chrom_names <- .condense_chrom_names(chrom_names)
   names(seqs) <- chrom_names
   return(seqs)
+}
+# reset coordinates for new chromosomes
+.reset_coord <- function(gff,seqs){
+  BiocGenerics::start(gff) <- 1
+  BiocGenerics::end(gff) <- BiocGenerics::width(seqs)
+  BiocGenerics::strand(gff) <- "+"
+  gff
 }
 
 # writing files of files -------------------------------------------------------
@@ -500,21 +519,24 @@ converttRNAscanToChrom <- function(gfffile,
 }
 
 # write gff file
-.write_gff <- function(gff, fileName, message){
+.write_gff <- function(gff_save, fileName, message){
   # remove brackets from chrom names
-  chrom_names <- as.character(GenomeInfoDb::seqnames(gff))
-  gff <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
-                                ranges = IRanges::ranges(gff),
-                                strand = as.character(BiocGenerics::strand(gff)),
-                                S4Vectors::mcols(gff))
-  rtracklayer::export.gff3(gff,con = fileName)
+  chrom_names <- .fix_chrom_names(
+    as.character(GenomeInfoDb::seqnames(gff_save)))
+  gff_save <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
+                          ranges = IRanges::ranges(gff_save),
+                          strand = as.character(BiocGenerics::strand(gff_save)),
+                          S4Vectors::mcols(gff_save))
+  rtracklayer::export.gff3(gff_save,con = fileName)
   message(message,fileName)
   return(invisible(fileName))
 }
 
 # write fasta file
-.write_fa <- function(seqs, fileName, message){
-  Biostrings::writeXStringSet(seqs,filepath = fileName)
+.write_fa <- function(seqs_save, fileName, message){
+  # remove brackets from chrom names
+  names(seqs_save) <- .fix_chrom_names(names(seqs_save))
+  Biostrings::writeXStringSet(seqs_save,filepath = fileName)
   message(message,fileName)
   return(invisible(fileName))
 }
@@ -593,8 +615,24 @@ appendGFF <- function(..., ident, msg){
   DF <- lapply(gffs,function(gff){
     S4Vectors::mcols(gff)
   })
+  # Force ID, Name, gene and Parent columns to be set even if empty
   colnames <- do.call(intersect, lapply(DF,colnames))
+  colnames <- unique(c(colnames,"ID","Name","gene","Parent"))
   DF <- lapply(DF,function(d){
+    diff <- setdiff(colnames,colnames(d))
+    if(length(diff) > 0){
+      d_add <- S4Vectors::DataFrame(
+        setNames(lapply(diff, function(names){
+          rep(NA_character_,nrow(d))
+        }),
+        diff))
+      # cannot combine character with CharacterList
+      if(length(diff[diff == "Parent"]) != 0){
+        d_add[,"Parent"] <- IRanges::CharacterList(rep(list(character(0)),
+                                                       nrow(d)))
+      }
+      d <- cbind(d,d_add)
+    }
     d[,colnames]
   })
   DF <- do.call(rbind, DF)
