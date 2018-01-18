@@ -234,7 +234,8 @@ setGeneric (
 setGeneric ( 
   name= "checkForModification",
   def=function(object,
-               data){standardGeneric("checkForModification")} 
+               data,
+               locations){standardGeneric("checkForModification")} 
 ) 
 
 

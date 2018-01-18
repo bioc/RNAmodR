@@ -37,82 +37,74 @@ setClass("mod_D",
 setMethod(
   f = "checkForModification",
   signature = signature(object = "mod_D",
-                        data = "DataFrame"),
+                        data = "DataFrame",
+                        locations = "numeric"),
   definition = function(object,
-                        data) {
+                        data,
+                        locations) {
     
     
     
+    
+    
+    
+    
+    
+    # short cut if amount of data is not sufficient
+    if( is.null(.do_D_pretest(location,
+                              data))) return(NULL)
+    # If potential modification right in front of current location
+    if(length(locs[locs == (location-1)]) != 0) {
+      locTestPre <- .check_for_D((location-1), 
+                                 .mask_data(data, location),
+                                 locs[locs != location])
+      if(!is.null(locTestPre)){
+        # udpate data accordingly
+        data <- .mask_data(data, (location-1))
+      }
+    }
+    # If potential modification right after of current location
+    if(length(locs[locs == (location+1)]) != 0) {
+      locTestPost <- .check_for_D((location+1), 
+                                  .mask_data(data, location),
+                                  locs[locs != location])
+      if(!is.null(locTestPost)){
+        # udpate data accordingly
+        data <- .mask_data(data, (location+1))
+      }
+    }
+    # Calculate the arrest rate per position
+    arrestData <- lapply(data, .get_arrest_rate)
+    # get test result for the current location
+    locTest <- .calc_D_test_values(location,
+                                   data,
+                                   arrestData)
+    # If insufficient data is present
+    if(is.null(locTest)) return(NULL)
+    # dynamic threshold based on the noise of the signal (high sd)
+    if(!.validate_D_pos(RNAMOD_D_SIGMA_THRESHOLD, 
+                        RNAMOD_D_P_THRESHOLD, 
+                        locTest$sig.mean, 
+                        locTest$p.value) ) {
+      # debug
+      if( getOption("RNAmod_debug") ){
+        .print_location_info(paste(location,"_no"),locs)
+      }
+      return(NULL)
+    }
+    # debug
+    if( getOption("RNAmod_debug") ){
+      .print_location_info(paste(location,"_yes"), locs)
+    }
+    # Return data
+    return(list(location = location,
+                signal = locTest$sig.mean,
+                signal.sd = locTest$sig.sd,
+                p.value = locTest$p.value,
+                nbsamples = locTest$n))
   }
 )
 
-# mask data for know modification locations
-# extend to N+2,N+3 location?
-.mask_data <- function(data, modLocations){
-  lapply(data, function(x){
-    x[as.numeric(names(x)) %in% (modLocations+1)] <- 
-      x[as.numeric(names(x)) %in% (modLocations+1)]*(1-RNAMOD_D_ARREST_RATE)
-    x
-  })
-}
-
-# check for D at given position
-.check_for_D <- function(location, 
-                         data,
-                         locs){
-  # short cut if amount of data is not sufficient
-  if( is.null(.do_D_pretest(location,
-                            data))) return(NULL)
-  # If potential modification right in front of current location
-  if(length(locs[locs == (location-1)]) != 0) {
-    locTestPre <- .check_for_D((location-1), 
-                               .mask_data(data, location),
-                               locs[locs != location])
-    if(!is.null(locTestPre)){
-      # udpate data accordingly
-      data <- .mask_data(data, (location-1))
-    }
-  }
-  # If potential modification right after of current location
-  if(length(locs[locs == (location+1)]) != 0) {
-    locTestPost <- .check_for_D((location+1), 
-                                .mask_data(data, location),
-                                locs[locs != location])
-    if(!is.null(locTestPost)){
-      # udpate data accordingly
-      data <- .mask_data(data, (location+1))
-    }
-  }
-  # Calculate the arrest rate per position
-  arrestData <- lapply(data, .get_arrest_rate)
-  # get test result for the current location
-  locTest <- .calc_D_test_values(location,
-                                 data,
-                                 arrestData)
-  # If insufficient data is present
-  if(is.null(locTest)) return(NULL)
-  # dynamic threshold based on the noise of the signal (high sd)
-  if(!.validate_D_pos(RNAMOD_D_SIGMA_THRESHOLD, 
-                      RNAMOD_D_P_THRESHOLD, 
-                      locTest$sig.mean, 
-                      locTest$p.value) ) {
-    # debug
-    if( getOption("RNAmod_debug") ){
-      .print_location_info(paste(location,"_no"),locs)
-    }
-    return(NULL)
-  }
-  # debug
-  if( getOption("RNAmod_debug") ){
-    .print_location_info(paste(location,"_yes"), locs)
-  }
-  # Return data
-  return(list(location = location,
-              signal = locTest$sig.mean,
-              signal.sd = locTest$sig.sd,
-              p.value = locTest$p.value,
-              nbsamples = locTest$n))
-}
 
 # check if any data is available to proceed with test
 .do_D_pretest <- function(location,
@@ -201,26 +193,3 @@ setMethod(
              group = c(rep("Position",length(testData)), 
                        rep("Baseline", length(baseData))))
 }
-
-#' @rdname mergePositionsOfReplicates
-#'
-#' @description
-#' \code{mod_D}
-#'
-#' @return
-#' @export
-#'
-#' @examples
-setMethod(
-  f = "mergePositionsOfReplicates",
-  signature = signature(object = "mod_D",
-                        gff = "GRanges",
-                        fafile = "FaFile",
-                        data = "list"),
-  definition = function(object,
-                        gff,
-                        fafile,
-                        data) {
-    return(NA)
-  }
-)
