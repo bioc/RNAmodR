@@ -186,7 +186,6 @@ converttRNAscanToChrom <- function(gfffile,
   assertive::assert_is_a_bool(appendToOriginal)
   # Load files
   gff <- rtracklayer::import.gff3(gfffile)
-  fa <- Rsamtools::FaFile(fafile)
   # load tRNAscan data
   tRNAscan <- tRNAscan2GRanges::tRNAscan2GFF(tRNAscanfile)
   # test if chromosome names of tRNAscan need to be fixed
@@ -200,9 +199,10 @@ converttRNAscanToChrom <- function(gfffile,
     chrom_names <- unique(as.character(GenomeInfoDb::seqnames(gff)))[seq_len(chrN)]
     names(chrom_names) <- unique(as.character(GenomeInfoDb::seqnames(tRNAscan)))
     # get new chromosome names
-    newChromNames <- unlist(lapply(GenomeInfoDb::seqnames(tRNAscan), function(x){
-      chrom_names[names(chrom_names) == x]
-    }))
+    newChromNames <- unlist(lapply(GenomeInfoDb::seqnames(tRNAscan), 
+                                   function(x){
+                                     chrom_names[names(chrom_names) == x]
+                                   }))
     # create updated tRNAscan object for subsetting
     tRNAscan_new <- GenomicRanges::GRanges(
       S4Vectors::Rle(newChromNames),

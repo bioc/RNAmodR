@@ -22,29 +22,6 @@ setClass("mod_m3C",
 )
 
 
-#' @rdname convertReadsToPositions
-#'
-#' @description
-#' \code{mod_m3C}: calls the default method
-#'
-#' @return
-#' @export
-#'
-#' @examples
-setMethod(
-  f = "convertReadsToPositions",
-  signature = signature(object = "mod_m3C",
-                        counts = "numeric",
-                        gff = "GRanges",
-                        data = "DataFrame"),
-  definition = function(object,
-                        counts,
-                        gff,
-                        data) {
-    return(NA)
-  }
-)
-
 
 #' @rdname parseMod
 #' 
@@ -59,124 +36,18 @@ setMethod(
 #'
 #' @examples
 setMethod(
-  f = "parseMod",
-  signature = signature(object = "mod_m3C",
-                        gff = "GRanges",
-                        fafile = "FaFile",
-                        data = "list"),
+  f = "checkForModification",
+  signature = signature(object = "mod_D",
+                        data = "DataFrame"),
   definition = function(object,
-                        gff,
-                        fafile,
                         data) {
-    message("Parsing data for m3C modifications...")
-    # browser()
-    # Process only genes found in all datasets
-    IDs <- lapply(data,names)
-    IDs <- Reduce(intersect, IDs)
     
-    # detect modification per transcript
-    # res <- lapply(IDs,
-    res <- BiocParallel::bplapply(IDs,
-                                  FUN = .analyze_M3C_transcript_prep,
-                                  data = data,
-                                  gff = gff,
-                                  fafile = fafile)
-    names(res) <- IDs
-    res <- res[!is.null(res)]
     
-    # If not results are present return NA instead of NULL
-    if(is.null(res)){
-      return(NA)
-    }
-    return(res)
+    
   }
 )
 
-# returns the position data for m7G analysis.
-# each entry in list a result for a gene of all replicates
-.get_M3C_data <- function(ID,data){
-  res <- lapply(data,function(x){
-    return(x[[ID]][["default"]])
-  })
-  return(res)
-}
 
-# merge positions in one transcript
-.analyze_M3C_transcript_prep <- function(ID,
-                                         data,
-                                         gff,
-                                         fafile){
-  # debug
-  if( getOption("RNAmod_debug") ){
-    .print_transcript_info(paste(ID," prep"), "")
-  }
-  
-  data <- .get_M3C_data(ID,data)
-  # do not take into account position 1
-  data <- lapply(data, function(x){
-    x[as.numeric(names(x)) == 1] <- 0
-    x
-  })
-  # get sequence of transcript and subset gff for single transcript data
-  gff <- .subset_gff_for_unique_transcript(gff, ID)
-  seq <- .get_seq_for_unique_transcript(gff,fafile,ID)
-  # detect all C positions
-  locations <- stringr::str_locate_all(as.character(seq), "C")
-  locations <- locations[[1]][,"start"]
-  if(length(locations) == 0) return(NULL)
-  # Convert local C position to global positions
-  globalLocations <- .convert_local_to_global_locations(gff, locations)
-  
-  res <- .analyze_M3C_transcript(ID = ID,
-                                 data = data,
-                                 globalLocations = globalLocations,
-                                 iterationN = 1)
-  res <- res[order(as.numeric(unlist(lapply(res, "[[", "location"))))]
-  return(res)
-}
-
-# merge positions in one transcript
-.analyze_M3C_transcript <- function(ID,
-                                    data,
-                                    globalLocations,
-                                    iterationN){
-  if( iterationN > .get_transcript_max_iteration()) return(NULL)
-  # debug
-  if( getOption("RNAmod_debug") ){
-    .print_transcript_info(paste(ID," detect"), iterationN)
-  }
-  
-  # Retrieve m3C positions
-  modifications <- lapply(globalLocations,
-                          .check_for_M3C,
-                          data,
-                          globalLocations)
-  if(length(modifications) == 0) return(NULL)
-  # name the locations based on sequence position
-  names(modifications) <- paste0(ID,"_C_",globalLocations)
-  modifications <-  modifications[!vapply(modifications,is.null,logical(1))]
-  if(length(modifications) == 0) return(NULL)
-  # check if by masking found modifications positions additional positions are
-  # picked up - remember the +1 location data
-  modLocations <- as.numeric(unlist(lapply(modifications, "[[","location")))
-  # do not take into account positions found as modification
-  data <- .mask_data(data, modLocations)
-  globalLocations <- globalLocations[!(globalLocations %in% modLocations)]
-  return(append(modifications,.analyze_M3C_transcript(ID = ID,
-                                            data = data,
-                                            globalLocations = globalLocations,
-                                            (iterationN+1))))
-}
-
-# mask data for know modification locations
-# extend to N+2,N+3 location?
-.mask_data <- function(data, modLocations){
-  lapply(data, function(x){
-    x[as.numeric(names(x)) %in% (modLocations+1)] <- 
-      x[as.numeric(names(x)) %in% (modLocations+1)]*(1-RNAMOD_M3C_ARREST_RATE)
-    x
-  })
-}
 
 # check for m3C at given position
 .check_for_M3C <- function(location, 
@@ -320,26 +191,3 @@ setMethod(
              group = c(rep("Position",length(testData)), 
                        rep("Baseline", length(baseData))))
 }
-
-#' @rdname mergePositionsOfReplicates
-#'
-#' @description
-#' \code{mod_m3C}
-#'
-#' @return
-#' @export
-#'
-#' @examples
-setMethod(
-  f = "mergePositionsOfReplicates",
-  signature = signature(object = "mod_m3C",
-                        gff = "GRanges",
-                        fafile = "FaFile",
-                        data = "list"),
-  definition = function(object,
-                        gff,
-                        fafile,
-                        data) {
-    return(NA)
-  }
-)

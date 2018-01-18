@@ -180,13 +180,13 @@ setGeneric (
                modifications){standardGeneric("parseForModifications")} 
 ) 
 
-# modtype accessors ------------------------------------------------------------
+# analysis type accessors ------------------------------------------------------------
 
 #' @name mod-accessors
 #' 
-#' @title Accessor for 'mod' class
+#' @title Accessor for 'analysis' class
 #' 
-#' @param object mod object 
+#' @param object analysis object 
 #' 
 #' @export
 setGeneric ( 
@@ -198,8 +198,43 @@ setGeneric (
 #' 
 #' @export
 setGeneric ( 
+  name= "getPositions",
+  def=function(object){standardGeneric("getPositions")} 
+) 
+
+#' @rdname mod-accessors
+#' 
+#' @export
+setGeneric ( 
+  name= "getModifications",
+  def=function(object){standardGeneric("getModifications")} 
+) 
+
+#' @rdname mod-accessors
+#' 
+#' @export
+setGeneric ( 
+  name= "getNumberOfModifications",
+  def=function(object){standardGeneric("getNumberOfModifications")} 
+) 
+
+# modtype accessors ------------------------------------------------------------
+
+#' @rdname mod-accessors
+#' 
+#' @export
+setGeneric ( 
   name= "getModType",
   def=function(object){standardGeneric("getModType")} 
+) 
+
+#' @rdname mod-accessors
+#' 
+#' @export
+setGeneric ( 
+  name= "checkForModification",
+  def=function(object,
+               data){standardGeneric("checkForModification")} 
 ) 
 
 
@@ -209,18 +244,18 @@ setGeneric (
 #' 
 #' @title convertReadsToPositions
 #' 
-#' @param object mod object 
-#' @param counts total counts in the BAM file containing the data
+#' @param object analysis object 
+#' @param files files which to analyze
+#' @param param ScanBamParam to use for loading the bam files
 #' @param gff a GRanges object for the genome
-#' @param data list of DataFrame containg the read data
-#' 
+#'
 #' @export
 setGeneric ( 
   name= "convertReadsToPositions",
   def=function(object,
-               counts,
+               files,
                gff,
-               data){standardGeneric("convertReadsToPositions")} 
+               param){standardGeneric("convertReadsToPositions")} 
 ) 
 
 #' @name parseMod
