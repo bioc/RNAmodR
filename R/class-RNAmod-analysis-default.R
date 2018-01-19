@@ -1,3 +1,4 @@
+#' @include class-RNAmod-mod-type.R
 #' @include class-RNAmod-analysis-type.R
 NULL
 
@@ -33,6 +34,7 @@ setMethod(
                         files,
                         gff,
                         param) {
+    browser()
     # detect modifications in each file
     data <- lapply(files,
                    FUN = .get_positions,
@@ -46,7 +48,7 @@ setMethod(
            call. = FALSE)
     }
     object@data <- data
-    return(invisible(TRUE))
+    return(object)
   }
 )
 
@@ -141,18 +143,15 @@ setMethod(
   signature = signature(object = "analysis_default",
                         gff = "GRanges",
                         fafile = "FaFile",
-                        modifications = "character",
-                        data = "list"),
+                        modifications = "list"),
   definition = function(object,
                         gff,
                         fafile,
                         modifications) {
-    # browser()
+    browser()
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
-    # load modifications classes
-    modClasses <- .load_mod_classes(modifications)
     # detect modification per transcript
     res <- lapply(IDs,
     # res <- BiocParallel::bplapply(IDs,
@@ -160,25 +159,24 @@ setMethod(
                                   data = object@data,
                                   gff = gff,
                                   fafile = fafile,
-                                  mods = modClasses)
+                                  mods = modifications)
     names(res) <- IDs
     res <- res[!is.null(res)]
     # If not results are present return NA instead of NULL
     if(is.null(res)){
-      return(NA)
+      res <- NA
     }
-    return(res)
-    
-    
-    
-    # General cleanup
-    mod_positions <- mod_positions[!is.na(mod_positions)]
-    # Specific cleanup
-    mod_positions <- lapply(mod_positions, function(modPerTypes){
-      modPerTypes[!vapply(modPerTypes,is.null,logical(1))]
-    })
+    object@modifications <- res
+    return(object)
   }
 )
+
+# returns the position data for m7G analysis.
+# each entry in list a result for a gene of all replicates
+.get_data <- function(ID,data){
+  res <- lapply(data,"[[",ID)
+  return(res)
+}
 
 # detect and merge modification positions in one transcript
 .analyze_transcript_prep <- function(ID,
@@ -186,11 +184,12 @@ setMethod(
                                      gff,
                                      fafile,
                                      mods){
+  browser()
   # debug
   if( getOption("RNAmod_debug") ){
     .print_transcript_info(paste(ID," prep"), "")
   }
-  data <- data[[ID]]
+  data <- .get_data(ID,data)
   # do not take into account position 1
   data <- lapply(data, function(x){
     x[as.numeric(names(x)) == 1] <- 0
@@ -199,11 +198,13 @@ setMethod(
   # get sequence of transcript and subset gff for single transcript data
   gff <- .subset_gff_for_unique_transcript(gff, ID)
   seq <- .get_seq_for_unique_transcript(gff,fafile,ID)
+  # generate a location vector
+  locations <- 1:width(seq)
   # Convert local G position to global positions
   globalLocations <- .convert_local_to_global_locations(gff, locations)
   
   
-  
+  browser()
   
   # detect all G positions
   locations <- stringr::str_locate_all(as.character(seq), "G")
@@ -215,6 +216,7 @@ setMethod(
   
   
   res <- .analyze_transcript(ID = ID,
+                             mods = mods,
                              data = data,
                              globalLocations = globalLocations,
                              iterationN = 1)
@@ -224,6 +226,7 @@ setMethod(
 
 # merge positions in one transcript
 .analyze_transcript <- function(ID,
+                                mods,
                                 data,
                                 globalLocations,
                                 iterationN){
@@ -439,26 +442,21 @@ setMethod(
                         gff,
                         fafile,
                         data) {
+    browser()
     # Process only genes found in all datasets
     IDs <- lapply(data,names)
     IDs <- Reduce(intersect, IDs)
     res <- lapply(IDs,
-                  FUN = .merge_positions,
-                  data)
+                          FUN = .merge_positions,
+                          object@data)
     names(res) <- IDs
     res <- res[!is.null(res)]
-    
     # If not results are present return NA instead of NULL
     if(is.null(res)){
-      return(NA)
+      res <- NA
     }
-    return(res)
-    
-    
-    
-    
-    
-    positions <- positions[!is.na(positions)]
+    object@data <- res
+    return(object)
   }
 )
 

@@ -36,11 +36,17 @@ RNAMOD_GFF_COLNAMES <- c("source","type","score","phase","ID","Name","Parent",
 
 RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
                                     "mRNA",
+                                    "rRNA",
                                     "rRNA_gene",
+                                    "tRNA",
                                     "tRNA_gene",
+                                    "ncRNA",
                                     "ncRNA_gene",
                                     "snoRNA",
-                                    "snRNA_gene")
+                                    "snoRNA_gene",
+                                    "snRNA",
+                                    "snRNA_gene",
+                                    "SRP_RNA")
 
 # Settings
 RNAMOD_DEFAULT_PALETTE <- "Set1"

@@ -232,6 +232,14 @@ setGeneric (
 #' 
 #' @export
 setGeneric ( 
+  name= "getAnalysisType",
+  def=function(object){standardGeneric("getAnalysisType")} 
+) 
+
+#' @rdname mod-accessors
+#' 
+#' @export
+setGeneric ( 
   name= "checkForModification",
   def=function(object,
                data,
@@ -264,10 +272,9 @@ setGeneric (
 #' @title parseMod
 #' 
 #' @param object mod object 
-#' @param counts total counts in the BAM file containing the data
 #' @param gff a GRanges object for the genome
 #' @param fafile a FaFile object for the genome
-#' @param data list of DataFrame containg the read data
+#' @param modifications list of modification used for parsing
 #' 
 #' @export
 setGeneric ( 
@@ -275,7 +282,7 @@ setGeneric (
   def=function(object,
                gff,
                fafile,
-               data){standardGeneric("parseMod")} 
+               modifications){standardGeneric("parseMod")} 
 ) 
 
 #' @name mergePositionsOfReplicates

@@ -33,7 +33,7 @@ setMethod(
             "'...")
     # add the default modification class, which is just used for handling read 
     # positions (5'-end), but not modification detection.
-    modClasses <- .load_mod_classes(append("default",modifications))
+    modClasses <- .load_mod_classes(modifications)
     # retrieve the analysis types need
     analysisTypes <- setNames(vapply(modClasses, getAnalysisType, character(1)),
                               modifications)
@@ -42,7 +42,7 @@ setMethod(
       names(analysisTypes[analysisTypes == x])
     }),unique(analysisTypes))
     # load the analysis classes
-    analysisClasses <- .load_mod_classes(names(analysisGroups))
+    analysisClasses <- .load_analysis_classes(names(analysisGroups))
     # extract gene boundaries
     gff <- .Object@.dataGFF
     gff <- gff[S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_CONTAINING_FEATURES,]
@@ -53,19 +53,28 @@ setMethod(
                                     .Object@.mapQuality,
                                     .get_acceptable_chrom_ident(files))
     # load data into each analysis class
-    loadTest <- lapply(names(analysisGroups), function(className){
+    analysisClasses <- sapply(names(analysisGroups), function(className){
       convertReadsToPositions(analysisClasses[[className]],
                               files,
                               gff,
                               param)
-    })
+    }, simplify = FALSE, USE.NAMES = TRUE)
     # parse data in each analysis class for the subset of modifications
     # this merges data from all replicates for the analysis
-    parseTest <- lapply(names(analysisGroups), function(className){
+    analysisClasses <- sapply(names(analysisGroups), function(className){
+      modClassesSubset <- modClasses[vapply(modClasses, 
+                                            getAnalysisType, 
+                                            character(1)) == className]
       parseMod(analysisClasses[[className]],
                gff,
                .Object@.dataFasta,
-               names(analysisGroups[analysisGroups == className]))
+               modClassesSubset)
+    }, simplify = FALSE, USE.NAMES = TRUE)
+    # General cleanup
+    mod_positions <- mod_positions[!is.na(mod_positions)]
+    # Specific cleanup
+    mod_positions <- lapply(mod_positions, function(modPerTypes){
+      modPerTypes[!vapply(modPerTypes,is.null,logical(1))]
     })
     # check if any modification could be detected
     nMods <- lapply(names(analysisGroups), function(className){
@@ -76,11 +85,20 @@ setMethod(
            call. = FALSE)
     }
     # Merge position data
-    mergeTest <- lapply(names(analysisGroups), function(className){
+    analysisClasses <- sapply(names(analysisGroups), function(className){
       mergePositionsOfReplicates(analysisClasses[[className]],
                                  gff,
                                  .Object@.dataFasta)
-    })
+    }, simplify = FALSE, USE.NAMES = TRUE)
+    # if( sum(unlist(nMods)) == 0){
+    #   stop("No modifications detected. Aborting...",
+    #        call. = FALSE)
+    # }
+    
+    
+    
+    
+    
     # Retrieve position data
     positions <- lapply(names(analysisGroups), function(className){
       getPositions(analysisClasses[[className]])

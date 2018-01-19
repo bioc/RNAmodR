@@ -1,6 +1,6 @@
 Package: RNAmod
 Type: Package
-Title: What the Package Does (one line, title case)
+Title: RNAmodR: detecting post-transcriptional RNA modification
 Version: 0.1
 Date: 2018-01-11
 Authors@R: person("Felix G.M.", 
@@ -8,30 +8,35 @@ Authors@R: person("Felix G.M.",
                   email = "felix.g.m.ernst@outlook.com", 
                   role = c("aut", "cre"))
 Description:
-  What the package does (one paragraph).
+  Based on known pattern of read positions RNAmodR detects post-transcriptional
+  RNA modifications in HTS data. RNAmodR is designed to be extendable, so that
+  detection and analysis of new patterns in HTS data can be added easily. 
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
 LazyData: true
 Collate: 
-  'RNAmod.R'
-  'AllGenerics.R'
-  'AllGenerics-export.R'
-  'RNAModString.R'
-  'RNAmod-utils-preparations.R'
-  'RNAmod-utils.R'
-  'assertions.R'
-  'class-RNAmod-type.R'
-  'class-RNAmod-D.R'
-  'class-RNAmod-default.R'
-  'class-RNAmod-m3C.R'
-  'class-RNAmod-m7G.R'
-  'class-RNAmod.R'
-  'methods-RNAmod-compare.R'
-  'methods-RNAmod-parse.R'
-  'methods-RNAmod-plot.R'
-  'methods-RNAmod.R'
-  'methods-RNAmodR-analysis.R'
+    'RNAmod.R'
+    'AllGenerics.R'
+    'AllGenerics-export-default.R'
+    'AllGenerics-export.R'
+    'RNAModString.R'
+    'RNAmod-utils-preparations.R'
+    'RNAmod-utils.R'
+    'assertions.R'
+    'class-RNAmod.R'
+    'class-RNAmod-analysis-type.R'
+    'class-RNAmod-mod-type.R'
+    'class-RNAmod-analysis-default.R'
+    'class-RNAmod-mod-D.R'
+    'class-RNAmod-mod-m3C.R'
+    'class-RNAmod-mod-m7G.R'
+    'methods-RNAmod-compare.R'
+    'methods-RNAmod-parse.R'
+    'methods-RNAmod-plot.R'
+    'methods-RNAmod.R'
+    'methods-RNAmodR-analysis.R'
+    'utils-RNAmod-analysis-type.R'
 Imports:
   methods,
   assertive,

@@ -13,6 +13,7 @@ RNAMOD_SEP_SEQNAMES <- "---"
 #' @param fafile 
 #' @param geneTypes 
 #' @param ident 
+#' @param saveTrimmedFile 
 #' @param appendToOriginal 
 #'
 #' @return
@@ -44,11 +45,13 @@ convertGeneTypeToChrom <- function(gfffile,
                                    fafile,
                                    geneTypes,
                                    ident,
+                                   saveTrimmedFile = FALSE,
                                    appendToOriginal = FALSE){
   # Check inputs
   assertive::assert_all_are_existing_files(gfffile)
   assertive::assert_all_are_existing_files(fafile)
   assertive::assert_is_a_non_empty_string(ident)
+  assertive::assert_is_a_bool(saveTrimmedFile)
   assertive::assert_is_a_bool(appendToOriginal)
   # Load files
   gff <- rtracklayer::import.gff3(gfffile)
@@ -59,7 +62,7 @@ convertGeneTypeToChrom <- function(gfffile,
   gff_sub <- gff[S4Vectors::mcols(gff)$type %in% geneTypes,]
   IDs <- S4Vectors::mcols(gff_sub)$ID
   # hand of the individual IDs
-  convertGeneToChrom(gfffile,fafile,IDs,ident,appendToOriginal)
+  convertGeneToChrom(gfffile,fafile,IDs,ident,appendToOriginal,saveTrimmedFile)
 }
 
 #' @rdname convertGeneToChrom
@@ -71,12 +74,18 @@ convertGeneToChrom <- function(gfffile,
                                fafile,
                                genes,
                                ident,
+                               saveTrimmedFile = FALSE,
                                appendToOriginal = FALSE){
   # Check inputs
   assertive::assert_all_are_existing_files(gfffile)
   assertive::assert_all_are_existing_files(fafile)
   assertive::assert_is_a_non_empty_string(ident)
+  assertive::assert_is_a_bool(saveTrimmedFile)
   assertive::assert_is_a_bool(appendToOriginal)
+  # get the aggregated file names
+  fileNames <- .get_file_names(gfffile,
+                               fafile,
+                               ident)
   # Load files
   gff <- rtracklayer::import.gff3(gfffile)
   fa <- Rsamtools::FaFile(fafile)
@@ -90,7 +99,9 @@ convertGeneToChrom <- function(gfffile,
   gff_subset <- .get_gff_subset(gff, genes)
   # Remove all entries from the original gff, which are part of the subset
   gff_trimmed <- .get_trimmed_gff(gff, 
-                                  gff_subset)
+                                  gff_subset,
+                                  saveTrimmedFile,
+                                  fileNames[["trim_gfffile"]])
   # extract the coding sequences of all subset features
   seqs_subset <- .extract_exon_sequences(gff_subset,fa)
   # remove indistinguishable sequences (applies usually to tRNA, rRNA and such)
@@ -103,19 +114,14 @@ convertGeneToChrom <- function(gfffile,
   gff_subset_clustered <- .update_gff_subset(gff_subset_clustered,
                                              seqs_subset_clustered)
   seqs_subset_clustered <- .update_seqs(seqs_subset_clustered)
-  # get the aggregated file names
-  fileNames <- .get_file_names(gfffile,
-                               fafile,
-                               ident)
   # write general output to files
   .write_output(gff_subset_clustered,
                 seqs_subset_clustered,
                 gff_subset,
-                gff_trimmed,
                 fileNames)
   # if appendToOriginal == TRUE saved appended version of the original files
   # with the clustered subset files
-  if(appendToOriginal){
+  if(saveTrimmedFile && appendToOriginal){
     fileNames[["out_fafile"]] <- 
       appendFastaFiles(fileNames[["in_fafile"]],
                        fileNames[["convert_fafile"]],
@@ -138,6 +144,8 @@ convertGeneToChrom <- function(gfffile,
                     S4Vectors::mcols(gff)$Name %in% genes) |
                    (!is.na(S4Vectors::mcols(gff)$ID) & 
                       S4Vectors::mcols(gff)$ID %in% genes) |
+                   (!is.na(S4Vectors::mcols(gff)$gene) & 
+                      S4Vectors::mcols(gff)$gene %in% genes) |
                    (!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
                       as.character(S4Vectors::mcols(gff)$Parent) %in% genes) |
                    (is.na(S4Vectors::mcols(gff)$ID) & 
@@ -156,7 +164,10 @@ convertGeneToChrom <- function(gfffile,
   gff_sub
 }
 # get the trimmed gff annotation
-.get_trimmed_gff <- function(gff, gff_subset){
+.get_trimmed_gff <- function(gff, 
+                             gff_subset,
+                             saveTrimmedFile,
+                             trim_gfffile){
   gff_trimmed <- IRanges::subsetByOverlaps(gff, 
                                            gff_subset,
                                            type = "equal")
@@ -164,6 +175,12 @@ convertGeneToChrom <- function(gfffile,
                                            gff_trimmed,
                                            type = "equal",
                                            invert = TRUE)
+  if(saveTrimmedFile){
+    # save the reduced gff annotation file, which can be used for further steps
+    .write_gff(gff_trimmed, 
+               trim_gfffile,
+               "Saved trimmed gff3 file: ")
+  }
   gff_trimmed
 }
 
@@ -177,58 +194,28 @@ converttRNAscanToChrom <- function(gfffile,
                                    fafile,
                                    tRNAscanfile,
                                    ident,
+                                   saveTrimmedFile = FALSE,
                                    appendToOriginal = FALSE){
   # Check inputs
   assertive::assert_all_are_existing_files(gfffile)
   assertive::assert_all_are_existing_files(fafile)
   assertive::assert_all_are_existing_files(tRNAscanfile)
   assertive::assert_is_a_non_empty_string(ident)
+  assertive::assert_is_a_bool(saveTrimmedFile)
   assertive::assert_is_a_bool(appendToOriginal)
+  # get the aggregated file names
+  fileNames <- .get_file_names(gfffile,
+                               fafile,
+                               ident)
   # Load files
   gff <- rtracklayer::import.gff3(gfffile)
   # load tRNAscan data
   tRNAscan <- tRNAscan2GRanges::tRNAscan2GFF(tRNAscanfile)
-  # test if chromosome names of tRNAscan need to be fixed
-  chromTest <- intersect(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))),
-                         unique(as.character(GenomeInfoDb::seqnames(gff))))
-  if(!identical(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))), 
-                chromTest)){
-    # if yes
-    # construct a translation library
-    chrN <- length(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))))
-    chrom_names <- unique(as.character(GenomeInfoDb::seqnames(gff)))[seq_len(chrN)]
-    names(chrom_names) <- unique(as.character(GenomeInfoDb::seqnames(tRNAscan)))
-    # get new chromosome names
-    newChromNames <- unlist(lapply(GenomeInfoDb::seqnames(tRNAscan), 
-                                   function(x){
-                                     chrom_names[names(chrom_names) == x]
-                                   }))
-    # create updated tRNAscan object for subsetting
-    tRNAscan_new <- GenomicRanges::GRanges(
-      S4Vectors::Rle(newChromNames),
-      ranges = IRanges::ranges(tRNAscan),
-      strand = as.character(BiocGenerics::strand(tRNAscan)),
-      S4Vectors::mcols(tRNAscan))
-  } else {
-    tRNAscan_new <- tRNAscan
-  }
-  # Because tRNA His does not exactly overlap, enlarge the boundaries each by
-  # 3 nt
-  start(tRNAscan_new) <- start(tRNAscan_new) - 3
-  end(tRNAscan_new) <- end(tRNAscan_new) + 3
-  # Remove all entries from the original gff, which are part of the tRNAscan
-  gff_subset <- suppressWarnings(IRanges::subsetByOverlaps(gff, 
-                                                           tRNAscan_new,
-                                                           type = "within"))
-  if(length(gff_subset) == 0){
-    stop("No overlap found in supplied gff and tRNAscan file.",
-         call. = FALSE)
-  }
-  gff_subset <- gff_subset[order(rtracklayer::chrom(gff_subset), 
-                           BiocGenerics::start(gff_subset))]
-  # Remove all entries from the original gff, which are part of the subset
-  gff_trimmed <- .get_trimmed_gff(gff, 
-                                  gff_subset)
+  # generate a trimmed version and save if necessary
+  gff_subset <- .get_trimmed_tRNAscan(tRNAscan,
+                                      gff,
+                                      saveTrimmedFile,
+                                      fileNames[["trim_gfffile"]])
   # unknown tRNA should also be masked. therefore exchange gff_sub for tRNAscan
   gff_subset <- tRNAscan[,colnames(S4Vectors::mcols(tRNAscan)) %in% 
                            c("source","type","score","phase","ID","Name","gene")]
@@ -269,17 +256,12 @@ converttRNAscanToChrom <- function(gfffile,
     ranges = IRanges::ranges(tRNA_subset_clustered),
     strand = as.character(BiocGenerics::strand(tRNA_subset_clustered)),
     S4Vectors::mcols(tRNA_subset_clustered))
-  
-  # get the aggregated file names
-  fileNames <- .get_file_names(gfffile,
-                               fafile,
-                               ident)
+  # write output
   .write_output(tRNA_subset_clustered,
                 seqs_subset_clustered,
                 gff_subset,
-                gff_trimmed,
                 fileNames)
-  if(appendToOriginal){
+  if(saveTrimmedFile && appendToOriginal){
     fileNames[["out_fafile"]] <- appendFastaFiles(fileNames[["in_fafile"]],
                                           fileNames[["convert_fafile"]],
                                           ident = ident,
@@ -290,6 +272,53 @@ converttRNAscanToChrom <- function(gfffile,
                                           msg = "Saved appended gff3 file: ")
   }
   return(invisible(fileNames))
+}
+
+.get_trimmed_tRNAscan <- function(tRNAscan,gff,saveTrimmedFile,trim_gfffile){
+  # test if chromosome names of tRNAscan need to be fixed
+  chromTest <- intersect(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))),
+                         unique(as.character(GenomeInfoDb::seqnames(gff))))
+  if(!identical(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))), 
+                chromTest)){
+    # if yes
+    # construct a translation library
+    chrN <- length(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))))
+    chrom_names <- unique(as.character(GenomeInfoDb::seqnames(gff)))[seq_len(chrN)]
+    names(chrom_names) <- unique(as.character(GenomeInfoDb::seqnames(tRNAscan)))
+    # get new chromosome names
+    newChromNames <- unlist(lapply(GenomeInfoDb::seqnames(tRNAscan), 
+                                   function(x){
+                                     chrom_names[names(chrom_names) == x]
+                                   }))
+    # create updated tRNAscan object for subsetting
+    tRNAscan_new <- GenomicRanges::GRanges(
+      S4Vectors::Rle(newChromNames),
+      ranges = IRanges::ranges(tRNAscan),
+      strand = as.character(BiocGenerics::strand(tRNAscan)),
+      S4Vectors::mcols(tRNAscan))
+  } else {
+    tRNAscan_new <- tRNAscan
+  }
+  # Because tRNA His does not exactly overlap, enlarge the boundaries each by
+  # 3 nt
+  start(tRNAscan_new) <- start(tRNAscan_new) - 3
+  end(tRNAscan_new) <- end(tRNAscan_new) + 3
+  # Remove all entries from the original gff, which are part of the tRNAscan
+  gff_subset <- suppressWarnings(IRanges::subsetByOverlaps(gff, 
+                                                           tRNAscan_new,
+                                                           type = "within"))
+  if(length(gff_subset) == 0){
+    stop("No overlap found in supplied gff and tRNAscan file.",
+         call. = FALSE)
+  }
+  gff_subset <- gff_subset[order(rtracklayer::chrom(gff_subset), 
+                                 BiocGenerics::start(gff_subset))]
+  # Remove all entries from the original gff, which are part of the subset
+  gff_trimmed <- .get_trimmed_gff(gff, 
+                                  gff_subset,
+                                  saveTrimmedFile,
+                                  trim_gfffile)
+  return(gff_subset)
 }
 
 # identifing annotations and manipulations identifiers -------------------------
@@ -498,7 +527,6 @@ converttRNAscanToChrom <- function(gfffile,
 .write_output <- function(gff_subset_clustered,
                           seqs_subset_clustered,
                           gff_subset,
-                          gff_trimmed,
                           fileNames){
   # save subset as single gff and fasta file
   .write_gff(gff_subset_clustered, 
@@ -512,14 +540,13 @@ converttRNAscanToChrom <- function(gfffile,
   .write_gff(gff_subset, 
              fileNames[["mask_gfffile"]],
              "Saved mask gff3 file: ")
-  # save the reduced gff annotation file, which can be used for further steps
-  .write_gff(gff_trimmed, 
-             fileNames[["trim_gfffile"]],
-             "Saved trimmed gff3 file: ")
 }
 
 # write gff file
 .write_gff <- function(gff_save, fileName, message){
+  if(missing(message)){
+    message <- ""
+  }
   # remove brackets from chrom names
   chrom_names <- .fix_chrom_names(
     as.character(GenomeInfoDb::seqnames(gff_save)))
@@ -534,6 +561,9 @@ converttRNAscanToChrom <- function(gfffile,
 
 # write fasta file
 .write_fa <- function(seqs_save, fileName, message){
+  if(missing(message)){
+    message <- ""
+  }
   # remove brackets from chrom names
   names(seqs_save) <- .fix_chrom_names(names(seqs_save))
   Biostrings::writeXStringSet(seqs_save,filepath = fileName)
@@ -574,7 +604,7 @@ appendFastaFiles <- function(..., ident, msg){
   files <- as.character(unlist(list(...)))
   assertive::assert_all_are_existing_files(files)
   seqs <- lapply(files, readDNAStringSet)
-  seq <- do.call(append, seqs)
+  seq <- do.call(c, seqs)
   return(.write_fa(seq,
                    .get_file_name(files[[1]],
                                   ".fa",
@@ -610,13 +640,13 @@ appendGFF <- function(..., ident, msg){
     as.character(BiocGenerics::strand(gff))
   })
   strand <- c(unlist(strand))
-  
+  browser()
   # merge mcols
   DF <- lapply(gffs,function(gff){
     S4Vectors::mcols(gff)
   })
   # Force ID, Name, gene and Parent columns to be set even if empty
-  colnames <- do.call(intersect, lapply(DF,colnames))
+  colnames <- Reduce(intersect, lapply(DF,colnames))
   colnames <- unique(c(colnames,"ID","Name","gene","Parent"))
   DF <- lapply(DF,function(d){
     diff <- setdiff(colnames,colnames(d))

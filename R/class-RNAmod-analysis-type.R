@@ -1,4 +1,5 @@
 #' @include RNAmod.R
+#' @include class-RNAmod.R
 NULL
 
 #' @name mod
@@ -105,7 +106,7 @@ setMethod(
   analysisClasses <- vector(mode = "list", length = length(analysis))
   names(analysisClasses) <- analysis
   for(i in seq_along(analysis)){
-    className <- paste0("mod_",analysis[[i]])
+    className <- paste0("analysis_",analysis[[i]])
     # try to create modification detection classes
     tryCatch(
       class <- new(className),
