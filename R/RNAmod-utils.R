@@ -212,9 +212,11 @@ setMethod(
   stop("Can't find ", name, call. = FALSE)
 }
 
+# GRanges helper functions -----------------------------------------------------
+
 # subsets a gRanges object for entries concerning a single ID
 # - Name/ID for parent entry
-# - al childs based on Parent name equals ID
+# - all childs based on Parent name equals ID
 .subset_gff_for_unique_transcript <- function(gff, ID){
   res <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
                 S4Vectors::mcols(gff)$Name == ID) |
@@ -223,11 +225,28 @@ setMethod(
                (!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
                   as.character(S4Vectors::mcols(gff)$Parent) == ID),]
   if(length(res) != 1){
-    stop("Error gff annotation. Non unique ID detected: ",
+    stop("Error in gff annotation. Non unique ID detected: ",
          ID,
          call. = FALSE)
   }
   return(res)
+}
+
+# returns an order based on the named of the chromosome and start and end 
+# coordinates
+.order_GRanges <- function(gr){
+  gr[order(GenomeInfoDb::seqnames(gr),
+           BiocGenerics::start(gr),
+           BiocGenerics::end(gr))]
+}
+
+# returns all identifiers whcih can be used as a identifier in the Parent
+# column
+.get_parent_identifiers <- function(gr){
+  parents <- as.character(gr$ID)
+  parents[is.na(parents)] <- as.character(gr[is.na(parents)]$Name)
+  parents[is.na(parents)] <- as.character(gr[is.na(parents)]$gene)
+  parents
 }
 
 # sequence handling ------------------------------------------------------------

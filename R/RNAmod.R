@@ -48,7 +48,9 @@ RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
                                     "snRNA",
                                     "snRNA_gene",
                                     "SRP_RNA")
-RNAMOD_MOD_SEQ_FEATURES <- c("CDS",
+RNAMOD_MOD_SEQ_FEATURES <- c("five_prime_UTR",
+                             "three_prime_UTR",
+                             "CDS",
                              "noncoding_exon",
                              "exon")
 RNAMOD_MOD_DIRECT_SEQ_FEATURES <- c("rRNA",

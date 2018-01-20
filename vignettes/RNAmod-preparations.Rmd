@@ -43,7 +43,6 @@ gfffile <- paste0(folder,"sacCer3_R64-2-1.gff3")
 fafile <- paste0(folder,"sacCer3_R64-2-1.fasta")
 tRNAscanfile <- paste0(folder,"sacCer3-tRNAs.ss.sort")
 matchFastaToGff(gfffile,fafile)
-
 # get specific rRNA genes and save as fasta/gff
 gff <- rtracklayer::import.gff3(gfffile)
 RDN25 <- S4Vectors::mcols(gff[grepl("RDN25",S4Vectors::mcols(gff)$ID),])$ID
@@ -55,11 +54,6 @@ rRNAFiles <- convertGeneToChrom(gfffile,
                                 fafile,
                                 c(RDN25,RDN18,RDN58,RNDmt),
                                 "rRNA",
-                                removeDuplicateSeqs = TRUE)
-rRNAFiles <- convertGeneTypeToChrom(gfffile,
-                                fafile,
-                                "rRNA_gene",
-                                "rRNA2",
                                 removeDuplicateSeqs = TRUE)
 # get specific mRNA genes and other transcripts and save as fasta/gff
 miscFiles <- convertGeneTypeToChrom(gfffile,
@@ -74,7 +68,6 @@ tRNAFiles <- converttRNAscanToChrom(gfffile,
                                     fafile,
                                     tRNAscanfile,
                                     "tRNAscan")
-
 # append all the files
 appendFastaFiles(rRNAFiles[["convert_fafile"]],
                  miscFiles[["convert_fafile"]],
@@ -94,27 +87,26 @@ gfffile <- paste0(folder,"eco_MG1655.gff3")
 fafile <- paste0(folder,"eco_MG1655.fasta")
 tRNAscanfile <- paste0(folder,"eschColi_K_12_MG1655-tRNAs.ss.sort")
 matchFastaToGff(gfffile,fafile)
-
 # Remove rRNA genes and append to fasta/gff
 rRNAFiles <- convertGeneTypeToChrom(gfffile,
                                     fafile,
                                     "rRNA",
-                                    "rRNA")
+                                    "rRNA",
+                                    removeDuplicateSeqs = TRUE)
 # get specific mRNA genes and other transcripts and save as fasta/gff
 miscFiles <- convertGeneTypeToChrom(gfffile,
                                     fafile,
-                                    c("gene",
+                                    c("CDS",
                                       "ncRNA",
                                       "tmRNA",
                                       "RNase_P_RNA",
                                       "SRP_RNA"),
                                     "misc")
 # Remove specific tRNA genes and append to fasta/gff
-tRNAFiles <- converttRNAscanToChrom(rRNAFiles[["out_gfffile"]],
-                                    rRNAFiles[["out_fafile"]],
+tRNAFiles <- converttRNAscanToChrom(gfffile,
+                                    fafile,
                                     tRNAscanfile,
                                     "tRNAscan")
-
 # append all the files
 appendFastaFiles(rRNAFiles[["convert_fafile"]],
                  miscFiles[["convert_fafile"]],
@@ -135,19 +127,19 @@ gfffileS <- paste0(folder,"GRCh38_latest_genomic_s.gff")
 fafile <- paste0(folder,"GRCh38_latest_genomic.fasta")
 tRNAscanfile <- paste0(folder,"hg38-tRNAs.ss.sort")
 matchFastaToGff(gfffile,fafile)
-
 # get rRNA genes and save as fasta/gff
 rRNAFiles <- convertGeneTypeToChrom(gfffile,
-                                fafile,
-                                "rRNA",
-                                "rRNA")
+                                    fafile,
+                                    "rRNA_gene",
+                                    "rRNA",
+                                    removeDuplicateSeqs = TRUE)
 # get specific mRNA genes and other transcripts and save as fasta/gff
 miscFiles <- convertGeneTypeToChrom(gfffile,
                                     fafile,
                                     c("mRNA",
-                                      "ncRNA",
-                                      "snoRNA",
-                                      "snRNA",
+                                      "ncRNA_gene",
+                                      "snoRNA_gene",
+                                      "snRNA_gene",
                                       "RNase_P_RNA"),
                                     "misc")
 # Remove specific tRNA genes and append to fasta/gff
@@ -155,7 +147,6 @@ tRNAFiles <- converttRNAscanToChrom(gfffile,
                                     fafile,
                                     tRNAscanfile,
                                     "tRNAscan")
-
 # append all the files
 appendFastaFiles(rRNAFiles[["convert_fafile"]],
                  miscFiles[["convert_fafile"]],

@@ -195,9 +195,7 @@ convertGeneToChrom <- function(gfffile,
     stop("No genes found in supplied gff file with the given genes names.",
          call. = FALSE)
   }
-  gff_sub <- gff_sub[order(GenomeInfoDb::seqnames(gff_sub), 
-                           BiocGenerics::start(gff_sub))]
-  gff_sub
+  .order_GRanges(gff_sub)
 }
 # get the trimmed gff annotation
 .do_trimming_gff <- function(gff, 
@@ -230,9 +228,9 @@ convertGeneToChrom <- function(gfffile,
                                                 genes,
                                                 removeDuplicateSeqs){
   # extract the coding sequences of all subset features
-  seqs_subset <- .extract_exon_sequences(gff,
-                                         gff_subset,
-                                         fa)
+  seqs_subset <- .extract_transcript_sequences(gff,
+                                               gff_subset,
+                                               fa)
   # if duplicated sequences should be removed. If the number of sequences is 
   # high will result in very long runtime
   if(removeDuplicateSeqs){
@@ -248,13 +246,15 @@ convertGeneToChrom <- function(gfffile,
     seqs_subset_clustered <- .cluster_results_seqs(seqs_subset)
     # match gff and fasta sequences and create a new gff annotation and fasta 
     # sequences
-    gff_subset_clustered <- .update_gff_subset(gff_subset_clustered,
+    gff_subset_clustered <- .update_gff_subset(gff,
+                                               gff_subset_clustered,
                                                seqs_subset_clustered)
     seqs_subset_clustered <- .update_seqs(seqs_subset_clustered)
   } else {
     # match gff and fasta sequences and create a new gff annotation and fasta 
     # sequences
-    gff_subset_clustered <- .update_gff_subset(gff_subset,
+    gff_subset_clustered <- .update_gff_subset(gff,
+                                               gff_subset,
                                                seqs_subset)
     seqs_subset_clustered <- .update_seqs(seqs_subset)
   }
@@ -263,30 +263,38 @@ convertGeneToChrom <- function(gfffile,
 }
 
 # getting sequences ------------------------------------------------------------
-# extract the exons sequences and merges them into one per gene
-.extract_exon_sequences <- function(gff,
-                                    gff_sub,
-                                    fa){
+# extract the transcripts sequences and merges them into one per gene
+.extract_transcript_sequences <- function(gff,
+                                          gff_sub,
+                                          fa){
+  # split in transcript which have parents and the to assemble a sequence for
+  # these parents
   genes <- unique(c(gff_sub$ID,gff_sub$Name,gff_sub$gene))
   genes <- genes[!is.na(genes)]
-  exons <- gff[!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
-                 (as.character(S4Vectors::mcols(gff)$Parent) %in% genes) &
-                 S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_SEQ_FEATURES]
-  non_exons <- IRanges::subsetByOverlaps(gff_sub, 
-                                         exons,
-                                         type = "any",
-                                         invert = TRUE)
-  exons <- c(exons,non_exons)
-  exons <- exons[order(GenomeInfoDb::seqnames(exons), 
-                       BiocGenerics::start(exons))]
-  # get sequences for exons
-  exons_seq <- Biostrings::getSeq(fa,exons)
-  names(exons_seq) <- .get_unique_seqnames(exons)
+  transcripts <- gff[!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
+                       (as.character(S4Vectors::mcols(gff)$Parent) %in% genes) &
+                       S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_SEQ_FEATURES]
+  # transcripts which don't have a parent. get raw sequences
+  non_child_transcripts <- IRanges::subsetByOverlaps(gff_sub, 
+                                                     transcripts,
+                                                     type = "any",
+                                                     invert = TRUE)
+  transcripts <- c(transcripts,non_child_transcripts)
+  transcripts <- .order_GRanges(transcripts)
+  # get sequences for transcripts
+  transcripts_seq <- Biostrings::getSeq(fa,transcripts)
+  # set names of transcripts
+  names <- as.character(transcripts$Parent)
+  names[is.na(names)] <- .get_unique_seqnames(non_child_transcripts)
+  names(transcripts_seq) <- names
+  # reset ID for strand identification. this object is just temporary used
+  transcripts$temp_ID <- names
   # get unique names and iterate and merge split sequences
-  uniq_gene_names <- unique(names(exons_seq))
-  seqs <- Biostrings::DNAStringSet(lapply(uniq_gene_names, function(name){
-    seq <- exons_seq[BiocGenerics::which(names(exons_seq) == name)]
-    strand <- unique(as.character(BiocGenerics::strand(exons[.get_unique_seqnames(exons) == name])))
+  uniq_gene_names <- unique(names(transcripts_seq))
+  seqs <- Biostrings::DNAStringSet(sapply(uniq_gene_names, function(name){
+    seq <- transcripts_seq[BiocGenerics::which(names(transcripts_seq) == name)]
+    strand <- unique(as.character(BiocGenerics::strand(
+      transcripts[as.character(transcripts$temp_ID) == name])))
     # If strand == "-" intron sequences are in reverse order
     if(strand == "-"){
       return(BiocGenerics::unlist(rev(seq)))
@@ -295,9 +303,16 @@ convertGeneToChrom <- function(gfffile,
   }))
   # rename sequences to match parent sequence
   if(length(seqs) != length(gff_sub)){
-    warnings("Mismatching number of annotations and sequences",
-             call. = FALSE)
+    warning("Mismatching number of annotations and sequences. This is likely ",
+            "the cause of not referenced types (",
+            paste(RNAMOD_MOD_SEQ_FEATURES,
+                  collapse = ","),") for ",
+            "certain annotations, eg. ncRNA described as gene. These will be ",
+            "dropped.",
+            call. = FALSE)
   }
+  gff_sub <- gff_sub[(gff_sub$ID %in% as.character(transcripts$Parent)) | 
+                       (gff_sub$ID %in% transcripts$ID)]
   names(seqs) <- .get_unique_seqnames(gff_sub)
   return(seqs)
 }
@@ -324,7 +339,9 @@ convertGeneToChrom <- function(gfffile,
 
 # matching annotations and sequences -------------------------------------------
 # create new gff annotations
-.update_gff_subset <- function(gff_sub, seqs){
+.update_gff_subset <- function(gff,
+                               gff_sub,
+                               seqs){
   # subset gff to parents and childs
   gff_sub <- gff_sub[.get_unique_seqnames(gff_sub) %in% names(seqs)]
   gff_sub <- gff_sub[!duplicated(.get_unique_seqnames(gff_sub))]
@@ -339,12 +356,31 @@ convertGeneToChrom <- function(gfffile,
   chrom_names <- .condense_chrom_names(chrom_names)
   # update/create and combine GRanges
   gff_sub <- GenomicRanges::GRanges(S4Vectors::Rle(chrom_names),
-                             ranges = IRanges::ranges(gff_sub),
-                             strand = as.character(BiocGenerics::strand(gff_sub)),
-                             S4Vectors::mcols(gff_sub))
-  gff_sub <- gff_sub[order(GenomeInfoDb::seqnames(gff_sub), 
-                           BiocGenerics::start(gff_sub))]
-  return(gff_sub)
+                                    ranges = IRanges::ranges(gff_sub),
+                                    strand = as.character(BiocGenerics::strand(gff_sub)),
+                                    S4Vectors::mcols(gff_sub))
+  # add potential parent annotations
+  parents <- as.character(gff_sub$Parent)
+  parents <- parents[!is.na(parents)]
+  # get parent subset
+  gff_parents <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
+                        S4Vectors::mcols(gff)$Name %in% parents) |
+                       (!is.na(S4Vectors::mcols(gff)$ID) & 
+                          S4Vectors::mcols(gff)$ID %in% parents) |
+                       (!is.na(S4Vectors::mcols(gff)$gene) & 
+                          S4Vectors::mcols(gff)$gene %in% parents),]
+  # get chromosome names for the parent dependent on the chrom_name of the child
+  gff_sub_w_p <- gff_sub[as.character(gff_sub$Parent) 
+                         %in% .get_parent_identifiers(gff_parents) ]
+  gff_parents <- gff_parents[.get_parent_identifiers(gff_parents) 
+                             %in% as.character(gff_sub_w_p$Parent) ]
+  chrom_names_parents <- GenomeInfoDb::seqnames(gff_sub_w_p)
+  gff_sub <- c(GenomicRanges::GRanges(chrom_names_parents,
+                      ranges = IRanges::ranges(gff_sub_w_p),
+                      strand = as.character(BiocGenerics::strand(gff_sub_w_p)),
+                      S4Vectors::mcols(gff_parents)),
+               gff_sub)
+  .order_GRanges(gff_sub)
 }
 # create new fasta file
 .update_seqs <- function(seqs){
@@ -490,8 +526,7 @@ converttRNAscanToChrom <- function(gfffile,
     stop("No overlap found in supplied gff and tRNAscan file.",
          call. = FALSE)
   }
-  gff_subset <- gff_subset[order(GenomeInfoDb::seqnames(gff_subset), 
-                                 BiocGenerics::start(gff_subset))]
+  gff_subset <- .order_GRanges(gff_subset)
   # Remove all entries from the original gff, which are part of the subset
   .do_trimming_gff(gff, 
                    gff_subset,
@@ -503,6 +538,7 @@ converttRNAscanToChrom <- function(gfffile,
 # identifing annotations and manipulations identifiers -------------------------
 # merge seq_identifier
 .get_unique_seqnames <- function(gff){
+  if(length(gff) == 0) return(NULL)
   paste0(S4Vectors::mcols(gff)$ID,
          RNAMOD_SEP_SEQNAMES,
          S4Vectors::mcols(gff)$Name,
