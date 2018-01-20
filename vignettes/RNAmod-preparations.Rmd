@@ -2,29 +2,29 @@
 title: "RNAmod: pre-mapping preparation of genome and annotation"
 author: "Felix G.M. Ernst"
 date: "`r Sys.Date()`"
+package: tRNAscan2GRanges
+abstract: >
+  Example conversion of extracting of sequences and annotation to construct a
+  special transcriptome to map reads against
 output: 
-    rmarkdown::html_document:
-        toc: true
-        toc_float: true
-        df_print: paged
+  BiocStyle::html_document:
+    toc: true
+    toc_float: true
+    df_print: paged
 vignette: >
   %\VignetteIndexEntry{RNAmod - pre-mapping preparation of genome and annotation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown(css.files = c('custom.css'))
 ```
 
 # Introduction
 
 ```{r tRNA}
 library(RNAmod)
-
 matchFastaToGff <- function(gfffile, fafile){
   gff <- rtracklayer::import.gff3(gfffile)
   fsa <- Biostrings::readDNAStringSet(fafile)
@@ -33,9 +33,9 @@ matchFastaToGff <- function(gfffile, fafile){
 }
 ```
 
-# Converting tRNA and rRNA genes to seperate chromosomes
+# Converting rRNA, mRNA and tRNA genes to seperate chromosomes
 
-## sacCer3
+## S. cerevisiae
 
 ```{r sacCer3}
 folder <- "genomes/sacCer3/"
@@ -54,7 +54,13 @@ RNDmt <- c(S4Vectors::mcols(gff[grepl("Q0020",S4Vectors::mcols(gff)$ID),])$ID,
 rRNAFiles <- convertGeneToChrom(gfffile,
                                 fafile,
                                 c(RDN25,RDN18,RDN58,RNDmt),
-                                "rRNA")
+                                "rRNA",
+                                removeDuplicateSeqs = TRUE)
+rRNAFiles <- convertGeneTypeToChrom(gfffile,
+                                fafile,
+                                "rRNA_gene",
+                                "rRNA2",
+                                removeDuplicateSeqs = TRUE)
 # get specific mRNA genes and other transcripts and save as fasta/gff
 miscFiles <- convertGeneTypeToChrom(gfffile,
                                     fafile,
@@ -74,7 +80,6 @@ appendFastaFiles(rRNAFiles[["convert_fafile"]],
                  miscFiles[["convert_fafile"]],
                  tRNAFiles[["convert_fafile"]],
                  ident = "complete")
-
 appendGFF(rRNAFiles[["convert_gfffile"]],
           miscFiles[["convert_gfffile"]],
           tRNAFiles[["convert_gfffile"]],
@@ -94,52 +99,34 @@ matchFastaToGff(gfffile,fafile)
 rRNAFiles <- convertGeneTypeToChrom(gfffile,
                                     fafile,
                                     "rRNA",
-                                    "rRNA",
-                                    appendToOriginal = TRUE)
-
-# Manually remove any trace of rRNA genes from gff file
-gff <- rtracklayer::import.gff3(rRNAFiles[["in_gfffile"]])
-gff_rRNA <- gff[S4Vectors::mcols(gff)$type == "rRNA",]
-gff_rRNA <- IRanges::subsetByOverlaps(gff, 
-                                      gff_rRNA,
-                                      minoverlap = 0,
-                                      type = "equal",
-                                      invert = TRUE)
-rtracklayer::export.gff3(gff_rRNA,rRNAFiles[["out_gfffile"]])
-rRNAFiles[["out_gfffile"]] <- appendGFF(rRNAFiles[["out_gfffile"]],
-                                        rRNAFiles[["convert_gfffile"]],
-                                        ident = "clean",
-                                        msg = "Saved appended gff file: ")
-
+                                    "rRNA")
+# get specific mRNA genes and other transcripts and save as fasta/gff
+miscFiles <- convertGeneTypeToChrom(gfffile,
+                                    fafile,
+                                    c("gene",
+                                      "ncRNA",
+                                      "tmRNA",
+                                      "RNase_P_RNA",
+                                      "SRP_RNA"),
+                                    "misc")
 # Remove specific tRNA genes and append to fasta/gff
 tRNAFiles <- converttRNAscanToChrom(rRNAFiles[["out_gfffile"]],
                                     rRNAFiles[["out_fafile"]],
                                     tRNAscanfile,
-                                    "tRNAscan",
-                                    appendToOriginal = TRUE)
+                                    "tRNAscan")
 
-# generate script lines for masking nucleotides and copying files to wd folder
-script <- paste0("cat %s/*_mask_* > %s\n",
-               "dos2unix %s\n",
-               "bedtools maskfasta -mc N -fi %s -bed %s -fo %s\n",
-               "cp %s %s\n",
-               "cp %s %s")
-script <- gettextf(script,
-                   dirname(tRNAFiles[["out_fafile"]]),
-       paste0(dirname(tRNAFiles[["out_fafile"]]),"/eco-MG1655_mask.gff3"),
-       tRNAFiles[["out_fafile"]],
-       tRNAFiles[["out_fafile"]],
-       paste0(dirname(tRNAFiles[["out_fafile"]]),"/eco-MG1655_mask.gff3"),
-       paste0(dirname(tRNAFiles[["out_fafile"]]),"/eco-MG1655_masked.fasta"),
-       tRNAFiles[["out_gfffile"]],
-       "eco-MG1655_masked.gff3",
-       paste0(dirname(tRNAFiles[["out_fafile"]]),"/eco-MG1655_masked.fasta"),
-       "eco-MG1655_masked.fasta")
-message("# Run this in command line:\n\n",
-        script)
+# append all the files
+appendFastaFiles(rRNAFiles[["convert_fafile"]],
+                 miscFiles[["convert_fafile"]],
+                 tRNAFiles[["convert_fafile"]],
+                 ident = "complete")
+appendGFF(rRNAFiles[["convert_gfffile"]],
+          miscFiles[["convert_gfffile"]],
+          tRNAFiles[["convert_gfffile"]],
+                 ident = "complete")
 ```
 
-
+## H. sapiens
 
 ```{r GRCh38}
 folder <- "genomes/GRCh38/"
@@ -154,7 +141,6 @@ rRNAFiles <- convertGeneTypeToChrom(gfffile,
                                 fafile,
                                 "rRNA",
                                 "rRNA")
-
 # get specific mRNA genes and other transcripts and save as fasta/gff
 miscFiles <- convertGeneTypeToChrom(gfffile,
                                     fafile,

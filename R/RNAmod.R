@@ -35,6 +35,7 @@ RNAMOD_GFF_COLNAMES <- c("source","type","score","phase","ID","Name","Parent",
                            "Alias","gene")
 
 RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
+                                    "gene",
                                     "mRNA",
                                     "rRNA",
                                     "rRNA_gene",
@@ -47,6 +48,25 @@ RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
                                     "snRNA",
                                     "snRNA_gene",
                                     "SRP_RNA")
+RNAMOD_MOD_SEQ_FEATURES <- c("CDS",
+                             "noncoding_exon",
+                             "exon")
+RNAMOD_MOD_DIRECT_SEQ_FEATURES <- c("rRNA",
+                                    "rRNA_gene")
+# RNAMOD_MOD_SEQ_FEATURES <- c("CDS",
+#                              "noncoding_exon",
+#                              "exon",
+#                              "rRNA",
+#                              "rRNA_gene",
+#                              "tRNA",
+#                              "tRNA_gene",
+#                              "ncRNA",
+#                              "ncRNA_gene",
+#                              "snoRNA",
+#                              "snoRNA_gene",
+#                              "snRNA",
+#                              "snRNA_gene",
+#                              "SRP_RNA")
 
 # Settings
 RNAMOD_DEFAULT_PALETTE <- "Set1"
