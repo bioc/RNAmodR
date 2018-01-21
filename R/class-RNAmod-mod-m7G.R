@@ -12,11 +12,8 @@ RNAMOD_M7G_SIGMA_THRESHOLD <- 3
 #'
 #' @description 
 #' \code{mod_m7G}
-#'
-#' @return
+#' 
 #' @export
-#'
-#' @examples
 setClass("mod_m7G",
          contains = "mod",
          prototype = list(modType = "m7G")
@@ -27,10 +24,7 @@ setClass("mod_m7G",
 #' @description 
 #' \code{mod_m7G}
 #' 
-#' @return
 #' @export
-#'
-#' @examples
 setMethod(
   f = "maskPositionData",
   signature = signature(object = "mod_m7G",
@@ -51,13 +45,7 @@ setMethod(
 #' @description 
 #' \code{mod_m7G}
 #' 
-#' @return
 #' @export
-#' 
-#' @importFrom stringr str_locate_all
-#' @importFrom BiocParallel bplapply
-#'
-#' @examples
 setMethod(
   f = "preTest",
   signature = signature(object = "mod_m7G",
@@ -68,13 +56,9 @@ setMethod(
                         location,
                         data,
                         globalLocations) {
-    # if non G position skip position
-    if( names(globalLocations[globalLocations == location]) 
-        != RNAMOD_M7G_NUCLEOTIDE){
-      return(NULL)
-    }
     # do pretest
     res <- .do_M7G_pretest(location,
+                           globalLocations,
                            data)
     return(res)
   }
@@ -83,7 +67,13 @@ setMethod(
 # check if any data is available to proceed with test
 # this is in a seperate function since it is also called by checkForModification
 .do_M7G_pretest <- function(location,
+                            globalLocations,
                             data){
+  # if non G position skip position
+  if( names(globalLocations[globalLocations == location]) 
+      != RNAMOD_M7G_NUCLEOTIDE){
+    return(NULL)
+  }
   # do not take into account position 1
   if(location == 1) return(NULL)
   # merge data for positions
@@ -116,28 +106,21 @@ setMethod(
 #' @description 
 #' \code{mod_m7G}
 #' 
-#' @return
 #' @export
-#' 
-#' @importFrom stringr str_locate_all
-#' @importFrom BiocParallel bplapply
-#'
-#' @examples
 setMethod(
   f = "checkForModification",
   signature = signature(object = "mod_m7G",
                         location = "numeric",
                         globalLocations = "numeric",
-                        data = "list",
-                        modClasses = "list"),
+                        data = "list"),
   definition = function(object,
                         location,
                         globalLocations,
-                        data,
-                        modClasses) {
+                        data) {
     # browser()
     # get test result for the current location
     locTest <- .calc_M7G_test_values(location,
+                                     globalLocations,
                                      data)
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
@@ -168,9 +151,11 @@ setMethod(
 
 # test for m7G at current location
 .calc_M7G_test_values <- function(location,
+                                  globalLocations,
                                   data){
   # short cut if amount of data is not sufficient
   pretestData <- .do_M7G_pretest(location,
+                                 globalLocations,
                                  data)
   if(is.null(pretestData)) return(NULL)
   # data from pretest

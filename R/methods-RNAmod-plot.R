@@ -378,7 +378,8 @@ setMethod(
   names(data) <- vapply(modClasses, getAnalysisType, character(1))
   # aggregated data based on plot type
   data <- setNames(lapply(unique(names(data)), function(name){
-    do.call(rbind, data[names(data) == name])
+    x <- do.call(rbind, data[names(data) == name])
+    x[order(x$start,x$end),]
   })
   ,unique(names(data)))
   return(data)
@@ -390,7 +391,7 @@ setMethod(
 # returns a plot showing all modifications on one type of position data
 .get_mod_plot <- function(pos,mods,letters){
   requireNamespace("ggplot2", quietly = TRUE)
-  
+  # browser()
   break_FUN <- function(lim){
     if(length(lim[is.na(lim)])>0) return(lim)
     x <- 0

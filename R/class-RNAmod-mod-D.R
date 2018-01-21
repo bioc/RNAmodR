@@ -12,11 +12,8 @@ RNAMOD_D_SIGMA_THRESHOLD <- 3
 #'
 #' @description 
 #' \code{mod_D}
-#'
-#' @return
+#' 
 #' @export
-#'
-#' @examples
 setClass("mod_D",
          contains = "mod",
          prototype = list(modType = "D")
@@ -27,10 +24,7 @@ setClass("mod_D",
 #' @description 
 #' \code{mod_D}
 #' 
-#' @return
 #' @export
-#'
-#' @examples
 setMethod(
   f = "maskPositionData",
   signature = signature(object = "mod_D",
@@ -51,13 +45,7 @@ setMethod(
 #' @description 
 #' \code{mod_D}
 #' 
-#' @return
 #' @export
-#' 
-#' @importFrom stringr str_locate_all
-#' @importFrom BiocParallel bplapply
-#'
-#' @examples
 setMethod(
   f = "preTest",
   signature = signature(object = "mod_D",
@@ -68,14 +56,10 @@ setMethod(
                         location,
                         data,
                         globalLocations) {
-    # if non G position skip position
-    if( names(globalLocations[globalLocations == location]) 
-        != RNAMOD_D_NUCLEOTIDE){
-      return(NULL)
-    }
     # do pretest
     res <- .do_D_pretest(location,
-                           data)
+                         globalLocations,
+                         data)
     return(res)
   }
 )
@@ -83,7 +67,13 @@ setMethod(
 # check if any data is available to proceed with test
 # this is in a seperate function since it is also called by checkForModification
 .do_D_pretest <- function(location,
-                            data){
+                          globalLocations,
+                          data){
+  # if non G position skip position
+  if( names(globalLocations[globalLocations == location]) 
+      != RNAMOD_D_NUCLEOTIDE){
+    return(NULL)
+  }
   # do not take into account position 1
   if(location == 1) return(NULL)
   # merge data for positions
@@ -116,29 +106,22 @@ setMethod(
 #' @description 
 #' \code{mod_D}
 #' 
-#' @return
 #' @export
-#' 
-#' @importFrom stringr str_locate_all
-#' @importFrom BiocParallel bplapply
-#'
-#' @examples
 setMethod(
   f = "checkForModification",
   signature = signature(object = "mod_D",
                         location = "numeric",
                         globalLocations = "numeric",
-                        data = "list",
-                        modClasses = "list"),
+                        data = "list"),
   definition = function(object,
                         location,
                         globalLocations,
-                        data,
-                        modClasses) {
+                        data) {
     # browser()
     # get test result for the current location
     locTest <- .calc_D_test_values(location,
-                                     data)
+                                   globalLocations,
+                                   data)
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
     # dynamic threshold based on the noise of the signal (high sd)
@@ -168,10 +151,12 @@ setMethod(
 
 # test for D at current location
 .calc_D_test_values <- function(location,
-                                  data){
+                                globalLocations,
+                                data){
   # short cut if amount of data is not sufficient
   pretestData <- .do_D_pretest(location,
-                                 data)
+                               globalLocations,
+                               data)
   if(is.null(pretestData)) return(NULL)
   # data from pretest
   testData <- pretestData$testData

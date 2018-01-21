@@ -82,11 +82,7 @@ setMethod(
   # bamData <- bamData[names(bamData) %in% c("RDN25-1")]
   
   # combination
-  # bamData <- bamData[names(bamData) %in% c("RDN18-1",
-  #                                          "tS(CGA)C",
-  #                                          "tI(AAU)B",
-  #                                          "tH(GUG)E1",
-  #                                          "tD(GUC)B")]
+  # bamData <- bamData[names(bamData) %in% c("tA(TGC)A")]
   # if( getOption("RNAmod_debug") ){
   #   bamData <- bamData[names(bamData) %in% getOption("RNAmod_debug_transcripts")]
   # }
@@ -171,7 +167,7 @@ setMethod(
                                   fafile = fafile,
                                   modClasses = modClasses)
     names(res) <- IDs
-    res <- res[!is.null(res)]
+    res <- res[!vapply(res, is.null, logical(1))]
     # If not results are present return NA instead of NULL
     if(is.null(res)){
       res <- NA
@@ -211,6 +207,28 @@ setMethod(
                              globalLocations = globalLocations,
                              iterationN = 1)
   res <- res[order(as.numeric(unlist(lapply(res, "[[", "location"))))]
+  if(is.null(res)) return(NULL)
+  # recalculate sigma values by masking all positions except the one testing for
+  resb <- res
+  names <- names(res)
+  res <- lapply(seq_along(res), function(i){
+    x <- data
+    testPosition <- res[[i]]
+    nonTestPositions <- res[seq_along(res) != i]
+    if( length(nonTestPositions) > 0 ){
+      locs <- setNames(
+        as.numeric(unlist(lapply(nonTestPositions, "[[","location"))),
+        unlist(lapply(nonTestPositions, "[[","type")))
+      x <- .mask_data(modClasses,
+                      x,
+                      locs)
+    }
+    return(checkForModification(modClasses[[testPosition$type]],
+                         location = testPosition$location,
+                         globalLocations = globalLocations,
+                         data = x))
+  })
+  names(res) <- names
   return(res)
 }
 
@@ -232,8 +250,6 @@ setMethod(
                           modClasses,
                           data,
                           globalLocations)
-  # browser()
-  if(length(modifications) == 0) return(NULL)
   # name the locations based on sequence position
   names(modifications) <- paste0(ID,
                                  "_",
@@ -331,8 +347,7 @@ setMethod(
     return(checkForModification(class,
                                 location = location,
                                 globalLocations = globalLocations,
-                                data = data,
-                                modClasses = modClasses))
+                                data = data))
   })
   res <- res[!vapply(res, is.null, logical(1))]
   if(length(res) > 1) return(NULL)

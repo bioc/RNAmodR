@@ -263,8 +263,7 @@ setGeneric (
   def=function(object,
                location,
                globalLocations,
-               data,
-               modClasses){standardGeneric("checkForModification")} 
+               data){standardGeneric("checkForModification")} 
 ) 
 
 
