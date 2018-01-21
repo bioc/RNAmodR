@@ -379,7 +379,8 @@ setMethod(
   # aggregated data based on plot type
   data <- setNames(lapply(unique(names(data)), function(name){
     x <- do.call(rbind, data[names(data) == name])
-    x[order(x$start,x$end),]
+    if(is.null(x)) return(NULL)
+    return(x[order(x$start,x$end),])
   })
   ,unique(names(data)))
   return(data)
