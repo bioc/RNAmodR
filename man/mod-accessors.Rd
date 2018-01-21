@@ -6,14 +6,11 @@
 \alias{mod-accessors}
 \alias{getPositions}
 \alias{getModifications}
-\alias{getNumberOfModifications}
 \alias{getModType}
 \alias{getAnalysisType}
-\alias{checkForModification}
 \alias{getPlotType,analysis-method}
 \alias{getPositions,analysis-method}
 \alias{getModifications,analysis-method}
-\alias{getNumberOfModifications,analysis-method}
 \alias{getAnalysisType,mod-method}
 \alias{getModType,mod-method}
 \title{Accessor for 'analysis' class}
@@ -24,21 +21,15 @@ getPositions(object)
 
 getModifications(object)
 
-getNumberOfModifications(object)
-
 getModType(object)
 
 getAnalysisType(object)
-
-checkForModification(object, data, locations)
 
 \S4method{getPlotType}{analysis}(object)
 
 \S4method{getPositions}{analysis}(object)
 
 \S4method{getModifications}{analysis}(object)
-
-\S4method{getNumberOfModifications}{analysis}(object)
 
 \S4method{getAnalysisType}{mod}(object)
 
@@ -54,9 +45,6 @@ a list of data as a lists of list(replicate) of DataFrame(transcript)
 
 a list of data as a lists of list(replicate) of DataFrame(transcript)
 
-returns the total number of modifications detected independent of the
-type of modification
-
 character defining the plot type for this modification class
 
 character defining the modification type for this modification
@@ -71,9 +59,6 @@ getPositions(analysis)
 }
 \donttest{
 getModifications(analysis)
-}
-\donttest{
-getNumberOfModifications(analysis)
 }
 \donttest{
 getAnalysisType(mod)

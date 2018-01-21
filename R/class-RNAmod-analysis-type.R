@@ -78,26 +78,6 @@ setMethod(
   }
 )
 
-#' @rdname mod-accessors
-#'
-#' @return returns the total number of modifications detected independent of the
-#' type of modification
-#' @export
-#'
-#' @examples
-#' \donttest{
-#' getNumberOfModifications(analysis)
-#' }
-setMethod(
-  f = "getNumberOfModifications", 
-  signature = signature(object = "analysis"),
-  definition = function(object) {
-    sum(unlist(lapply(object@modifications,nrow)))
-  }
-)
-
-
-
 
 # analysis class handling ------------------------------------------------------
 

@@ -340,7 +340,7 @@ setMethod(
 
 # aggregates the position data for plotting of different plot types
 .aggregate_pos_data <- function(gff,data, modClasses){
-  plotTypes <- vapply(modClasses, getPlotType, character(1))
+  plotTypes <- vapply(modClasses, getAnalysisType, character(1))
   plotTypes <- unique(plotTypes)
   data <- lapply(plotTypes, function(type, data){
     if(is.null(data[[type]])){
@@ -375,7 +375,7 @@ setMethod(
     data[data$RNAmod_type == type,]
   })
   # set name of plot type
-  names(data) <- vapply(modClasses, getPlotType, character(1))
+  names(data) <- vapply(modClasses, getAnalysisType, character(1))
   # aggregated data based on plot type
   data <- setNames(lapply(unique(names(data)), function(name){
     do.call(rbind, data[names(data) == name])

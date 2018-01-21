@@ -223,13 +223,9 @@ setMethod(
                (!is.na(S4Vectors::mcols(gff)$ID) & 
                   S4Vectors::mcols(gff)$ID == ID) |
                (!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
-                  as.character(S4Vectors::mcols(gff)$Parent) == ID),]
-  if(length(res) != 1){
-    stop("Error in gff annotation. Non unique ID detected: ",
-         ID,
-         call. = FALSE)
-  }
-  return(res)
+                  as.character(S4Vectors::mcols(gff)$Parent) == ID &
+                  S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_SEQ_FEATURES),]
+  .order_GRanges(res)
 }
 
 # returns an order based on the named of the chromosome and start and end 

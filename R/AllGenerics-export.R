@@ -210,14 +210,6 @@ setGeneric (
   def=function(object){standardGeneric("getModifications")} 
 ) 
 
-#' @rdname mod-accessors
-#' 
-#' @export
-setGeneric ( 
-  name= "getNumberOfModifications",
-  def=function(object){standardGeneric("getNumberOfModifications")} 
-) 
-
 # modtype accessors ------------------------------------------------------------
 
 #' @rdname mod-accessors
@@ -236,14 +228,43 @@ setGeneric (
   def=function(object){standardGeneric("getAnalysisType")} 
 ) 
 
-#' @rdname mod-accessors
+#' @name maskPositionData
+#' 
+#' @title maskPositionData
+#' 
+#' @export
+setGeneric ( 
+  name= "maskPositionData",
+  def=function(object,
+               data,
+               modLocations){standardGeneric("maskPositionData")} 
+) 
+
+#' @name preTest
+#' 
+#' @title preTest
+#' 
+#' @export
+setGeneric ( 
+  name= "preTest",
+  def=function(object,
+               location,
+               data,
+               globalLocations){standardGeneric("preTest")} 
+) 
+
+#' @name checkForModification
+#' 
+#' @title checkForModification
 #' 
 #' @export
 setGeneric ( 
   name= "checkForModification",
   def=function(object,
+               location,
+               globalLocations,
                data,
-               locations){standardGeneric("checkForModification")} 
+               modClasses){standardGeneric("checkForModification")} 
 ) 
 
 
@@ -274,7 +295,7 @@ setGeneric (
 #' @param object mod object 
 #' @param gff a GRanges object for the genome
 #' @param fafile a FaFile object for the genome
-#' @param modifications list of modification used for parsing
+#' @param modClasses list of modification classes used for parsing
 #' 
 #' @export
 setGeneric ( 
@@ -282,7 +303,7 @@ setGeneric (
   def=function(object,
                gff,
                fafile,
-               modifications){standardGeneric("parseMod")} 
+               modClasses){standardGeneric("parseMod")} 
 ) 
 
 #' @name mergePositionsOfReplicates
@@ -299,8 +320,7 @@ setGeneric (
   name= "mergePositionsOfReplicates",
   def=function(object,
                gff,
-               fafile,
-               data){standardGeneric("mergePositionsOfReplicates")} 
+               fafile){standardGeneric("mergePositionsOfReplicates")} 
 ) 
 
 

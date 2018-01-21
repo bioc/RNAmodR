@@ -22,7 +22,7 @@ setMethod(
   definition = function(.Object,
                         number,
                         modifications){
-    browser()
+    # browser()
     # Check input
     assertive::is_a_number(number)
     assertive::assert_all_are_non_empty_character(modifications)
@@ -70,17 +70,11 @@ setMethod(
                .Object@.dataFasta,
                modClassesSubset)
     }, simplify = FALSE, USE.NAMES = TRUE)
-    # General cleanup
-    mod_positions <- mod_positions[!is.na(mod_positions)]
-    # Specific cleanup
-    mod_positions <- lapply(mod_positions, function(modPerTypes){
-      modPerTypes[!vapply(modPerTypes,is.null,logical(1))]
-    })
     # check if any modification could be detected
-    nMods <- lapply(names(analysisGroups), function(className){
-      getNumberOfModifications(analysisClasses[[className]])
-    })
-    if( sum(unlist(nMods)) == 0){
+    nMods <- vapply(names(analysisGroups), function(className){
+      length(getModifications(analysisClasses[[className]]))
+    }, numeric(1))
+    if( sum(nMods) == 0){
       stop("No modifications detected. Aborting...",
            call. = FALSE)
     }
@@ -90,23 +84,14 @@ setMethod(
                                  gff,
                                  .Object@.dataFasta)
     }, simplify = FALSE, USE.NAMES = TRUE)
-    # if( sum(unlist(nMods)) == 0){
-    #   stop("No modifications detected. Aborting...",
-    #        call. = FALSE)
-    # }
-    
-    
-    
-    
-    
     # Retrieve position data
-    positions <- lapply(names(analysisGroups), function(className){
+    positions <- sapply(names(analysisGroups), function(className){
       getPositions(analysisClasses[[className]])
-    })
+    }, simplify = FALSE)
     # Retrieve modification data
-    mod_positions <- lapply(names(analysisGroups), function(className){
+    mod_positions <- sapply(names(analysisGroups), function(className){
       getModifications(analysisClasses[[className]])
-    })
+    }, simplify = FALSE)
     # Construct DataFrame from found modifications
     df <- .construct_DataFrame_from_mod_result(mod_positions,gff)
     # Save found modifications as gff file
@@ -129,12 +114,14 @@ setMethod(
 
 # Construct DataFrame from RNAmod results per modification from individual
 # gene results
-.construct_DataFrame_from_mod_result <- function(data,gff){
-  modTypes <- names(data)
-  l <- lapply(seq_along(modTypes), function(j){
-    modType <- data[[j]]
-    genes <- names(modType)
-    genesDf <- lapply(modType,
+.construct_DataFrame_from_mod_result <- function(data,
+                                                 gff){
+  l <- lapply(seq_along(data), function(i){
+    analysisType <- names(data[i])
+    analysisTypeData <- data[[i]]
+    
+    genes <- names(analysisTypeData)
+    genesDf <- lapply(analysisTypeData,
                       .get_dataframe_per_gene)
     nMods <- unlist(lapply(genesDf, function(df){
       nrow(df)
@@ -161,9 +148,7 @@ setMethod(
       df$Parent <- genes[[i]]
       df$source <- rep("RNAmodR",nrow(df))
       df$type <- rep("RNAMOD",nrow(df))
-      df$RNAmod_type <- rep(modTypes[j],nrow(df))
       df$score <- df$RNAmod_signal
-      df$ID <- paste0(df$Parent,"_",df$ID)
       return(df)
     })
     genesDf <- genesDf[!vapply(genesDf, is.null, logical(1))]
@@ -172,6 +157,7 @@ setMethod(
     res <- res[order(res$start),]
     return(res)
   })
+  
   l <- l[!vapply(l, is.null, logical(1))]
   if(length(l) == 0){
     stop("No modifications detected. Aborting...",
@@ -192,6 +178,7 @@ setMethod(
   df <- S4Vectors::DataFrame(start = vapply(gene,"[[",numeric(1),"location"),
               end = vapply(gene,"[[",numeric(1),"location"),
               ID = names(gene),
+              RNAmod_type = vapply(gene,"[[",character(1),"type"),
               RNAmod_signal = vapply(gene,"[[",numeric(1),"signal"),
               RNAmod_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
               RNAmod_p.value = vapply(gene,"[[",numeric(1),"p.value"),
@@ -199,8 +186,11 @@ setMethod(
   return(df)
 }
 
-
-.construct_SE_from_mod_result <- function(experiment,gff,data,positions){
+# conctructs a SummarizedExperiment from modifications and position data
+.construct_SE_from_mod_result <- function(experiment,
+                                          gff,
+                                          data,
+                                          positions){
   # rownames and colnames(modTypes)
   modTypes <- unique(data$RNAmod_type)
   rownames <- S4Vectors::mcols(gff)$ID

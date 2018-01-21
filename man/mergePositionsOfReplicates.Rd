@@ -4,14 +4,13 @@
 \docType{methods}
 \name{mergePositionsOfReplicates}
 \alias{mergePositionsOfReplicates}
-\alias{mergePositionsOfReplicates,analysis_default,GRanges,FaFile,list-method}
+\alias{mergePositionsOfReplicates,analysis_default,GRanges,FaFile-method}
 \title{mergePositionsOfReplicates}
 \usage{
-mergePositionsOfReplicates(object, gff, fafile, data)
+mergePositionsOfReplicates(object, gff, fafile)
 
-
-  \S4method{mergePositionsOfReplicates}{analysis_default,GRanges,FaFile,list}(object,
-  gff, fafile, data)
+\S4method{mergePositionsOfReplicates}{analysis_default,GRanges,FaFile}(object,
+  gff, fafile)
 }
 \arguments{
 \item{object}{mod object}

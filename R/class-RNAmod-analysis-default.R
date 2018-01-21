@@ -34,7 +34,7 @@ setMethod(
                         files,
                         gff,
                         param) {
-    browser()
+    # browser()
     # detect modifications in each file
     data <- lapply(files,
                    FUN = .get_positions,
@@ -84,7 +84,9 @@ setMethod(
   # combination
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "tS(CGA)C",
-  #                                          "tC(GCA)B")]
+  #                                          "tI(AAU)B",
+  #                                          "tH(GUG)E1",
+  #                                          "tD(GUC)B")]
   # if( getOption("RNAmod_debug") ){
   #   bamData <- bamData[names(bamData) %in% getOption("RNAmod_debug_transcripts")]
   # }
@@ -127,6 +129,14 @@ setMethod(
   return(posData)
 }
 
+# returns the position data for analysis as a list of data per replicate for
+# individual transcript
+.get_data <- function(ID,data){
+  res <- lapply(data,"[[",ID)
+  return(res)
+}
+
+
 #' @rdname parseMod
 #' 
 #' @description 
@@ -143,12 +153,12 @@ setMethod(
   signature = signature(object = "analysis_default",
                         gff = "GRanges",
                         fafile = "FaFile",
-                        modifications = "list"),
+                        modClasses = "list"),
   definition = function(object,
                         gff,
                         fafile,
-                        modifications) {
-    browser()
+                        modClasses) {
+    # browser()
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
@@ -159,7 +169,7 @@ setMethod(
                                   data = object@data,
                                   gff = gff,
                                   fafile = fafile,
-                                  mods = modifications)
+                                  modClasses = modClasses)
     names(res) <- IDs
     res <- res[!is.null(res)]
     # If not results are present return NA instead of NULL
@@ -171,11 +181,8 @@ setMethod(
   }
 )
 
-# returns the position data for m7G analysis.
-# each entry in list a result for a gene of all replicates
-.get_data <- function(ID,data){
-  res <- lapply(data,"[[",ID)
-  return(res)
+.get_single_position_letters <- function(x) {
+  substring(x, 1:nchar(x), 1:nchar(x))  
 }
 
 # detect and merge modification positions in one transcript
@@ -183,40 +190,23 @@ setMethod(
                                      data,
                                      gff,
                                      fafile,
-                                     mods){
-  browser()
+                                     modClasses){
+  # browser()
   # debug
   if( getOption("RNAmod_debug") ){
     .print_transcript_info(paste(ID," prep"), "")
   }
   data <- .get_data(ID,data)
-  # do not take into account position 1
-  data <- lapply(data, function(x){
-    x[as.numeric(names(x)) == 1] <- 0
-    x
-  })
   # get sequence of transcript and subset gff for single transcript data
   gff <- .subset_gff_for_unique_transcript(gff, ID)
   seq <- .get_seq_for_unique_transcript(gff,fafile,ID)
   # generate a location vector
-  locations <- 1:width(seq)
-  # Convert local G position to global positions
+  locations <- 1:length(seq)
+  names(locations) <- .get_single_position_letters(as.character(seq))  
+  # # Convert local G position to global positions
   globalLocations <- .convert_local_to_global_locations(gff, locations)
-  
-  
-  browser()
-  
-  # detect all G positions
-  locations <- stringr::str_locate_all(as.character(seq), "G")
-  locations <- locations[[1]][,"start"]
-  if(length(locations) == 0) return(NULL)
-  
-  
-  
-  
-  
   res <- .analyze_transcript(ID = ID,
-                             mods = mods,
+                             modClasses = modClasses,
                              data = data,
                              globalLocations = globalLocations,
                              iterationN = 1)
@@ -226,201 +216,140 @@ setMethod(
 
 # merge positions in one transcript
 .analyze_transcript <- function(ID,
-                                mods,
+                                modClasses,
                                 data,
                                 globalLocations,
                                 iterationN){
+  # browser()
   if( iterationN > .get_transcript_max_iteration()) return(NULL)
   # debug
   if( getOption("RNAmod_debug") ){
     .print_transcript_info(paste(ID," detect"), iterationN)
   }
-  
-  
-  
-  
-  
-  
-  
-  # Retrieve m7G positions
+  # Retrieve modifications positions
   modifications <- lapply(globalLocations,
-                          .check_for_M7G,
+                          .check_for_modification,
+                          modClasses,
                           data,
                           globalLocations)
+  # browser()
   if(length(modifications) == 0) return(NULL)
-  
-  
-  
-  
-  
-  
   # name the locations based on sequence position
-  names(modifications) <- paste0(ID,"_G_",globalLocations)
-  modifications <-  modifications[!vapply(modifications,is.null,logical(1))]
+  names(modifications) <- paste0(ID,
+                                 "_",
+                                 names(globalLocations),
+                                 "_",
+                                 globalLocations)
+  modifications <- modifications[!vapply(modifications,is.null,logical(1))]
   if(length(modifications) == 0) return(NULL)
   # check if by masking found modifications positions additional positions are
   # picked up - remember the +1 location data
-  modLocations <- as.numeric(unlist(lapply(modifications, "[[","location")))
+  modLocations <- setNames(
+    as.numeric(unlist(lapply(modifications, "[[","location"))),
+    unlist(lapply(modifications, "[[","type")))
   # do not take into account positions found as modification
-  data <- .mask_data(data, modLocations)
+  data <- .mask_data(modClasses,
+                     data,
+                     modLocations)
   globalLocations <- globalLocations[!(globalLocations %in% modLocations)]
-  return(append(modifications,.analyze_M7G_transcript(ID = ID,
-                                                      data = data,
-                                                      globalLocations = globalLocations,
-                                                      (iterationN+1))))
+  return(append(modifications,.analyze_transcript(ID = ID,
+                                                  modClasses = modClasses,
+                                                  data = data,
+                                                  globalLocations = globalLocations,
+                                                  (iterationN+1))))
 }
 
 # mask data for know modification locations
-# extend to N+2,N+3 location?
-.mask_data <- function(data, modLocations){
-  lapply(data, function(x){
-    x[as.numeric(names(x)) %in% (modLocations+1)] <- 
-      x[as.numeric(names(x)) %in% (modLocations+1)]*(1-RNAMOD_M7G_ARREST_RATE)
+.mask_data <- function(modClasses,
+                       data,
+                       modLocations){
+  # browser()
+  # only use class for which data is present
+  modTypes <- unique(names(modLocations))
+  modClassTypes <- unlist(lapply(modClasses, getModType))
+  data <- lapply(data, function(x){
+    modClassesSubset <- modClasses[modClassTypes %in% modTypes]
+    for(i in seq_along(modClassesSubset)){
+      subsetLocations <- 
+        modLocations[names(modLocations) == getModType(modClassesSubset[[i]])]
+      x <- maskPositionData(modClassesSubset[[i]],
+                       x,
+                       subsetLocations)
+    }
     x
   })
+  return(data)
 }
 
-# check for m7G at given position
-.check_for_M7G <- function(location, 
-                           data,
-                           locs){
-  # short cut if amount of data is not sufficient
-  if( is.null(.do_M7G_pretest(location,
-                              data))) return(NULL)
-  # If potential modification right in front of current location
-  if(length(locs[locs == (location-1)]) != 0) {
-    locTestPre <- .check_for_M7G((location-1), 
-                                 .mask_data(data, location),
-                                 locs[locs != location])
-    if(!is.null(locTestPre)){
-      # udpate data accordingly
-      data <- .mask_data(data, (location-1))
+# check for modifications at given position
+.check_for_modification <- function(location, 
+                                    modClasses,
+                                    data,
+                                    globalLocations){
+  
+  # if(location == 1575) { browser() }
+  res <- lapply(modClasses, function(class){
+    # short cut if amount/properties of data are not sufficient
+    if( is.null(preTest(class,
+                        location,
+                        data,
+                        globalLocations))) return(NULL)
+    # If potential modification right in front of current location
+    if(length(globalLocations[globalLocations == (location-1)]) != 0) {
+      locTestPre <- .check_for_modification((location-1),
+                                            modClasses,
+                                            .mask_data(list(class),
+                                                       data, 
+                                                       .get_location_vector(location,
+                                                                            getModType(class))),
+                                            globalLocations[globalLocations != location])
+      if(!is.null(locTestPre)){
+        # udpate data accordingly
+        data <- .mask_data(modClasses,
+                           data, 
+                           .get_location_vector(locTestPre$location,
+                                                locTestPre$type))
+      }
     }
-  }
-  # If potential modification right after of current location
-  if(length(locs[locs == (location+1)]) != 0) {
-    locTestPost <- .check_for_M7G((location+1), 
-                                  .mask_data(data, location),
-                                  locs[locs != location])
-    if(!is.null(locTestPost)){
-      # udpate data accordingly
-      data <- .mask_data(data, (location+1))
+    # If potential modification right after of current location
+    if(length(globalLocations[globalLocations == (location+1)]) != 0) {
+      locTestPost <- .check_for_modification((location+1), 
+                                             modClasses,
+                                             .mask_data(list(class),
+                                                        data, 
+                                                        .get_location_vector(location,
+                                                                             getModType(class))),
+                                             globalLocations[globalLocations != location])
+      if(!is.null(locTestPost)){
+        # udpate data accordingly
+        data <- .mask_data(modClasses,
+                           data, 
+                           .get_location_vector(locTestPost$location,
+                                                locTestPost$type))
+      }
     }
-  }
-  # Calculate the arrest rate per position
-  arrestData <- lapply(data, .get_arrest_rate)
-  # get test result for the current location
-  locTest <- .calc_M7G_test_values(location,
-                                   data,
-                                   arrestData)
-  # If insufficient data is present
-  if(is.null(locTest)) return(NULL)
-  # dynamic threshold based on the noise of the signal (high sd)
-  if(!.validate_M7G_pos(RNAMOD_M7G_SIGMA_THRESHOLD, 
-                        RNAMOD_M7G_P_THRESHOLD, 
-                        locTest$sig.mean, 
-                        locTest$p.value) ) {
-    # debug
-    if( getOption("RNAmod_debug") ){
-      .print_location_info(paste(location,"_no"),locs)
-    }
-    return(NULL)
-  }
-  # debug
-  if( getOption("RNAmod_debug") ){
-    .print_location_info(paste(location,"_yes"), locs)
-  }
+    return(checkForModification(class,
+                                location = location,
+                                globalLocations = globalLocations,
+                                data = data,
+                                modClasses = modClasses))
+  })
+  res <- res[!vapply(res, is.null, logical(1))]
+  if(length(res) > 1) return(NULL)
+  if(length(res) == 0) return(NULL)
   # Return data
   return(list(location = location,
-              signal = locTest$sig.mean,
-              signal.sd = locTest$sig.sd,
-              p.value = locTest$p.value,
-              nbsamples = locTest$n))
+              type = res[[1]]$type,
+              signal = res[[1]]$signal,
+              signal.sd = res[[1]]$signal.sd,
+              p.value = res[[1]]$p.value,
+              nbsamples = res[[1]]$nbsamples))
 }
 
-# check if any data is available to proceed with test
-.do_M7G_pretest <- function(location,
-                            data){
-  # do not take into account position 1
-  if(location == 1) return(NULL)
-  
-  # merge data for positions
-  # data on the N+1 location
-  testData <- .aggregate_location_data(data, (location+1))
-  testData <- testData[testData > 0]
-  # base data to compare against
-  baseData <- .aggregate_not_location_data(data, (location+1))
-  
-  # number of replicates
-  n <- length(data)
-  # if not enough data is present
-  if(length(testData) == 0 | 
-     length(baseData) < (3*n)) return(NULL)
-  return(list(n = n,
-              testData = testData,
-              baseData = baseData))
-}
-
-# test for m7G at current location
-.calc_M7G_test_values <- function(location,
-                                  data,
-                                  arrestData){
-  # short cut if amount of data is not sufficient
-  pretestData <- .do_M7G_pretest(location,
-                                 data)
-  if(is.null(pretestData)) return(NULL)
-  
-  # data from pretest
-  testData <- pretestData$testData
-  baseData <- pretestData$baseData
-  n <- pretestData$n
-  
-  # data on the arrect direction
-  testArrestData <- .aggregate_location_data(arrestData, location)
-  # No read arrest detectable
-  if( sum(testArrestData) < 0 ) return(NULL)
-  # To low arrest detectable
-  testArrest <- length(testArrestData[testArrestData >= RNAMOD_M7G_ARREST_RATE])
-  if( length(testArrestData) != testArrest ) {
-    return(NULL)
-  }
-  # get test values
-  # overall mean and sd
-  mean <-  mean(baseData)
-  sd <-  stats::sd(baseData)
-  # Use the sigma level as value for signal strength
-  sig <- (as.numeric(as.character(testData)) - mean) %/% sd
-  sig.mean <- mean(sig)
-  sig.sd <- stats::sd(sig)
-  # Since normality of distribution can not be assumed use the MWU
-  # generate p.value for single position
-  p.value <- suppressWarnings(wilcox.test(baseData, testData)$p.value)
-  return(list(sig = sig,
-              sig.mean = sig.mean,
-              sig.sd = sig.sd,
-              p.value = p.value,
-              n = n))
-}
-
-# call yes or nor position
-.validate_M7G_pos <- function(sig.threshold, 
-                              p.threshold, 
-                              sig, 
-                              p.value){
-  ((sig > sig.threshold &&
-      p.value <= p.threshold) ||
-     (sig > sig.threshold &&
-        !.get_use_p()))
-}
-
-# create data.frame for sample plotting
-.create_M7G_plot_data <- function(testData, baseData, name){
-  data.frame(x = c(rep(name,(length(testData) + 
-                               length(baseData)))),
-             y = c(testData, 
-                   baseData),
-             group = c(rep("Position",length(testData)), 
-                       rep("Baseline", length(baseData))))
+.get_location_vector <- function(location, 
+                                 type){
+  setNames(location,
+           rep(type,length(location)))
 }
 
 #' @rdname mergePositionsOfReplicates
@@ -436,19 +365,16 @@ setMethod(
   f = "mergePositionsOfReplicates",
   signature = signature(object = "analysis_default",
                         gff = "GRanges",
-                        fafile = "FaFile",
-                        data = "list"),
+                        fafile = "FaFile"),
   definition = function(object,
                         gff,
-                        fafile,
-                        data) {
-    browser()
+                        fafile) {
     # Process only genes found in all datasets
-    IDs <- lapply(data,names)
+    IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
     res <- lapply(IDs,
-                          FUN = .merge_positions,
-                          object@data)
+                  FUN = .merge_positions,
+                  object@data)
     names(res) <- IDs
     res <- res[!is.null(res)]
     # If not results are present return NA instead of NULL
@@ -464,15 +390,14 @@ setMethod(
 # each entry in list a result for a gene of all replicates
 .get_default_data <- function(ID,data){
   res <- lapply(data,function(x){
-    return(x[[ID]][["default"]])
+    return(x[[ID]])
   })
   return(res)
 }
 
-
 # merge positions in one transcript
 .merge_positions <- function(ID,data){
-  data <- .get_default_data(ID,data)
+  data <- .get_data(ID,data)
   positions <- unique(unlist(lapply(data,names)))
   res <- lapply(positions,
                 FUN = .merge_position,

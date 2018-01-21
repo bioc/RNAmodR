@@ -50,7 +50,8 @@ NULL
 
 # converts the position on a transcript from start to end, to the correct
 # genomic position
-.convert_local_to_global_locations <- function(gff, loc){
+.convert_local_to_global_locations <- function(gff,
+                                               loc){
   # browser()
   # Intron handling needs to be added
   strand <- unique(as.character(strand(gff)))
