@@ -13,7 +13,8 @@ RNAMOD_SEP_SEQNAMES <- "---"
 #' @param fafile 
 #' @param geneTypes 
 #' @param ident 
-#' @param saveTrimmedFile  
+#' @param saveTrimmedFile 
+#' @param appendToOriginal 
 #' @param removeDuplicateSeqs 
 #'
 #' @return
@@ -46,11 +47,13 @@ convertGeneTypeToChrom <- function(gfffile,
                                    geneTypes,
                                    ident,
                                    saveTrimmedFile = FALSE,
+                                   appendToOriginal = FALSE,
                                    removeDuplicateSeqs = FALSE){
   .check_input(gfffile,
                fafile,
                ident,
-               saveTrimmedFile)
+               saveTrimmedFile,
+               appendToOriginal)
   # get the aggregated file names
   fileNames <- .get_file_names(gfffile,
                                fafile,
@@ -71,6 +74,7 @@ convertGeneTypeToChrom <- function(gfffile,
                                   IDs,
                                   fileNames,
                                   saveTrimmedFile,
+                                  appendToOriginal,
                                   removeDuplicateSeqs)))
 }
 
@@ -84,11 +88,13 @@ convertGeneToChrom <- function(gfffile,
                                genes,
                                ident,
                                saveTrimmedFile = FALSE,
+                               appendToOriginal = FALSE,
                                removeDuplicateSeqs = FALSE){
   .check_input(gfffile,
                fafile,
                ident,
-               saveTrimmedFile)
+               saveTrimmedFile,
+               appendToOriginal)
   # get the aggregated file names
   fileNames <- .get_file_names(gfffile,
                                fafile,
@@ -109,6 +115,7 @@ convertGeneToChrom <- function(gfffile,
                                   genes,
                                   fileNames,
                                   saveTrimmedFile,
+                                  appendToOriginal,
                                   removeDuplicateSeqs)))
 }
 
@@ -119,6 +126,7 @@ convertGeneToChrom <- function(gfffile,
                            genes,
                            fileNames,
                            saveTrimmedFile,
+                           appendToOriginal,
                            removeDuplicateSeqs){
   # get the matchin gff entries
   gff_subset <- .get_gff_subset(gff,
@@ -141,6 +149,20 @@ convertGeneToChrom <- function(gfffile,
                 seqs_subset_clustered,
                 gff_subset,
                 fileNames)
+  # if appendToOriginal == TRUE saved appended version of the original files
+  # with the clustered subset files
+  if(saveTrimmedFile && appendToOriginal){
+    fileNames[["out_fafile"]] <- 
+      appendFastaFiles(fileNames[["in_fafile"]],
+                       fileNames[["convert_fafile"]],
+                       ident = ident,
+                       msg = "Saved appended fasta file: ")
+    fileNames[["out_gfffile"]] <- 
+      appendGFF(fileNames[["trim_gfffile"]],
+                fileNames[["convert_gfffile"]],
+                ident = ident,
+                msg = "Saved appended gff3 file: ")
+  }
   # return file names
   return(fileNames)
 }
@@ -149,12 +171,14 @@ convertGeneToChrom <- function(gfffile,
 .check_input <- function(gfffile,
                          fafile,
                          ident,
-                         saveTrimmedFile){
+                         saveTrimmedFile,
+                         appendToOriginal){
   # Check inputs
   assertive::assert_all_are_existing_files(gfffile)
   assertive::assert_all_are_existing_files(fafile)
   assertive::assert_is_a_non_empty_string(ident)
   assertive::assert_is_a_bool(saveTrimmedFile)
+  assertive::assert_is_a_bool(appendToOriginal)
   return(invisible(TRUE))
 }
 
@@ -257,26 +281,45 @@ convertGeneToChrom <- function(gfffile,
                                                      invert = TRUE)
   transcripts <- c(transcripts,non_child_transcripts)
   transcripts <- .order_GRanges(transcripts)
+  # dot his now because the transcript object will be reused
+  gff_sub <- gff_sub[(gff_sub$ID %in% as.character(transcripts$Parent)) | 
+                       (gff_sub$ID %in% transcripts$ID)]
   # get sequences for transcripts
-  transcripts_seq <- Biostrings::getSeq(fa,transcripts)
+  # message("111")
+  # transcripts_seq <- Biostrings::getSeq(fa,transcripts)
+  message("222")
   # set names of transcripts
   names <- as.character(transcripts$Parent)
   names[is.na(names)] <- .get_unique_seqnames(non_child_transcripts)
-  names(transcripts_seq) <- names
+  # names(transcripts_seq) <- names
   # reset ID for strand identification. this object is just temporary used
   transcripts$temp_ID <- names
+  browser()
+  transcripts <- split(transcripts, transcripts$temp_ID)
   # get unique names and iterate and merge split sequences
-  uniq_gene_names <- unique(names(transcripts_seq))
-  seqs <- Biostrings::DNAStringSet(sapply(uniq_gene_names, function(name){
-    seq <- transcripts_seq[BiocGenerics::which(names(transcripts_seq) == name)]
-    strand <- unique(as.character(BiocGenerics::strand(
-      transcripts[as.character(transcripts$temp_ID) == name])))
+  # uniq_gene_names <- unique(names(transcripts_seq))
+  # uniq_gene_names <- unique(transcripts$temp_ID)
+  param <- BiocParallel::bpparam()
+  param$workers <- 3
+  BiocParallel::register(param)
+  # generate a list
+  seqs <- list(seq = BiocParallel::bplapply(transcripts, function(transcript,
+                                                                  fa){
+    Biostrings::getSeq(fa,transcript)
+  },
+  fa = fa),
+  strands = BiocParallel::bplapply(transcripts, function(transcript){
+    unique(as.character(BiocGenerics::strand(transcript)))
+  })
+  # join sequences 
+  seqs <- Biostrings::DNAStringSet(BiocParallel::bplapply(seqs, function(seq){
     # If strand == "-" intron sequences are in reverse order
-    if(strand == "-"){
-      return(BiocGenerics::unlist(rev(seq)))
+    if(seq$strand == "-"){
+      return(BiocGenerics::unlist(rev(seq$seq)))
     }
-    return(BiocGenerics::unlist(seq))
+    return(BiocGenerics::unlist(seq$seq))
   }))
+  message("333")
   # rename sequences to match parent sequence
   if(length(seqs) != length(gff_sub)){
     warning("Mismatching number of annotations and sequences. This is likely ",
@@ -287,8 +330,6 @@ convertGeneToChrom <- function(gfffile,
             "dropped.",
             call. = FALSE)
   }
-  gff_sub <- gff_sub[(gff_sub$ID %in% as.character(transcripts$Parent)) | 
-                       (gff_sub$ID %in% transcripts$ID)]
   names(seqs) <- .get_unique_seqnames(gff_sub)
   return(seqs)
 }
@@ -452,14 +493,20 @@ converttRNAscanToChrom <- function(gfffile,
                 seqs_subset_clustered,
                 gff_subset,
                 fileNames)
-  # return file names
+  if(saveTrimmedFile && appendToOriginal){
+    fileNames[["out_fafile"]] <- appendFastaFiles(fileNames[["in_fafile"]],
+                                          fileNames[["convert_fafile"]],
+                                          ident = ident,
+                                          msg = "Saved appended fasta file: ")
+    fileNames[["out_gfffile"]] <- appendGFF(fileNames[["trim_gfffile"]],
+                                          fileNames[["convert_gfffile"]],
+                                          ident = ident,
+                                          msg = "Saved appended gff3 file: ")
+  }
   return(invisible(fileNames))
 }
 
-.get_trimmed_tRNAscan <- function(tRNAscan,
-                                  gff,
-                                  saveTrimmedFile,
-                                  trim_gfffile){
+.get_trimmed_tRNAscan <- function(tRNAscan,gff,saveTrimmedFile,trim_gfffile){
   # test if chromosome names of tRNAscan need to be fixed
   chromTest <- intersect(unique(as.character(GenomeInfoDb::seqnames(tRNAscan))),
                          unique(as.character(GenomeInfoDb::seqnames(gff))))
@@ -498,7 +545,7 @@ converttRNAscanToChrom <- function(gfffile,
   }
   gff_subset <- .order_GRanges(gff_subset)
   # Remove all entries from the original gff, which are part of the subset
-  .do_trimming_gff(gff[], 
+  .do_trimming_gff(gff, 
                    gff_subset,
                    saveTrimmedFile,
                    trim_gfffile)

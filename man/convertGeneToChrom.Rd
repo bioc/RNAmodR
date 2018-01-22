@@ -8,11 +8,10 @@
 \title{convert gene sequences to individual chromosomes}
 \usage{
 convertGeneTypeToChrom(gfffile, fafile, geneTypes, ident,
-  saveTrimmedFile = FALSE, appendToOriginal = FALSE,
-  removeDuplicateSeqs = FALSE)
+  saveTrimmedFile = FALSE, removeDuplicateSeqs = FALSE)
 
 convertGeneToChrom(gfffile, fafile, genes, ident, saveTrimmedFile = FALSE,
-  appendToOriginal = FALSE, removeDuplicateSeqs = FALSE)
+  removeDuplicateSeqs = FALSE)
 
 converttRNAscanToChrom(gfffile, fafile, tRNAscanfile, ident,
   saveTrimmedFile = FALSE, appendToOriginal = FALSE)
@@ -27,8 +26,6 @@ converttRNAscanToChrom(gfffile, fafile, tRNAscanfile, ident,
 \item{ident}{}
 
 \item{saveTrimmedFile}{}
-
-\item{appendToOriginal}{}
 
 \item{removeDuplicateSeqs}{}
 

@@ -28,11 +28,24 @@ requireNamespace("GenomicRanges")
 requireNamespace("assertive")
 
 
-RNAMOD_GFF_FEATURE_TYPES <- c("gene","mRNA","transcript","CDS",
-                                "biological_region","five_prime_UTR",
-                                "three_prime_UTR")
-RNAMOD_GFF_COLNAMES <- c("source","type","score","phase","ID","Name","Parent",
-                           "Alias","gene")
+RNAMOD_GFF_FEATURE_TYPES <- c("gene",
+                              "mRNA",
+                              "transcript",
+                              "CDS",
+                              "biological_region",
+                              "five_prime_UTR",
+                              "three_prime_UTR")
+RNAMOD_GFF_COLNAMES <- c("source",
+                         "type",
+                         "score",
+                         "phase",
+                         "ID",
+                         "Name",
+                         "Parent",
+                         "Alias",
+                         "gene",
+                         "protein_id",
+                         "transcript_id")
 
 RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
                                     "gene",

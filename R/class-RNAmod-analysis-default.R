@@ -36,10 +36,11 @@ setMethod(
                         param) {
     # browser()
     # detect modifications in each file
-    data <- lapply(files,
-                   FUN = .get_positions,
-                   gff,
-                   param)
+    #data <- lapply(files,
+    data <- BiocParallel::bplapply(files,
+                                   FUN = .get_positions,
+                                   gff,
+                                   param)
     data <- data[!is.null(data)]
     if(length(data) == 0){
       stop("No reads detected in any bam file for '",
@@ -159,8 +160,8 @@ setMethod(
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
     # detect modification per transcript
-    res <- lapply(IDs,
-    # res <- BiocParallel::bplapply(IDs,
+    # res <- lapply(IDs,
+    res <- BiocParallel::bplapply(IDs,
                                   FUN = .analyze_transcript_prep,
                                   data = object@data,
                                   gff = gff,
@@ -387,9 +388,10 @@ setMethod(
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
-    res <- lapply(IDs,
-                  FUN = .merge_positions,
-                  object@data)
+    # res <- lapply(IDs,
+    res <- BiocParallel::bplapply(IDs,
+                                  FUN = .merge_positions,
+                                  object@data)
     names(res) <- IDs
     res <- res[!is.null(res)]
     # If not results are present return NA instead of NULL
