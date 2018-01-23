@@ -28,13 +28,13 @@ requireNamespace("GenomicRanges")
 requireNamespace("assertive")
 
 
-RNAMOD_GFF_FEATURE_TYPES <- c("gene",
-                              "mRNA",
-                              "transcript",
-                              "CDS",
-                              "biological_region",
-                              "five_prime_UTR",
-                              "three_prime_UTR")
+# RNAMOD_GFF_FEATURE_TYPES <- c("gene",
+#                               "mRNA",
+#                               "transcript",
+#                               "CDS",
+#                               "biological_region",
+#                               "five_prime_UTR",
+#                               "three_prime_UTR")
 RNAMOD_GFF_COLNAMES <- c("source",
                          "type",
                          "score",
@@ -46,7 +46,6 @@ RNAMOD_GFF_COLNAMES <- c("source",
                          "gene",
                          "protein_id",
                          "transcript_id")
-
 RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
                                     "gene",
                                     "mRNA",
@@ -66,28 +65,14 @@ RNAMOD_MOD_SEQ_FEATURES <- c("five_prime_UTR",
                              "CDS",
                              "noncoding_exon",
                              "exon")
-RNAMOD_MOD_DIRECT_SEQ_FEATURES <- c("rRNA",
-                                    "rRNA_gene")
-# RNAMOD_MOD_SEQ_FEATURES <- c("CDS",
-#                              "noncoding_exon",
-#                              "exon",
-#                              "rRNA",
-#                              "rRNA_gene",
-#                              "tRNA",
-#                              "tRNA_gene",
-#                              "ncRNA",
-#                              "ncRNA_gene",
-#                              "snoRNA",
-#                              "snoRNA_gene",
-#                              "snRNA",
-#                              "snRNA_gene",
-#                              "SRP_RNA")
 
 # Settings
 RNAMOD_DEFAULT_PALETTE <- "Set1"
 RNAMOD_DEFAULT_TRANSCRIPT_MAX_ITERATIONS <- 5
+RNAMOD_DEFAULT_MAPQ <- 5
 
 .onLoad <- function(libname,pkgname){
+  options("RNAmod_map_quality" = RNAMOD_DEFAULT_MAPQ)
   options("RNAmod_sample_transcripts" = c("RDN18-1"))
   options("RNAmod_transcript_max_iteration" = 
             RNAMOD_DEFAULT_TRANSCRIPT_MAX_ITERATIONS)

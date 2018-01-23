@@ -21,6 +21,7 @@ Collate:
     'AllGenerics-export-default.R'
     'AllGenerics-export.R'
     'RNAModString.R'
+    'RNAmod-options.R'
     'RNAmod-utils-preparations.R'
     'RNAmod-utils.R'
     'assertions.R'

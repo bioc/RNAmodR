@@ -62,7 +62,8 @@ setMethod(
       do.call(c, x)
     }
   } 
-  ids <- .get_IDs_from_scanBamParam(dataList,param)
+  ids <- .get_IDs_from_scanBamParam_all_reads(param,
+                                              dataList)
   dataList <- unname(dataList) # names not valid for unlisting of result
   elts <- stats::setNames(Rsamtools::bamWhat(param), 
                           Rsamtools::bamWhat(param))
@@ -75,38 +76,46 @@ setMethod(
   return(df)
 }
 
-.get_IDs_from_scanBamParam <- function(dataList,param){
-  geneNames <- vector(mode = "list", 
-                      length=length(names(Rsamtools::bamWhich(param))))
+# repeats names in the format chromosome:start-end according to the number of 
+# reads for each in element bamWhich(param)
+.get_IDs_from_scanBamParam_all_reads <- function(param,
+                                                 dataList){
+  geneNames <- .get_IDs_from_scanBamParam(param)
+  # Repeat every "chr:start-end" = "ID" pair for number of reads mapped to this
+  # part
+  geneNames2 <- lapply(seq_along(geneNames), function(i){
+    rep(geneNames[i],
+             length(dataList[[names(geneNames[i])]]$seq))
+  })
+  geneNames <- setNames(unlist(geneNames2),
+                        unlist(lapply(geneNames2, names)))
+  return(geneNames)
+}
+
+# assembles a name in the format of chromosome:start-end for each element in 
+# bamWhich(param)
+.get_IDs_from_scanBamParam <- function(param){
   # construct start-end part
   # format = start-end
-  geneNames <- lapply(Rsamtools::bamWhich(param), function(x){
-    pos <- paste0(IRanges::start(x),"-",IRanges::end(x))
+  geneNamesPerChrom <- lapply(Rsamtools::bamWhich(param), function(x){
     # If ID column is NA use Name column
     res <- S4Vectors::mcols(x)$ID
     res[is.na(res)] <- S4Vectors::mcols(x[is.na(S4Vectors::mcols(x)$ID),])$Name
-    
     names(res) <- paste0(IRanges::start(x),"-",IRanges::end(x))
     return(res)
   })
   # combine chromosome with start-end part
   # format = chr:start-end
-  names(geneNames) <- names(Rsamtools::bamWhich(param))
-  for(i  in seq_along(geneNames)){
-    names(geneNames[[i]]) <- paste0(names(geneNames[i]),
-                                    ":",
-                                    names(geneNames[[i]]))
-  }
-  geneNames <- setNames(unlist(geneNames),unlist(lapply(geneNames, names)))
-  
-  # Repeat every "chr:start-end" = "ID" pair for number of reads mapped to this
-  # part
-  geneNames2 <- vector(mode="list",length(geneNames))
-  for(i in seq_along(geneNames)){
-    geneNames2[[i]] <- list(rep(geneNames[i],
-                                length(dataList[[names(geneNames[i])]]$seq)))
-  }
-  geneNames <- setNames(unlist(geneNames2),unlist(lapply(geneNames2, names)))
+  names(geneNamesPerChrom) <- names(Rsamtools::bamWhich(param))
+  geneNamesPerChrom <- lapply(seq_along(geneNamesPerChrom), function(i){
+    setNames(geneNamesPerChrom[[i]],
+             paste0(names(geneNamesPerChrom[i]),
+                    ":",
+                    names(geneNamesPerChrom[[i]])))
+  })
+  names(geneNamesPerChrom) <- names(Rsamtools::bamWhich(param))
+  geneNames <- setNames(unlist(geneNamesPerChrom),
+                        unlist(lapply(geneNamesPerChrom, names)))
   return(geneNames)
 }
 
@@ -128,9 +137,9 @@ setMethod(
       return(y)
     }
     
-    res <- bplapply(files,
-                    FUN,
-                    param = param)
+    res <- BiocParallel::bplapply(files,
+                                  FUN,
+                                  param = param)
     names(res) <- files
   }
   return(res)
@@ -140,10 +149,10 @@ setMethod(
 # Returns the number of reads contained in a bam file for parameters set in
 # param
 .get_bam_read_count <- function(files, quality){
-  
   res <- c()
   files <- files[grepl(".bam",files)]
   if( length(files) > 0){
+    res 
     for(i in 1:length(files)) {
       res[[i]] <- countBam(files[[i]], 
                            param = ScanBamParam(mapqFilter = quality))$records
@@ -168,7 +177,10 @@ setMethod(
   for(i in seq_along(unique(GenomeInfoDb::seqnames(gRangeInput)))){
     ident <- as.character(unique(GenomeInfoDb::seqnames(gRangeInput))[i])
     if( ident %in% acceptableChromIdent ){
-      gRangeList <- append(gRangeList, GenomicRanges::GRangesList(gRangeInput[GenomeInfoDb::seqnames(gRangeInput) == ident,]) )
+      gRangeList <- append(gRangeList, 
+                           GenomicRanges::GRangesList(
+                             gRangeInput[GenomeInfoDb::seqnames(gRangeInput) 
+                                         == ident,]) )
       listNames[[i]] <- ident
     } else {
       warning("Not matching chromosome identifier in gff and bam file. ",
@@ -180,11 +192,11 @@ setMethod(
   
   which <- gRangeList
   what <- c("rname", "strand", "pos", "qwidth", "seq", "mapq")
-  param <- Rsamtools::ScanBamParam(which=which, 
-                                   what=what
-                                   # since tRNA and
-                                   # mapqFilter = quality
-                                   )
+  flags <- scanBamFlag(isSecondaryAlignment = FALSE)
+  param <- Rsamtools::ScanBamParam(flag = flags,
+                                   which=which, 
+                                   what=what,
+                                   mapqFilter = .get_map_quality())
   return(param)
 }
 
@@ -218,6 +230,7 @@ setMethod(
 # - Name/ID for parent entry
 # - all childs based on Parent name equals ID
 .subset_gff_for_unique_transcript <- function(gff, ID){
+  browser()
   res <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
                 S4Vectors::mcols(gff)$Name == ID) |
                (!is.na(S4Vectors::mcols(gff)$ID) & 
@@ -314,44 +327,4 @@ setMethod(
 }
 .print_transcript_info <- function(ID, iterationN){
   message(ID, " - iteration: ",iterationN)
-}
-
-# option retrieval -------------------------------------------------------------
-
-# whether to use a p value for detection or not
-.get_use_p <- function(){
-  useP <- getOption("RNAmod_use_p")
-  if(!assertive::is_a_bool(useP)){
-    useP <- as.logical(useP[[1]])
-    warning("The option 'RNAmod_use_p' is not a single logical value. ",
-            "Please set 'RNAmod_use_p' to TRUE or FALSE.",
-            call. = FALSE)
-  }
-  useP
-}
-
-
-.get_color_palette <- function(){
-  palette <- getOption("RNAmod_palette")
-  if(!assertive::is_a_string(palette)){
-    palette <- RNAMOD_DEFAULT_PALETTE
-    warning("The option 'RNAmod_palette' is not a single string. ",
-            "Please set 'RNAmod_palette' to a valid palette identifier using ",
-            "a single string.",
-            call. = FALSE)
-  }
-  palette
-}
-
-
-.get_transcript_max_iteration <- function(){
-  iterations <- getOption("RNAmod_transcript_max_iteration")
-  if(!assertive::is_a_number(iterations)){
-    iterations <- RNAMOD_DEFAULT_TRANSCRIPT_MAX_ITERATIONS
-    warning("The option 'RNAmod_transcript_max_iteration' is not a single ",
-            "number. Please set 'RNAmod_palette' to a valid palette ",
-            "identifier using a single string.",
-            call. = FALSE)
-  }
-  iterations
 }
