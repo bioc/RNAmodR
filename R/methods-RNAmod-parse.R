@@ -45,11 +45,12 @@ setMethod(
     analysisClasses <- .load_analysis_classes(names(analysisGroups))
     # extract gene boundaries
     gff <- .Object@.dataGFF
-    gff <- gff[S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_CONTAINING_FEATURES,]
     # combine path and file name
     files <- paste0(getInputFolder(.Object),experiment$BamFile)
     # assemble param for scanBam
-    param <- .assemble_scanBamParam(gff, 
+    param <- .assemble_scanBamParam(.get_parent_annotations(
+                                      .subset_rnamod_containing_features(gff)
+                                    ), 
                                     .Object@.mapQuality,
                                     .get_acceptable_chrom_ident(files))
     # load data into each analysis class

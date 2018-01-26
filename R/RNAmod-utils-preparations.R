@@ -2,6 +2,11 @@
 NULL
 
 RNAMOD_SEP_SEQNAMES <- "---"
+RNAMOD_MOD_SEQ_FEATURES_PREP <- c("five_prime_UTR",
+                                  "three_prime_UTR",
+                                  "CDS",
+                                  "noncoding_exon",
+                                  "exon")
 
 #' @name convertGeneToChrom
 #' 
@@ -249,7 +254,7 @@ convertGeneToChrom <- function(gfffile,
   genes <- genes[!is.na(genes)]
   transcripts <- gff[!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
                        (as.character(S4Vectors::mcols(gff)$Parent) %in% genes) &
-                       S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_SEQ_FEATURES]
+                       S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_SEQ_FEATURES_PREP]
   # transcripts which don't have a parent. get raw sequences
   non_child_transcripts <- IRanges::subsetByOverlaps(gff_sub, 
                                                      transcripts,
@@ -281,7 +286,7 @@ convertGeneToChrom <- function(gfffile,
   if(length(seqs) != length(gff_sub)){
     warning("Mismatching number of annotations and sequences. This is likely ",
             "the cause of not referenced types (",
-            paste(RNAMOD_MOD_SEQ_FEATURES,
+            paste(RNAMOD_MOD_SEQ_FEATURES_PREP,
                   collapse = ","),") for ",
             "certain annotations, eg. ncRNA described as gene. These will be ",
             "dropped.",
@@ -347,8 +352,8 @@ convertGeneToChrom <- function(gfffile,
                           S4Vectors::mcols(gff)$gene %in% parents),]
   # get chromosome names for the parent dependent on the chrom_name of the child
   gff_sub_w_p <- gff_sub[as.character(gff_sub$Parent) 
-                         %in% .get_parent_identifiers(gff_parents) ]
-  gff_parents <- gff_parents[.get_parent_identifiers(gff_parents) 
+                         %in% .get_unique_identifiers(gff_parents) ]
+  gff_parents <- gff_parents[.get_unique_identifiers(gff_parents) 
                              %in% as.character(gff_sub_w_p$Parent) ]
   chrom_names_parents <- GenomeInfoDb::seqnames(gff_sub_w_p)
   gff_sub <- c(GenomicRanges::GRanges(chrom_names_parents,

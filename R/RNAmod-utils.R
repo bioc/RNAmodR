@@ -45,53 +45,6 @@ setMethod(
 
 # reading BAM input ------------------------------------------------------------
 
-#' converts results from scanBam to DataFrame
-#' returns a simplified DataFrame for read data read out from a BAM
-#' file
-#' 
-#' @importFrom stats setNames
-#' @importClassesFrom S4Vectors DataFrame
-.convert_bam_to_DataFrame <- function(dataList, 
-                                      param){
-  .unlist <- function (x){
-    ## do.call(c, ...) coerces factor to integer, which is undesired
-    x1 <- x[[1L]]
-    if (is.factor(x1)) {
-      structure(unlist(x), class = "factor", levels = levels(x1))
-    } else {
-      do.call(c, x)
-    }
-  } 
-  ids <- .get_IDs_from_scanBamParam_all_reads(param,
-                                              dataList)
-  dataList <- unname(dataList) # names not valid for unlisting of result
-  elts <- stats::setNames(Rsamtools::bamWhat(param), 
-                          Rsamtools::bamWhat(param))
-  
-  lst <- lapply(elts, function(elt) .unlist(lapply(dataList, "[[", elt)))
-  lst$ID <- ids
-  lst <- lst[c("ID"="ID",elts)]
-  
-  df <- do.call(S4Vectors::DataFrame, lst)
-  return(df)
-}
-
-# repeats names in the format chromosome:start-end according to the number of 
-# reads for each in element bamWhich(param)
-.get_IDs_from_scanBamParam_all_reads <- function(param,
-                                                 dataList){
-  geneNames <- .get_IDs_from_scanBamParam(param)
-  # Repeat every "chr:start-end" = "ID" pair for number of reads mapped to this
-  # part
-  geneNames2 <- lapply(seq_along(geneNames), function(i){
-    rep(geneNames[i],
-             length(dataList[[names(geneNames[i])]]$seq))
-  })
-  geneNames <- setNames(unlist(geneNames2),
-                        unlist(lapply(geneNames2, names)))
-  return(geneNames)
-}
-
 # assembles a name in the format of chromosome:start-end for each element in 
 # bamWhich(param)
 .get_IDs_from_scanBamParam <- function(param){
@@ -117,48 +70,6 @@ setMethod(
   geneNames <- setNames(unlist(geneNamesPerChrom),
                         unlist(lapply(geneNamesPerChrom, names)))
   return(geneNames)
-}
-
-#' scans BAM files and converts them to DataFrame each 
-#' 
-#' @import Biostrings
-.get_bam_data <- function(files, 
-                          param){
-  
-  res <- c()
-  files <- files[grepl(".bam",files)]
-  if( length(files) > 0){
-    
-    FUN <-  function(x, param){
-      requireNamespace("Rsamtools", quietly = TRUE)
-      
-      y <- scanBam(x, param=param)
-      y <- .convert_bam_to_DataFrame(y, param)
-      return(y)
-    }
-    
-    res <- BiocParallel::bplapply(files,
-                                  FUN,
-                                  param = param)
-    names(res) <- files
-  }
-  return(res)
-  
-}
-
-# Returns the number of reads contained in a bam file for parameters set in
-# param
-.get_bam_read_count <- function(files, quality){
-  res <- c()
-  files <- files[grepl(".bam",files)]
-  if( length(files) > 0){
-    res 
-    for(i in 1:length(files)) {
-      res[[i]] <- countBam(files[[i]], 
-                           param = ScanBamParam(mapqFilter = quality))$records
-    }
-  }
-  return(res)
 }
 
 
@@ -191,11 +102,12 @@ setMethod(
   names(gRangeList) <- listNames[listNames != ""]
   
   which <- gRangeList
-  what <- c("rname", "strand", "pos", "qwidth", "seq", "mapq")
+  # what <- c("rname", "strand", "pos", "qwidth", "seq", "mapq")
+  what <- c("seq", "mapq")
   flags <- scanBamFlag(isSecondaryAlignment = FALSE)
   param <- Rsamtools::ScanBamParam(flag = flags,
-                                   which=which, 
-                                   what=what,
+                                   which = which, 
+                                   what = what,
                                    mapqFilter = .get_map_quality())
   return(param)
 }
@@ -224,21 +136,114 @@ setMethod(
   stop("Can't find ", name, call. = FALSE)
 }
 
+# BiocGeneric helper functions -------------------------------------------------
+
+# strand related functions
+.get_strand <- function(x){
+  as.character(BiocGenerics::strand(x))
+}
+.get_unique_strand <- function(x){
+  unique(.get_strand(x))
+}
+.is_minus_strand <- function(x) {
+  all(as.logical(x == "-"))
+}
+.is_on_minus_strand <- function(x) {
+  all(.is_on_correct_strand(x,"-"))
+}
+# is on the minus strand?
+.is_on_correct_strand <- function(x, strand) {
+  as.logical(.get_strand(x) == strand) 
+}
+.is_on_correct_strand2 <- function(x, gr) {
+  as.logical(.get_strand(x) == .get_unique_strand(gr)) 
+}
+
 # GRanges helper functions -----------------------------------------------------
+
+# get aggregated identifiers
+.get_gr_ids <- function(gr,
+                        na.rm = TRUE){
+  IDs <- unique(c(gr$ID,gr$Name))
+  if(na.rm){
+    IDs <- IDs[!is.na(IDs)]
+  }
+  IDs
+}
+
+# get unique ids
+# returns all identifiers which can be used as a identifier in the Parent
+# column aggrgated by precident: ID > Name > gene
+.get_unique_identifiers <- function(gr){
+  ids <- as.character(gr$ID)
+  ids[is.na(ids)] <- as.character(gr[is.na(ids)]$Name)
+  ids[is.na(ids)] <- as.character(gr[is.na(ids)]$gene)
+  ids
+}
+
+# subset to types present in RNAMOD_MOD_SEQ_FEATURES
+.subset_rnamod_transcript_features <- function(gr){
+  gr[S4Vectors::mcols(gr)$type %in% RNAMOD_MOD_TRANSCRIPT_FEATURES,]
+}
+# subset to types present in RNAMOD_MOD_SEQ_FEATURES
+.subset_rnamod_containing_features <- function(gr){
+  gr[S4Vectors::mcols(gr)$type %in% RNAMOD_MOD_CONTAINING_FEATURES,]
+}
 
 # subsets a gRanges object for entries concerning a single ID
 # - Name/ID for parent entry
 # - all childs based on Parent name equals ID
-.subset_gff_for_unique_transcript <- function(gff, ID){
-  browser()
-  res <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
+.subset_gff_for_unique_transcript <- function(gff, 
+                                              ID,
+                                              wo.childs = TRUE){
+  gr <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
                 S4Vectors::mcols(gff)$Name == ID) |
                (!is.na(S4Vectors::mcols(gff)$ID) & 
-                  S4Vectors::mcols(gff)$ID == ID) |
-               (!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
-                  as.character(S4Vectors::mcols(gff)$Parent) == ID &
-                  S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_SEQ_FEATURES),]
-  .order_GRanges(res)
+                  S4Vectors::mcols(gff)$ID == ID),]
+  if(!wo.childs){
+    gr <- append(gr, .get_childs(gff,ID))
+  }
+  .order_GRanges(gr)
+}
+# recursive search for all childs of an ID
+.get_childs <- function(gff, ID){
+  gr <- gff[!is.na(as.character(gff$Parent)) & 
+              as.character(gff$Parent) == ID,]
+  if(length(gr) == 0) return(GRanges())
+  # Use ID and Name for child search
+  IDs <- .get_gr_ids(gr)
+  IDs <- IDs[IDs != ID]
+  # Walk up the parent chain
+  grl <- append(list(gr),lapply(IDs, function(x){.get_childs(gff,x)}))
+  grl <- grl[!vapply(grl,is.null,logical(1))]
+  return(unlist(GRangesList(grl)))
+}
+
+# subset GRanges for highest ranking parent
+.get_parent_annotations <- function(gr,
+                                    IDs,
+                                    doRecursiveSearch = FALSE,
+                                    forceSingle = FALSE){
+  if(!doRecursiveSearch){
+    res <- gr[is.na(as.character(gr$Parent)),]
+    if(length(res) > 1 && forceSingle) 
+      stop("No distinct single parent annotation detectable.")
+    return(res)
+  }
+  if(missing(IDs)) IDs <- .get_gr_ids(gr)
+  l <- lapply(IDs, .get_parent, gr = gr)
+  l <- unique(unlist(l[!vapply(l,is.null,logical(1))]))
+  .order_GRanges(gr[(!is.na(gr$ID) & gr$ID %in% l) |
+                      (!is.na(gr$Name) & gr$Name %in% l),])
+}
+# quasi recursive search for all possible parents
+.get_parent <- function(ID,
+                        gr){
+  parent <- as.character(gr[(!is.na(gr$ID) & gr$ID == ID) |
+                              (!is.na(gr$Name) & gr$Name == ID),]$Parent)
+  parent <- parent[!is.na(parent)]
+  if(length(parent) == 0) return(ID)
+  return(unlist(lapply(parent, .get_parent, gr)))
 }
 
 # returns an order based on the named of the chromosome and start and end 
@@ -249,14 +254,6 @@ setMethod(
            BiocGenerics::end(gr))]
 }
 
-# returns all identifiers whcih can be used as a identifier in the Parent
-# column
-.get_parent_identifiers <- function(gr){
-  parents <- as.character(gr$ID)
-  parents[is.na(parents)] <- as.character(gr[is.na(parents)]$Name)
-  parents[is.na(parents)] <- as.character(gr[is.na(parents)]$gene)
-  parents
-}
 
 # sequence handling ------------------------------------------------------------
 

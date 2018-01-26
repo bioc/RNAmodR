@@ -2,7 +2,7 @@
 NULL
 
 RNAMOD_M7G_NUCLEOTIDE <- "G"
-RNAMOD_M7G_ROLLING_MEAN_WINDOW_WIDTH <- 9
+RNAMOD_M7G_SPM <- 3
 RNAMOD_M7G_ARREST_RATE <- 0.95
 RNAMOD_M7G_P_THRESHOLD <- 0.05
 RNAMOD_M7G_SIGMA_THRESHOLD <- 3
@@ -51,14 +51,14 @@ setMethod(
   signature = signature(object = "mod_m7G",
                         location = "numeric",
                         data = "list",
-                        globalLocations = "numeric"),
+                        locations = "numeric"),
   definition = function(object,
                         location,
                         data,
-                        globalLocations) {
+                        locations) {
     # do pretest
     res <- .do_M7G_pretest(location,
-                           globalLocations,
+                           locations,
                            data)
     return(res)
   }
@@ -67,25 +67,27 @@ setMethod(
 # check if any data is available to proceed with test
 # this is in a seperate function since it is also called by checkForModification
 .do_M7G_pretest <- function(location,
-                            globalLocations,
+                            locations,
                             data){
   # if non G position skip position
-  if( names(globalLocations[globalLocations == location]) 
-      != RNAMOD_M7G_NUCLEOTIDE){
+  if( names(locations[locations == location]) != RNAMOD_M7G_NUCLEOTIDE){
     return(NULL)
   }
   # do not take into account position 1
   if(location == 1) return(NULL)
+  # browser()
+  # number of replicates
+  n <- length(data)
   # merge data for positions
   # data on the N+1 location
   testData <- .aggregate_location_data(data, (location+1))
   testData <- testData[testData > 0]
+  # if spm is not high enough
+  if(length(testData[testData >= RNAMOD_M7G_SPM]) < n) return(NULL)
   # base data to compare against
   baseData <- .aggregate_not_location_data(data, (location+1))
-  # number of replicates
-  n <- length(data)
   # if not enough data is present
-  if(length(testData) == 0 | 
+  if(length(testData) < n | 
      length(baseData) < (3*n)) return(NULL)
   # get test values
   # overall mean and sd
@@ -111,16 +113,17 @@ setMethod(
   f = "checkForModification",
   signature = signature(object = "mod_m7G",
                         location = "numeric",
-                        globalLocations = "numeric",
+                        locations = "numeric",
                         data = "list"),
   definition = function(object,
                         location,
-                        globalLocations,
+                        locations,
                         data) {
+    # if(location == 1575 | location == 599 | location == 1420) { browser() }
     # browser()
     # get test result for the current location
     locTest <- .calc_M7G_test_values(location,
-                                     globalLocations,
+                                     locations,
                                      data)
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
@@ -151,11 +154,11 @@ setMethod(
 
 # test for m7G at current location
 .calc_M7G_test_values <- function(location,
-                                  globalLocations,
+                                  locations,
                                   data){
   # short cut if amount of data is not sufficient
   pretestData <- .do_M7G_pretest(location,
-                                 globalLocations,
+                                 locations,
                                  data)
   if(is.null(pretestData)) return(NULL)
   # data from pretest

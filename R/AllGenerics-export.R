@@ -250,7 +250,7 @@ setGeneric (
   def=function(object,
                location,
                data,
-               globalLocations){standardGeneric("preTest")} 
+               locations){standardGeneric("preTest")} 
 ) 
 
 #' @name checkForModification
@@ -262,7 +262,7 @@ setGeneric (
   name= "checkForModification",
   def=function(object,
                location,
-               globalLocations,
+               locations,
                data){standardGeneric("checkForModification")} 
 ) 
 

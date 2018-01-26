@@ -18,6 +18,7 @@ NULL
 #' @import rtracklayer
 #' @import Rsamtools
 #' @import GenomicRanges
+#' @import GenomicAlignments
 #' @import ggplot2
 NULL
 
@@ -25,6 +26,7 @@ requireNamespace("BiocParallel")
 requireNamespace("Biostrings")
 requireNamespace("rtracklayer")
 requireNamespace("GenomicRanges")
+requireNamespace("GenomicAlignments")
 requireNamespace("assertive")
 
 
@@ -60,11 +62,20 @@ RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
                                     "snRNA",
                                     "snRNA_gene",
                                     "SRP_RNA")
-RNAMOD_MOD_SEQ_FEATURES <- c("five_prime_UTR",
-                             "three_prime_UTR",
-                             "CDS",
-                             "noncoding_exon",
-                             "exon")
+RNAMOD_MOD_INVALID_FEATURES <- c("chromosome",
+                                 "telomere",
+                                 "telomeric_repeat")
+RNAMOD_MOD_TRANSCRIPT_FEATURES <- c("gene",
+                                    "mRNA",
+                                    "five_prime_UTR",
+                                    "three_prime_UTR",
+                                    "CDS",
+                                    "noncoding_exon",
+                                    "exon",
+                                    "intron",
+                                    "five_prime_UTR_intron",
+                                    "three_prime_UTR_intron")
+
 
 # Settings
 RNAMOD_DEFAULT_PALETTE <- "Set1"

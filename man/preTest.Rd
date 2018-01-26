@@ -9,16 +9,16 @@
 \alias{preTest,mod_m7G,numeric,list,numeric-method}
 \title{preTest}
 \usage{
-preTest(object, location, data, globalLocations)
+preTest(object, location, data, locations)
 
 \S4method{preTest}{mod_D,numeric,list,numeric}(object, location, data,
-  globalLocations)
+  locations)
 
 \S4method{preTest}{mod_m3C,numeric,list,numeric}(object, location, data,
-  globalLocations)
+  locations)
 
 \S4method{preTest}{mod_m7G,numeric,list,numeric}(object, location, data,
-  globalLocations)
+  locations)
 }
 \description{
 \code{mod_D}

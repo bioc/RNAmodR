@@ -2,7 +2,7 @@
 NULL
 
 RNAMOD_D_NUCLEOTIDE <- "T"
-RNAMOD_D_ROLLING_MEAN_WINDOW_WIDTH <- 9
+RNAMOD_D_SPM <- 3
 RNAMOD_D_ARREST_RATE <- 0.95
 RNAMOD_D_P_THRESHOLD <- 0.05
 RNAMOD_D_SIGMA_THRESHOLD <- 3
@@ -51,14 +51,14 @@ setMethod(
   signature = signature(object = "mod_D",
                         location = "numeric",
                         data = "list",
-                        globalLocations = "numeric"),
+                        locations = "numeric"),
   definition = function(object,
                         location,
                         data,
-                        globalLocations) {
+                        locations) {
     # do pretest
     res <- .do_D_pretest(location,
-                         globalLocations,
+                         locations,
                          data)
     return(res)
   }
@@ -67,25 +67,27 @@ setMethod(
 # check if any data is available to proceed with test
 # this is in a seperate function since it is also called by checkForModification
 .do_D_pretest <- function(location,
-                          globalLocations,
+                          locations,
                           data){
   # if non G position skip position
-  if( names(globalLocations[globalLocations == location]) 
+  if( names(locations[locations == location]) 
       != RNAMOD_D_NUCLEOTIDE){
     return(NULL)
   }
   # do not take into account position 1
   if(location == 1) return(NULL)
+  # number of replicates
+  n <- length(data)
   # merge data for positions
   # data on the N+1 location
   testData <- .aggregate_location_data(data, (location+1))
   testData <- testData[testData > 0]
+  # if spm is not high enough
+  if(length(testData[testData >= RNAMOD_D_SPM]) < n) return(NULL)
   # base data to compare against
   baseData <- .aggregate_not_location_data(data, (location+1))
-  # number of replicates
-  n <- length(data)
   # if not enough data is present
-  if(length(testData) == 0 | 
+  if(length(testData) < n | 
      length(baseData) < (3*n)) return(NULL)
   # get test values
   # overall mean and sd
@@ -111,16 +113,16 @@ setMethod(
   f = "checkForModification",
   signature = signature(object = "mod_D",
                         location = "numeric",
-                        globalLocations = "numeric",
+                        locations = "numeric",
                         data = "list"),
   definition = function(object,
                         location,
-                        globalLocations,
+                        locations,
                         data) {
     # browser()
     # get test result for the current location
     locTest <- .calc_D_test_values(location,
-                                   globalLocations,
+                                   locations,
                                    data)
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
@@ -151,11 +153,11 @@ setMethod(
 
 # test for D at current location
 .calc_D_test_values <- function(location,
-                                globalLocations,
+                                locations,
                                 data){
   # short cut if amount of data is not sufficient
   pretestData <- .do_D_pretest(location,
-                               globalLocations,
+                               locations,
                                data)
   if(is.null(pretestData)) return(NULL)
   # data from pretest

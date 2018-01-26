@@ -22,6 +22,9 @@ setClass("analysis_default",
 #'
 #' @return
 #' @export
+#' 
+#' @importFrom IRanges findOverlaps extractList
+#' @importFrom S4Vectors split from to
 #'
 #' @examples
 setMethod(
@@ -34,13 +37,12 @@ setMethod(
                         files,
                         gff,
                         param) {
-    # browser()
+    message(Sys.time())
     # detect modifications in each file
-    #data <- lapply(files,
-    data <- BiocParallel::bplapply(files,
-                                   FUN = .get_positions,
-                                   gff,
-                                   param)
+    data <- lapply(files,
+                   FUN = .get_positions,
+                   gff,
+                   param)
     data <- data[!is.null(data)]
     if(length(data) == 0){
       stop("No reads detected in any bam file for '",
@@ -58,35 +60,32 @@ setMethod(
 .get_positions <- function(bamFile,
                            gff,
                            param){
-  # Construct Dataframe from scanBam data
-  bamData <- Rsamtools::scanBam(bamFile, param=param)
-  bamData <- .convert_bam_to_DataFrame(bamData, param=param)
+  bamData <- GenomicAlignments::readGAlignments(bamFile,
+                                                param = param)
   # Total counts
-  totalCounts <- Rsamtools::idxstatsBam(bamFile, param=param)
+  totalCounts <- Rsamtools::idxstatsBam(bamFile,
+                                        param = param)
   totalCounts <- sum(totalCounts$mapped)
-  # process result
-  bamData <- S4Vectors::split(bamData,
-                              bamData$ID)
-  # browser()
-  # for testing
-  # m7G 
-  # bamData <- bamData[names(bamData) %in% c("RDN18-1")]
-  # bamData <- bamData[names(bamData) %in% c("tC(GCA)B")]
+  # process result and split into chunks based on gff
+  IDs <- .get_IDs_from_scanBamParam(param)
+  gff_subset <- gff[.get_unique_identifiers(gff) %in% IDs,]
+  hits <- IRanges::findOverlaps(bamData,
+                                gff_subset)
+  bamData <- IRanges::extractList(bamData, 
+                                  S4Vectors::split(
+                                    S4Vectors::from(hits),
+                                    as.factor(S4Vectors::to(hits))))
+  names(bamData) <- .get_unique_identifiers(gff_subset)[
+    as.numeric(names(bamData))]
   
-  # D 
-  # bamData <- bamData[names(bamData) %in% c("tH(GUG)E1")]
-  # bamData <- bamData[names(bamData) %in% c("tI(AAU)B")]
-  # bamData <- bamData[names(bamData) %in% c("tD(GUC)B")]
-  
-  # m3C
-  # bamData <- bamData[names(bamData) %in% c("tS(CGA)C")]
-  # bamData <- bamData[names(bamData) %in% c("RDN25-1")]
-  
-  # combination
-  # bamData <- bamData[names(bamData) %in% c("tA(TGC)A")]
-  # if( getOption("RNAmod_debug") ){
-  #   bamData <- bamData[names(bamData) %in% getOption("RNAmod_debug_transcripts")]
-  # }
+  bamData <- bamData[names(bamData) %in% c("RDN18-1",
+                                           "YBR041W",
+                                           "YBR056W",
+                                           "YAL030W")]
+  # bamData <- bamData[names(bamData) %in% c("YBR041W",
+  #                                          "YBR056W",
+  #                                          "YAL030W")]
+  # bamData <- bamData[names(bamData) %in% c("YBR056W")]
   
   if(length(bamData) == 0){
     warning("No reads detected in bam file '",
@@ -94,11 +93,14 @@ setMethod(
             "'")
     return(NULL)
   }
-  positions <- lapply(bamData,
-                      # res <- BiocParallel::bplapply(bamData,
-                      FUN = .get_positions_in_transcript,
-                      totalCounts,
-                      gff)
+  positions <- mapply(
+  # positions <- BiocParallel::bpmapply(
+                                      FUN = .get_positions_in_transcript,
+                                      bamData,
+                                      names(bamData),
+                                      MoreArgs = list(totalCounts,
+                                                      gff),
+                                      SIMPLIFY = FALSE)
   names(positions) <- names(bamData)
   return(positions)
 }
@@ -106,31 +108,30 @@ setMethod(
 
 # For each transcript get positional data
 # This can be individually done for different modification types
-.get_positions_in_transcript <- function(data,counts,gff){
+.get_positions_in_transcript <- function(data,
+                                         id,
+                                         counts,
+                                         gff){
+  # skip if transcript does not have data
+  if(length(data) == 0) return(NULL)
   # get ID and GRanges
-  gff <- .subset_gff_for_unique_transcript(gff, unique(data$ID))
-  # fill up empty positions
-  strand <- as.character(strand(gff))
-  if(strand == "-"){
-    pos <- data$pos + data$qwidth - 1
-  } else {
-    pos <- data$pos
-  }
+  gr <- .subset_gff_for_unique_transcript(gff, 
+                                          id)
+  # get the genomic distance
+  # also used in .convert_global_to_local_position
+  length <- width(gr)
+  # do position conversion to translate genomic position to local transcript
+  # position. take care of introns, etc
+  pos <- .convert_global_to_local_position(gff,gr,data)
   # Normalize counts per positions against million of reads in BamFile
   posData <- table(pos)/(counts/10^6)
   # spread table with zero values to the length of transcript
-  posData <- setNames(as.double(unlist(lapply(1:width(gff), function(i){
+  posData <- setNames(as.double(unlist(lapply(1:length, 
+                                              function(i){
     if(length(posData[names(posData) == i]) == 0) return(0)
     posData[names(posData) == i]
-  }))),1:width(gff))
+  }))),1:length)
   return(posData)
-}
-
-# returns the position data for analysis as a list of data per replicate for
-# individual transcript
-.get_data <- function(ID,data){
-  res <- lapply(data,"[[",ID)
-  return(res)
 }
 
 
@@ -155,13 +156,14 @@ setMethod(
                         gff,
                         fafile,
                         modClasses) {
+    message(Sys.time())
     # browser()
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
     # detect modification per transcript
-    # res <- lapply(IDs,
-    res <- BiocParallel::bplapply(IDs,
+    res <- lapply(IDs,
+    # res <- BiocParallel::bplapply(IDs,
                                   FUN = .analyze_transcript_prep,
                                   data = object@data,
                                   gff = gff,
@@ -195,22 +197,23 @@ setMethod(
   }
   data <- .get_data(ID,data)
   # get sequence of transcript and subset gff for single transcript data
-  gff <- .subset_gff_for_unique_transcript(gff, ID)
-  seq <- .get_seq_for_unique_transcript(gff,fafile,ID)
+  gr <- .subset_gff_for_unique_transcript(gff, ID)
+  # get the genomic sequences
+  seq <- .get_seq_for_unique_transcript(gr,fafile,ID)
+  # get transcript sequence by removing intron sequences
+  seq <- .get_transcript_sequence(gff,gr$ID,seq)
   # generate a location vector
   locations <- 1:length(seq)
-  names(locations) <- .get_single_position_letters(as.character(seq))  
-  # # Convert local G position to global positions
-  globalLocations <- .convert_local_to_global_locations(gff, locations)
+  names(locations) <- seq
+  # analyze the transcript
   res <- .analyze_transcript(ID = ID,
                              modClasses = modClasses,
                              data = data,
-                             globalLocations = globalLocations,
+                             locations = locations,
                              iterationN = 1)
   res <- res[order(as.numeric(unlist(lapply(res, "[[", "location"))))]
   if(is.null(res)) return(NULL)
   # recalculate sigma values by masking all positions except the one testing for
-  resb <- res
   names <- names(res)
   res <- lapply(seq_along(res), function(i){
     x <- data
@@ -225,11 +228,18 @@ setMethod(
                       locs)
     }
     return(checkForModification(modClasses[[testPosition$type]],
-                         location = testPosition$location,
-                         globalLocations = globalLocations,
-                         data = x))
+                                location = testPosition$location,
+                                locations = locations,
+                                data = x))
   })
   names(res) <- names
+  return(res)
+}
+
+# returns the position data for analysis as a list of data per replicate for
+# individual transcript
+.get_data <- function(ID,data){
+  res <- lapply(data,"[[",ID)
   return(res)
 }
 
@@ -237,26 +247,25 @@ setMethod(
 .analyze_transcript <- function(ID,
                                 modClasses,
                                 data,
-                                globalLocations,
+                                locations,
                                 iterationN){
-  # browser()
   if( iterationN > .get_transcript_max_iteration()) return(NULL)
   # debug
   if( getOption("RNAmod_debug") ){
     .print_transcript_info(paste(ID," detect"), iterationN)
   }
   # Retrieve modifications positions
-  modifications <- lapply(globalLocations,
+  modifications <- lapply(locations,
                           .check_for_modification,
                           modClasses,
                           data,
-                          globalLocations)
+                          locations)
   # name the locations based on sequence position
   names(modifications) <- paste0(ID,
                                  "_",
-                                 names(globalLocations),
+                                 names(locations),
                                  "_",
-                                 globalLocations)
+                                 locations)
   modifications <- modifications[!vapply(modifications,is.null,logical(1))]
   if(length(modifications) == 0) return(NULL)
   # check if by masking found modifications positions additional positions are
@@ -268,11 +277,11 @@ setMethod(
   data <- .mask_data(modClasses,
                      data,
                      modLocations)
-  globalLocations <- globalLocations[!(globalLocations %in% modLocations)]
+  locations <- locations[!(locations %in% modLocations)]
   return(append(modifications,.analyze_transcript(ID = ID,
                                                   modClasses = modClasses,
                                                   data = data,
-                                                  globalLocations = globalLocations,
+                                                  locations = locations,
                                                   (iterationN+1))))
 }
 
@@ -302,24 +311,24 @@ setMethod(
 .check_for_modification <- function(location, 
                                     modClasses,
                                     data,
-                                    globalLocations){
+                                    locations){
   
-  # if(location == 1575) { browser() }
+  # if(location == 1575 | location == 599 | location == 1420) { browser() }
   res <- lapply(modClasses, function(class){
     # short cut if amount/properties of data are not sufficient
     if( is.null(preTest(class,
                         location,
                         data,
-                        globalLocations))) return(NULL)
+                        locations))) return(NULL)
     # If potential modification right in front of current location
-    if(length(globalLocations[globalLocations == (location-1)]) != 0) {
+    if(length(locations[locations == (location-1)]) != 0) {
       locTestPre <- .check_for_modification((location-1),
                                             modClasses,
                                             .mask_data(list(class),
                                                        data, 
                                                        .get_location_vector(location,
                                                                             getModType(class))),
-                                            globalLocations[globalLocations != location])
+                                            locations[locations != location])
       if(!is.null(locTestPre)){
         # udpate data accordingly
         data <- .mask_data(modClasses,
@@ -329,14 +338,14 @@ setMethod(
       }
     }
     # If potential modification right after of current location
-    if(length(globalLocations[globalLocations == (location+1)]) != 0) {
+    if(length(locations[locations == (location+1)]) != 0) {
       locTestPost <- .check_for_modification((location+1), 
                                              modClasses,
                                              .mask_data(list(class),
                                                         data, 
                                                         .get_location_vector(location,
                                                                              getModType(class))),
-                                             globalLocations[globalLocations != location])
+                                             locations[locations != location])
       if(!is.null(locTestPost)){
         # udpate data accordingly
         data <- .mask_data(modClasses,
@@ -347,7 +356,7 @@ setMethod(
     }
     return(checkForModification(class,
                                 location = location,
-                                globalLocations = globalLocations,
+                                locations = locations,
                                 data = data))
   })
   res <- res[!vapply(res, is.null, logical(1))]
@@ -385,6 +394,7 @@ setMethod(
   definition = function(object,
                         gff,
                         fafile) {
+    message(Sys.time())
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
