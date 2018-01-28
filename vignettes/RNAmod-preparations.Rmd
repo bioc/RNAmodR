@@ -24,7 +24,7 @@ BiocStyle::markdown(css.files = c('custom.css'))
 # Introduction
 
 ```{r tRNA,eval=FALSE}
-library(RNAmod)
+library(RNAmodR)
 matchFastaToGff <- function(gfffile, fafile){
   gff <- rtracklayer::import.gff3(gfffile)
   fsa <- Biostrings::readDNAStringSet(fafile)

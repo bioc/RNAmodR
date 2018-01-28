@@ -1,4 +1,4 @@
 library(testthat)
-library(m7G)
+library(RNAmodR)
 
-test_check("m7G")
+test_check("RNAmodR")
