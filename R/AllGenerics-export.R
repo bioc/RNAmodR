@@ -310,16 +310,11 @@ setGeneric (
 #' @title mergePositionsOfReplicates
 #' 
 #' @param object mod object 
-#' @param gff a GRanges object for the genome
-#' @param fafile a FaFile object for the genome
-#' @param data list of DataFrame containg the read data
 #' 
 #' @export
 setGeneric ( 
   name= "mergePositionsOfReplicates",
-  def=function(object,
-               gff,
-               fafile){standardGeneric("mergePositionsOfReplicates")} 
+  def=function(object){standardGeneric("mergePositionsOfReplicates")} 
 ) 
 
 

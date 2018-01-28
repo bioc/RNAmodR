@@ -45,12 +45,14 @@ setMethod(
     analysisClasses <- .load_analysis_classes(names(analysisGroups))
     # extract gene boundaries
     gff <- .Object@.dataGFF
+    # subset to relevant annotations 
+    gff_subset <- .get_parent_annotations(
+      .subset_rnamod_containing_features(gff)
+    )
     # combine path and file name
     files <- paste0(getInputFolder(.Object),experiment$BamFile)
     # assemble param for scanBam
-    param <- .assemble_scanBamParam(.get_parent_annotations(
-                                      .subset_rnamod_containing_features(gff)
-                                    ), 
+    param <- .assemble_scanBamParam(gff_subset, 
                                     .Object@.mapQuality,
                                     .get_acceptable_chrom_ident(files))
     # load data into each analysis class
@@ -81,9 +83,7 @@ setMethod(
     }
     # Merge position data
     analysisClasses <- sapply(names(analysisGroups), function(className){
-      mergePositionsOfReplicates(analysisClasses[[className]],
-                                 gff,
-                                 .Object@.dataFasta)
+      mergePositionsOfReplicates(analysisClasses[[className]])
     }, simplify = FALSE, USE.NAMES = TRUE)
     # Retrieve position data
     positions <- sapply(names(analysisGroups), function(className){
@@ -94,7 +94,8 @@ setMethod(
       getModifications(analysisClasses[[className]])
     }, simplify = FALSE)
     # Construct DataFrame from found modifications
-    df <- .construct_DataFrame_from_mod_result(mod_positions,gff)
+    df <- .construct_DataFrame_from_mod_result(mod_positions,
+                                               gff_subset)
     # Save found modifications as gff file
     setGff(.Object,
            GRanges(df),
@@ -102,7 +103,10 @@ setMethod(
            modifications)
     message("Saved detected modifications as gff3 file.")
     # Save found modifications asSummarizedExperiment
-    se <- .construct_SE_from_mod_result(experiment,gff,df,positions)
+    se <- .construct_SE_from_mod_result(experiment,
+                                        gff_subset,
+                                        df,
+                                        positions)
     setSummarizedExperiment(.Object,
                             se,
                             number,

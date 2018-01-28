@@ -2,7 +2,7 @@
 #' @include class-RNAmod-analysis-type.R
 NULL
 
-RNAMOD_DEFAULT_READ_DENSITY <- 0.5
+RNAMOD_DEFAULT_READ_DENSITY <- 0.2
 
 #' @rdname mod
 #'
@@ -80,6 +80,8 @@ setMethod(
   names(bamData) <- .get_unique_identifiers(gff_subset)[
     as.numeric(names(bamData))]
   
+  bamData <- bamData[names(bamData) %in% c("RDN18-1",
+                                           "YBR041W")]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "YBR041W",
   #                                          "YBR056W",
@@ -106,10 +108,10 @@ setMethod(
                                       MoreArgs = list(totalCounts,
                                                       gff),
                                       SIMPLIFY = FALSE)
+  names(positions) <- names(bamData)
   # remove entries for transcript for which position data is sufficient
   positions <- positions[!vapply(positions, is.null, logical(1))]
   if(length(positions) == 0) return(NULL)
-  names(positions) <- names(bamData)
   return(positions)
 }
 
@@ -132,7 +134,7 @@ setMethod(
   # position. take care of introns, etc
   pos <- .convert_global_to_local_position(gff,gr,data)
   # if number of reads per transcript length is not enough
-  if(length(pos) < (width(gr) * RNAMOD_DEFAULT_READ_DENSITY )) return(NULL)
+  if(length(pos) < (width(gr) * RNAMOD_DEFAULT_READ_DENSITY)) return(NULL)
   # Normalize counts per positions against million of reads in BamFile
   posData <- table(pos)/(counts/10^6)
   # spread table with zero values to the length of transcript
@@ -399,12 +401,8 @@ setMethod(
 #' @examples
 setMethod(
   f = "mergePositionsOfReplicates",
-  signature = signature(object = "analysis_default",
-                        gff = "GRanges",
-                        fafile = "FaFile"),
-  definition = function(object,
-                        gff,
-                        fafile) {
+  signature = signature(object = "analysis_default"),
+  definition = function(object) {
     message(Sys.time())
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)

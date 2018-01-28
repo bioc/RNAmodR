@@ -4,22 +4,15 @@
 \docType{methods}
 \name{mergePositionsOfReplicates}
 \alias{mergePositionsOfReplicates}
-\alias{mergePositionsOfReplicates,analysis_default,GRanges,FaFile-method}
+\alias{mergePositionsOfReplicates,analysis_default-method}
 \title{mergePositionsOfReplicates}
 \usage{
-mergePositionsOfReplicates(object, gff, fafile)
+mergePositionsOfReplicates(object)
 
-\S4method{mergePositionsOfReplicates}{analysis_default,GRanges,FaFile}(object,
-  gff, fafile)
+\S4method{mergePositionsOfReplicates}{analysis_default}(object)
 }
 \arguments{
 \item{object}{mod object}
-
-\item{gff}{a GRanges object for the genome}
-
-\item{fafile}{a FaFile object for the genome}
-
-\item{data}{list of DataFrame containg the read data}
 }
 \description{
 \code{analysis_default}
