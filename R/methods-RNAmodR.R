@@ -1,4 +1,4 @@
-#' @include RNAmod.R
+#' @include RNAmodR.R
 NULL
 
 #' @rdname getExperimentData
@@ -14,7 +14,7 @@ NULL
 #' @export
 #'
 #' @examples
-#' data("RNAmod_test", package = "RNAmod")
+#' data("RNAmodR_test", package = "RNAmodR")
 #' 
 #' # All experiments
 #' getSampleData(experiment)
@@ -24,7 +24,7 @@ NULL
 #' getSampleData(experiment, c(1,2))
 setMethod(
   f = "getExperimentData", 
-  signature = signature(.Object = "RNAmod", 
+  signature = signature(.Object = "RNAmodR", 
                         number = "ANY"),
   definition = function(.Object, 
                         number){
@@ -55,7 +55,15 @@ setMethod(
 }
 
 
-#' @describeIn getSummarizedExperiment
+#' @rdname getSummarizedExperiment
+#' 
+#' @title returns one or more SummarizedExperiment
+#' 
+#' @description
+#' Global access to SummarizedExperiments stored by RpfExperiment. 
+#' \code{getSummarizedExperiment()} returns the result of experiment, whereas 
+#' \code{getSummarizedExperiments()}, is the vectorized version returning a
+#' list of experiment results.
 #' 
 #' @param .Object an RNAmod object 
 #' @param number a number defining the experiment. For 
@@ -73,7 +81,7 @@ setMethod(
 #' }
 setMethod(
   f = "getSummarizedExperiment", 
-  signature = signature(.Object = "RNAmod", 
+  signature = signature(.Object = "RNAmodR", 
                         number = "numeric",
                         modification = "character"),
   definition = function(.Object, 
@@ -99,7 +107,7 @@ setMethod(
 #' @export
 setMethod(
   f = "getSummarizedExperiments", 
-  signature = signature(.Object = "RNAmod",
+  signature = signature(.Object = "RNAmodR",
                         number = "numeric",
                         modification = "character"),
   definition = function(.Object, 
@@ -135,7 +143,7 @@ setMethod(
 #' @importFrom S4Vectors SimpleList
 setMethod(
   f = ".loadSummarizedExperiment", 
-  signature = signature(.Object = "RNAmod", 
+  signature = signature(.Object = "RNAmodR", 
                         experiment = "list",
                         modification = "character"),
   definition = function(.Object, 
@@ -150,7 +158,7 @@ setMethod(
     
     folder <- fileName <- paste0(getOutputFolder(.Object),
                                  "SE/",
-                                 "RNAmod_",
+                                 "RNAmodR_",
                                  unique(experiment["SampleName"]),
                                  "_")
     fileNames <- paste0(folder,
@@ -241,7 +249,7 @@ setMethod(
 #' @import SummarizedExperiment
 setMethod(
   f = ".saveSummarizedExperiments", 
-  signature = signature(.Object = "RNAmod", 
+  signature = signature(.Object = "RNAmodR", 
                         se = "RangedSummarizedExperiment", 
                         experiment = "list",
                         modification = "character"),
@@ -260,7 +268,7 @@ setMethod(
            call. = FALSE)
     }
     fileNames <- paste0(folder,
-                        "RNAmod_",
+                        "RNAmodR_",
                         unique(experiment["SampleName"]),
                         "_",
                         modification,
@@ -279,7 +287,7 @@ setMethod(
     tmp <- se
     assays(tmp) <- assays(se)[type]
     rowData(tmp)$mods <- lapply(rowData(tmp)$mods, function(df){
-      df[df$RNAmod_type == type,]
+      df[df$RNAmodR_type == type,]
     })
     return(tmp)
   }, se)
@@ -294,8 +302,15 @@ setMethod(
 }
 
 
-#' @describeIn setSummarizedExperiment
-#'
+#' @rdname setSummarizedExperiment
+#' 
+#' @title sets a SummarizedExperiment object
+#' 
+#' @description
+#' Saves/overwrites a SummarizedExperiment object for certain experiment and 
+#' passes the SummarizedExperiment object on to be saved to disk as .RData file
+#' in the \code{results\\SE} folder
+#' 
 #' @param .Object a RNAmod object 
 #' @param se a RangedSummarizedExperiment object
 #' @param number a number defining the experiment
@@ -310,7 +325,7 @@ setMethod(
 #' }
 setMethod(
   f = "setSummarizedExperiment", 
-  signature = signature(.Object = "RNAmod", 
+  signature = signature(.Object = "RNAmodR", 
                         se = "RangedSummarizedExperiment", 
                         number = "numeric",
                         modification = "character"),
@@ -339,15 +354,22 @@ setMethod(
 }
 
 
-#' @rdname getGff
+#' @rdname getGffResult
 #'
-#' @title getGff
+#' @title getGffResult
+#'
+#' @description With this function the results of the parseForModification are
+#' returned, if they are saved on disk. Any combination of modifications can be
+#' requested, but only found results for the given modification are returned.
+#' The results contain the local coordinates per transscript.
 #'
 #' @param .Object RNAmod.
 #' @param number numeric.
 #' @param modification character.
+#' @param genomicCoordinates logical value, whether to return results with local
+#' transcript coordinates or genomic coordinates. (default = FALSE)
 #'
-#' @return
+#' @return the found modifications as a GRanges object in the gff3 format.
 #' @export
 #' 
 #' @importFrom GenomeInfoDb seqnames
@@ -357,14 +379,19 @@ setMethod(
 #' @importFrom BiocGenerics strand
 #'
 #' @examples
+#' \donttest{
+#' getGffResult(mod,1,"m7G")
+#' }
 setMethod(
-  f = "getGff",
-  signature = signature(.Object = "RNAmod",
+  f = "getGffResult",
+  signature = signature(.Object = "RNAmodR",
                         number = "numeric",
-                        modification = "character"),
+                        modification = "character",
+                        genomicCoordinates = "logical"),
   definition = function(.Object,
                         number,
-                        modification) {
+                        modification,
+                        genomicCoordinates) {
     assertive::assert_all_are_non_empty_character(modification)
     experiment <- getExperimentData(.Object, number)
     .check_for_experiment(experiment, number)
@@ -388,7 +415,7 @@ setMethod(
   folder <- paste0(getOutputFolder(.Object),
                    "gff/")
   paste0(folder,
-         "RNAmod_",
+         "RNAmodR_",
          sampleName,
          "_",
          modification,
@@ -427,7 +454,7 @@ setMethod(
   return(gff)
 }
 
-#' @title .saveGff
+#' @title .saveGffResult
 #' 
 #' @description
 #' Saves GRanges object as gff3 file file
@@ -441,8 +468,8 @@ setMethod(
 #' 
 #' @importFrom rtracklayer export.gff3
 setMethod(
-  f = ".saveGff", 
-  signature = signature(.Object = "RNAmod", 
+  f = ".saveGffResult", 
+  signature = signature(.Object = "RNAmodR", 
                         gff = "GRanges", 
                         experiment = "list",
                         modification = "character"),
@@ -468,7 +495,7 @@ setMethod(
   if(length(modification) == 1) return(list(gff))
   #
   gffs <- lapply(modification, function(type){
-    gff[S4Vectors::mcols(gff)$RNAmod_type == type]
+    gff[S4Vectors::mcols(gff)$RNAmodR_type == type]
   })
   return(gffs)
 }
@@ -483,9 +510,9 @@ setMethod(
   }
 }
 
-#' @rdname setGff
+#' @rdname setGffResult
 #'
-#' @title setGff
+#' @title setGffResult
 #'
 #' @param .Object RNAmod.
 #' @param gff GRanges.
@@ -497,11 +524,11 @@ setMethod(
 #'
 #' @examples
 #' \donttest{
-#' setGff(experiment, gff, 1, c("m7G"))
+#' setGffResult(experiment, gff, 1, c("m7G"))
 #' }
 setMethod(
-  f = "setGff",
-  signature = signature(.Object = "RNAmod",
+  f = "setGffResult",
+  signature = signature(.Object = "RNAmodR",
                         gff = "GRanges",
                         number = "numeric",
                         modification = "character"),
@@ -521,7 +548,7 @@ setMethod(
       }
     }
     
-    gff <- .saveGff(.Object, gff, experiment, modification)
+    gff <- .saveGffResult(.Object, gff, experiment, modification)
     return(invisible(gff))
   }
 )

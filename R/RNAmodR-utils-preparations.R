@@ -1,8 +1,8 @@
-#' @include RNAmod.R
+#' @include RNAmodR.R
 NULL
 
-RNAMOD_SEP_SEQNAMES <- "---"
-RNAMOD_MOD_SEQ_FEATURES_PREP <- c("five_prime_UTR",
+RNAMODR_SEP_SEQNAMES <- "---"
+RNAMODR_MOD_SEQ_FEATURES_PREP <- c("five_prime_UTR",
                                   "three_prime_UTR",
                                   "CDS",
                                   "noncoding_exon",
@@ -21,7 +21,8 @@ RNAMOD_MOD_SEQ_FEATURES_PREP <- c("five_prime_UTR",
 #' @param saveTrimmedFile  
 #' @param removeDuplicateSeqs 
 #'
-#' @return
+#' @return named list containing the filenames used for input and several 
+#' outputs
 #' @export
 #' 
 #' @importFrom S4Vectors mcols Rle
@@ -254,7 +255,7 @@ convertGeneToChrom <- function(gfffile,
   genes <- genes[!is.na(genes)]
   transcripts <- gff[!is.na(as.character(S4Vectors::mcols(gff)$Parent)) & 
                        (as.character(S4Vectors::mcols(gff)$Parent) %in% genes) &
-                       S4Vectors::mcols(gff)$type %in% RNAMOD_MOD_SEQ_FEATURES_PREP]
+                       S4Vectors::mcols(gff)$type %in% RNAMODR_MOD_SEQ_FEATURES_PREP]
   # transcripts which don't have a parent. get raw sequences
   non_child_transcripts <- IRanges::subsetByOverlaps(gff_sub, 
                                                      transcripts,
@@ -286,7 +287,7 @@ convertGeneToChrom <- function(gfffile,
   if(length(seqs) != length(gff_sub)){
     warning("Mismatching number of annotations and sequences. This is likely ",
             "the cause of not referenced types (",
-            paste(RNAMOD_MOD_SEQ_FEATURES_PREP,
+            paste(RNAMODR_MOD_SEQ_FEATURES_PREP,
                   collapse = ","),") for ",
             "certain annotations, eg. ncRNA described as gene. These will be ",
             "dropped.",
@@ -515,15 +516,15 @@ converttRNAscanToChrom <- function(gfffile,
 .get_unique_seqnames <- function(gff){
   if(length(gff) == 0) return(NULL)
   paste0(S4Vectors::mcols(gff)$ID,
-         RNAMOD_SEP_SEQNAMES,
+         RNAMODR_SEP_SEQNAMES,
          S4Vectors::mcols(gff)$Name,
-         RNAMOD_SEP_SEQNAMES,
+         RNAMODR_SEP_SEQNAMES,
          S4Vectors::mcols(gff)$gene)
 }
 
 # split seq_identifier
 .reverse_unique_seqnames <- function(names){
-  res <- str_split(names, RNAMOD_SEP_SEQNAMES)
+  res <- str_split(names, RNAMODR_SEP_SEQNAMES)
   ID <- vapply(res,function(x){x[1]},character(1))
   Name <- vapply(res,function(x){x[2]},character(1))
   gene <- vapply(res,function(x){x[3]},character(1))
@@ -709,6 +710,12 @@ appendFastaFiles <- function(..., ident, msg){
 #' @export
 #' 
 #' @examples
+#' \donttest{
+#' appendGFF("file1.gff",
+#'           "file2.gff",
+#'           "test",
+#'           "done")
+#' }
 appendGFF <- function(..., ident, msg){
   files <- as.character(unlist(list(...)))
   assertive::assert_all_are_existing_files(files)

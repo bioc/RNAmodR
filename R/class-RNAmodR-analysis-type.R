@@ -1,15 +1,12 @@
-#' @include RNAmod.R
-#' @include class-RNAmod.R
+#' @include RNAmodR.R
+#' @include class-RNAmodR.R
 NULL
 
-#' @name mod
+#' @name analysis
 #' 
-#' @title mod
-#'
-#' @return
+#' @title analysis
+#' 
 #' @export
-#'
-#' @examples
 setClass("analysis",
          contains = "VIRTUAL",
          slots = c(plotType = "character",
@@ -27,7 +24,7 @@ setMethod(
   }
 )
 
-#' @rdname mod-accessors
+#' @rdname analysis-accessors
 #'
 #' @return character defining the plot type for this analysis class
 #' @export
@@ -35,6 +32,8 @@ setMethod(
 #' @examples
 #' \donttest{
 #' getPlotType(analysis)
+#' getPositions(analysis)
+#' getModifications(analysis)
 #' }
 setMethod(
   f = "getPlotType", 
@@ -44,15 +43,10 @@ setMethod(
   }
 )
 
-#' @rdname mod-accessors
+#' @rdname analysis-accessors
 #'
 #' @return a list of data as a lists of list(replicate) of DataFrame(transcript)
 #' @export
-#'
-#' @examples
-#' \donttest{
-#' getPositions(analysis)
-#' }
 setMethod(
   f = "getPositions", 
   signature = signature(object = "analysis"),
@@ -61,15 +55,10 @@ setMethod(
   }
 )
 
-#' @rdname mod-accessors
+#' @rdname analysis-accessors
 #'
 #' @return a list of data as a lists of list(replicate) of DataFrame(transcript)
 #' @export
-#'
-#' @examples
-#' \donttest{
-#' getModifications(analysis)
-#' }
 setMethod(
   f = "getModifications", 
   signature = signature(object = "analysis"),

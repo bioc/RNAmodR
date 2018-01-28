@@ -1,4 +1,4 @@
-#' @include RNAmod.R
+#' @include RNAmodR.R
 NULL
 
 #' @rdname heatmapModifications
@@ -22,7 +22,7 @@ NULL
 #' }
 setMethod(
   f = "heatmapModifications",
-  signature = signature(.Object = "RNAmod",
+  signature = signature(.Object = "RNAmodR",
                         se = "SummarizedExperiment",
                         modifications = "character",
                         gene = "character"),
@@ -39,7 +39,7 @@ setMethod(
 #' @export
 setMethod(
   f = "saveHeatmapModifications",
-  signature = signature(.Object = "RNAmod",
+  signature = signature(.Object = "RNAmodR",
                         se = "SummarizedExperiment",
                         modifications = "character",
                         gene = "character"),

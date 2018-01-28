@@ -1,4 +1,4 @@
-#' @include RNAmod.R 
+#' @include RNAmodR.R 
 NULL
 
 #' @name counts

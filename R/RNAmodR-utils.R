@@ -1,4 +1,4 @@
-#' @include RNAmod.R
+#' @include RNAmodR.R
 NULL
 
 
@@ -33,7 +33,7 @@ setMethod(
     
     file.copy(from = system.file("extdata", 
                                  "example_experiment_layout.csv",
-                                 package = "RNAmod"),
+                                 package = "RNAmodR"),
               to = paste0(dataFolder,
                           "experiment_layout.csv") )
     
@@ -181,13 +181,13 @@ setMethod(
   ids
 }
 
-# subset to types present in RNAMOD_MOD_SEQ_FEATURES
+# subset to types present in RNAMODR_MOD_SEQ_FEATURES
 .subset_rnamod_transcript_features <- function(gr){
-  gr[S4Vectors::mcols(gr)$type %in% RNAMOD_MOD_TRANSCRIPT_FEATURES,]
+  gr[S4Vectors::mcols(gr)$type %in% RNAMODR_MOD_TRANSCRIPT_FEATURES,]
 }
-# subset to types present in RNAMOD_MOD_SEQ_FEATURES
+# subset to types present in RNAMODR_MOD_SEQ_FEATURES
 .subset_rnamod_containing_features <- function(gr){
-  gr[S4Vectors::mcols(gr)$type %in% RNAMOD_MOD_CONTAINING_FEATURES,]
+  gr[S4Vectors::mcols(gr)$type %in% RNAMODR_MOD_CONTAINING_FEATURES,]
 }
 
 # subsets a gRanges object for entries concerning a single ID

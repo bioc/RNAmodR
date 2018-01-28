@@ -1,4 +1,4 @@
-#' @include RNAmod.R
+#' @include RNAmodR.R
 NULL
 
 # these are used just internally and can be switched to different package

@@ -22,8 +22,8 @@ knitr::opts_chunk$set(
 
 
 create RNAmod
-```{r tRNA}
-mod <- RNAmod("test",
+```{r tRNA,eval=FALSE}
+mod <- RNAmodR("test",
               "experiment_layout.csv",
               "sacCer3_R64-2-1_masked.gff3",
               "sacCer3_R64-2-1_masked.fasta")
@@ -49,3 +49,11 @@ saveModPlot(mod,se3,modifications,c(tRNA),filetype = "png")
 
 
 ```
+
+# Session info
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+# References

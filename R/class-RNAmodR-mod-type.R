@@ -1,17 +1,15 @@
-#' @include RNAmod.R
-#' @include class-RNAmod.R
+#' @include RNAmodR.R
+#' @include class-RNAmodR.R
 NULL
-
 
 
 #' @name mod
 #' 
 #' @title mod
-#'
-#' @return
+#' 
+#' @description Virtual class for modification detection.
+#' 
 #' @export
-#'
-#' @examples
 setClass("mod",
          contains = "VIRTUAL",
          slots = c(analysisType = "character",

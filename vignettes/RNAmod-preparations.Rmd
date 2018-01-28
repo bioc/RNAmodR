@@ -23,7 +23,7 @@ BiocStyle::markdown(css.files = c('custom.css'))
 
 # Introduction
 
-```{r tRNA}
+```{r tRNA,eval=FALSE}
 library(RNAmod)
 matchFastaToGff <- function(gfffile, fafile){
   gff <- rtracklayer::import.gff3(gfffile)
@@ -37,7 +37,7 @@ matchFastaToGff <- function(gfffile, fafile){
 
 ## S. cerevisiae
 
-```{r sacCer3}
+```{r sacCer3,eval=FALSE}
 folder <- "genomes/sacCer3/"
 gfffile <- paste0(folder,"sacCer3_R64-2-1.gff3")
 fafile <- paste0(folder,"sacCer3_R64-2-1.fasta")
@@ -102,7 +102,7 @@ message("# Run this in command line:\n\n",
 
 ## E. coli
 
-```{r eco}
+```{r eco,eval=FALSE}
 folder <- "genomes/Eco/"
 gfffile <- paste0(folder,"eco_MG1655.gff3")
 fafile <- paste0(folder,"eco_MG1655.fasta")
@@ -154,7 +154,7 @@ message("# Run this in command line:\n\n",
 
 ## H. sapiens
 
-```{r GRCh38}
+```{r GRCh38,eval=FALSE}
 folder <- "genomes/GRCh38/"
 gfffile <- paste0(folder,"GRCh38_latest_genomic.gff")
 gfffileS <- paste0(folder,"GRCh38_latest_genomic_s.gff")
@@ -210,3 +210,5 @@ message("# Run this in command line:\n\n",
 ```{r sessionInfo}
 sessionInfo()
 ```
+
+# References

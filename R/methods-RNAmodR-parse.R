@@ -1,4 +1,4 @@
-#' @include RNAmod.R
+#' @include RNAmodR.R
 NULL
 
 
@@ -10,13 +10,21 @@ NULL
 #' @param number a number defining an experiment. 
 #' @param modifications name of modification to be used for analysis. 
 #'
-#' @return
+#' @return TRUE if the analysis does finish without error
 #' @export
 #'
 #' @examples
+#' \donttest{
+#' unzip(system.file("extdata", package = "RNAmodR", file = "RNAmodR.zip" ))
+#' mod <- RNAmodR("test",
+#'                "test_layout.csv",
+#'                "test_gff.gff3",
+#'                "test_masked.fasta")
+#' parseForModifications(mod,1,"m7G")               
+#' }
 setMethod(
   f = "parseForModifications", 
-  signature = signature(.Object = "RNAmod",
+  signature = signature(.Object = "RNAmodR",
                         number = "numeric",
                         modifications = "character"),
   definition = function(.Object,
@@ -112,6 +120,7 @@ setMethod(
                             number,
                             modifications)
     message("Saved detected modifications as SummarizedExperiment.")
+    return(invisible(TRUE))
   }
 )
 
@@ -153,7 +162,7 @@ setMethod(
       df$Parent <- genes[[i]]
       df$source <- rep("RNAmodR",nrow(df))
       df$type <- rep("RNAMOD",nrow(df))
-      df$score <- df$RNAmod_signal
+      df$score <- df$RNAmodR_signal
       return(df)
     })
     genesDf <- genesDf[!vapply(genesDf, is.null, logical(1))]
@@ -172,8 +181,8 @@ setMethod(
   }
   df <- do.call(rbind,l)
   df <- df[,c("chrom","start","end","strand","source","type","score","ID",
-              "Parent","RNAmod_type","RNAmod_signal","RNAmod_signal_sd",
-              "RNAmod_p.value","RNAmod_nbReplicates")]
+              "Parent","RNAmodR_type","RNAmodR_signal","RNAmodR_signal_sd",
+              "RNAmodR_p.value","RNAmodR_nbReplicates")]
   
   df$source <- factor(df$source)
   df$type <- factor(df$type)
@@ -185,12 +194,12 @@ setMethod(
   df <- S4Vectors::DataFrame(start = vapply(gene,"[[",numeric(1),"location"),
               end = vapply(gene,"[[",numeric(1),"location"),
               ID = names(gene),
-              RNAmod_type = vapply(gene,"[[",character(1),"type"),
-              RNAmod_signal = vapply(gene,"[[",numeric(1),"signal"),
-              RNAmod_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
-              RNAmod_p.value = format(vapply(gene,"[[",numeric(1),"p.value"), 
+              RNAmodR_type = vapply(gene,"[[",character(1),"type"),
+              RNAmodR_signal = vapply(gene,"[[",numeric(1),"signal"),
+              RNAmodR_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
+              RNAmodR_p.value = format(vapply(gene,"[[",numeric(1),"p.value"), 
                                       digits = 10, scientific = FALSE),
-              RNAmod_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
+              RNAmodR_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
   return(df)
 }
 
@@ -200,7 +209,7 @@ setMethod(
                                           data,
                                           positions){
   # rownames and colnames(modTypes)
-  modTypes <- unique(data$RNAmod_type)
+  modTypes <- unique(data$RNAmodR_type)
   rownames <- S4Vectors::mcols(gff)$ID
   rownames[is.na(rownames)] <- 
     S4Vectors::mcols(gff[is.na(S4Vectors::mcols(gff)$ID),])$Name
@@ -262,7 +271,7 @@ setMethod(
                     function(modType){
                       mods <- lapply(geneMods, 
                                      function(gene){
-                                       gene[gene$RNAmod_type == modType,]
+                                       gene[gene$RNAmodR_type == modType,]
                                      })
                       
                       data <- vapply(mods,nrow,numeric(1))

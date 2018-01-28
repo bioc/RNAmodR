@@ -1,4 +1,4 @@
-#' @include class-RNAmod-analysis-type.R
+#' @include class-RNAmodR-analysis-type.R
 NULL
 
 # common function for converting data ------------------------------------------

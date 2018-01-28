@@ -1,33 +1,33 @@
-#' @include class-RNAmod-mod-type.R
+#' @include class-RNAmodR-mod-type.R
 NULL
 
-RNAMOD_M7G_NUCLEOTIDE <- "G"
-RNAMOD_M7G_SPM <- 5
-RNAMOD_M7G_ARREST_RATE <- 0.95
-RNAMOD_M7G_P_THRESHOLD <- 0.05
-RNAMOD_M7G_SIGMA_THRESHOLD <- 15
+RNAMODR_D_NUCLEOTIDE <- "T"
+RNAMODR_D_SPM <- 5
+RNAMODR_D_ARREST_RATE <- 0.95
+RNAMODR_D_P_THRESHOLD <- 0.05
+RNAMODR_D_SIGMA_THRESHOLD <- 15
 
 
 #' @rdname mod
 #'
 #' @description 
-#' \code{mod_m7G}
+#' \code{mod_D}
 #' 
 #' @export
-setClass("mod_m7G",
+setClass("mod_D",
          contains = "mod",
-         prototype = list(modType = "m7G")
+         prototype = list(modType = "D")
 )
 
 #' @rdname maskPositionData
 #' 
 #' @description 
-#' \code{mod_m7G}
+#' \code{mod_D}
 #' 
 #' @export
 setMethod(
   f = "maskPositionData",
-  signature = signature(object = "mod_m7G",
+  signature = signature(object = "mod_D",
                         data = "numeric",
                         modLocations = "numeric"),
   definition = function(object,
@@ -35,7 +35,7 @@ setMethod(
                         modLocations) {
     data[as.numeric(names(data)) %in% (modLocations+1)] <- 
       data[as.numeric(names(data)) %in% (modLocations+1)] * 
-      (1-RNAMOD_M7G_ARREST_RATE)
+      (1-RNAMODR_D_ARREST_RATE)
     return(data)
   }
 )
@@ -43,12 +43,12 @@ setMethod(
 #' @rdname preTest
 #' 
 #' @description 
-#' \code{mod_m7G}
+#' \code{mod_D}
 #' 
 #' @export
 setMethod(
   f = "preTest",
-  signature = signature(object = "mod_m7G",
+  signature = signature(object = "mod_D",
                         location = "numeric",
                         data = "list",
                         locations = "numeric"),
@@ -57,25 +57,25 @@ setMethod(
                         data,
                         locations) {
     # do pretest
-    res <- .do_M7G_pretest(location,
-                           locations,
-                           data)
+    res <- .do_D_pretest(location,
+                         locations,
+                         data)
     return(res)
   }
 )
 
 # check if any data is available to proceed with test
 # this is in a seperate function since it is also called by checkForModification
-.do_M7G_pretest <- function(location,
-                            locations,
-                            data){
+.do_D_pretest <- function(location,
+                          locations,
+                          data){
   # if non G position skip position
-  if( names(locations[locations == location]) != RNAMOD_M7G_NUCLEOTIDE){
+  if( names(locations[locations == location]) 
+      != RNAMODR_D_NUCLEOTIDE){
     return(NULL)
   }
   # do not take into account position 1
   if(location == 1) return(NULL)
-  # browser()
   # number of replicates
   n <- length(data)
   # merge data for positions
@@ -83,7 +83,7 @@ setMethod(
   testData <- .aggregate_location_data(data, (location+1))
   testData <- testData[testData > 0]
   # if spm is not high enough
-  if(length(testData[testData >= RNAMOD_M7G_SPM]) < n) return(NULL)
+  if(length(testData[testData >= RNAMODR_D_SPM]) < n) return(NULL)
   # base data to compare against
   baseData <- .aggregate_not_location_data(data, (location+1))
   # if not enough data is present
@@ -95,7 +95,7 @@ setMethod(
   sd <-  stats::sd(baseData)
   # Use the sigma level as value for signal strength
   if( mean((as.numeric(as.character(testData)) - mean) %/% (mean+sd)) 
-      <= RNAMOD_M7G_SIGMA_THRESHOLD) {
+      <= RNAMODR_D_SIGMA_THRESHOLD) {
     return(NULL)
   }
   return(list(n = n,
@@ -106,12 +106,12 @@ setMethod(
 #' @rdname checkForModification
 #' 
 #' @description 
-#' \code{mod_m7G}
+#' \code{mod_D}
 #' 
 #' @export
 setMethod(
   f = "checkForModification",
-  signature = signature(object = "mod_m7G",
+  signature = signature(object = "mod_D",
                         location = "numeric",
                         locations = "numeric",
                         data = "list"),
@@ -119,28 +119,26 @@ setMethod(
                         location,
                         locations,
                         data) {
-    # if(location == 1575 | location == 599 | location == 1420) { browser() }
-    # if(location == 1925) { browser() }
     # browser()
     # get test result for the current location
-    locTest <- .calc_M7G_test_values(location,
-                                     locations,
-                                     data)
+    locTest <- .calc_D_test_values(location,
+                                   locations,
+                                   data)
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
     # dynamic threshold based on the noise of the signal (high sd)
-    if(!.validate_M7G_pos(RNAMOD_M7G_SIGMA_THRESHOLD, 
-                          RNAMOD_M7G_P_THRESHOLD, 
+    if(!.validate_D_pos(RNAMODR_D_SIGMA_THRESHOLD, 
+                          RNAMODR_D_P_THRESHOLD, 
                           locTest$sig.mean, 
                           locTest$p.value) ) {
       # debug
-      if( getOption("RNAmod_debug") ){
+      if( getOption("RNAmodR_debug") ){
         .print_location_info(paste(location,"_no"),locs)
       }
       return(NULL)
     }
     # debug
-    if( getOption("RNAmod_debug") ){
+    if( getOption("RNAmodR_debug") ){
       .print_location_info(paste(location,"_yes"), locs)
     }
     # Return data
@@ -153,14 +151,14 @@ setMethod(
   }
 )
 
-# test for m7G at current location
-.calc_M7G_test_values <- function(location,
-                                  locations,
-                                  data){
+# test for D at current location
+.calc_D_test_values <- function(location,
+                                locations,
+                                data){
   # short cut if amount of data is not sufficient
-  pretestData <- .do_M7G_pretest(location,
-                                 locations,
-                                 data)
+  pretestData <- .do_D_pretest(location,
+                               locations,
+                               data)
   if(is.null(pretestData)) return(NULL)
   # data from pretest
   testData <- pretestData$testData
@@ -173,7 +171,7 @@ setMethod(
   # No read arrest detectable
   if( sum(testArrestData) < 0 ) return(NULL)
   # To low arrest detectable
-  testArrest <- length(testArrestData[testArrestData >= RNAMOD_M7G_ARREST_RATE])
+  testArrest <- length(testArrestData[testArrestData >= RNAMODR_D_ARREST_RATE])
   if( length(testArrestData) != testArrest ) {
     return(NULL)
   }
@@ -196,7 +194,7 @@ setMethod(
 }
 
 # call yes or nor position
-.validate_M7G_pos <- function(sig.threshold, 
+.validate_D_pos <- function(sig.threshold, 
                               p.threshold, 
                               sig, 
                               p.value){
@@ -207,7 +205,7 @@ setMethod(
 }
 
 # create data.frame for sample plotting
-.create_M7G_plot_data <- function(testData, baseData, name){
+.create_D_plot_data <- function(testData, baseData, name){
   data.frame(x = c(rep(name,(length(testData) + 
                                length(baseData)))),
              y = c(testData, 
