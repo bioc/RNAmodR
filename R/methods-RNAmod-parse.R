@@ -128,16 +128,16 @@ setMethod(
       nrow(df)
     }))
     if( sum(nMods) == 0 ) return(NULL)
-    
+    # browser()
     # This way os selection matches to one construting the initial read
     # DataFrame
     g <- gff[as.character(S4Vectors::mcols(gff)$ID) %in% genes |
                (as.character(S4Vectors::mcols(gff)$Name) %in% genes &
                   is.na(as.character(S4Vectors::mcols(gff)$ID)))]
-    S4Vectors::mcols(gff)[is.na(as.character(S4Vectors::mcols(gff)$ID))]$ID <- 
-      S4Vectors::mcols(gff)[is.na(as.character(S4Vectors::mcols(gff)$ID))]$Name
+    S4Vectors::mcols(gff)[is.na(as.character(S4Vectors::mcols(gff)$ID)),]$ID <- 
+      S4Vectors::mcols(gff)[is.na(as.character(S4Vectors::mcols(gff)$ID)),]$Name
     S4Vectors::mcols(g)$ID <- factor(S4Vectors::mcols(g)$ID, levels = genes)
-    g <- g[order(S4Vectors::mcols(g)$ID)]
+    g <- g[order(S4Vectors::mcols(g)$ID),]
     
     strand <- as.character(BiocGenerics::strand(g))
     chrom <- as.character(GenomeInfoDb::seqnames(g))
@@ -155,7 +155,9 @@ setMethod(
     genesDf <- genesDf[!vapply(genesDf, is.null, logical(1))]
     if(length(genesDf) == 0) return(NULL)
     res <- do.call(rbind,genesDf)
-    res <- res[order(res$start),]
+    res <- res[order(res$chrom,
+                     res$start,
+                     res$end),]
     return(res)
   })
   
@@ -182,7 +184,8 @@ setMethod(
               RNAmod_type = vapply(gene,"[[",character(1),"type"),
               RNAmod_signal = vapply(gene,"[[",numeric(1),"signal"),
               RNAmod_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
-              RNAmod_p.value = vapply(gene,"[[",numeric(1),"p.value"),
+              RNAmod_p.value = format(vapply(gene,"[[",numeric(1),"p.value"), 
+                                      digits = 10, scientific = FALSE),
               RNAmod_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
   return(df)
 }
