@@ -80,13 +80,13 @@ setMethod(
   names(bamData) <- .get_unique_identifiers(gff_subset)[
     as.numeric(names(bamData))]
   
-  bamData <- bamData[names(bamData) %in% c("RDN18-1",
-                                           "YBR041W")]
+  # bamData <- bamData[names(bamData) %in% c("RDN18-1",
+  #                                          "YBR041W")]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "YBR041W",
   #                                          "YBR056W",
   #                                          "YAL030W")]
-  # bamData <- bamData[names(bamData) %in% c("YJL047C")]
+  # bamData <- bamData[names(bamData) %in% c("RDN18-1")]
   # bamData <- bamData[names(bamData) %in% c("YJL047C",
   #                                          "YHR199C-A")]
   # bamData <- bamData[names(bamData) %in% c("YBR041W",
@@ -407,8 +407,8 @@ setMethod(
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
-    # res <- lapply(IDs,
-    res <- BiocParallel::bplapply(IDs,
+    res <- lapply(IDs,
+    # res <- BiocParallel::bplapply(IDs,
                                   FUN = .merge_positions,
                                   object@data)
     names(res) <- IDs
@@ -434,13 +434,14 @@ setMethod(
 # merge positions in one transcript
 .merge_positions <- function(ID,data){
   data <- .get_data(ID,data)
-  positions <- unique(unlist(lapply(data,names)))
+  positions <- as.numeric(unique(unlist(lapply(data,names))))
   res <- lapply(positions,
                 FUN = .merge_position,
                 data)
   df <- data.frame(pos = unlist(lapply(res,"[[","pos")),
                    mean = unlist(lapply(res,"[[","mean")),
-                   sd = unlist(lapply(res,"[[","sd")))
+                   sd = unlist(lapply(res,"[[","sd")),
+                   stringsAsFactors = FALSE)
   return(df)
 }
 

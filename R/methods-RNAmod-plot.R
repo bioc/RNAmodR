@@ -214,18 +214,20 @@ setMethod(
                                           gff,
                                           fasta,
                                           modClasses){
-  gff_sub <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
-                    S4Vectors::mcols(gff)$Name == geneName) |
-                   (!is.na(S4Vectors::mcols(gff)$ID) & 
-                      S4Vectors::mcols(gff)$ID == geneName),]
+  gff_sub <- .subset_gff_for_unique_transcript(gff, 
+                                               geneName)
   seq <- Rsamtools::getSeq(fasta,gff_sub)[[1]]
-  letters <- strsplit(gsub("([[:alnum:]]{1})", "\\1 ", 
-                           as.character(seq)), " ")[[1]]
+  letters <- .get_transcript_sequence(gff,
+                                      geneName,
+                                      seq)
   # create description layer plot
   layer <- .create_layer_data(gff,gff_sub)
   
   # get data for different plot types
-  posData <- .aggregate_pos_data(gff_sub,positions,modClasses)
+  posData <- .aggregate_pos_data(gff_sub,
+                                 positions,
+                                 letters,
+                                 modClasses)
   mods <- mods[order(mods$start),]
   modData <- .aggregate_mod_data(mods,modClasses)
   
@@ -236,7 +238,8 @@ setMethod(
     pos <- posData[[type]]
     mods <- modData[[type]]
     
-    plot <- .get_mod_plot(pos,mods,letters)
+    plot <- .get_mod_plot(pos,
+                          mods)
     return(plot)
   })
   #layerPlot <- .get_gene_plot(geneName, layer, posData[[1]])
@@ -269,19 +272,21 @@ setMethod(
                                     gff,
                                     fasta,
                                     modClasses){
-  gff_sub <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
-                    S4Vectors::mcols(gff)$Name == geneName) |
-                   (!is.na(S4Vectors::mcols(gff)$ID) & 
-                      S4Vectors::mcols(gff)$ID == geneName),]
-  seq <- Rsamtools::getSeq(fasta,gff_sub)[[1]]
-  letters <- strsplit(gsub("([[:alnum:]]{1})", "\\1 ", 
-                           as.character(seq)), " ")[[1]]
   
+  gff_sub <- .subset_gff_for_unique_transcript(gff, 
+                                               geneName)
+  seq <- Rsamtools::getSeq(fasta,gff_sub)[[1]]
+  letters <- .get_transcript_sequence(gff,
+                                      geneName,
+                                      seq)
   # create description layer plot
   layer <- .create_layer_data(gff,gff_sub)
   
   # get data for different plot types
-  posData <- .aggregate_pos_data(gff_sub,positions,modClasses)
+  posData <- .aggregate_pos_data(gff_sub,
+                                 positions,
+                                 letters,
+                                 modClasses)
   mods <- mods[order(mods$start),]
   modData <- .aggregate_mod_data(mods,modClasses)
   modData <- lapply(names(modData), function(x){
@@ -296,10 +301,12 @@ setMethod(
     pos <- posData[[mod$plotType]]
     
     # focus on a modification
-    localStart <- pos[pos$pos == mods$start,"localPos"] - 
+    localStart <- as.numeric(pos[as.numeric(pos$pos) %in% mods$start,"pos"]) - 
       RNAMOD_PLOT_FOCUS_WINDOW
-    localEnd <- pos[pos$pos == mods$end,"localPos"] + RNAMOD_PLOT_FOCUS_WINDOW
-    pos <- pos[pos$localPos > localStart & pos$localPos < localEnd,]
+    localEnd <- as.numeric(pos[as.numeric(pos$pos) %in% mods$end,"pos"]) + 
+      RNAMOD_PLOT_FOCUS_WINDOW
+    pos <- pos[as.numeric(pos$pos) > localStart &
+                 as.numeric(pos$pos) < localEnd,]
     
     # to inhibit plotting by grid.arrange
     grDevices::pdf(file = NULL)
@@ -307,7 +314,8 @@ setMethod(
     # get plots
     # layerPlot <- .get_gene_plot(geneName, layer, pos)
     layerPlot <- list()
-    plot <- .get_mod_plot(pos,mod,letters)
+    plot <- .get_mod_plot(pos,
+                          mod)
     
     nrow <- length(layerPlot) + 1
     width <- 80 + nrow(pos) * RNAMOD_PLOT_POS_WIDTH
@@ -339,7 +347,10 @@ setMethod(
 # data aggregation function ----------------------------------------------------
 
 # aggregates the position data for plotting of different plot types
-.aggregate_pos_data <- function(gff,data, modClasses){
+.aggregate_pos_data <- function(gff,
+                                data, 
+                                letters,
+                                modClasses){
   plotTypes <- vapply(modClasses, getAnalysisType, character(1))
   plotTypes <- unique(plotTypes)
   data <- lapply(plotTypes, function(type, data){
@@ -352,11 +363,10 @@ setMethod(
            call. = FALSE)
     }
     res <- data[[type]]
-    if( as.character(BiocGenerics::strand(gff)) == "-"){
-      res <- res[order(res$pos, decreasing = TRUE),]
-    }
-    res$localPos <- 1:nrow(res)
-    rownames(res) <- res$localPos
+    # short time fix
+    res$pos <- as.numeric(res$pos)[order(as.numeric(res$pos))]
+    # add letters to position data
+    res$letters <- letters
     return(res)
   }, data)
   names(data) <- plotTypes
@@ -390,7 +400,7 @@ setMethod(
 # modification visualization ---------------------------------------------------
 
 # returns a plot showing all modifications on one type of position data
-.get_mod_plot <- function(pos,mods,letters){
+.get_mod_plot <- function(pos,mods){
   requireNamespace("ggplot2", quietly = TRUE)
   # browser()
   break_FUN <- function(lim){
@@ -402,11 +412,9 @@ setMethod(
     as.numeric(c(x,unlist(lapply(1:n,function(z){100*z})),round(max(lim))))
   }
   
-  # focusing on positions
-  pos$letters <- letters[1:nrow(pos)]
   
   # initial plot setup
-  plot <- ggplot(pos, aes_(x = ~localPos, y = ~mean, label = ~letters)) +
+  plot <- ggplot(pos, aes_(x = ~as.numeric(pos), y = ~mean, label = ~letters)) +
     scale_x_continuous(name = "position of transcript [nt]",
                        expand = c(0,10)) +
     scale_y_continuous(name = "mean(number of read ends)",
@@ -424,10 +432,10 @@ setMethod(
   if(is.null(mods)) return(plot)
   
   # prepare mod data
-  mods$localStart <- pos[pos$pos %in% mods$start,"localPos"]
-  mods$localEnd <- pos[pos$pos %in% mods$end,"localPos"]
+  mods$localStart <- as.numeric(pos[as.numeric(pos$pos) %in% mods$start,"pos"])
+  mods$localEnd <- as.numeric(pos[as.numeric(pos$pos) %in% mods$end,"pos"])
   mods$y <- unlist(lapply(mods$localStart, function(x){
-    pos[pos$localPos == x,"mean"]*1.02
+    pos[pos$pos == x,"mean"]*1.02
   }))
   mods$yend <- unlist(lapply(mods$localStart, function(x){
     max(pos$mean)
@@ -445,7 +453,8 @@ setMethod(
     
   # plot modifications for single positions each
   # setup p value text
-  p_text <- unlist(lapply( modsPositions$RNAmod_p.value, function(p){
+  p_text <- unlist(lapply(as.numeric(modsPositions$RNAmod_p.value), 
+                          function(p){
     if( p < 0.0001){
       return(paste0("< ",0.0001))
     } else {
@@ -515,7 +524,7 @@ setMethod(
                            pos){
   requireNamespace("ggplot2", quietly = TRUE)
   
-  xlim <- c(min(pos$localPos),max(pos$localPos))
+  xlim <- c(min(pos$pos),max(pos$pos))
   ymin <- 0
   ymin2 <- 0
   browser()
@@ -658,24 +667,15 @@ setMethod(
                      ".",
                      filetype)
   for(i in 1:seq_along(length(fileNames))){
-    if(filetype == "pdf"){
-      if(assertive::r_has_cairo_capability() & getOption("RNAmod_use_cairo") ){
+    if( assertive::r_has_cairo_capability() & getOption("RNAmod_use_cairo") ){
+      if(filetype == "pdf"){
         grDevices::cairo_pdf(fileNames[[i]],
                              width = (width[[i]]*RNAMOD_PLOT_MM_TO_INCH_F),
                              height = (height[[i]]*RNAMOD_PLOT_MM_TO_INCH_F))
         graphics::plot(plot[[i]])
         grDevices::dev.off()
-      } else {
-        ggplot2::ggsave(plot[[i]],
-                        filename = fileNames[[i]],
-                        units = "mm",
-                        width = width[[i]],
-                        height = height[[i]],
-                        limitsize = FALSE)
       }
-    }
-    if(filetype == "png"){
-      if( assertive::r_has_cairo_capability() & getOption("RNAmod_use_cairo") ){
+      if(filetype == "png"){
         grDevices::png(fileNames[[i]],
                        units = "in",
                        width = (width[[i]]*
@@ -686,16 +686,17 @@ setMethod(
                        res = dpi)
         graphics::plot(plot[[i]])
         grDevices::dev.off()
-      } else {
-        ggplot2::ggsave(plot[[i]],
-                        filename = fileNames[[i]],
-                        units = "mm",
-                        width = width[[i]],
-                        height = height[[i]],
-                        dpi = dpi,
-                        limitsize = FALSE)
       }
+    } else {
+      ggplot2::ggsave(plot[[i]],
+                      filename = fileNames[[i]],
+                      units = "mm",
+                      width = width[[i]],
+                      height = height[[i]],
+                      dpi = dpi,
+                      limitsize = FALSE)
     }
+    
     message("Saving mod plot for '",names[[i]],"'")
   }
 }

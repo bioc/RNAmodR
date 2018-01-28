@@ -37,6 +37,7 @@ se3 <- getSummarizedExperiment(mod,3,modifications)
 
 tRNA <- rownames(se1)[grepl("t", rownames(se1), fixed = TRUE)]
 rRNA <- c("RDN18-1","RDN25-1")
+m7Gtranscripts <- names(assays(se)$m7G[assays(se)$m7G > 0,])
 
 saveModPlot(mod,se1,modifications,c(rRNA))
 saveModPlot(mod,se2,modifications,c(rRNA))
@@ -44,4 +45,7 @@ saveModPlot(mod,se3,modifications,c(rRNA))
 saveModPlot(mod,se1,modifications,c(tRNA),filetype = "png")
 saveModPlot(mod,se2,modifications,c(tRNA),filetype = "png")
 saveModPlot(mod,se3,modifications,c(tRNA),filetype = "png")
+
+
+
 ```

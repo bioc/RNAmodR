@@ -90,7 +90,7 @@ RNAMOD_DEFAULT_MAPQ <- 5
   options("RNAmod_use_p" = TRUE)
   options("RNAmod_palette" = RNAMOD_DEFAULT_PALETTE)
   options("RNAmod_dpi" = 600)
-  options("RNAmod_use_cairo" = TRUE)
+  options("RNAmod_use_cairo" = FALSE)
   options("RNAmod_debug" = FALSE)
   options("RNAmod_debug_transcripts" = c("tG(UCC)G"))
 }
