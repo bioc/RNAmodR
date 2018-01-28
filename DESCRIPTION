@@ -14,19 +14,23 @@ Description:
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
-LazyData: true
 Collate: 
     'RNAmod.R'
     'AllGenerics.R'
     'AllGenerics-export-default.R'
     'AllGenerics-export.R'
     'RNAModString.R'
+    'class-RNAmod.R'
+    'class-RNAmod-analysis-type.R'
+    'RNAmod-data-utils.R'
+    'RNAmod-data.R'
     'RNAmod-options.R'
+    'methods-RNAmod-plot.R'
+    'RNAmod-plot-utils.R'
+    'RNAmod-ranges-utils.R'
     'RNAmod-utils-preparations.R'
     'RNAmod-utils.R'
     'assertions.R'
-    'class-RNAmod.R'
-    'class-RNAmod-analysis-type.R'
     'class-RNAmod-mod-type.R'
     'class-RNAmod-analysis-default.R'
     'class-RNAmod-mod-D.R'
@@ -34,10 +38,8 @@ Collate:
     'class-RNAmod-mod-m7G.R'
     'methods-RNAmod-compare.R'
     'methods-RNAmod-parse.R'
-    'methods-RNAmod-plot.R'
     'methods-RNAmod.R'
     'methods-RNAmodR-analysis.R'
-    'utils-RNAmod-analysis-type.R'
 Imports:
   methods,
   assertive,

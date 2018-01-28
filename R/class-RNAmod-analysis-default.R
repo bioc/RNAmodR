@@ -181,6 +181,7 @@ setMethod(
 )
 
 .get_single_position_letters <- function(x) {
+  x <- as.character(x)
   substring(x, 1:nchar(x), 1:nchar(x))  
 }
 

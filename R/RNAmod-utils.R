@@ -121,20 +121,20 @@ setMethod(
   return(unique(unlist(seqnames)))
 }
 
-# Check if name exists in any parent env apart from global env
-.where <- function(name, n = 1) {
-  env = parent.frame( n = n)
-  while(!identical(env, sys.frame(which = 0))) {
-    if (exists(name, envir = env, inherits = FALSE)) {
-      # success case
-      return(env)
-    }
-    # inspect parent
-    n <- n + 1
-    env <- parent.frame(n = n)
-  }
-  stop("Can't find ", name, call. = FALSE)
-}
+# # Check if name exists in any parent env apart from global env
+# .where <- function(name, n = 1) {
+#   env = parent.frame( n = n)
+#   while(!identical(env, sys.frame(which = 0))) {
+#     if (exists(name, envir = env, inherits = FALSE)) {
+#       # success case
+#       return(env)
+#     }
+#     # inspect parent
+#     n <- n + 1
+#     env <- parent.frame(n = n)
+#   }
+#   stop("Can't find ", name, call. = FALSE)
+# }
 
 # BiocGeneric helper functions -------------------------------------------------
 
@@ -146,7 +146,7 @@ setMethod(
   unique(.get_strand(x))
 }
 .is_minus_strand <- function(x) {
-  all(as.logical(x == "-"))
+  all(as.logical(.get_strand(x) == "-"))
 }
 .is_on_minus_strand <- function(x) {
   all(.is_on_correct_strand(x,"-"))
@@ -221,9 +221,9 @@ setMethod(
 
 # subset GRanges for highest ranking parent
 .get_parent_annotations <- function(gr,
-                                    IDs,
+                                    forceSingle = FALSE,
                                     doRecursiveSearch = FALSE,
-                                    forceSingle = FALSE){
+                                    IDs){
   if(!doRecursiveSearch){
     res <- gr[is.na(as.character(gr$Parent)),]
     if(length(res) > 1 && forceSingle) 
