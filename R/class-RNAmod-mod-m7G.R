@@ -94,7 +94,7 @@ setMethod(
   mean <-  mean(baseData)
   sd <-  stats::sd(baseData)
   # Use the sigma level as value for signal strength
-  if( mean((as.numeric(as.character(testData)) - mean) %/% sd) 
+  if( mean((as.numeric(as.character(testData)) - mean) %/% (mean+sd)) 
       <= RNAMOD_M7G_SIGMA_THRESHOLD) {
     return(NULL)
   }
@@ -182,7 +182,7 @@ setMethod(
   mean <-  mean(baseData)
   sd <-  stats::sd(baseData)
   # Use the sigma level as value for signal strength
-  sig <- (as.numeric(as.character(testData)) - mean) %/% sd
+  sig <- (as.numeric(as.character(testData)) - mean) %/% (mean+sd)
   sig.mean <- mean(sig)
   sig.sd <- stats::sd(sig)
   # Since normality of distribution can not be assumed use the MWU

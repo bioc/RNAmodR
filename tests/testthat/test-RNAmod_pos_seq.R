@@ -89,11 +89,13 @@ test_that("Transcript position functions:",
             # .move_postion
             n <- 20
             actual <- RNAmod:::.move_postion(1:n,c(12,13,14),"+")
-            expect_length(actual, n)
-            expect_length(actual[actual == 12],4)
+            expect_length(actual, n-3)
+            expect_equal(max(actual), 17)
+            expect_length(actual[actual == 12],1)
             actual <- RNAmod:::.move_postion(1:n,c(12,13,14),"-")
-            expect_length(actual, n)
-            expect_length(actual[actual == 14],4)
+            expect_length(actual, n-3)
+            expect_equal(min(actual), 4)
+            expect_length(actual[actual == 14],1)
             
             # no introns
             actual <- RNAmod:::.get_intron_positions(gff,"RDN18-1")

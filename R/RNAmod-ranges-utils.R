@@ -71,6 +71,7 @@ NULL
                           posToBeRemoved,
                           strand){
   x <- unlist(posToBeRemoved)
+  positions <- positions[!(positions %in% x)]
   unlist(lapply(positions, function(position){
     if(.is_minus_strand(strand)){
       position <- position + length(x[x>position])
