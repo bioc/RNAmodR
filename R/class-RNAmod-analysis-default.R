@@ -2,6 +2,8 @@
 #' @include class-RNAmod-analysis-type.R
 NULL
 
+RNAMOD_DEFAULT_READ_DENSITY <- 0.5
+
 #' @rdname mod
 #'
 #' @description 
@@ -78,10 +80,13 @@ setMethod(
   names(bamData) <- .get_unique_identifiers(gff_subset)[
     as.numeric(names(bamData))]
   
-  bamData <- bamData[names(bamData) %in% c("RDN18-1",
-                                           "YBR041W",
-                                           "YBR056W",
-                                           "YAL030W")]
+  # bamData <- bamData[names(bamData) %in% c("RDN18-1",
+  #                                          "YBR041W",
+  #                                          "YBR056W",
+  #                                          "YAL030W")]
+  # bamData <- bamData[names(bamData) %in% c("YJL047C")]
+  # bamData <- bamData[names(bamData) %in% c("YJL047C",
+  #                                          "YHR199C-A")]
   # bamData <- bamData[names(bamData) %in% c("YBR041W",
   #                                          "YBR056W",
   #                                          "YAL030W")]
@@ -101,6 +106,9 @@ setMethod(
                                       MoreArgs = list(totalCounts,
                                                       gff),
                                       SIMPLIFY = FALSE)
+  # remove entries for transcript for which position data is sufficient
+  positions <- positions[!vapply(positions, is.null, logical(1))]
+  if(length(positions) == 0) return(NULL)
   names(positions) <- names(bamData)
   return(positions)
 }
@@ -123,6 +131,8 @@ setMethod(
   # do position conversion to translate genomic position to local transcript
   # position. take care of introns, etc
   pos <- .convert_global_to_local_position(gff,gr,data)
+  # if number of reads per transcript length is not enough
+  if(length(pos) < (width(gr) * RNAMOD_DEFAULT_READ_DENSITY )) return(NULL)
   # Normalize counts per positions against million of reads in BamFile
   posData <- table(pos)/(counts/10^6)
   # spread table with zero values to the length of transcript

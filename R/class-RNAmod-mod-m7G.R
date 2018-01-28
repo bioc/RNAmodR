@@ -120,6 +120,7 @@ setMethod(
                         locations,
                         data) {
     # if(location == 1575 | location == 599 | location == 1420) { browser() }
+    # if(location == 1925) { browser() }
     # browser()
     # get test result for the current location
     locTest <- .calc_M7G_test_values(location,

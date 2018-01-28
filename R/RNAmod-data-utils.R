@@ -3,6 +3,13 @@ NULL
 
 # common function for converting data ------------------------------------------
 
+# Calculate FPKM values
+.calculate_fpkm <- function(nReads,length,R){
+  # Calculate fpkm
+  fpkm <- nReads/((length/1000) * (R/1000000))
+  return(fpkm)
+}
+
 # Calculate the arrest rate per position
 .get_arrest_rate <- function(x){
   if(is.null(names(x))) stop("Unnamed position data.")

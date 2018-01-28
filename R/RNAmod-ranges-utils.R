@@ -27,6 +27,9 @@ NULL
 .convert_global_to_local_position <- function(gff,
                                               gr,
                                               data){
+  # discard reads out of boundaries
+  data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
+  data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
   # get a list of introns and the position which are void
   posToBeRemoved <- .get_intron_positions(gff,
                                           gr$ID)
@@ -57,8 +60,8 @@ NULL
     positions <- positions - BiocGenerics::start(gr) + 1
   }
   # discard reads out of boundaries
-  positions <- positions[positions>0]
-  positions <- positions[positions<=length]
+  # positions <- positions[positions>0]
+  # positions <- positions[positions<=length]
   return(positions)
 }
 
