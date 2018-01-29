@@ -25,22 +25,21 @@ NULL
     # min = -1 in other direction
     return((b/a-1))
   }))
-  setNames(y,names(x))
+  stats::setNames(y,names(x))
 }
 
 # Calculate the arrest difference per position
-.get_arrest_diff <- function(i, meanData){
-  x <- data[[i]]
-  y <- unlist(lapply(seq_along(x), function(j){
-    x[as.numeric(names(x)) == j]-meanData[[i]][as.numeric(names(x)) == j]
+.get_arrest_diff <- function(data, meanData){
+  y <- unlist(lapply(seq_along(data), function(j){
+    data[as.numeric(names(data)) == j]-meanData[[i]][as.numeric(names(data)) == j]
   }))
-  setNames(y,names(x))
+  stats::setNames(y,names(data))
 }
 
 # calculates a rolling mean values
 .get_rolling_mean <- function(x,
                               n=3){
-  y <- setNames(filter(x,rep(1/n,n), sides=2),names(x))
+  y <- stats::setNames(stats::filter(x,rep(1/n,n), sides=2),names(x))
   y[is.na(y)] <- x[is.na(y)]
   return(y)
 }

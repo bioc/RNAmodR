@@ -5,30 +5,28 @@
 \name{heatmapModifications}
 \alias{heatmapModifications}
 \alias{saveHeatmapModifications}
-\alias{heatmapModifications,RNAmodR,SummarizedExperiment,character,character-method}
+\alias{heatmapModifications,RNAmodR,list,character-method}
 \alias{heatmapModifications}
 \alias{saveHeatmapModifications}
-\alias{saveHeatmapModifications,RNAmodR,SummarizedExperiment,character,character-method}
+\alias{saveHeatmapModifications,RNAmodR,list,character-method}
 \title{Comparative visualization of modifications}
 \usage{
-heatmapModifications(.Object, se, modifications, genes)
+heatmapModifications(.Object, ses, modifications)
 
-saveHeatmapModifications(.Object, se, modifications, genes)
+saveHeatmapModifications(.Object, ses, modifications)
 
+\S4method{heatmapModifications}{RNAmodR,list,character}(.Object, ses,
+  modifications)
 
-  \S4method{heatmapModifications}{RNAmodR,SummarizedExperiment,character,character}(.Object,
-  se, modifications, genes)
-
-
-  \S4method{saveHeatmapModifications}{RNAmodR,SummarizedExperiment,character,character}(.Object,
-  se, modifications, genes)
+\S4method{saveHeatmapModifications}{RNAmodR,list,character}(.Object, ses,
+  modifications)
 }
 \arguments{
 \item{.Object}{a RNAmod object.}
 
-\item{se}{a SummarizedExperiment containg the experimental data.}
-
 \item{modifications}{name of modification to be used for analysis.}
+
+\item{se}{a SummarizedExperiment containg the experimental data.}
 
 \item{gene}{a single gene name}
 }

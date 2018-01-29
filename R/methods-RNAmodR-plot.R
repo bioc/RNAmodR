@@ -52,11 +52,11 @@ setMethod(
     if(length(genesAvail) != length(gene)){
       if(length(genesAvail) > 0){
         warning("No information available for the following genes: '",
-                paste0(setdiff(genes,genesAvail), collapse = "', '"),"'",
+                paste0(setdiff(gene,genesAvail), collapse = "', '"),"'",
                 call. = FALSE)
       } else {
         stop("No information available for any genes given: '",
-             paste0(genes, collapse = "', '"),"'",
+             paste0(gene, collapse = "', '"),"'",
              call. = FALSE)
       }
     }
@@ -266,6 +266,8 @@ setMethod(
 
 # plot per modification --------------------------------------------------------
 
+#' @importFrom gridExtra grid.arrange
+#' 
 .plot_per_modifications <- function(geneName,
                                     positions,
                                     mods,
@@ -387,7 +389,7 @@ setMethod(
   # set name of plot type
   names(data) <- vapply(modClasses, getAnalysisType, character(1))
   # aggregated data based on plot type
-  data <- setNames(lapply(unique(names(data)), function(name){
+  data <- stats::setNames(lapply(unique(names(data)), function(name){
     x <- do.call(rbind, data[names(data) == name])
     if(is.null(x)) return(NULL)
     return(x[order(x$start,x$end),])
@@ -399,6 +401,7 @@ setMethod(
 
 # modification visualization ---------------------------------------------------
 
+#' @importFrom scales scientific
 # returns a plot showing all modifications on one type of position data
 .get_mod_plot <- function(pos,mods){
   requireNamespace("ggplot2", quietly = TRUE)

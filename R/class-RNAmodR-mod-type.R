@@ -7,7 +7,8 @@ NULL
 #' 
 #' @title mod
 #' 
-#' @description Virtual class for modification detection.
+#' @description 
+#' Virtual class for modification detection.
 #' 
 #' @export
 setClass("mod",

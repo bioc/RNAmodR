@@ -132,6 +132,10 @@ setMethod(
   return(positions)
 }
 
+.estimate_number_of_workers <- function(){
+  
+}
+
 
 # For each transcript get positional data
 # This can be individually done for different modification types
@@ -155,7 +159,7 @@ setMethod(
   # Normalize counts per positions against million of reads in BamFile
   posData <- table(pos)/(counts/10^6)
   # spread table with zero values to the length of transcript
-  posData <- setNames(as.double(unlist(lapply(1:length, 
+  posData <- stats::setNames(as.double(unlist(lapply(1:length, 
                                               function(i){
     if(length(posData[names(posData) == i]) == 0) return(0)
     posData[names(posData) == i]
@@ -264,7 +268,7 @@ setMethod(
     testPosition <- res[[i]]
     nonTestPositions <- res[seq_along(res) != i]
     if( length(nonTestPositions) > 0 ){
-      locs <- setNames(
+      locs <- stats::setNames(
         as.numeric(unlist(lapply(nonTestPositions, "[[","location"))),
         unlist(lapply(nonTestPositions, "[[","type")))
       x <- .mask_data(modClasses,
@@ -314,7 +318,7 @@ setMethod(
   if(length(modifications) == 0) return(NULL)
   # check if by masking found modifications positions additional positions are
   # picked up - remember the +1 location data
-  modLocations <- setNames(
+  modLocations <- stats::setNames(
     as.numeric(unlist(lapply(modifications, "[[","location"))),
     unlist(lapply(modifications, "[[","type")))
   # do not take into account positions found as modification
@@ -417,8 +421,8 @@ setMethod(
 
 .get_location_vector <- function(location, 
                                  type){
-  setNames(location,
-           rep(type,length(location)))
+  stats::setNames(location,
+                  rep(type,length(location)))
 }
 
 #' @rdname mergePositionsOfReplicates

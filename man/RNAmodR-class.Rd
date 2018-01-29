@@ -4,11 +4,11 @@
 \name{RNAmodR-class}
 \alias{RNAmodR-class}
 \alias{RNAmodR-class}
-\alias{RNAmod}
+\alias{RNAmodR}
 \alias{show,RNAmodR-method}
 \title{RNAmodR Class}
 \usage{
-RNAmod(experimentName, experimentLayout, experimentGFF, experimentFasta)
+RNAmodR(experimentName, experimentLayout, experimentGFF, experimentFasta)
 
 \S4method{show}{RNAmodR}(object)
 }

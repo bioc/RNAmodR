@@ -22,7 +22,7 @@ knitr::opts_chunk$set(
 
 
 create RNAmod
-```{r tRNA}
+```{r RNAmodR, eval=FALSE}
 library(RNAmodR)
 library(SummarizedExperiment)
 mod <- RNAmodR("test",
@@ -31,29 +31,37 @@ mod <- RNAmodR("test",
               "sacCer3_R64-2-1_masked.fasta")
 modifications <- c("m7G","D","m3C")
 no <- unique(getExperimentData(mod)$ExperimentNo)
-lapply(no,function(x){
-  parseForModifications(mod,x,modifications)
-  se <- getSummarizedExperiment(mod,x,modifications)
+for(i in seq_along(no)){
+  parseForModifications(mod,no[i],modifications)
+  se <- getSummarizedExperiment(mod,no[i],modifications)
   transcripts <- unique(c(names(assays(se)$m7G[assays(se)$m7G > 0,]),
                           names(assays(se)$m3C[assays(se)$m3C > 0,]),
                           names(assays(se)$D[assays(se)$D > 0,])))
   saveModPlot(mod,se,modifications,transcripts)
-})
-no <- unique(getExperimentData(mod_hsa)$ExperimentNo)
-lapply(no,function(x){
-  parseForModifications(mod_hsa,x,modifications)
-  se <- getSummarizedExperiment(mod_hsa,x,modifications)
-  transcripts <- unique(c(names(assays(se)$m7G[assays(se)$m7G > 0,]),
-                          names(assays(se)$m3C[assays(se)$m3C > 0,]),
-                          names(assays(se)$D[assays(se)$D > 0,])))
-  saveModPlot(mod_hsa,se,modifications,transcripts)
-})
+}
+gc()
 
 param <- BiocParallel::bpparam()
 param$workers <- 3
 BiocParallel::register(param)
 
-mod_hsa <- RNAmod("test",
+no <- unique(getExperimentData(mod_hsa)$ExperimentNo)
+for(i in seq_along(no)){
+  parseForModifications(mod_hsa,no[i],modifications)
+  se <- getSummarizedExperiment(mod_hsa,no[i],modifications)
+  transcripts <- unique(c(names(assays(se)$m7G[assays(se)$m7G > 0,]),
+                          names(assays(se)$m3C[assays(se)$m3C > 0,]),
+                          names(assays(se)$D[assays(se)$D > 0,])))
+  saveModPlot(mod_hsa,se,modifications,transcripts)
+}
+param$workers <- 6
+BiocParallel::register(param)
+
+param <- BiocParallel::bpparam()
+param$workers <- 3
+BiocParallel::register(param)
+
+mod_hsa <- RNAmodR("test",
               "experiment_layout_hsa.csv",
               "GRCh38_latest_genomic_masked.gff3",
               "GRCh38_latest_genomic_masked.fasta")

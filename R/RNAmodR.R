@@ -10,6 +10,7 @@
 NULL
 
 #' @import methods
+#' @import stats
 #' @import assertive
 #' @import BiocParallel
 #' @import Biostrings

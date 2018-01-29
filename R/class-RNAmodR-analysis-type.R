@@ -6,6 +6,25 @@ NULL
 #' 
 #' @title analysis
 #' 
+#' @description
+#' The class is virtual and has to be extended from, eg. \code{analysis_default}
+#' 
+#' @section
+#' The analysis class is the main function for detecting modifications. It works
+#' usually in a three step manner.
+#' \itemize{
+#'   \item{"1."}{\code{convertReadsToPositions}: This function aggregates the
+#'   information of reads per bam file, eg. per replicate and stores them for
+#'   subsequent analysis}
+#'   \item{"2."}{\code{parseMod}: This function searches for a defined pattern. 
+#'   For this \code{mod} class objects will be created on the fly based on the 
+#'   names of the modification one wants to detect and which can understand the
+#'   data aggregated by \code{convertReadsToPositions}.}
+#'   \item{"3."}{\code{mergePositionsOfReplicates}: This function aggregates the
+#'   base data further for storage. This involves usually generating a per
+#'   position mean and sd or equivalent.}
+#' }
+#' 
 #' @export
 setClass("analysis",
          contains = "VIRTUAL",
@@ -25,7 +44,15 @@ setMethod(
 )
 
 #' @rdname analysis-accessors
-#'
+#' 
+#' @title Accessor for \code{analysis} class objects
+#' 
+#' @description
+#' The accessor function to \code{analysis} class objects can be used to access
+#' the data saved in slots of the object. See examples for available functions.
+#' 
+#' @param object analysis object 
+#' 
 #' @return character defining the plot type for this analysis class
 #' @export
 #'

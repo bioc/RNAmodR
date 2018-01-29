@@ -41,37 +41,37 @@ NULL
 #' @rdname RNAmodR-Accessors
 #' 
 #' @export
-setGeneric ( 
-  name= "getInputFolder",
-  def=function(.Object ){standardGeneric("getInputFolder")} 
+setGeneric( 
+  name = "getInputFolder",
+  def = function(.Object ){standardGeneric("getInputFolder")} 
 ) 
 #' @rdname RNAmodR-Accessors
 #' 
 #' @export
-setGeneric ( 
-  name= "getOutputFolder",
-  def=function(.Object ){standardGeneric("getOutputFolder")} 
+setGeneric( 
+  name = "getOutputFolder",
+  def = function(.Object ){standardGeneric("getOutputFolder")} 
 ) 
 #' @rdname RNAmodR-Accessors
 #' 
 #' @export
-setGeneric ( 
-  name= "getExperimentName",
-  def=function(.Object ){standardGeneric("getExperimentName")} 
+setGeneric( 
+  name = "getExperimentName",
+  def = function(.Object ){standardGeneric("getExperimentName")} 
 ) 
 #' @rdname RNAmodR-Accessors
 #' 
 #' @export
-setGeneric ( 
-  name= "getGFFFile",
-  def=function(.Object ){standardGeneric("getGFFFile")} 
+setGeneric( 
+  name = "getGFFFile",
+  def = function(.Object ){standardGeneric("getGFFFile")} 
 ) 
 #' @rdname RNAmodR-Accessors
 #' 
 #' @export
-setGeneric ( 
-  name= "getFastaFile",
-  def=function(.Object ){standardGeneric("getFastaFile")} 
+setGeneric( 
+  name = "getFastaFile",
+  def = function(.Object ){standardGeneric("getFastaFile")} 
 ) 
 
 # setup helper functions -------------------------------------------------------
@@ -82,9 +82,9 @@ setGeneric (
 #' conveniance function for setting up folders for an experiment
 #' 
 #' @export
-setGeneric ( 
-  name= "setupWorkEnvir", 
-  def=function(experimentName){standardGeneric("setupWorkEnvir")} 
+setGeneric( 
+  name = "setupWorkEnvir", 
+  def = function(experimentName){standardGeneric("setupWorkEnvir")} 
 ) 
 
 #' @title matchFastaToGff
@@ -93,10 +93,10 @@ setGeneric (
 #' title
 #' 
 #' @export
-setGeneric ( 
-  name= "matchFastaToGff", 
-  def=function(inputFasta,
-               inputGFF){standardGeneric("matchFastaToGff")} 
+setGeneric( 
+  name = "matchFastaToGff", 
+  def = function(inputFasta,
+                 inputGFF){standardGeneric("matchFastaToGff")} 
 ) 
 
 
@@ -105,53 +105,53 @@ setGeneric (
 #' @name getExperimentData
 #' 
 #' @export
-setGeneric ( 
-  name= "getExperimentData",
-  def=function(.Object,
-               number){standardGeneric("getExperimentData")} 
+setGeneric( 
+  name = "getExperimentData",
+  def = function(.Object,
+                 number){standardGeneric("getExperimentData")} 
 ) 
 
 
 #' @name getSummarizedExperiment
 #' 
 #' @export
-setGeneric ( 
-  name= "getSummarizedExperiment",
-  def=function(.Object,
-               number, 
-               modification){standardGeneric("getSummarizedExperiment")} 
+setGeneric( 
+  name = "getSummarizedExperiment",
+  def = function(.Object,
+                 number, 
+                 modification){standardGeneric("getSummarizedExperiment")} 
 ) 
 
 #' @rdname  getSummarizedExperiment
 #' 
 #' @export
-setGeneric ( 
-  name= "getSummarizedExperiments",
-  def=function(.Object,
-               number, 
-               modification){standardGeneric("getSummarizedExperiments")} 
+setGeneric( 
+  name = "getSummarizedExperiments",
+  def = function(.Object,
+                 number, 
+                 modification){standardGeneric("getSummarizedExperiments")} 
 ) 
 
 #' @name setSummarizedExperiment
 #' 
 #' @export
-setGeneric ( 
-  name= "setSummarizedExperiment",
-  def=function(.Object,
-               se,
-               number, 
-               modification ){standardGeneric("setSummarizedExperiment")} 
+setGeneric( 
+  name = "setSummarizedExperiment",
+  def = function(.Object,
+                 se,
+                 number, 
+                 modification ){standardGeneric("setSummarizedExperiment")} 
 ) 
 
 #' @name getGffResult
 #' 
 #' @export
-setGeneric ( 
-  name= "getGffResult",
-  def=function(.Object,
-               number, 
-               modification,
-               genomicCoordinates = FALSE){standardGeneric("getGffResult")} 
+setGeneric( 
+  name = "getGffResult",
+  def = function(.Object,
+                 number, 
+                 modification,
+                 genomicCoordinates = FALSE){standardGeneric("getGffResult")} 
 ) 
 
 #' @name setGffResult
@@ -159,12 +159,12 @@ setGeneric (
 #' @description setGff
 #' 
 #' @export
-setGeneric ( 
-  name= "setGffResult",
-  def=function(.Object,
-               gff,
-               number, 
-               modification){standardGeneric("setGffResult")} 
+setGeneric( 
+  name = "setGffResult",
+  def = function(.Object,
+                 gff,
+                 number, 
+                 modification){standardGeneric("setGffResult")} 
 ) 
 
 # parsing ----------------------------------------------------------------------
@@ -172,41 +172,37 @@ setGeneric (
 #' @name parseForModifications
 #'
 #' @export
-setGeneric ( 
-  name= "parseForModifications",
-  def=function(.Object,
-               number,
-               modifications){standardGeneric("parseForModifications")} 
+setGeneric( 
+  name = "parseForModifications",
+  def = function(.Object,
+                 number,
+                 modifications){standardGeneric("parseForModifications")} 
 ) 
 
 # analysis type accessors ------------------------------------------------------------
 
 #' @name analysis-accessors
 #' 
-#' @title Accessor for \code{analysis} class objects
-#' 
-#' @param object analysis object 
-#' 
 #' @export
-setGeneric ( 
-  name= "getPlotType",
-  def=function(object){standardGeneric("getPlotType")} 
+setGeneric( 
+  name = "getPlotType",
+  def = function(object){standardGeneric("getPlotType")} 
 ) 
 
 #' @rdname analysis-accessors
 #' 
 #' @export
-setGeneric ( 
-  name= "getPositions",
-  def=function(object){standardGeneric("getPositions")} 
+setGeneric( 
+  name = "getPositions",
+  def = function(object){standardGeneric("getPositions")} 
 ) 
 
 #' @rdname analysis-accessors
 #' 
 #' @export
-setGeneric ( 
-  name= "getModifications",
-  def=function(object){standardGeneric("getModifications")} 
+setGeneric( 
+  name = "getModifications",
+  def = function(object){standardGeneric("getModifications")} 
 ) 
 
 # mod type accessors -----------------------------------------------------------
@@ -219,17 +215,17 @@ setGeneric (
 #' title 
 #' 
 #' @export
-setGeneric ( 
-  name= "getModType",
-  def=function(object){standardGeneric("getModType")} 
+setGeneric( 
+  name = "getModType",
+  def = function(object){standardGeneric("getModType")} 
 ) 
 
 #' @rdname mod-accessors
 #' 
 #' @export
-setGeneric ( 
-  name= "getAnalysisType",
-  def=function(object){standardGeneric("getAnalysisType")} 
+setGeneric( 
+  name = "getAnalysisType",
+  def = function(object){standardGeneric("getAnalysisType")} 
 ) 
 
 
@@ -245,12 +241,12 @@ setGeneric (
 #' @param gff a GRanges object for the genome
 #'
 #' @export
-setGeneric ( 
-  name= "convertReadsToPositions",
-  def=function(object,
-               files,
-               gff,
-               param){standardGeneric("convertReadsToPositions")} 
+setGeneric( 
+  name = "convertReadsToPositions",
+  def = function(object,
+                 files,
+                 gff,
+                 param){standardGeneric("convertReadsToPositions")} 
 ) 
 
 #' @name parseMod
@@ -263,12 +259,12 @@ setGeneric (
 #' @param modClasses list of modification classes used for parsing
 #' 
 #' @export
-setGeneric ( 
-  name= "parseMod",
-  def=function(object,
-               gff,
-               fafile,
-               modClasses){standardGeneric("parseMod")} 
+setGeneric( 
+  name = "parseMod",
+  def = function(object,
+                 gff,
+                 fafile,
+                 modClasses){standardGeneric("parseMod")} 
 ) 
 
 #' @name mergePositionsOfReplicates
@@ -278,9 +274,9 @@ setGeneric (
 #' @param object mod object 
 #' 
 #' @export
-setGeneric ( 
-  name= "mergePositionsOfReplicates",
-  def=function(object){standardGeneric("mergePositionsOfReplicates")} 
+setGeneric( 
+  name = "mergePositionsOfReplicates",
+  def = function(object){standardGeneric("mergePositionsOfReplicates")} 
 ) 
 
 
@@ -291,11 +287,11 @@ setGeneric (
 #' @title maskPositionData
 #' 
 #' @export
-setGeneric ( 
-  name= "maskPositionData",
-  def=function(object,
-               data,
-               modLocations){standardGeneric("maskPositionData")} 
+setGeneric( 
+  name = "maskPositionData",
+  def = function(object,
+                 data,
+                 modLocations){standardGeneric("maskPositionData")} 
 ) 
 
 #' @name preTest
@@ -303,12 +299,12 @@ setGeneric (
 #' @title preTest
 #' 
 #' @export
-setGeneric ( 
-  name= "preTest",
-  def=function(object,
-               location,
-               data,
-               locations){standardGeneric("preTest")} 
+setGeneric( 
+  name = "preTest",
+  def = function(object,
+                 location,
+                 data,
+                 locations){standardGeneric("preTest")} 
 ) 
 
 #' @name checkForModification
@@ -316,12 +312,12 @@ setGeneric (
 #' @title checkForModification
 #' 
 #' @export
-setGeneric ( 
-  name= "checkForModification",
-  def=function(object,
-               location,
-               locations,
-               data){standardGeneric("checkForModification")} 
+setGeneric( 
+  name = "checkForModification",
+  def = function(object,
+                 location,
+                 locations,
+                 data){standardGeneric("checkForModification")} 
 ) 
 
 
@@ -332,48 +328,46 @@ setGeneric (
 #' @title getModPlot
 #' 
 #' @export
-setGeneric ( 
-  name= "getModPlot",
-  def=function(.Object,
-               se,
-               modifications,
-               gene,
-               focus = FALSE){standardGeneric("getModPlot")} 
+setGeneric( 
+  name = "getModPlot",
+  def = function(.Object,
+                 se,
+                 modifications,
+                 gene,
+                 focus = FALSE){standardGeneric("getModPlot")} 
 )
 
 #' @rdname getModPlot
 #' 
 #' @export
-setGeneric ( 
-  name= "saveModPlot",
-  def=function(.Object,
-               se,
-               modifications,
-               genes,
-               focus = FALSE,
-               filetype = "pdf"){standardGeneric("saveModPlot")} 
+setGeneric( 
+  name = "saveModPlot",
+  def = function(.Object,
+                 se,
+                 modifications,
+                 genes,
+                 focus = FALSE,
+                 filetype = "pdf"){standardGeneric("saveModPlot")} 
 )
 
 #' @name heatmapModifications
 #'
 #' @export
-setGeneric (
-  name= "heatmapModifications",
-  def=function(.Object,
-               se,
-               modifications,
-               genes){standardGeneric("heatmapModifications")}
+setGeneric(
+  name = "heatmapModifications",
+  def = function(.Object,
+                 ses,
+                 modifications){standardGeneric("heatmapModifications")}
 )
 
 #' @rdname heatmapModifications
 #'
 #' @export
-setGeneric (
-  name= "saveHeatmapModifications",
-  def=function(.Object,
-               se,
-               modifications,
-               genes){standardGeneric("saveHeatmapModifications")}
+setGeneric(
+  name = "saveHeatmapModifications",
+  def = function(.Object,
+                 ses,
+                 modifications){standardGeneric("saveHeatmapModifications")}
 )
 
 
@@ -384,11 +378,11 @@ setGeneric (
 #' @title compareSample
 #' 
 #' @export
-setGeneric ( 
-  name= "compareSample",
-  def=function(.Object,
-               number,
-               modifications){standardGeneric("compareSample")} 
+setGeneric( 
+  name = "compareSample",
+  def = function(.Object,
+                 number,
+                 modifications){standardGeneric("compareSample")} 
 )
 
 #' @name compareAsHeatmap
@@ -396,11 +390,36 @@ setGeneric (
 #' @title compareAsHeatmap
 #' 
 #' @export
-setGeneric ( 
-  name= "compareAsHeatmap",
-  def=function(.Object,
-               number,
-               modifications,
-               genes){standardGeneric("compareAsHeatmap")} 
+setGeneric( 
+  name = "compareAsHeatmap",
+  def = function(.Object,
+                 number,
+                 modifications,
+                 genes){standardGeneric("compareAsHeatmap")} 
 )
 
+
+# SummarizedExperiment ---------------------------------------------------------
+
+
+#' @name seGetModifications
+#'
+#' @title seGetModifications
+#' 
+#' @export
+setGeneric( 
+  name = "seGetModifications",
+  def = function(se,
+                 genes,
+                 modifications){standardGeneric("seGetModifications")} 
+)
+#' @name seGetPositions
+#'
+#' @title seGetPositions
+#' 
+#' @export
+setGeneric( 
+  name = "seGetPositions",
+  def = function(se,
+                 genes){standardGeneric("seGetPositions")} 
+)

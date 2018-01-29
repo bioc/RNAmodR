@@ -2,7 +2,7 @@
 NULL
 
 
-#' @name parseForModifications
+#' @rdname parseForModifications
 #' 
 #' @title parseForModifications
 #'
@@ -12,7 +12,7 @@ NULL
 #'
 #' @return TRUE if the analysis does finish without error
 #' @export
-#'
+#' 
 #' @examples
 #' \donttest{
 #' unzip(system.file("extdata", package = "RNAmodR", file = "RNAmodR.zip" ))
@@ -39,14 +39,18 @@ setMethod(
     message("Searching for modifications in sample '",
             unique(experiment["SampleName"]),
             "'...")
+    # browser()
     # add the default modification class, which is just used for handling read 
     # positions (5'-end), but not modification detection.
     modClasses <- .load_mod_classes(modifications)
     # retrieve the analysis types need
-    analysisTypes <- setNames(vapply(modClasses, getAnalysisType, character(1)),
-                              modifications)
+    analysisTypes <- stats::setNames(vapply(modClasses, 
+                                            getAnalysisType, 
+                                            character(1)),
+                                     modifications)
     # group the analysis types
-    analysisGroups <- setNames(lapply(unique(analysisTypes), function(x){
+    analysisGroups <- stats::setNames(lapply(unique(analysisTypes), 
+                                             function(x){
       names(analysisTypes[analysisTypes == x])
     }),unique(analysisTypes))
     # load the analysis classes
@@ -105,10 +109,10 @@ setMethod(
     df <- .construct_DataFrame_from_mod_result(mod_positions,
                                                gff_subset)
     # Save found modifications as gff file
-    setGff(.Object,
-           GRanges(df),
-           number,
-           modifications)
+    setGffResult(.Object,
+                 GRanges(df),
+                 number,
+                 modifications)
     message("Saved detected modifications as gff3 file.")
     # Save found modifications asSummarizedExperiment
     se <- .construct_SE_from_mod_result(experiment,
@@ -194,11 +198,11 @@ setMethod(
   df <- S4Vectors::DataFrame(start = vapply(gene,"[[",numeric(1),"location"),
               end = vapply(gene,"[[",numeric(1),"location"),
               ID = names(gene),
-              RNAmod_type = vapply(gene,"[[",character(1),"type"),
-              RNAmod_signal = vapply(gene,"[[",numeric(1),"signal"),
-              RNAmod_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
-              RNAmod_p.value = vapply(gene,"[[",numeric(1),"p.value"),
-              RNAmod_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
+              RNAmodR_type = vapply(gene,"[[",character(1),"type"),
+              RNAmodR_signal = vapply(gene,"[[",numeric(1),"signal"),
+              RNAmodR_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
+              RNAmodR_p.value = vapply(gene,"[[",numeric(1),"p.value"),
+              RNAmodR_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
   return(df)
 }
 

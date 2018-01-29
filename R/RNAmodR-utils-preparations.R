@@ -750,7 +750,7 @@ appendGFF <- function(..., ident, msg){
     diff <- setdiff(colnames,colnames(d))
     if(length(diff) > 0){
       d_add <- S4Vectors::DataFrame(
-        setNames(lapply(diff, function(names){
+        stats::setNames(lapply(diff, function(names){
           rep(NA_character_,nrow(d))
         }),
         diff))

@@ -55,7 +55,10 @@ Imports:
   GenomeInfoDb,
   Rsamtools,
   rtracklayer,
-  tRNAscan2GRanges
+  tRNAscan2GRanges,
+  scales,
+  stats,
+  gridExtra
 Suggests: testthat,
   knitr,
   rmarkdown

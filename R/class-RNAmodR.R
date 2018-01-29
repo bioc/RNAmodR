@@ -58,11 +58,13 @@ setClass("RNAmodR",
 
 #' @rdname RNAmodR-class
 #'
+#' @importFrom utils read.csv
+#'
 #' @export
-RNAmod <- function(experimentName, 
-                   experimentLayout, 
-                   experimentGFF, 
-                   experimentFasta){
+RNAmodR <- function(experimentName, 
+                    experimentLayout, 
+                    experimentGFF, 
+                    experimentFasta){
   
   # Input check
   if(missing(experimentName)) stop("Experimental name not provided")
@@ -122,16 +124,17 @@ setMethod(
                                            .Object@inputGFF)
     .Object@.dataFasta <- Rsamtools::FaFile(.Object@inputFasta)
     Rsamtools::indexFa(.Object@inputFasta)
-    .Object@.dataGFF <- rtracklayer::import.gff3(.Object@inputGFF)
+    .Object@.dataGFF <- rtracklayer::import.gff3(.Object@inputGFF,
+                                                 colnames = RNAMODR_GFF_COLNAMES)
     if( any( names(Rsamtools::scanFa(.Object@.dataFasta)) != unique(rtracklayer::chrom(.Object@.dataGFF)) ) ) {
       stop("Names of sequences in the fasta file do not match the chromosome names in the gff file")
     }
     
     #load sample data
-    samples <- .check_sample_data( read.csv(.Object@inputFile, 
-                                            header = TRUE, 
-                                            stringsAsFactors = FALSE, 
-                                            sep = ";"),
+    samples <- .check_sample_data(utils::read.csv(.Object@inputFile, 
+                                                  header = TRUE, 
+                                                  stringsAsFactors = FALSE, 
+                                                  sep = ";"),
                                    getInputFolder(.Object))
     
     .Object@.dataSamples <- samples

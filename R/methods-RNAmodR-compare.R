@@ -23,14 +23,16 @@ NULL
 setMethod(
   f = "heatmapModifications",
   signature = signature(.Object = "RNAmodR",
-                        se = "SummarizedExperiment",
-                        modifications = "character",
-                        gene = "character"),
+                        ses = "list",
+                        modifications = "character"),
   definition = function(.Object,
-                        se,
-                        modifications,
-                        genes){
-    NULL
+                        ses,
+                        modifications){
+    RNAmodR::assert_all_are_SummarizedExperiment(ses)
+    assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+  
+  
+  
   }
 )
 
@@ -40,13 +42,11 @@ setMethod(
 setMethod(
   f = "saveHeatmapModifications",
   signature = signature(.Object = "RNAmodR",
-                        se = "SummarizedExperiment",
-                        modifications = "character",
-                        gene = "character"),
+                        ses = "list",
+                        modifications = "character"),
   definition = function(.Object,
-                        se,
-                        modifications,
-                        genes){
+                        ses,
+                        modifications){
     NULL
   }
 )

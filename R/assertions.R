@@ -3,7 +3,7 @@ NULL
 
 # these are used just internally and can be switched to different package
 
-is_object_class <- function(x, .xname, className){
+.is_object_class <- function(x, .xname, className){
   if( class(x) != className ){
     return(false("%s is not of an object of class '%s'.", .xname, className))
   }
@@ -16,7 +16,7 @@ is_object_class <- function(x, .xname, className){
 # GRanges
 
 is_GRanges <- function(x, .xname = get_name_in_parents(x)){
-  is_object_class(x, .xname, "GRanges")
+  .is_object_class(x, .xname, "GRanges")
 }
 
 assert_is_GRanges <- function(x, 
@@ -41,22 +41,72 @@ assert_all_are_GRanges <- function(x,
 # FaFile
 
 is_FaFile <- function(x, .xname = get_name_in_parents(x)){
-  is_object_class(x, .xname, "FaFile")
+  .is_object_class(x, .xname, "FaFile")
 }
 
 assert_is_FaFile <- function(x, 
-                              severity = getOption("assertive.severity","stop")){
-  assert_engine(is_GRanges, 
+                             severity = getOption("assertive.severity","stop")){
+  assert_engine(is_FaFile, 
                 x, 
                 .xname = get_name_in_parents(x),
                 severity = severity)
 }
 
 assert_all_are_FaFile <- function(x, 
-                                   severity = getOption("assertive.severity","stop")){
+                                  severity = getOption("assertive.severity","stop")){
   .xname <- get_name_in_parents(x)
-  msg <- gettextf("%s are not all all GRanges objects.", .xname)
-  assert_engine(is_GRanges, 
+  msg <- gettextf("%s are not all all FaFile objects.", .xname)
+  assert_engine(is_FaFile, 
+                x, 
+                .xname = .xname, 
+                msg = msg,
+                severity = severity)
+}
+
+
+# SummarizedExperiment
+
+#' @name is_SummarizedExperiment
+#' 
+#' @title assertive: SummarizedExperiment
+#' 
+#' @description 
+#' \code{is_SummarizedExperiment}/\code{assert_is_SummarizedExperiment}: Check 
+#' if input is a SummarizedExperiment object
+#' \code{assert_all_are_SummarizedExperiment}: Check if input is a list of 
+#' SummarizedExperiment objects
+#' 
+#' @param x object to test
+#' @param .xname name of the object in parent env
+#' @param severity assertions only: severity of failing assertion
+#'
+#' @return logical
+#' @export
+is_SummarizedExperiment <- function(x, .xname = get_name_in_parents(x)){
+  .is_object_class(x, .xname, "SummarizedExperiment")
+}
+
+#' @rdname is_SummarizedExperiment
+#' 
+#' @export
+#' @return invisible logical
+assert_is_SummarizedExperiment <- function(x, 
+                             severity = getOption("assertive.severity","stop")){
+  assert_engine(is_SummarizedExperiment, 
+                x, 
+                .xname = get_name_in_parents(x),
+                severity = severity)
+}
+
+#' @rdname is_SummarizedExperiment
+#' 
+#' @export
+#' @return invisible logical
+assert_all_are_SummarizedExperiment <- function(x, 
+                                  severity = getOption("assertive.severity","stop")){
+  .xname <- get_name_in_parents(x)
+  msg <- gettextf("%s are not all all SummarizedExperiment objects.", .xname)
+  assert_engine(is_SummarizedExperiment, 
                 x, 
                 .xname = .xname, 
                 msg = msg,

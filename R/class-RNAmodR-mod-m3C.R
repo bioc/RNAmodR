@@ -1,11 +1,11 @@
 #' @include class-RNAmodR-mod-type.R
 NULL
 
-RNAMOD_M3C_NUCLEOTIDE <- "C"
-RNAMOD_M3C_SPM <- 3
-RNAMOD_M3C_ARREST_RATE <- 0.95
-RNAMOD_M3C_P_THRESHOLD <- 0.05
-RNAMOD_M3C_SIGMA_THRESHOLD <- 15
+RNAMODR_M3C_NUCLEOTIDE <- "C"
+RNAMODR_M3C_SPM <- 3
+RNAMODR_M3C_ARREST_RATE <- 0.95
+RNAMODR_M3C_P_THRESHOLD <- 0.05
+RNAMODR_M3C_SIGMA_THRESHOLD <- 15
 
 
 #' @rdname mod
@@ -133,13 +133,13 @@ setMethod(
                           locTest$p.value) ) {
       # debug
       if( getOption("RNAmodR_debug") ){
-        .print_location_info(paste(location,"_no"),locs)
+        .print_location_info(paste(location,"_no"),locations)
       }
       return(NULL)
     }
     # debug
     if( getOption("RNAmodR_debug") ){
-      .print_location_info(paste(location,"_yes"), locs)
+      .print_location_info(paste(location,"_yes"), locations)
     }
     # Return data
     return(list(location = location,
@@ -185,7 +185,7 @@ setMethod(
   sig.sd <- stats::sd(sig)
   # Since normality of distribution can not be assumed use the MWU
   # generate p.value for single position
-  p.value <- suppressWarnings(wilcox.test(baseData, testData)$p.value)
+  p.value <- suppressWarnings(stats::wilcox.test(baseData, testData)$p.value)
   return(list(sig = sig,
               sig.mean = sig.mean,
               sig.sd = sig.sd,

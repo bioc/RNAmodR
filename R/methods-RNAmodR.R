@@ -552,3 +552,94 @@ setMethod(
     return(invisible(gff))
   }
 )
+
+
+# easy access functions to results ---------------------------------------------
+
+#' Title
+#'
+#' @param se SummarizedExperiment. 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+setMethod(
+  f = "seGetModifications",
+  signature = signature(se = "SummarizedExperiment"),
+  definition = function(se,
+                        genes,
+                        modifications){
+    # check validity of SE
+    .check_row_data(se, "mods")
+    # get data
+    mods <- SummarizedExperiment::rowData(se)$mods
+    # subset if defined
+    if(!missing(genes)){
+      assertive::assert_all_are_non_empty_character(genes)
+      mods <- mods[names(mods) %in% genes]
+    }
+    if(!missing(modifications)){
+      assertive::assert_all_are_non_empty_character(modifications)
+      modAvail <- unique(unlist(lapply(mods, function(x){
+        unique(as.character(x$RNAmodR_type))})))
+      if(length(modAvail[modifications %in% modAvail]) == 0){
+        stop("None of the modifications '",
+             paste(modifications,collapse = "','"),
+             "' are available in results. Following modifications are ",
+             "present: '",
+             paste(modAvail,collapse = "','"),"'",
+             call. = FALSE)
+      }
+      modAvail <- modAvail[modAvail %in% modifications]
+      res <- lapply(mods, function(x){
+        x[x$RNAmodR_type %in% modAvail,]
+      })
+      names(res) <- names(mods)
+      mods <- res
+    }
+    mods <- .clean_output(mods, function(x){
+      if(nrow(x) == 0) return(TRUE)
+      FALSE
+    })
+    return(mods)
+  }
+)
+
+.check_row_data <- function(se, name){
+  colnames <- colnames(SummarizedExperiment::rowData(se))
+  if(!(name %in% colnames)){
+    stop("Invalid SummarizedExperiment object. Column ", name, " not found in ",
+         "rowData.",
+         call. = FALSE)
+  }
+  return(invisible(TRUE))
+}
+
+
+#' Title
+#'
+#' @param se SummarizedExperiment. 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+setMethod(
+  f = "seGetPositions",
+  signature = signature(se = "SummarizedExperiment"),
+  definition = function(se,
+                        genes){
+    # check validity of SE
+    .check_row_data(se, "positions")
+    # get data
+    positions <- SummarizedExperiment::rowData(se)$positions
+    # subset if defined
+    if(!missing(genes)){
+      assertive::assert_all_are_non_empty_character(genes)
+      positions <- positions[names(positions) %in% genes]
+    }
+    positions <- .clean_output2(positions, is.null)
+    return(positions)
+  }
+)
