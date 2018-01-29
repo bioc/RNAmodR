@@ -8,8 +8,7 @@ NULL
 #' 
 #' @description
 #' The class is virtual and has to be extended from, eg. \code{analysis_default}
-#' 
-#' @section
+#'  
 #' The analysis class is the main function for detecting modifications. It works
 #' usually in a three step manner.
 #' \itemize{

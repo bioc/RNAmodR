@@ -3,7 +3,7 @@
 \docType{methods}
 \name{parseForModifications}
 \alias{parseForModifications}
-\alias{parseForModifications}
+\alias{parseForModifications,RNAmodR,numeric,character-method}
 \title{parseForModifications}
 \usage{
 parseForModifications(.Object, number, modifications)

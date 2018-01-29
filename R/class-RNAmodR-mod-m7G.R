@@ -2,10 +2,9 @@
 NULL
 
 RNAMODR_M7G_NUCLEOTIDE <- "G"
-RNAMODR_M7G_SPM <- 3
 RNAMODR_M7G_ARREST_RATE <- 0.95
 RNAMODR_M7G_P_THRESHOLD <- 0.05
-RNAMODR_M7G_SIGMA_THRESHOLD <- 15
+RNAMODR_M7G_SIGMA_THRESHOLD <- 5
 
 
 #' @rdname mod
@@ -51,15 +50,18 @@ setMethod(
   signature = signature(object = "mod_m7G",
                         location = "numeric",
                         data = "list",
+                        spmThreshold = "numeric",
                         locations = "numeric"),
   definition = function(object,
                         location,
                         data,
+                        spmThreshold,
                         locations) {
     # do pretest
     res <- .do_M7G_pretest(location,
                            locations,
-                           data)
+                           data,
+                           spmThreshold)
     return(res)
   }
 )
@@ -68,7 +70,8 @@ setMethod(
 # this is in a seperate function since it is also called by checkForModification
 .do_M7G_pretest <- function(location,
                             locations,
-                            data){
+                            data,
+                            spmThreshold){
   # if non G position skip position
   if( names(locations[locations == location]) != RNAMODR_M7G_NUCLEOTIDE){
     return(NULL)
@@ -83,7 +86,7 @@ setMethod(
   testData <- .aggregate_location_data(data, (location+1))
   testData <- testData[testData > 0]
   # if spm is not high enough
-  if(length(testData[testData >= RNAMODR_M7G_SPM]) < n) return(NULL)
+  if(length(testData[testData >= spmThreshold]) < n) return(NULL)
   # base data to compare against
   baseData <- .aggregate_not_location_data(data, (location+1))
   # if not enough data is present
@@ -114,18 +117,21 @@ setMethod(
   signature = signature(object = "mod_m7G",
                         location = "numeric",
                         locations = "numeric",
-                        data = "list"),
+                        data = "list",
+                        spmThreshold = "numeric"),
   definition = function(object,
                         location,
                         locations,
-                        data) {
+                        data,
+                        spmThreshold) {
     # if(location == 1575 | location == 599 | location == 1420) { browser() }
     # if(location == 1925) { browser() }
     # browser()
     # get test result for the current location
     locTest <- .calc_M7G_test_values(location,
                                      locations,
-                                     data)
+                                     data,
+                                     spmThreshold)
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
     # dynamic threshold based on the noise of the signal (high sd)
@@ -156,11 +162,13 @@ setMethod(
 # test for m7G at current location
 .calc_M7G_test_values <- function(location,
                                   locations,
-                                  data){
+                                  data,
+                                  spmThreshold){
   # short cut if amount of data is not sufficient
   pretestData <- .do_M7G_pretest(location,
                                  locations,
-                                 data)
+                                 data,
+                                 spmThreshold)
   if(is.null(pretestData)) return(NULL)
   # data from pretest
   testData <- pretestData$testData

@@ -10,7 +10,6 @@
 NULL
 
 #' @import methods
-#' @import stats
 #' @import assertive
 #' @import BiocParallel
 #' @import Biostrings
@@ -19,6 +18,7 @@ NULL
 #' @import GenomicRanges
 #' @import GenomicAlignments
 #' @import ggplot2
+#' @importFrom stats setNames wilcox.test
 NULL
 
 requireNamespace("BiocParallel")

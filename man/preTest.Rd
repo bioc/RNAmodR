@@ -4,21 +4,21 @@
 \docType{methods}
 \name{preTest}
 \alias{preTest}
-\alias{preTest,mod_D,numeric,list,numeric-method}
-\alias{preTest,mod_m3C,numeric,list,numeric-method}
-\alias{preTest,mod_m7G,numeric,list,numeric-method}
+\alias{preTest,mod_D,numeric,list,numeric,numeric-method}
+\alias{preTest,mod_m3C,numeric,list,numeric,numeric-method}
+\alias{preTest,mod_m7G,numeric,list,numeric,numeric-method}
 \title{preTest}
 \usage{
-preTest(object, location, data, locations)
+preTest(object, location, data, spmThreshold, locations)
 
-\S4method{preTest}{mod_D,numeric,list,numeric}(object, location, data,
-  locations)
+\S4method{preTest}{mod_D,numeric,list,numeric,numeric}(object, location, data,
+  spmThreshold, locations)
 
-\S4method{preTest}{mod_m3C,numeric,list,numeric}(object, location, data,
-  locations)
+\S4method{preTest}{mod_m3C,numeric,list,numeric,numeric}(object, location, data,
+  spmThreshold, locations)
 
-\S4method{preTest}{mod_m7G,numeric,list,numeric}(object, location, data,
-  locations)
+\S4method{preTest}{mod_m7G,numeric,list,numeric,numeric}(object, location, data,
+  spmThreshold, locations)
 }
 \description{
 \code{mod_D}

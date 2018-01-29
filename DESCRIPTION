@@ -41,9 +41,12 @@ Collate:
 Imports:
   methods,
   assertive,
+  stats,
   stringr,
   ggplot2,
   ggrepel,
+  scales,
+  gridExtra,
   BiocGenerics,
   S4Vectors,
   Biostrings,
@@ -55,10 +58,7 @@ Imports:
   GenomeInfoDb,
   Rsamtools,
   rtracklayer,
-  tRNAscan2GRanges,
-  scales,
-  stats,
-  gridExtra
+  tRNAscan2GRanges
 Suggests: testthat,
   knitr,
   rmarkdown

@@ -33,6 +33,10 @@ a list of data as a lists of list(replicate) of DataFrame(transcript)
 
 a list of data as a lists of list(replicate) of DataFrame(transcript)
 }
+\description{
+The accessor function to \code{analysis} class objects can be used to access
+the data saved in slots of the object. See examples for available functions.
+}
 \examples{
 \donttest{
 getPlotType(analysis)
