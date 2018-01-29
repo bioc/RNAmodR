@@ -1,14 +1,12 @@
-#' @title 
-#' RNAmod
+#' @title RNAmodR
 #' 
 #' @author Felix G M Ernst [aut]
 #' 
 #' @description
 #' todo
-#' 
 #'
 #' @docType package
-#' @name RNAmod
+#' @name RNAmodR
 NULL
 
 #' @import methods
@@ -30,14 +28,14 @@ requireNamespace("GenomicAlignments")
 requireNamespace("assertive")
 
 
-# RNAMOD_GFF_FEATURE_TYPES <- c("gene",
+# RNAMODR_GFF_FEATURE_TYPES <- c("gene",
 #                               "mRNA",
 #                               "transcript",
 #                               "CDS",
 #                               "biological_region",
 #                               "five_prime_UTR",
 #                               "three_prime_UTR")
-RNAMOD_GFF_COLNAMES <- c("source",
+RNAMODR_GFF_COLNAMES <- c("source",
                          "type",
                          "score",
                          "phase",
@@ -48,7 +46,7 @@ RNAMOD_GFF_COLNAMES <- c("source",
                          "gene",
                          "protein_id",
                          "transcript_id")
-RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
+RNAMODR_MOD_CONTAINING_FEATURES <- c("transcript",
                                     "gene",
                                     "mRNA",
                                     "rRNA",
@@ -62,10 +60,10 @@ RNAMOD_MOD_CONTAINING_FEATURES <- c("transcript",
                                     "snRNA",
                                     "snRNA_gene",
                                     "SRP_RNA")
-RNAMOD_MOD_INVALID_FEATURES <- c("chromosome",
+RNAMODR_MOD_INVALID_FEATURES <- c("chromosome",
                                  "telomere",
                                  "telomeric_repeat")
-RNAMOD_MOD_TRANSCRIPT_FEATURES <- c("gene",
+RNAMODR_MOD_TRANSCRIPT_FEATURES <- c("gene",
                                     "mRNA",
                                     "five_prime_UTR",
                                     "three_prime_UTR",
@@ -78,19 +76,19 @@ RNAMOD_MOD_TRANSCRIPT_FEATURES <- c("gene",
 
 
 # Settings
-RNAMOD_DEFAULT_PALETTE <- "Set1"
-RNAMOD_DEFAULT_TRANSCRIPT_MAX_ITERATIONS <- 5
-RNAMOD_DEFAULT_MAPQ <- 5
+RNAMODR_DEFAULT_PALETTE <- "Set1"
+RNAMODR_DEFAULT_TRANSCRIPT_MAX_ITERATIONS <- 5
+RNAMODR_DEFAULT_MAPQ <- 5
 
 .onLoad <- function(libname,pkgname){
-  options("RNAmod_map_quality" = RNAMOD_DEFAULT_MAPQ)
-  options("RNAmod_sample_transcripts" = c("RDN18-1"))
-  options("RNAmod_transcript_max_iteration" = 
-            RNAMOD_DEFAULT_TRANSCRIPT_MAX_ITERATIONS)
-  options("RNAmod_use_p" = TRUE)
-  options("RNAmod_palette" = RNAMOD_DEFAULT_PALETTE)
-  options("RNAmod_dpi" = 600)
-  options("RNAmod_use_cairo" = FALSE)
-  options("RNAmod_debug" = FALSE)
-  options("RNAmod_debug_transcripts" = c("tG(UCC)G"))
+  options("RNAmodR_map_quality" = RNAMODR_DEFAULT_MAPQ)
+  options("RNAmodR_sample_transcripts" = c("RDN18-1"))
+  options("RNAmodR_transcript_max_iteration" = 
+            RNAMODR_DEFAULT_TRANSCRIPT_MAX_ITERATIONS)
+  options("RNAmodR_use_p" = TRUE)
+  options("RNAmodR_palette" = RNAMODR_DEFAULT_PALETTE)
+  options("RNAmodR_dpi" = 600)
+  options("RNAmodR_use_cairo" = FALSE)
+  options("RNAmodR_debug" = FALSE)
+  options("RNAmodR_debug_transcripts" = c("tG(UCC)G"))
 }

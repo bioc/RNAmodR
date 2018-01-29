@@ -1,4 +1,4 @@
-#' @include class-RNAmod-mod-type.R
+#' @include class-RNAmodR-mod-type.R
 NULL
 
 RNAMOD_D_NUCLEOTIDE <- "T"
@@ -35,7 +35,7 @@ setMethod(
                         modLocations) {
     data[as.numeric(names(data)) %in% (modLocations+1)] <- 
       data[as.numeric(names(data)) %in% (modLocations+1)] * 
-      (1-RNAMOD_D_ARREST_RATE)
+      (1-RNAMODR_D_ARREST_RATE)
     return(data)
   }
 )
@@ -71,7 +71,7 @@ setMethod(
                           data){
   # if non G position skip position
   if( names(locations[locations == location]) 
-      != RNAMOD_D_NUCLEOTIDE){
+      != RNAMODR_D_NUCLEOTIDE){
     return(NULL)
   }
   # do not take into account position 1
@@ -83,7 +83,7 @@ setMethod(
   testData <- .aggregate_location_data(data, (location+1))
   testData <- testData[testData > 0]
   # if spm is not high enough
-  if(length(testData[testData >= RNAMOD_D_SPM]) < n) return(NULL)
+  if(length(testData[testData >= RNAMODR_D_SPM]) < n) return(NULL)
   # base data to compare against
   baseData <- .aggregate_not_location_data(data, (location+1))
   # if not enough data is present
@@ -95,7 +95,7 @@ setMethod(
   sd <-  stats::sd(baseData)
   # Use the sigma level as value for signal strength
   if( mean((as.numeric(as.character(testData)) - mean) %/% (mean+sd)) 
-      <= RNAMOD_D_SIGMA_THRESHOLD) {
+      <= RNAMODR_D_SIGMA_THRESHOLD) {
     return(NULL)
   }
   return(list(n = n,
@@ -127,18 +127,18 @@ setMethod(
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
     # dynamic threshold based on the noise of the signal (high sd)
-    if(!.validate_D_pos(RNAMOD_D_SIGMA_THRESHOLD, 
-                          RNAMOD_D_P_THRESHOLD, 
+    if(!.validate_D_pos(RNAMODR_D_SIGMA_THRESHOLD, 
+                          RNAMODR_D_P_THRESHOLD, 
                           locTest$sig.mean, 
                           locTest$p.value) ) {
       # debug
-      if( getOption("RNAmod_debug") ){
+      if( getOption("RNAmodR_debug") ){
         .print_location_info(paste(location,"_no"),locs)
       }
       return(NULL)
     }
     # debug
-    if( getOption("RNAmod_debug") ){
+    if( getOption("RNAmodR_debug") ){
       .print_location_info(paste(location,"_yes"), locs)
     }
     # Return data
@@ -171,7 +171,7 @@ setMethod(
   # No read arrest detectable
   if( sum(testArrestData) < 0 ) return(NULL)
   # To low arrest detectable
-  testArrest <- length(testArrestData[testArrestData >= RNAMOD_D_ARREST_RATE])
+  testArrest <- length(testArrestData[testArrestData >= RNAMODR_D_ARREST_RATE])
   if( length(testArrestData) != testArrest ) {
     return(NULL)
   }

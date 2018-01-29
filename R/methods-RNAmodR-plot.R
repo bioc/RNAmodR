@@ -1,12 +1,12 @@
-#' @include RNAmod.R
+#' @include RNAmodR.R
 NULL
 
-RNAMOD_PLOT_POS_WIDTH <- 1
-RNAMOD_PLOT_LAYER_HEIGHT <- 50
-RNAMOD_PLOT_SEQ_SIZE <- 1
-RNAMOD_PLOT_DATA_HEIGHT <- 100
-RNAMOD_PLOT_FOCUS_WINDOW <- 50
-RNAMOD_PLOT_MM_TO_INCH_F <- 0.03937008
+RNAMODR_PLOT_POS_WIDTH <- 1
+RNAMODR_PLOT_LAYER_HEIGHT <- 50
+RNAMODR_PLOT_SEQ_SIZE <- 1
+RNAMODR_PLOT_DATA_HEIGHT <- 100
+RNAMODR_PLOT_FOCUS_WINDOW <- 50
+RNAMODR_PLOT_MM_TO_INCH_F <- 0.03937008
 
 #' @rdname getModPlot
 #' 
@@ -31,7 +31,7 @@ RNAMOD_PLOT_MM_TO_INCH_F <- 0.03937008
 #' }
 setMethod(
   f = "getModPlot", 
-  signature = signature(.Object = "RNAmod",
+  signature = signature(.Object = "RNAmodR",
                         se = "SummarizedExperiment",
                         modifications = "character",
                         gene = "character"),
@@ -112,7 +112,7 @@ setMethod(
 #' @importFrom ggrepel geom_label_repel
 setMethod(
   f = "saveModPlot", 
-  signature = signature(.Object = "RNAmod",
+  signature = signature(.Object = "RNAmodR",
                         se = "SummarizedExperiment",
                         modifications = "character",
                         genes = "character"),
@@ -246,9 +246,9 @@ setMethod(
   layerPlot <- list()
   
   nrow <- length(layerPlot) + length(dataPlots)
-  width <- 80 + nrow(posData[[1]]) * RNAMOD_PLOT_POS_WIDTH
-  height <- length(layerPlot) * RNAMOD_PLOT_LAYER_HEIGHT + 
-    length(dataPlots) * RNAMOD_PLOT_DATA_HEIGHT
+  width <- 80 + nrow(posData[[1]]) * RNAMODR_PLOT_POS_WIDTH
+  height <- length(layerPlot) * RNAMODR_PLOT_LAYER_HEIGHT + 
+    length(dataPlots) * RNAMODR_PLOT_DATA_HEIGHT
   
   # grid <- do.call(gridExtra::grid.arrange, append(dataPlots,
   #                                                 layerPlot,
@@ -302,9 +302,9 @@ setMethod(
     
     # focus on a modification
     localStart <- as.numeric(pos[as.numeric(pos$pos) %in% mods$start,"pos"]) - 
-      RNAMOD_PLOT_FOCUS_WINDOW
+      RNAMODR_PLOT_FOCUS_WINDOW
     localEnd <- as.numeric(pos[as.numeric(pos$pos) %in% mods$end,"pos"]) + 
-      RNAMOD_PLOT_FOCUS_WINDOW
+      RNAMODR_PLOT_FOCUS_WINDOW
     pos <- pos[as.numeric(pos$pos) > localStart &
                  as.numeric(pos$pos) < localEnd,]
     
@@ -318,9 +318,9 @@ setMethod(
                           mod)
     
     nrow <- length(layerPlot) + 1
-    width <- 80 + nrow(pos) * RNAMOD_PLOT_POS_WIDTH
-    height <- RNAMOD_PLOT_LAYER_HEIGHT + 
-      RNAMOD_PLOT_DATA_HEIGHT
+    width <- 80 + nrow(pos) * RNAMODR_PLOT_POS_WIDTH
+    height <- RNAMODR_PLOT_LAYER_HEIGHT + 
+      RNAMODR_PLOT_DATA_HEIGHT
     
     # grid <- gridExtra::grid.arrange(plot, layerPlot, nrow = nrow)
     grid <- gridExtra::grid.arrange(plot, nrow = nrow)
@@ -379,10 +379,10 @@ setMethod(
   modTypes <- unique(modTypes)
   # get modifications which are requested based on type
   data <- lapply(modTypes, function(type){
-    if(nrow(data[data$RNAmod_type == type,]) == 0){
+    if(nrow(data[data$RNAmodR_type == type,]) == 0){
       return(NULL)
     }
-    data[data$RNAmod_type == type,]
+    data[data$RNAmodR_type == type,]
   })
   # set name of plot type
   names(data) <- vapply(modClasses, getAnalysisType, character(1))
@@ -426,7 +426,7 @@ setMethod(
   plot <- plot + geom_bar(stat = "identity") +
     geom_text(mapping = aes_(y = 0),
               vjust = 1.5,
-              size = RNAMOD_PLOT_SEQ_SIZE)
+              size = RNAMODR_PLOT_SEQ_SIZE)
   
   # if no mod data available
   if(is.null(mods)) return(plot)
@@ -453,7 +453,7 @@ setMethod(
     
   # plot modifications for single positions each
   # setup p value text
-  p_text <- unlist(lapply(as.numeric(modsPositions$RNAmod_p.value), 
+  p_text <- unlist(lapply(as.numeric(modsPositions$RNAmodR_p.value), 
                           function(p){
     if( p < 0.0001){
       return(paste0("< ",0.0001))
@@ -462,11 +462,11 @@ setMethod(
     }
   }))
   # setup modification labels
-  modsPositions$label <- paste0(modsPositions$RNAmod_type,
+  modsPositions$label <- paste0(modsPositions$RNAmodR_type,
                                 "\n",
                                 rownames(modsPositions),
                                 "\n \u03C3: ",
-                                modsPositions$RNAmod_signal,
+                                modsPositions$RNAmodR_signal,
                                 " (p ",
                                 p_text,
                                 ")")
@@ -476,7 +476,7 @@ setMethod(
                                              y = ~y,
                                              xend = ~localStart,
                                              yend = ~yend,
-                                             colour = ~RNAmod_type),
+                                             colour = ~RNAmodR_type),
                               inherit.aes = FALSE) +
     scale_colour_brewer(name = "Modification\ntype",
                         palette = "Set1") +
@@ -657,21 +657,21 @@ setMethod(
   assertive::assert_all_are_non_empty_character(names)
   assertive::assert_all_are_whole_numbers(width)
   assertive::assert_all_are_whole_numbers(height)
-  if(!assertive::is_a_number(getOption("RNAmod_dpi")))
-    options("RNAmod_dpi",as.numeric(getOption("RNAmod_dpi")[[1]]))
-  dpi <- getOption("RNAmod_dpi")
+  if(!assertive::is_a_number(getOption("RNAmodR_dpi")))
+    options("RNAmodR_dpi",as.numeric(getOption("RNAmodR_dpi")[[1]]))
+  dpi <- getOption("RNAmodR_dpi")
   
   fileNames <- paste0(folder,
-                     "RNAmod_",
+                     "RNAmodR_",
                      names,
                      ".",
                      filetype)
   for(i in 1:seq_along(length(fileNames))){
-    if( assertive::r_has_cairo_capability() & getOption("RNAmod_use_cairo") ){
+    if( assertive::r_has_cairo_capability() & getOption("RNAmodR_use_cairo") ){
       if(filetype == "pdf"){
         grDevices::cairo_pdf(fileNames[[i]],
-                             width = (width[[i]]*RNAMOD_PLOT_MM_TO_INCH_F),
-                             height = (height[[i]]*RNAMOD_PLOT_MM_TO_INCH_F))
+                             width = (width[[i]]*RNAMODR_PLOT_MM_TO_INCH_F),
+                             height = (height[[i]]*RNAMODR_PLOT_MM_TO_INCH_F))
         graphics::plot(plot[[i]])
         grDevices::dev.off()
       }
@@ -679,9 +679,9 @@ setMethod(
         grDevices::png(fileNames[[i]],
                        units = "in",
                        width = (width[[i]]*
-                                  RNAMOD_PLOT_MM_TO_INCH_F),
+                                  RNAMODR_PLOT_MM_TO_INCH_F),
                        height = (height[[i]]*
-                                   RNAMOD_PLOT_MM_TO_INCH_F),
+                                   RNAMODR_PLOT_MM_TO_INCH_F),
                        type = "cairo-png",
                        res = dpi)
         graphics::plot(plot[[i]])

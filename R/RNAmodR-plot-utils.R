@@ -1,4 +1,4 @@
-#' @include methods-RNAmod-plot.R
+#' @include methods-RNAmodR-plot.R
 NULL
 
 # sample plotting --------------------------------------------------------------

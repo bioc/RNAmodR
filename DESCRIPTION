@@ -1,4 +1,4 @@
-Package: RNAmod
+Package: RNAmodR
 Type: Package
 Title: RNAmodR: detecting post-transcriptional RNA modification
 Version: 0.1
@@ -15,45 +15,47 @@ License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
 Collate: 
-    'RNAmod.R'
-    'AllGenerics.R'
-    'AllGenerics-export-default.R'
-    'AllGenerics-export.R'
-    'RNAModString.R'
-    'class-RNAmod.R'
-    'class-RNAmod-analysis-type.R'
-    'RNAmod-data-utils.R'
-    'RNAmod-data.R'
-    'RNAmod-options.R'
-    'methods-RNAmod-plot.R'
-    'RNAmod-plot-utils.R'
-    'RNAmod-ranges-utils.R'
-    'RNAmod-utils-preparations.R'
-    'RNAmod-utils.R'
-    'assertions.R'
-    'class-RNAmod-mod-type.R'
-    'class-RNAmod-analysis-default.R'
-    'class-RNAmod-mod-D.R'
-    'class-RNAmod-mod-m3C.R'
-    'class-RNAmod-mod-m7G.R'
-    'methods-RNAmod-compare.R'
-    'methods-RNAmod-parse.R'
-    'methods-RNAmod.R'
-    'methods-RNAmodR-analysis.R'
+  'RNAmodR.R'
+  'AllGenerics.R'
+  'AllGenerics-export.R'
+  'class-RNAmodR.R'
+  'class-RNAmodR-analysis-type.R'
+  'RNAmodR-data-utils.R'
+  'RNAmodR-data.R'
+  'RNAmodR-options.R'
+  'methods-RNAmodR-plot.R'
+  'RNAmodR-plot-utils.R'
+  'RNAmodR-ranges-utils.R'
+  'RNAmodR-utils-preparations.R'
+  'RNAmodR-utils.R'
+  'assertions.R'
+  'class-RNAmodR-mod-type.R'
+  'class-RNAmodR-analysis-default.R'
+  'class-RNAmodR-mod-D.R'
+  'class-RNAmodR-mod-m3C.R'
+  'class-RNAmodR-mod-m7G.R'
+  'methods-RNAmodR-analysis.R'
+  'methods-RNAmodR-compare.R'
+  'methods-RNAmodR-parse.R'
+  'methods-RNAmodR.R'
 Imports:
   methods,
   assertive,
-  Rsamtools,
-  BiocParallel,
-  Biostrings,
-  rtracklayer,
-  GenomicRanges,
+  stringr,
   ggplot2,
-  GenomeInfoDb,
-  S4Vectors,
+  ggrepel,
   BiocGenerics,
-  tRNAscan2GRanges,
-  ggrepel
+  S4Vectors,
+  Biostrings,
+  BiocParallel,
+  GenomicRanges,
+  GenomicAlignments,
+  IRanges,
+  SummarizedExperiment,
+  GenomeInfoDb,
+  Rsamtools,
+  rtracklayer,
+  tRNAscan2GRanges
 Suggests: testthat,
   knitr,
   rmarkdown

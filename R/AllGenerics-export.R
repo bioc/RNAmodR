@@ -2,15 +2,15 @@
 NULL
 
 
-# RNAmod ================================================================
-#' @name RNAmod-Accessors 
+# RNAmodR ================================================================
+#' @name RNAmodR-Accessors 
 #' 
-#' @title Accessors for RNAmod Object
+#' @title Accessors for RNAmodR Object
 #' 
 #' @description
-#' Accessors for RNAmod Object
+#' Accessors for RNAmodR Object
 #'
-#' @param .Object a RNAmod object
+#' @param .Object a RNAmodR object
 #'
 #' @return 
 #' \code{getInputFolder}, \code{getOutputFolder}: the requested folder path
@@ -19,47 +19,62 @@ NULL
 #' also the path identifier, which is expected to contain the data and source 
 #' folder.
 #' 
-#' \code{getGFF}: the information of the input gff file as GRanges object
+#' \code{getGFFFile}: the information of the input gff file as GRanges object
 #' 
-#' \code{getFasta}: the link to the fasta file as FaFile class
+#' \code{getFastaFile}: the link to the fasta file as FaFile class
+#' 
+#' @examples
+#' \donttest{#' 
+#' unzip(system.file("extdata", package = "RNAmodR", file = "RNAmodR.zip" ))
+#' mod <- RNAmodR("test",
+#'                "test_layout.csv",
+#'                "test_gff.gff3",
+#'                "test_masked.fasta")
+#' getInputFolder(mod)  
+#' getOutputFolder(mod)  
+#' getExperimentName(mod)  
+#' getGFFFile(mod)  
+#' getFastaFile(mod)
+#' }
 NULL
 
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #' 
 #' @export
 setGeneric ( 
   name= "getInputFolder",
   def=function(.Object ){standardGeneric("getInputFolder")} 
 ) 
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #' 
 #' @export
 setGeneric ( 
   name= "getOutputFolder",
   def=function(.Object ){standardGeneric("getOutputFolder")} 
 ) 
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #' 
 #' @export
 setGeneric ( 
   name= "getExperimentName",
   def=function(.Object ){standardGeneric("getExperimentName")} 
 ) 
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #' 
 #' @export
 setGeneric ( 
-  name= "getGFF",
-  def=function(.Object ){standardGeneric("getGFF")} 
+  name= "getGFFFile",
+  def=function(.Object ){standardGeneric("getGFFFile")} 
 ) 
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #' 
 #' @export
 setGeneric ( 
-  name= "getFasta",
-  def=function(.Object ){standardGeneric("getFasta")} 
+  name= "getFastaFile",
+  def=function(.Object ){standardGeneric("getFastaFile")} 
 ) 
 
+# setup helper functions -------------------------------------------------------
 
 #' @title setupWorkEnvir
 #' 
@@ -99,14 +114,6 @@ setGeneric (
 
 #' @name getSummarizedExperiment
 #' 
-#' @title returns one or more SummarizedExperiment
-#' 
-#' @description
-#' Global access to SummarizedExperiments stored by RpfExperiment. 
-#' \code{getSummarizedExperiment()} returns the result of experiment, whereas 
-#' \code{getSummarizedExperiments()}, is the vectorized version returning a
-#' list of experiment results.
-#' 
 #' @export
 setGeneric ( 
   name= "getSummarizedExperiment",
@@ -127,13 +134,6 @@ setGeneric (
 
 #' @name setSummarizedExperiment
 #' 
-#' @title sets a SummarizedExperiment object
-#' 
-#' @description
-#' Saves/overwrites a SummarizedExperiment object for certain experiment and 
-#' passes the SummarizedExperiment object on to be saved to disk as .RData file
-#' in the \code{results\\SE} folder
-#' 
 #' @export
 setGeneric ( 
   name= "setSummarizedExperiment",
@@ -143,29 +143,28 @@ setGeneric (
                modification ){standardGeneric("setSummarizedExperiment")} 
 ) 
 
-#' @name getGff
-#' 
-#' @description getGff
+#' @name getGffResult
 #' 
 #' @export
 setGeneric ( 
-  name= "getGff",
+  name= "getGffResult",
   def=function(.Object,
                number, 
-               modification){standardGeneric("getGff")} 
+               modification,
+               genomicCoordinates = FALSE){standardGeneric("getGffResult")} 
 ) 
 
-#' @name setGff
+#' @name setGffResult
 #' 
 #' @description setGff
 #' 
 #' @export
 setGeneric ( 
-  name= "setGff",
+  name= "setGffResult",
   def=function(.Object,
                gff,
                number, 
-               modification){standardGeneric("setGff")} 
+               modification){standardGeneric("setGffResult")} 
 ) 
 
 # parsing ----------------------------------------------------------------------
@@ -182,9 +181,9 @@ setGeneric (
 
 # analysis type accessors ------------------------------------------------------------
 
-#' @name mod-accessors
+#' @name analysis-accessors
 #' 
-#' @title Accessor for 'analysis' class
+#' @title Accessor for \code{analysis} class objects
 #' 
 #' @param object analysis object 
 #' 
@@ -194,7 +193,7 @@ setGeneric (
   def=function(object){standardGeneric("getPlotType")} 
 ) 
 
-#' @rdname mod-accessors
+#' @rdname analysis-accessors
 #' 
 #' @export
 setGeneric ( 
@@ -202,7 +201,7 @@ setGeneric (
   def=function(object){standardGeneric("getPositions")} 
 ) 
 
-#' @rdname mod-accessors
+#' @rdname analysis-accessors
 #' 
 #' @export
 setGeneric ( 
@@ -210,9 +209,14 @@ setGeneric (
   def=function(object){standardGeneric("getModifications")} 
 ) 
 
-# modtype accessors ------------------------------------------------------------
+# mod type accessors -----------------------------------------------------------
 
-#' @rdname mod-accessors
+#' @name mod-accessors
+#' 
+#' @title accessors for \code{mod} class objects
+#' 
+#' @description 
+#' title 
 #' 
 #' @export
 setGeneric ( 
@@ -228,46 +232,8 @@ setGeneric (
   def=function(object){standardGeneric("getAnalysisType")} 
 ) 
 
-#' @name maskPositionData
-#' 
-#' @title maskPositionData
-#' 
-#' @export
-setGeneric ( 
-  name= "maskPositionData",
-  def=function(object,
-               data,
-               modLocations){standardGeneric("maskPositionData")} 
-) 
 
-#' @name preTest
-#' 
-#' @title preTest
-#' 
-#' @export
-setGeneric ( 
-  name= "preTest",
-  def=function(object,
-               location,
-               data,
-               locations){standardGeneric("preTest")} 
-) 
-
-#' @name checkForModification
-#' 
-#' @title checkForModification
-#' 
-#' @export
-setGeneric ( 
-  name= "checkForModification",
-  def=function(object,
-               location,
-               locations,
-               data){standardGeneric("checkForModification")} 
-) 
-
-
-# modification parsing ---------------------------------------------------------
+# analysis type functions - modifications parsing ------------------------------
 
 #' @name convertReadsToPositions
 #' 
@@ -315,6 +281,47 @@ setGeneric (
 setGeneric ( 
   name= "mergePositionsOfReplicates",
   def=function(object){standardGeneric("mergePositionsOfReplicates")} 
+) 
+
+
+# mod type functions -----------------------------------------------------------
+
+#' @name maskPositionData
+#' 
+#' @title maskPositionData
+#' 
+#' @export
+setGeneric ( 
+  name= "maskPositionData",
+  def=function(object,
+               data,
+               modLocations){standardGeneric("maskPositionData")} 
+) 
+
+#' @name preTest
+#' 
+#' @title preTest
+#' 
+#' @export
+setGeneric ( 
+  name= "preTest",
+  def=function(object,
+               location,
+               data,
+               locations){standardGeneric("preTest")} 
+) 
+
+#' @name checkForModification
+#' 
+#' @title checkForModification
+#' 
+#' @export
+setGeneric ( 
+  name= "checkForModification",
+  def=function(object,
+               location,
+               locations,
+               data){standardGeneric("checkForModification")} 
 ) 
 
 

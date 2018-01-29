@@ -2,26 +2,36 @@
 #' @include AllGenerics-export.R
 NULL
 
-#' @name RNAmod-class
+#' @name RNAmodR-class
 #' 
-#' @title RNAmod Class
+#' @title RNAmodR Class
 #' 
 #' @description 
-#' \code{RNAmod}
+#' \code{RNAmodR}
 NULL
 
-#' @title RNAmod-class
+#' @title RNAmodR-class
 #' 
-#' @rdname RNAmod-class 
+#' @rdname RNAmodR-class 
 #'
+#' @description 
+#' title
 #'
-#' @return a RNAmod object
+#' @return a RNAmodR object
 #' @export
 #' 
+#' @import Rsamtools
 #' @importClassesFrom GenomicRanges GRanges
 #'
 #' @examples
-setClass("RNAmod",
+#' \donttest{
+#' unzip(system.file("extdata", package = "RNAmodR", file = "RNAmodR.zip" ))
+#' mod <- RNAmodR("test",
+#'                "test_layout.csv",
+#'                "test_gff.gff3",
+#'                "test_masked.fasta")
+#' }
+setClass("RNAmodR",
          slots = c(
            experimentName = "character",
            inputFile = "character",
@@ -46,9 +56,7 @@ setClass("RNAmod",
 )
 
 
-#' @rdname RNAmod-class
-#'
-#' @import Rsamtools
+#' @rdname RNAmodR-class
 #'
 #' @export
 RNAmod <- function(experimentName, 
@@ -72,7 +80,7 @@ RNAmod <- function(experimentName,
   if(!is.character(experimentFasta)) 
     stop("experimentFasta can only be assigned a character vector of length 1")
   
-  class <- new("RNAmod", 
+  class <- new("RNAmodR", 
                experimentName, 
                experimentLayout, 
                experimentGFF, 
@@ -82,7 +90,7 @@ RNAmod <- function(experimentName,
 
 setMethod(
   f = "initialize", 
-  signature = signature(.Object = "RNAmod"),
+  signature = signature(.Object = "RNAmodR"),
   definition = function(.Object, 
                         experimentName, 
                         experimentLayout, 
@@ -214,78 +222,66 @@ setMethod(
 
 # default class methods --------------------------------------------------------
 
-#' @rdname RNAmod-class
+#' @rdname RNAmodR-class
 #' 
 #' @param object a RNAmod object.
 setMethod(
   f = "show",
-  signature = signature(object = "RNAmod"),
+  signature = signature(object = "RNAmodR"),
   definition = function(object) {
     print("test")
   }
 )
 
 
-
 # getters and setters ----------------------------------------------------------
 
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #'
 #' @export
-#'
-#' @examples
-#' \donttest{
-#' data("RNAmod_test", package = "RNAmod")
-#'
-#' getInputFolder(experiment)
-#' getOutputFolder(experiment)
-#' getExperimentName(experiment)
-#' head(getGFF(experiment))
-#' getFasta(experiment)
-#' }
 setMethod(
   f = "getInputFolder",
-  signature = signature(.Object = "RNAmod"),
+  signature = signature(.Object = "RNAmodR"),
   definition = function(.Object){
     return(paste0(.Object@.wd, .Object@.inputFolder))
   }
 )
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #'
 #' @export
 setMethod(
   f = "getOutputFolder",
-  signature = signature(.Object = "RNAmod"),
+  signature = signature(.Object = "RNAmodR"),
   definition = function(.Object){
     return(paste0(.Object@.wd, .Object@.outputFolder))
   }
 )
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #'
 #' @export
 setMethod(
   f = "getExperimentName",
-  signature = signature(.Object = "RNAmod"),
+  signature = signature(.Object = "RNAmodR"),
   definition = function(.Object){
     return(.Object@experimentName)
   }
 )
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #'
 #' @export
 setMethod(
-  f = "getGFF",
-  signature = signature(.Object = "RNAmod"),
+  f = "getGFFFile",
+  signature = signature(.Object = "RNAmodR"),
   definition = function(.Object){
     return(.Object@.dataGFF)
   }
 )
-#' @rdname RNAmod-Accessors
+#' @rdname RNAmodR-Accessors
 #'
 #' @export
 setMethod(
-  f = "getFasta",
-  signature = signature(.Object = "RNAmod"),
+  f = "getFastaFile",
+  signature = signature(.Object = "RNAmodR"),
   definition = function(.Object){
     return(.Object@.dataFasta)
   }

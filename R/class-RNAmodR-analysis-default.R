@@ -1,18 +1,21 @@
-#' @include class-RNAmod-mod-type.R
-#' @include class-RNAmod-analysis-type.R
+#' @include class-RNAmodR-mod-type.R
+#' @include class-RNAmodR-analysis-type.R
 NULL
 
-RNAMOD_DEFAULT_READ_DENSITY <- 0.2
+RNAMODR_DEFAULT_READ_DENSITY <- 0.2
 
-#' @rdname mod
+#' @name analysis_default
+#' 
+#' @title the default analysis class for RNAmodR
 #'
 #' @description 
-#' \code{analysis_default}
-#'
-#' @return
+#' \code{analysis_default}: the class can be used for analyzing the 5'-end of
+#' reads to detect specific post-transcriptional modifications.
+#' 
 #' @export
 #'
 #' @examples
+#' ad <- new("analysis_default")
 setClass("analysis_default",
          contains = "analysis")
 
@@ -20,15 +23,24 @@ setClass("analysis_default",
 #' @rdname convertReadsToPositions
 #'
 #' @description
-#' \code{analysis_default}: calls the default method
+#' \code{analysis_default}: load the input files, eg. bam files and 
+#' pre-processes the information to be used in the modification detection.
 #'
-#' @return
+#' @return a modifified \code{analysis} class object containing now the read 
+#' data required for modification detection.
 #' @export
 #' 
 #' @importFrom IRanges findOverlaps extractList
 #' @importFrom S4Vectors split from to
 #'
 #' @examples
+#' \donttest{
+#' ad <- new("analysis_default")
+#' convertReadsToPositions(ad,
+#'                        "test.bam",
+#'                        "test.gff",
+#'                        test_param)
+#' }
 setMethod(
   f = "convertReadsToPositions",
   signature = signature(object = "analysis_default",
@@ -47,9 +59,8 @@ setMethod(
                    param)
     data <- data[!is.null(data)]
     if(length(data) == 0){
-      stop("No reads detected in any bam file for '",
-           paste(modifications, collapse = "', '"),
-           "' modifications",
+      stop("No reads detected in any bam file :\n",
+           paste(files, collapse = "\n"),
            call. = FALSE)
     }
     object@data <- data
@@ -140,7 +151,7 @@ setMethod(
   # position. take care of introns, etc
   pos <- .convert_global_to_local_position(gff,gr,data)
   # if number of reads per transcript length is not enough
-  if(length(pos) < (width(gr) * RNAMOD_DEFAULT_READ_DENSITY)) return(NULL)
+  if(length(pos) < (width(gr) * RNAMODR_DEFAULT_READ_DENSITY)) return(NULL)
   # Normalize counts per positions against million of reads in BamFile
   posData <- table(pos)/(counts/10^6)
   # spread table with zero values to the length of transcript
@@ -156,14 +167,28 @@ setMethod(
 #' @rdname parseMod
 #' 
 #' @description 
-#' \code{analysis_default}
+#' \code{analysis_default}: parses the pre-processed data in the data slot
+#' to detect modifications
 #' 
-#' @return
+#' @return a modified \code{analysis} class object containting pre-processed
+#' data and found modifications
+#' 
 #' @export
 #' 
 #' @importFrom stringr str_locate_all
 #'
 #' @examples
+#' \donttest{
+#' ad <- new("analysis_default")
+#' convertReadsToPositions(ad,
+#'                        "test.bam",
+#'                        "test.gff",
+#'                        test_param)
+#' parseMod(ad,
+#'          "test.gff",
+#'          "test.fasta",
+#'          modclasses)
+#' }
 setMethod(
   f = "parseMod",
   signature = signature(object = "analysis_default",
@@ -211,7 +236,7 @@ setMethod(
                                      modClasses){
   # browser()
   # debug
-  if( getOption("RNAmod_debug") ){
+  if( getOption("RNAmodR_debug") ){
     .print_transcript_info(paste(ID," prep"), "")
   }
   data <- .get_data(ID,data)
@@ -270,7 +295,7 @@ setMethod(
                                 iterationN){
   if( iterationN > .get_transcript_max_iteration()) return(NULL)
   # debug
-  if( getOption("RNAmod_debug") ){
+  if( getOption("RNAmodR_debug") ){
     .print_transcript_info(paste(ID," detect"), iterationN)
   }
   # Retrieve modifications positions
@@ -401,10 +426,16 @@ setMethod(
 #' @description
 #' \code{analysis_default}
 #'
-#' @return
+#' @return a modified \code{analysis} class object now containing the aggregated
+#' pre-processed data of the input. This data is used for saving.
+#' 
 #' @export
 #'
 #' @examples
+#' \donttest{
+#' load(system.file("data", file = "test_example.RData", package = "RNAmodR"))
+#' mergePositionsOfReplicates(ad)
+#' }
 setMethod(
   f = "mergePositionsOfReplicates",
   signature = signature(object = "analysis_default"),
