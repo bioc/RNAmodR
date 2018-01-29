@@ -188,8 +188,7 @@ setMethod(
               RNAmod_type = vapply(gene,"[[",character(1),"type"),
               RNAmod_signal = vapply(gene,"[[",numeric(1),"signal"),
               RNAmod_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
-              RNAmod_p.value = format(vapply(gene,"[[",numeric(1),"p.value"), 
-                                      digits = 10, scientific = FALSE),
+              RNAmod_p.value = vapply(gene,"[[",numeric(1),"p.value"),
               RNAmod_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
   return(df)
 }

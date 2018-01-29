@@ -23,13 +23,49 @@ knitr::opts_chunk$set(
 
 create RNAmod
 ```{r tRNA}
+library(RNAmod)
+library(SummarizedExperiment)
 mod <- RNAmod("test",
               "experiment_layout.csv",
               "sacCer3_R64-2-1_masked.gff3",
               "sacCer3_R64-2-1_masked.fasta")
-
 modifications <- c("m7G","D","m3C")
-parseForModifications(mod,1,modifications)
+no <- unique(getExperimentData(mod)$ExperimentNo)
+lapply(no,function(x){
+  parseForModifications(mod,x,modifications)
+  se <- getSummarizedExperiment(mod,x,modifications)
+  transcripts <- unique(c(names(assays(se)$m7G[assays(se)$m7G > 0,]),
+                          names(assays(se)$m3C[assays(se)$m3C > 0,]),
+                          names(assays(se)$D[assays(se)$D > 0,])))
+  saveModPlot(mod,se,modifications,transcripts)
+})
+no <- unique(getExperimentData(mod_hsa)$ExperimentNo)
+lapply(no,function(x){
+  parseForModifications(mod_hsa,x,modifications)
+  se <- getSummarizedExperiment(mod_hsa,x,modifications)
+  transcripts <- unique(c(names(assays(se)$m7G[assays(se)$m7G > 0,]),
+                          names(assays(se)$m3C[assays(se)$m3C > 0,]),
+                          names(assays(se)$D[assays(se)$D > 0,])))
+  saveModPlot(mod_hsa,se,modifications,transcripts)
+})
+
+param <- BiocParallel::bpparam()
+param$workers <- 3
+BiocParallel::register(param)
+
+mod_hsa <- RNAmod("test",
+              "experiment_layout_hsa.csv",
+              "GRCh38_latest_genomic_masked.gff3",
+              "GRCh38_latest_genomic_masked.fasta")
+no <- unique(getExperimentData(mod_hsa)$ExperimentNo)
+lapply(no,function(x){
+  parseForModifications(mod_hsa,x,modifications)
+  se <- getSummarizedExperiment(mod_hsa,x,modifications)
+  transcripts <- unique(c(names(assays(se)$m7G[assays(se)$m7G > 0,]),
+                          names(assays(se)$m3C[assays(se)$m3C > 0,]),
+                          names(assays(se)$D[assays(se)$D > 0,])))
+  saveModPlot(mod_hsa,se,modifications,transcripts)
+})
 
 se1 <- getSummarizedExperiment(mod,1,modifications)
 se2 <- getSummarizedExperiment(mod,2,modifications)

@@ -100,14 +100,20 @@ setMethod(
             "'")
     return(NULL)
   }
-  positions <- mapply(
-  # positions <- BiocParallel::bpmapply(
+  
+  # param <- BiocParallel::bpparam()
+  # bak_param <- param
+  # param$workers <- 2
+  # BiocParallel::register(param)
+  # positions <- mapply(
+  positions <- BiocParallel::bpmapply(
                                       FUN = .get_positions_in_transcript,
                                       bamData,
                                       names(bamData),
                                       MoreArgs = list(totalCounts,
                                                       gff),
                                       SIMPLIFY = FALSE)
+  # BiocParallel::register(bak_param)
   names(positions) <- names(bamData)
   # remove entries for transcript for which position data is sufficient
   positions <- positions[!vapply(positions, is.null, logical(1))]
@@ -174,8 +180,8 @@ setMethod(
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
     # detect modification per transcript
-    res <- lapply(IDs,
-    # res <- BiocParallel::bplapply(IDs,
+    # res <- lapply(IDs,
+    res <- BiocParallel::bplapply(IDs,
                                   FUN = .analyze_transcript_prep,
                                   data = object@data,
                                   gff = gff,
@@ -407,8 +413,8 @@ setMethod(
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
-    res <- lapply(IDs,
-    # res <- BiocParallel::bplapply(IDs,
+    # res <- lapply(IDs,
+    res <- BiocParallel::bplapply(IDs,
                                   FUN = .merge_positions,
                                   object@data)
     names(res) <- IDs
