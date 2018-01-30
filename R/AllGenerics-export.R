@@ -357,21 +357,19 @@ setGeneric(
 #' @export
 setGeneric(
   name = "heatmapModifications",
-  def = function(.Object,
-                 ses,
+  def = function(ses,
+                 grl,
                  modifications){standardGeneric("heatmapModifications")}
 )
-
 #' @rdname heatmapModifications
 #'
 #' @export
 setGeneric(
   name = "saveHeatmapModifications",
-  def = function(.Object,
-                 ses,
+  def = function(ses,
+                 grl,
                  modifications){standardGeneric("saveHeatmapModifications")}
 )
-
 
 # comparison -------------------------------------------------------------------
 

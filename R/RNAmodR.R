@@ -18,7 +18,7 @@ NULL
 #' @import GenomicRanges
 #' @import GenomicAlignments
 #' @import ggplot2
-#' @importFrom stats setNames wilcox.test
+#' @importFrom stats setNames wilcox.test sd median
 NULL
 
 requireNamespace("BiocParallel")

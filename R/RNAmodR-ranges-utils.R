@@ -26,17 +26,13 @@ NULL
 # converts global to local positions and modifies data accoringly
 .convert_global_to_local_position <- function(gff,
                                               gr,
-                                              data){
-  # discard reads out of boundaries
-  data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
-  data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
-  # get a list of introns and the position which are void
-  posToBeRemoved <- .get_intron_positions(gff,
-                                          gr$ID)
-  # get the genomic distance
-  length <- width(gr) - length(unlist(posToBeRemoved))
-  #
-  #
+                                              data,
+                                              posToBeRemoved){
+  if(missing(posToBeRemoved)){
+    # get a list of introns and the position which are void
+    posToBeRemoved <- .get_intron_positions(gff,
+                                            gr$ID)
+  }
   # GA specific handling
   # move position based on strand
   strand <- .get_unique_strand(gr)
@@ -59,9 +55,6 @@ NULL
   } else {
     positions <- positions - BiocGenerics::start(gr) + 1
   }
-  # discard reads out of boundaries
-  # positions <- positions[positions>0]
-  # positions <- positions[positions<=length]
   return(positions)
 }
 

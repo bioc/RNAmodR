@@ -1,6 +1,42 @@
 #' @include class-RNAmodR-analysis-type.R
 NULL
 
+# modificaton access for SE and GRL --------------------------------------------
+
+.extract_modification_info_from_grl <- function(grl){
+  res <- lapply(grl, function(gr){
+    mcols <- S4Vectors::mcols(gr)
+    DF <- cbind(S4Vectors::DataFrame(chrom = GenomeInfoDb::seqnames(gr),
+                                     start = BiocGenerics::start(gr),
+                                     end = BiocGenerics::end(gr),
+                                     strand = as.character(BiocGenerics::strand(gr))),
+                mcols[,!(colnames(mcols) %in% c("phase"))])
+    DF$RNAmodR_signal <- as.numeric(DF$RNAmodR_signal)
+    DF$RNAmodR_signal_sd <- as.numeric(DF$RNAmodR_signal_sd)
+    DF$RNAmodR_p.value <- as.numeric(DF$RNAmodR_p.value)
+    DF$RNAmodR_nbReplicates <- as.numeric(DF$RNAmodR_nbReplicates)
+    rownames(DF) <- DF$ID
+    DF
+  })
+  names(res) <- names(grl)
+  res
+}
+
+.extract_modification_info_from_se <- function(ses){
+  res <- lapply(ses, function(se){
+    DF <- do.call(rbind,
+                  seGetModifications(se))
+    DF$RNAmodR_signal <- as.numeric(DF$RNAmodR_signal)
+    DF$RNAmodR_signal_sd <- as.numeric(DF$RNAmodR_signal_sd)
+    DF$RNAmodR_p.value <- as.numeric(DF$RNAmodR_p.value)
+    DF$RNAmodR_nbReplicates <- as.numeric(DF$RNAmodR_nbReplicates)
+    DF
+  })
+  names(res) <- names(ses)
+  res
+}
+
+
 # common function for converting data ------------------------------------------
 
 # Calculate FPKM values

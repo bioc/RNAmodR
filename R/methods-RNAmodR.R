@@ -616,7 +616,6 @@ setMethod(
   return(invisible(TRUE))
 }
 
-
 #' Title
 #'
 #' @param se SummarizedExperiment. 

@@ -2,8 +2,8 @@
 #' @include class-RNAmodR-analysis-type.R
 NULL
 
-RNAMODR_DEFAULT_READ_DENSITY <- 0.2
-RNAMODR_DEFAULT_READ_PER_KB_SPM_CONVERSION <- 0.01
+RNAMODR_DEFAULT_FPKM_THRESHOLD <- 1
+RNAMODR_DEFAULT_READ_PER_KB_SPM_CONVERSION <- 0.04
 
 #' @name analysis_default
 #' 
@@ -92,8 +92,8 @@ setMethod(
   names(bamData) <- .get_unique_identifiers(gff_subset)[
     as.numeric(names(bamData))]
   
-  bamData <- bamData[names(bamData) %in% c("RDN18-1") | 
-                       grepl("^t",names(bamData))]
+  # bamData <- bamData[names(bamData) %in% c("RDN18-1") |
+  #                      grepl("^t",names(bamData))]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "YBR041W",
   #                                          "YBR056W",
@@ -149,14 +149,24 @@ setMethod(
   # get ID and GRanges
   gr <- .subset_gff_for_unique_transcript(gff, 
                                           id)
-  # get the genomic distance
-  # also used in .convert_global_to_local_position
-  length <- width(gr)
+  # get a list of introns and the position which are void
+  posToBeRemoved <- .get_intron_positions(gff,
+                                          gr$ID)
+  # get the transcript length
+  length <- width(gr) - length(unlist(posToBeRemoved))
+  # discard reads out of boundaries
+  data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
+  data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
+  # if number of reads per transcript length is not enough - FPKM
+  fpkm <- length(data)/(length/1000)/(counts/10^6)
+  # message(id, ": ", fpkm)
+  if(fpkm < RNAMODR_DEFAULT_FPKM_THRESHOLD) return(NULL)
   # do position conversion to translate genomic position to local transcript
   # position. take care of introns, etc
-  pos <- .convert_global_to_local_position(gff,gr,data)
-  # if number of reads per transcript length is not enough
-  # if(length(pos) < (width(gr) * RNAMODR_DEFAULT_READ_DENSITY)) return(NULL)
+  pos <- .convert_global_to_local_position(gff,
+                                           gr,
+                                           data,
+                                           posToBeRemoved)
   # Normalize counts per positions against million of reads in BamFile
   posData <- table(pos)/(counts/10^6)
   # spread table with zero values to the length of transcript
@@ -166,7 +176,7 @@ setMethod(
     posData[names(posData) == i]
   }))),1:length)
   return(list(data = posData,
-              nreads = length(pos)))
+              nreads = fpkm))
 }
 
 
@@ -211,8 +221,8 @@ setMethod(
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
     # detect modification per transcript
-    res <- lapply(IDs,
-    # res <- BiocParallel::bplapply(IDs,
+    # res <- lapply(IDs,
+    res <- BiocParallel::bplapply(IDs,
                                   FUN = .analyze_transcript_prep,
                                   data = object@data,
                                   gff = gff,
@@ -259,8 +269,8 @@ setMethod(
   nreads <- mean(unlist(lapply(data,"[[","nreads")))
   data <- lapply(data,"[[","data")
   # generate spm threshold
-  spmThreshold <- (nreads/(length(seq)/1000)) * RNAMODR_DEFAULT_READ_PER_KB_SPM_CONVERSION
-  message(ID,": ",spmThreshold)
+  spmThreshold <- nreads * RNAMODR_DEFAULT_READ_PER_KB_SPM_CONVERSION
+  # message(ID,": ",spmThreshold)
   # analyze the transcript
   res <- .analyze_transcript(ID = ID,
                              modClasses = modClasses,

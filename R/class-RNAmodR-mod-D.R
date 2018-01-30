@@ -185,10 +185,18 @@ setMethod(
   }
   # get test values
   # overall mean and sd
-  mean <-  mean(baseData)
-  sd <-  stats::sd(baseData)
+  baseData <- baseData[baseData > 0]
+  if(length(baseData) == 0) return(NULL)
+  median <-  stats::median(baseData)
   # Use the sigma level as value for signal strength
-  sig <- (as.numeric(as.character(testData)) - mean) %/% (mean+sd)
+  sig <- (as.numeric(as.character(testData))) %/% median
+  
+  
+  # mean <-  mean(baseData)
+  # sd <-  stats::sd(baseData)
+  # # Use the sigma level as value for signal strength
+  # sig <- (as.numeric(as.character(testData)) - mean) %/% (mean+sd)
+  
   sig.mean <- mean(sig)
   sig.sd <- stats::sd(sig)
   # Since normality of distribution can not be assumed use the MWU
