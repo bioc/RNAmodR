@@ -351,6 +351,7 @@ convertGeneToChrom <- function(gfffile,
                           S4Vectors::mcols(gff)$ID %in% parents) |
                        (!is.na(S4Vectors::mcols(gff)$gene) & 
                           S4Vectors::mcols(gff)$gene %in% parents),]
+  gff_parents <- .order_GRanges(gff_parents)
   # get chromosome names for the parent dependent on the chrom_name of the child
   gff_sub_w_p <- gff_sub[as.character(gff_sub$Parent) 
                          %in% .get_unique_identifiers(gff_parents) ]

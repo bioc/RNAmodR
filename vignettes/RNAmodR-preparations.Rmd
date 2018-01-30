@@ -42,7 +42,8 @@ folder <- "genomes/sacCer3/"
 gfffile <- paste0(folder,"sacCer3_R64-2-1.gff3")
 fafile <- paste0(folder,"sacCer3_R64-2-1.fasta")
 tRNAscanfile <- paste0(folder,"sacCer3-tRNAs.ss.sort")
-matchFastaToGff(gfffile,fafile)
+matchFastaToGff(gfffile, fafile)
+
 # get specific rRNA genes and save as fasta/gff
 gff <- rtracklayer::import.gff3(gfffile)
 RDN25 <- S4Vectors::mcols(gff[grepl("RDN25",S4Vectors::mcols(gff)$ID),])$ID
@@ -54,50 +55,19 @@ rRNAFiles <- convertGeneToChrom(gfffile,
                                 fafile,
                                 c(RDN25,RDN18,RDN58,RNDmt),
                                 "rRNA",
-                                saveTrimmedFile = TRUE,
                                 removeDuplicateSeqs = TRUE)
-# Because annotation in yeast is also extended to the ETS sequences mask
-# all rRNA_gene types
-rRNA_depFiles <- convertGeneTypeToChrom(gfffile,
-                                fafile,
-                                "rRNA_gene",
-                                "rRNA_depleted",
-                                saveTrimmedFile = TRUE)
 # Remove specific tRNA genes and append to fasta/gff
-tRNAFiles <- converttRNAscanToChrom(rRNA_depFiles[["trim_gfffile"]],
+tRNAFiles <- converttRNAscanToChrom(gfffile,
                                     fafile,
                                     tRNAscanfile,
-                                    "tRNAscan",
-                                    saveTrimmedFile = TRUE)
+                                    "tRNAscan")
 # append all the files
-out_fafile <- appendFastaFiles(fafile,
-                               rRNAFiles[["convert_fafile"]],
+out_fafile <- appendFastaFiles(rRNAFiles[["convert_fafile"]],
                                tRNAFiles[["convert_fafile"]],
-                               ident = "complete")
-out_gfffile <- appendGFF(tRNAFiles[["trim_gfffile"]],
-                         rRNAFiles[["convert_gfffile"]],
+                               ident = "rRNA_tRNA")
+out_gfffile <- appendGFF(rRNAFiles[["convert_gfffile"]],
                          tRNAFiles[["convert_gfffile"]],
-                         ident = "complete")
-
-# generate bash script
-script <- paste0("cat %s*_mask_* > %s\n",
-               "dos2unix %s\n",
-               "bedtools maskfasta -mc N -fi %s -bed %s -fo %s\n",
-               "cp %s %s\n",
-               "cp %s %s")
-script <- gettextf(script,
-                  folder,
-       paste0(folder,"sacCer3_R64-2-1_mask.gff3"),
-       out_fafile,
-       out_fafile,
-       paste0(folder,"sacCer3_R64-2-1_mask.gff3"),
-       paste0(folder,"sacCer3_R64-2-1_masked.fasta"),
-       out_gfffile,
-       "sacCer3_R64-2-1_masked.gff3",
-       paste0(folder,"sacCer3_R64-2-1_masked.fasta"),
-       "sacCer3_R64-2-1_masked.fasta")
-message("# Run this in command line:\n\n",
-        script)
+                         ident = "rRNA_tRNA")
 ```
 
 ## E. coli
@@ -107,49 +77,26 @@ folder <- "genomes/Eco/"
 gfffile <- paste0(folder,"eco_MG1655.gff3")
 fafile <- paste0(folder,"eco_MG1655.fasta")
 tRNAscanfile <- paste0(folder,"eschColi_K_12_MG1655-tRNAs.ss.sort")
-matchFastaToGff(gfffile,fafile)
+matchFastaToGff(gfffile, fafile)
+
 # Remove rRNA genes and append to fasta/gff
 rRNAFiles <- convertGeneTypeToChrom(gfffile,
                                     fafile,
                                     "rRNA",
                                     "rRNA",
-                                    saveTrimmedFile = TRUE,
                                     removeDuplicateSeqs = TRUE)
 # Remove specific tRNA genes and append to fasta/gff
-tRNAFiles <- converttRNAscanToChrom(rRNAFiles[["trim_gfffile"]],
+tRNAFiles <- converttRNAscanToChrom(gfffile,
                                     fafile,
                                     tRNAscanfile,
-                                    "tRNAscan",
-                                    saveTrimmedFile = TRUE)
+                                    "tRNAscan")
 # append all the files
-out_fafile <- appendFastaFiles(fafile,
-                               rRNAFiles[["convert_fafile"]],
+out_fafile <- appendFastaFiles(rRNAFiles[["convert_fafile"]],
                                tRNAFiles[["convert_fafile"]],
-                               ident = "complete")
-out_gfffile <- appendGFF(tRNAFiles[["trim_gfffile"]],
-                         rRNAFiles[["convert_gfffile"]],
+                               ident = "rRNA_tRNA")
+out_gfffile <- appendGFF(rRNAFiles[["convert_gfffile"]],
                          tRNAFiles[["convert_gfffile"]],
-                         ident = "complete")
-
-# generate bash script
-script <- paste0("cat %s*_mask_* > %s\n",
-               "dos2unix %s\n",
-               "bedtools maskfasta -mc N -fi %s -bed %s -fo %s\n",
-               "cp %s %s\n",
-               "cp %s %s")
-script <- gettextf(script,
-                  folder,
-       paste0(folder,"eco_MG1655_mask.gff3"),
-       out_fafile,
-       out_fafile,
-       paste0(folder,"eco_MG1655_mask.gff3"),
-       paste0(folder,"eco_MG1655_masked.fasta"),
-       out_gfffile,
-       "eco_MG1655_masked.gff3",
-       paste0(folder,"eco_MG1655_masked.fasta"),
-       "eco_MG1655_masked.fasta")
-message("# Run this in command line:\n\n",
-        script)
+                         ident = "rRNA_tRNA")
 ```
 
 ## H. sapiens
@@ -157,52 +104,34 @@ message("# Run this in command line:\n\n",
 ```{r GRCh38,eval=FALSE}
 folder <- "genomes/GRCh38/"
 gfffile <- paste0(folder,"GRCh38_latest_genomic.gff")
-gfffileS <- paste0(folder,"GRCh38_latest_genomic_s.gff")
 fafile <- paste0(folder,"GRCh38_latest_genomic.fasta")
 tRNAscanfile <- paste0(folder,"hg38-tRNAs.ss.sort")
-matchFastaToGff(gfffile,fafile)
+matchFastaToGff(gfffile, fafile)
+
+rRNA <- c("rna14583",
+          "rna165283",
+          "rna165285",
+          "rna156558",
+          "rna156559",
+          "rna156560")
+
 # get rRNA genes and save as fasta/gff
-rRNAFiles <- convertGeneTypeToChrom(gfffile,
-                                    fafile,
-                                    "rRNA",
-                                    "rRNA",
-                                    saveTrimmedFile = TRUE,
-                                    removeDuplicateSeqs = TRUE)
+rRNAFiles <- convertGeneToChrom(gfffile,
+                                fafile,
+                                rRNA,
+                                "rRNA")
 # Remove specific tRNA genes and append to fasta/gff
-tRNAFiles <- converttRNAscanToChrom(rRNAFiles[["trim_gfffile"]],
+tRNAFiles <- converttRNAscanToChrom(gfffile,
                                     fafile,
                                     tRNAscanfile,
-                                    "tRNAscan",
-                                    saveTrimmedFile = TRUE)
+                                    "tRNAscan")
 # append all the files
-out_fafile <- appendFastaFiles(fafile,
-                 rRNAFiles[["convert_fafile"]],
-                 tRNAFiles[["convert_fafile"]],
-                 ident = "complete")
-out_gfffile <- appendGFF(tRNAFiles[["trim_gfffile"]],
-          rRNAFiles[["convert_gfffile"]],
-          tRNAFiles[["convert_gfffile"]],
-                 ident = "complete")
-
-# generate bash script
-script <- paste0("cat %s*_mask_* > %s\n",
-               "dos2unix %s\n",
-               "bedtools maskfasta -mc N -fi %s -bed %s -fo %s\n",
-               "cp %s %s\n",
-               "cp %s %s")
-script <- gettextf(script,
-                  folder,
-       paste0(folder,"GRCh38_latest_genomic_mask.gff3"),
-       out_fafile,
-       out_fafile,
-       paste0(folder,"GRCh38_latest_genomic_mask.gff3"),
-       paste0(folder,"GRCh38_latest_genomic_masked.fasta"),
-       out_gfffile,
-       "GRCh38_latest_genomic_masked.gff3",
-       paste0(folder,"GRCh38_latest_genomic_masked.fasta"),
-       "GRCh38_latest_genomic_masked.fasta")
-message("# Run this in command line:\n\n",
-        script)
+out_fafile <- appendFastaFiles(rRNAFiles[["convert_fafile"]],
+                               tRNAFiles[["convert_fafile"]],
+                               ident = "rRNA_tRNA")
+out_gfffile <- appendGFF(rRNAFiles[["convert_gfffile"]],
+                         tRNAFiles[["convert_gfffile"]],
+                         ident = "rRNA_tRNA")
 ```
 
 # Session info
