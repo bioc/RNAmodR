@@ -168,7 +168,7 @@ setMethod(
                                   assertive::is_existing_file,
                                   logical(1))]
     if(length(fileNames) == 0){
-      stop("No result gff files found.",
+      stop("No result SummarizedExperiment files found.",
            call. = FALSE)
     }
     ses <- lapply(fileNames,function(file){

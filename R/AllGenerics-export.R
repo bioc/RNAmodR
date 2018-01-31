@@ -304,7 +304,7 @@ setGeneric(
   def = function(object,
                  location,
                  data,
-                 spmThreshold,
+                 nreads,
                  locations){standardGeneric("preTest")} 
 ) 
 
@@ -319,7 +319,7 @@ setGeneric(
                  location,
                  locations,
                  data,
-                 spmThreshold){standardGeneric("checkForModification")} 
+                 nreads){standardGeneric("checkForModification")} 
 ) 
 
 

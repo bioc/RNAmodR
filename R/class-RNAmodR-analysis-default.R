@@ -2,8 +2,7 @@
 #' @include class-RNAmodR-analysis-type.R
 NULL
 
-RNAMODR_DEFAULT_FPKM_THRESHOLD <- 1
-RNAMODR_DEFAULT_READ_PER_KB_SPM_CONVERSION <- 0.04
+RNAMODR_DEFAULT_FPK_THRESHOLD <- 100
 
 #' @name analysis_default
 #' 
@@ -95,9 +94,7 @@ setMethod(
   # bamData <- bamData[names(bamData) %in% c("RDN18-1") |
   #                      grepl("^t",names(bamData))]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
-  #                                          "YBR041W",
-  #                                          "YBR056W",
-  #                                          "YAL030W")]
+  #                                          "tE(TTC)B")]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1")]
   # bamData <- bamData[names(bamData) %in% c("YJL047C",
   #                                          "YHR199C-A")]
@@ -157,18 +154,19 @@ setMethod(
   # discard reads out of boundaries
   data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
   data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
-  # if number of reads per transcript length is not enough - FPKM
-  fpkm <- length(data)/(length/1000)/(counts/10^6)
-  # message(id, ": ", fpkm)
-  if(fpkm < RNAMODR_DEFAULT_FPKM_THRESHOLD) return(NULL)
   # do position conversion to translate genomic position to local transcript
   # position. take care of introns, etc
   pos <- .convert_global_to_local_position(gff,
                                            gr,
                                            data,
                                            posToBeRemoved)
+  # if number of reads per transcript length is not enough - FPKM
+  fpk <- length(pos)/(length/1000)
+  # message(id, ": ", fpkm)
+  if(fpk < RNAMODR_DEFAULT_FPK_THRESHOLD) return(NULL)
   # Normalize counts per positions against million of reads in BamFile
-  posData <- table(pos)/(counts/10^6)
+  # posData <- table(pos)/(counts/10^6)
+  posData <- table(pos)
   # spread table with zero values to the length of transcript
   posData <- stats::setNames(as.double(unlist(lapply(1:length, 
                                               function(i){
@@ -176,7 +174,7 @@ setMethod(
     posData[names(posData) == i]
   }))),1:length)
   return(list(data = posData,
-              nreads = fpkm))
+              nreads = length(pos)))
 }
 
 
@@ -268,14 +266,11 @@ setMethod(
   # split data
   nreads <- mean(unlist(lapply(data,"[[","nreads")))
   data <- lapply(data,"[[","data")
-  # generate spm threshold
-  spmThreshold <- nreads * RNAMODR_DEFAULT_READ_PER_KB_SPM_CONVERSION
-  # message(ID,": ",spmThreshold)
   # analyze the transcript
   res <- .analyze_transcript(ID = ID,
                              modClasses = modClasses,
                              data = data,
-                             spmThreshold = spmThreshold,
+                             nreads = nreads,
                              locations = locations,
                              iterationN = 1)
   res <- res[order(as.numeric(unlist(lapply(res, "[[", "location"))))]
@@ -298,7 +293,7 @@ setMethod(
                                 location = testPosition$location,
                                 locations = locations,
                                 data = x,
-                                spmThreshold = spmThreshold))
+                                nreads = nreads))
   })
   names(res) <- names
   return(res)
@@ -315,7 +310,7 @@ setMethod(
 .analyze_transcript <- function(ID,
                                 modClasses,
                                 data,
-                                spmThreshold,
+                                nreads,
                                 locations,
                                 iterationN){
   if( iterationN > .get_transcript_max_iteration()) return(NULL)
@@ -328,7 +323,7 @@ setMethod(
                           .check_for_modification,
                           modClasses,
                           data,
-                          spmThreshold,
+                          nreads,
                           locations)
   # name the locations based on sequence position
   names(modifications) <- paste0(ID,
@@ -351,7 +346,7 @@ setMethod(
   return(append(modifications,.analyze_transcript(ID = ID,
                                                   modClasses = modClasses,
                                                   data = data,
-                                                  spmThreshold = spmThreshold,
+                                                  nreads = nreads,
                                                   locations = locations,
                                                   (iterationN+1))))
 }
@@ -382,16 +377,14 @@ setMethod(
 .check_for_modification <- function(location, 
                                     modClasses,
                                     data,
-                                    spmThreshold,
+                                    nreads,
                                     locations){
-  
-  # if(location == 1575 | location == 599 | location == 1420) { browser() }
   res <- lapply(modClasses, function(class){
     # short cut if amount/properties of data are not sufficient
     if( is.null(preTest(class,
                         location,
                         data,
-                        spmThreshold,
+                        nreads,
                         locations))) return(NULL)
     # If potential modification right in front of current location
     if(length(locations[locations == (location-1)]) != 0) {
@@ -401,7 +394,7 @@ setMethod(
                                                        data, 
                                                        .get_location_vector(location,
                                                                             getModType(class))),
-                                            spmThreshold,
+                                            nreads,
                                             locations[locations != location])
       if(!is.null(locTestPre)){
         # udpate data accordingly
@@ -419,7 +412,7 @@ setMethod(
                                                         data, 
                                                         .get_location_vector(location,
                                                                              getModType(class))),
-                                             spmThreshold,
+                                             nreads,
                                              locations[locations != location])
       if(!is.null(locTestPost)){
         # udpate data accordingly
@@ -433,7 +426,7 @@ setMethod(
                                 location = location,
                                 locations = locations,
                                 data = data,
-                                spmThreshold = spmThreshold))
+                                nreads = nreads))
   })
   res <- res[!vapply(res, is.null, logical(1))]
   if(length(res) > 1) return(NULL)

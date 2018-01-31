@@ -4,7 +4,7 @@ NULL
 RNAMODR_M3C_NUCLEOTIDE <- "C"
 RNAMODR_M3C_ARREST_RATE <- 0.95
 RNAMODR_M3C_P_THRESHOLD <- 0.05
-RNAMODR_M3C_SIGMA_THRESHOLD <- 5
+RNAMODR_M3C_SIG_THRESHOLD <- 50
 
 
 #' @rdname mod
@@ -50,18 +50,18 @@ setMethod(
   signature = signature(object = "mod_m3C",
                         location = "numeric",
                         data = "list",
-                        spmThreshold = "numeric",
+                        nreads = "numeric",
                         locations = "numeric"),
   definition = function(object,
                         location,
                         data,
-                        spmThreshold,
+                        nreads,
                         locations) {
     # do pretest
     res <- .do_M3C_pretest(location,
                            locations,
                            data,
-                           spmThreshold)
+                           nreads)
     return(res)
   }
 )
@@ -71,8 +71,8 @@ setMethod(
 .do_M3C_pretest <- function(location,
                             locations,
                             data,
-                            spmThreshold){
-  # if non G position skip position
+                            nreads){
+  # if non C position skip position
   if( names(locations[locations == location]) 
       != RNAMODR_M3C_NUCLEOTIDE){
     return(NULL)
@@ -83,27 +83,42 @@ setMethod(
   n <- length(data)
   # merge data for positions
   # data on the N+1 location
-  testData <- .aggregate_location_data(data, (location+1))
-  testData <- testData[testData > 0]
-  # if spm is not high enough
-  if(length(testData[testData >= spmThreshold]) < n) return(NULL)
+  testData <- .aggregate_location_data(data, (location + 1))
+  # if number of data points is not high enough
+  if(length(testData) < n) return(NULL)
   # base data to compare against
-  baseData <- .aggregate_not_location_data(data, (location+1))
+  baseData <- .aggregate_area_data(data, 
+                                   (location+1), 
+                                   60)
+  baseData <- baseData[baseData > 0]
   # if not enough data is present
-  if(length(testData) < n | 
-     length(baseData) < (3*n)) return(NULL)
-  # get test values
-  # overall mean and sd
-  mean <-  mean(baseData)
-  sd <-  stats::sd(baseData)
-  # Use the sigma level as value for signal strength
-  if( mean((as.numeric(as.character(testData)) - mean) %/% (mean+sd)) 
-      <= RNAMODR_M3C_SIGMA_THRESHOLD) {
-    return(NULL)
-  }
+  if(length(baseData) < (3*n)) return(NULL)
+  # Calculate the arrest rate per position
+  arrestData <- lapply(data,
+                       .get_arrest_rate)
+  # data on the arrect direction
+  testArrestData <- .aggregate_location_data(arrestData, location)
+  # No read arrest detectable
+  if( sum(testArrestData) < 0 ) return(NULL)
+  # To low arrest detectable
+  testArrest <- length(testArrestData[testArrestData >= RNAMODR_M3C_ARREST_RATE])
+  if( length(testArrestData) != testArrest ) return(NULL)
+  
+  
+  # # get test values
+  # # overall mean and sd
+  # mean <-  mean(baseData)
+  # sd <-  stats::sd(baseData)
+  # # Use the sigma level as value for signal strength
+  # if( ( mean( as.numeric( as.character(testData) ) - mean) %/% mean)
+  #     <= RNAMODR_D_SIGMA_THRESHOLD) {
+  #   return(NULL)
+  # }
+  
   return(list(n = n,
               testData = testData,
-              baseData = baseData))
+              baseData = baseData,
+              testArrestData = testArrestData))
 }
 
 #' @rdname checkForModification
@@ -118,22 +133,22 @@ setMethod(
                         location = "numeric",
                         locations = "numeric",
                         data = "list",
-                        spmThreshold = "numeric"),
+                        nreads = "numeric"),
   definition = function(object,
                         location,
                         locations,
                         data,
-                        spmThreshold) {
+                        nreads) {
     # browser()
     # get test result for the current location
     locTest <- .calc_M3C_test_values(location,
                                      locations,
                                      data,
-                                     spmThreshold)
+                                     nreads)
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
     # dynamic threshold based on the noise of the signal (high sd)
-    if(!.validate_M3C_pos(RNAMODR_M3C_SIGMA_THRESHOLD, 
+    if(!.validate_M3C_pos(RNAMODR_M3C_SIG_THRESHOLD, 
                           RNAMODR_M3C_P_THRESHOLD, 
                           locTest$sig.mean, 
                           locTest$p.value) ) {
@@ -161,47 +176,37 @@ setMethod(
 .calc_M3C_test_values <- function(location,
                                   locations,
                                   data,
-                                  spmThreshold){
+                                  nreads){
   # short cut if amount of data is not sufficient
   pretestData <- .do_M3C_pretest(location,
                                  locations,
                                  data,
-                                 spmThreshold)
+                                 nreads)
   if(is.null(pretestData)) return(NULL)
   # data from pretest
   testData <- pretestData$testData
   baseData <- pretestData$baseData
+  testArrestData <- pretestData$testArrestData
   n <- pretestData$n
-  # Calculate the arrest rate per position
-  arrestData <- lapply(data, .get_arrest_rate)
-  # data on the arrect direction
-  testArrestData <- .aggregate_location_data(arrestData, location)
-  # No read arrest detectable
-  if( sum(testArrestData) < 0 ) return(NULL)
-  # To low arrest detectable
-  testArrest <- length(testArrestData[testArrestData >= RNAMODR_M3C_ARREST_RATE])
-  if( length(testArrestData) != testArrest ) {
-    return(NULL)
-  }
-  # get test values
-  # overall mean and sd
-  baseData <- baseData[baseData > 0]
-  if(length(baseData) == 0) return(NULL)
-  median <-  stats::median(baseData)
-  # Use the sigma level as value for signal strength
-  sig <- (as.numeric(as.character(testData))) %/% median
-  
-  
-  # mean <-  mean(baseData)
-  # sd <-  stats::sd(baseData)
-  # # Use the sigma level as value for signal strength
-  # sig <- (as.numeric(as.character(testData)) - mean) %/% (mean+sd)
-  
-  sig.mean <- mean(sig)
+  # lower arrest rate threshold by 1% of maximal difference
+  y <- (RNAMODR_M3C_ARREST_RATE - (1 - RNAMODR_M3C_ARREST_RATE)/100)
+  # difference to threshold by relative percent
+  # minimal value of 1 since y is one percent lower than arrest rate threshold
+  sig <- (testArrestData - y) / (1 - y) * 100
+  # normalize to percentage of reads on transcript times 10 
+  # therefore max value = 100
+  # 5 * 1 (100%)
+  # 100 * 0.05 (5%)
+  x <- unlist(lapply(data,sum))
+  sig <- sig * (testData/x) * 10
+  sig.mean <- floor(mean(sig))
   sig.sd <- stats::sd(sig)
   # Since normality of distribution can not be assumed use the MWU
   # generate p.value for single position
-  p.value <- suppressWarnings(stats::wilcox.test(baseData, testData)$p.value)
+  # Does this have any meaning anymore? Can this be improved?
+  p.value <- suppressWarnings(stats::wilcox.test((baseData/mean(x)), 
+                                                 (testData/mean(x)))$p.value)
+  if(is.nan(p.value)) browser()
   return(list(sig = sig,
               sig.mean = sig.mean,
               sig.sd = sig.sd,

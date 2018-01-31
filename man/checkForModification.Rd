@@ -9,16 +9,16 @@
 \alias{checkForModification,mod_m7G,numeric,numeric,list,numeric-method}
 \title{checkForModification}
 \usage{
-checkForModification(object, location, locations, data, spmThreshold)
+checkForModification(object, location, locations, data, nreads)
 
 \S4method{checkForModification}{mod_D,numeric,numeric,list,numeric}(object,
-  location, locations, data, spmThreshold)
+  location, locations, data, nreads)
 
 \S4method{checkForModification}{mod_m3C,numeric,numeric,list,numeric}(object,
-  location, locations, data, spmThreshold)
+  location, locations, data, nreads)
 
 \S4method{checkForModification}{mod_m7G,numeric,numeric,list,numeric}(object,
-  location, locations, data, spmThreshold)
+  location, locations, data, nreads)
 }
 \description{
 \code{mod_D}

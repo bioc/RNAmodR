@@ -52,12 +52,14 @@ NULL
   y <- unlist(lapply(seq_along(x), function(i){
     a <- x[i]
     b <- x[(i+1)]
-    # infinite in one direction
-    if(is.na(b) || b == 0) return(-1)
+    if(is.na(b) || b == 0) {
+      b <- 1
+    }
+    if(is.na(a) || a == 0) {
+      a <- 1
+    }
     # max = 1 in one direction
     if(a <= b) return((1-a/b))
-    # infinite in other direction
-    if(is.na(a) || a == 0) return(1)
     # min = -1 in other direction
     return((b/a-1))
   }))
@@ -97,9 +99,16 @@ NULL
 .aggregate_area_data <- function(data, 
                                  location, 
                                  width){
-  unlist(lapply(data,function(dataPerReplicate){
+  unlist(.subset_area_data(data, 
+                           location, 
+                           width))
+}
+.subset_area_data <- function(data, 
+                              location, 
+                              width){
+  lapply(data,function(dataPerReplicate){
     return(dataPerReplicate[as.numeric(names(dataPerReplicate)) < (location+width) &
                               as.numeric(names(dataPerReplicate)) > (location-width) &
                               as.numeric(names(dataPerReplicate)) != location])
-  }))
+  })
 }
