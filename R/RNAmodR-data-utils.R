@@ -107,8 +107,16 @@ NULL
                               location, 
                               width){
   lapply(data,function(dataPerReplicate){
-    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) < (location+width) &
-                              as.numeric(names(dataPerReplicate)) > (location-width) &
+    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) < (location + width) &
+                              as.numeric(names(dataPerReplicate)) > (location - width) &
                               as.numeric(names(dataPerReplicate)) != location])
+  })
+}
+.subset_area_data2 <- function(data, 
+                               location, 
+                               width){
+  lapply(data,function(dataPerReplicate){
+    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) < (location + width) &
+                              as.numeric(names(dataPerReplicate)) > (location - width)])
   })
 }

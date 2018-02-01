@@ -197,7 +197,7 @@ setMethod(
   # therefore max value = 100
   # 1 * 5 (50%)
   # 100 * 0.05 (0.5%)
-  x <- unlist(lapply(data,sum))
+  x <- unlist(lapply(.subset_area_data2(data,location,75),sum))
   sig <- sig * (testData/x) * 10
   sig.mean <- floor(mean(sig))
   sig.sd <- stats::sd(sig)

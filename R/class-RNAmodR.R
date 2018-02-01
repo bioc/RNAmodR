@@ -158,7 +158,8 @@ setMethod(
   # Names of the first seven cols will be overwritten and are expected to fit
   # to the data type
   cols <- colnames(samples)
-  if( length(cols) < length(standardCols) ) {
+  if( length(cols) < length(standardCols) |
+      !all(cols[1:length(standardCols)] == standardCols) ) {
     stop("Please check the format of the csv file. It should be ; delimited ",
          "and contain at least the following columns: ",
          paste(standardCols, collapse = ","))

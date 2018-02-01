@@ -2,7 +2,7 @@
 NULL
 
 RNAMODR_M7G_NUCLEOTIDE <- "G"
-RNAMODR_M7G_ARREST_RATE <- 0.95
+RNAMODR_M7G_ARREST_RATE <- 0.96
 RNAMODR_M7G_P_THRESHOLD <- 0.05
 RNAMODR_M7G_SIG_THRESHOLD <- 50
 
@@ -197,7 +197,7 @@ setMethod(
   # therefore max value = 100
   # 5 * 1 (100%)
   # 100 * 0.05 (5%)
-  x <- unlist(lapply(data,sum))
+  x <- unlist(lapply(.subset_area_data2(data,location,75),sum))
   sig <- sig * (testData/x) * 10
   sig.mean <- floor(mean(sig))
   sig.sd <- stats::sd(sig)
