@@ -1,6 +1,6 @@
-Package: RNAmod
+Package: RNAmodR
 Type: Package
-Title: What the Package Does (one line, title case)
+Title: RNAmodR: detecting post-transcriptional RNA modification
 Version: 0.1
 Date: 2018-01-11
 Authors@R: person("Felix G.M.", 
@@ -8,44 +8,57 @@ Authors@R: person("Felix G.M.",
                   email = "felix.g.m.ernst@outlook.com", 
                   role = c("aut", "cre"))
 Description:
-  What the package does (one paragraph).
+  Based on known pattern of read positions RNAmodR detects post-transcriptional
+  RNA modifications in HTS data. RNAmodR is designed to be extendable, so that
+  detection and analysis of new patterns in HTS data can be added easily. 
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
-LazyData: true
 Collate: 
-  'RNAmod.R'
+  'RNAmodR.R'
   'AllGenerics.R'
   'AllGenerics-export.R'
-  'RNAModString.R'
-  'RNAmod-utils-preparations.R'
-  'RNAmod-utils.R'
+  'class-RNAmodR.R'
+  'class-RNAmodR-analysis-type.R'
+  'RNAmodR-data-utils.R'
+  'RNAmodR-data.R'
+  'RNAmodR-options.R'
+  'methods-RNAmodR-plot.R'
+  'RNAmodR-plot-utils.R'
+  'RNAmodR-ranges-utils.R'
+  'RNAmodR-utils-preparations.R'
+  'RNAmodR-utils.R'
   'assertions.R'
-  'class-RNAmod-type.R'
-  'class-RNAmod-D.R'
-  'class-RNAmod-default.R'
-  'class-RNAmod-m3C.R'
-  'class-RNAmod-m7G.R'
-  'class-RNAmod.R'
-  'methods-RNAmod-compare.R'
-  'methods-RNAmod-parse.R'
-  'methods-RNAmod-plot.R'
-  'methods-RNAmod.R'
+  'class-RNAmodR-mod-type.R'
+  'class-RNAmodR-analysis-default.R'
+  'class-RNAmodR-mod-D.R'
+  'class-RNAmodR-mod-m3C.R'
+  'class-RNAmodR-mod-m7G.R'
   'methods-RNAmodR-analysis.R'
+  'methods-RNAmodR-compare.R'
+  'methods-RNAmodR-parse.R'
+  'methods-RNAmodR.R'
 Imports:
   methods,
   assertive,
-  Rsamtools,
-  BiocParallel,
-  Biostrings,
-  rtracklayer,
-  GenomicRanges,
+  stats,
+  stringr,
   ggplot2,
-  GenomeInfoDb,
-  S4Vectors,
+  ggrepel,
+  scales,
+  gridExtra,
   BiocGenerics,
-  tRNAscan2GRanges,
-  ggrepel
+  S4Vectors,
+  Biostrings,
+  BiocParallel,
+  GenomicRanges,
+  GenomicAlignments,
+  IRanges,
+  SummarizedExperiment,
+  GenomeInfoDb,
+  Rsamtools,
+  rtracklayer,
+  tRNAscan2GRanges
 Suggests: testthat,
   knitr,
   rmarkdown

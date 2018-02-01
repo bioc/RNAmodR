@@ -1,0 +1,170 @@
+#' @include RNAmodR.R
+#' @include class-RNAmodR.R
+NULL
+
+#' @name analysis
+#' 
+#' @title analysis
+#' 
+#' @description
+#' The class is virtual and has to be extended from, eg. \code{analysis_default}
+#'  
+#' The analysis class is the main function for detecting modifications. It works
+#' usually in a three step manner.
+#' \itemize{
+#'   \item{"1."}{\code{convertReadsToPositions}: This function aggregates the
+#'   information of reads per bam file, eg. per replicate and stores them for
+#'   subsequent analysis}
+#'   \item{"2."}{\code{parseMod}: This function searches for a defined pattern. 
+#'   For this \code{mod} class objects will be created on the fly based on the 
+#'   names of the modification one wants to detect and which can understand the
+#'   data aggregated by \code{convertReadsToPositions}.}
+#'   \item{"3."}{\code{mergePositionsOfReplicates}: This function aggregates the
+#'   base data further for storage. This involves usually generating a per
+#'   position mean and sd or equivalent.}
+#' }
+#' 
+#' @export
+setClass("analysis",
+         contains = "VIRTUAL",
+         slots = c(plotType = "character",
+                   data = "list",
+                   modifications = "list"),
+         prototype = list(plotType = "default",
+                          data = list(),
+                          modifications = list())
+)
+setMethod(
+  f = "show", 
+  signature = signature(object = "analysis"),
+  definition = function(object) {
+    
+  }
+)
+
+#' @rdname analysis-accessors
+#' 
+#' @title Accessor for \code{analysis} class objects
+#' 
+#' @description
+#' The accessor function to \code{analysis} class objects can be used to access
+#' the data saved in slots of the object. See examples for available functions.
+#' 
+#' @param object analysis object 
+#' 
+#' @return character defining the plot type for this analysis class
+#' @export
+#'
+#' @examples
+#' \donttest{
+#' getPlotType(analysis)
+#' getPositions(analysis)
+#' getModifications(analysis)
+#' }
+setMethod(
+  f = "getPlotType", 
+  signature = signature(object = "analysis"),
+  definition = function(object) {
+    return(object@plotType)
+  }
+)
+
+#' @rdname analysis-accessors
+#'
+#' @return a list of data as a lists of list(replicate) of DataFrame(transcript)
+#' @export
+setMethod(
+  f = "getPositions", 
+  signature = signature(object = "analysis"),
+  definition = function(object) {
+    return(object@data)
+  }
+)
+
+#' @rdname analysis-accessors
+#'
+#' @return a list of data as a lists of list(replicate) of DataFrame(transcript)
+#' @export
+setMethod(
+  f = "getModifications", 
+  signature = signature(object = "analysis"),
+  definition = function(object) {
+    return(object@modifications)
+  }
+)
+
+
+# analysis class handling ------------------------------------------------------
+
+# load classes for modification analysis
+.load_analysis_classes <- function(analysis){
+  analysisClasses <- vector(mode = "list", length = length(analysis))
+  names(analysisClasses) <- analysis
+  for(i in seq_along(analysis)){
+    className <- paste0("analysis_",analysis[[i]])
+    # try to create modification detection classes
+    tryCatch(
+      class <- new(className),
+      error = function(e) stop("Class for '",
+                               analysis[[1]],
+                               "' analysis does not exist (",className,").",
+                               call. = FALSE)
+    )
+    # if( !existsMethod("convertReadsToPositions",signature(class(class),
+    #                                                       "numeric",
+    #                                                       "GRanges",
+    #                                                       "DataFrame") ) )
+    #   stop("Function convertReadsToPositions() not defined for ",class(class))
+    # if( !existsMethod("parseMod",signature(class(class),
+    #                                        "GRanges",
+    #                                        "FaFile",
+    #                                        "list") ) )
+    #   stop("Function parseMod() not defined for ",class(class))
+    # if( !existsMethod("mergePositionsOfReplicates",signature(class(class),
+    #                                                          "GRanges",
+    #                                                          "FaFile",
+    #                                                          "list") ) )
+    #   stop("Function mergePositionsOfReplicates() not defined for ",
+    #        class(class))
+    analysisClasses[[i]] <- class
+  }
+  return(analysisClasses)
+}
+
+
+# modification class handling --------------------------------------------------
+
+# load classes for modification analysis
+.load_mod_classes <- function(modifications){
+  modClasses <- vector(mode = "list", length = length(modifications))
+  for(i in seq_along(modifications)){
+    className <- paste0("mod_",modifications[[i]])
+    # try to create modification detection classes
+    tryCatch(
+      class <- new(className),
+      error = function(e) stop("Class for detecting ",
+                               modifications[[1]],
+                               " does not exist (",className,").",
+                               call. = FALSE)
+    )
+    # if( !existsMethod("convertReadsToPositions",signature(class(class),
+    #                                                       "numeric",
+    #                                                       "GRanges",
+    #                                                       "DataFrame") ) )
+    #   stop("Function convertReadsToPositions() not defined for ",class(class))
+    # if( !existsMethod("parseMod",signature(class(class),
+    #                                        "GRanges",
+    #                                        "FaFile",
+    #                                        "list") ) )
+    #   stop("Function parseMod() not defined for ",class(class))
+    # if( !existsMethod("mergePositionsOfReplicates",signature(class(class),
+    #                                                          "GRanges",
+    #                                                          "FaFile",
+    #                                                          "list") ) )
+    #   stop("Function mergePositionsOfReplicates() not defined for ",
+    #        class(class))
+    modClasses[[i]] <- class
+  }
+  names(modClasses) <- modifications
+  return(modClasses)
+}

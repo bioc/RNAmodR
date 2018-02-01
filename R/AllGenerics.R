@@ -1,4 +1,4 @@
-#' @include RNAmod.R
+#' @include RNAmodR.R
 NULL
 
 # experiment data---------------------------------------------------------------
@@ -29,28 +29,14 @@ setGeneric (
                modification ){standardGeneric(".saveSummarizedExperiments")} 
 ) 
 
-#' #' @title .loadGff
-#' #' 
-#' #' @description
-#' #' Loads saved gff3 as GRanges object from file
-#' setGeneric ( 
-#'   name= ".loadGff", 
-#'   def=function(.Object, 
-#'                experiment, 
-#'                modification,
-#'                failOnNonExist = TRUE){
-#'     standardGeneric(".loadGff")
-#'   } 
-#' ) 
-
-#' @title .saveGff
+#' @title .saveGffResult
 #' 
 #' @description
 #' Saves GRanges object as gff3 file
 setGeneric ( 
-  name= ".saveGff", 
+  name= ".saveGffResult", 
   def=function(.Object, 
                gff, 
                experiment, 
-               modification ){standardGeneric(".saveGff")} 
+               modification ){standardGeneric(".saveGffResult")} 
 ) 
