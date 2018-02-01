@@ -2,9 +2,9 @@
 NULL
 
 RNAMODR_M7G_NUCLEOTIDE <- "G"
-RNAMODR_M7G_ARREST_RATE <- 0.96
+RNAMODR_M7G_ARREST_RATE <- 0.95
 RNAMODR_M7G_P_THRESHOLD <- 0.05
-RNAMODR_M7G_SIG_THRESHOLD <- 50
+RNAMODR_M7G_SIG_THRESHOLD <- 5
 
 
 #' @rdname mod
@@ -50,18 +50,15 @@ setMethod(
   signature = signature(object = "mod_m7G",
                         location = "numeric",
                         data = "list",
-                        nreads = "numeric",
                         locations = "numeric"),
   definition = function(object,
                         location,
                         data,
-                        nreads,
                         locations) {
     # do pretest
     res <- .do_M7G_pretest(location,
                            locations,
-                           data,
-                           nreads)
+                           data)
     return(res)
   }
 )
@@ -70,15 +67,14 @@ setMethod(
 # this is in a seperate function since it is also called by checkForModification
 .do_M7G_pretest <- function(location,
                             locations,
-                            data,
-                            nreads){
+                            data){
+  # if(location == 1575) browser()
   # if non G position skip position
   if( names(locations[locations == location]) != RNAMODR_M7G_NUCLEOTIDE){
     return(NULL)
   }
   # do not take into account position 1
   if(location == 1) return(NULL)
-  # browser()
   # number of replicates
   n <- length(data)
   # merge data for positions
@@ -86,6 +82,8 @@ setMethod(
   testData <- .aggregate_location_data(data, (location + 1))
   # if number of data points is not high enough
   if(length(testData) < n) return(NULL)
+  # if stop coverage is to low
+  if(length(testData[testData > RNAMODR_M7G_ARREST_RATE]) < n) return(NULL)
   # base data to compare against
   baseData <- .aggregate_area_data(data, 
                                    (location + 1), 
@@ -93,32 +91,9 @@ setMethod(
   baseData <- baseData[baseData > 0]
   # if not enough data is present
   if(length(baseData) < (3*n)) return(NULL)
-  # Calculate the arrest rate per position
-  arrestData <- lapply(data,
-                       .get_arrest_rate)
-  # data on the arrect direction
-  testArrestData <- .aggregate_location_data(arrestData, location)
-  # No read arrest detectable
-  if( sum(testArrestData) < 0 ) return(NULL)
-  # To low arrest detectable
-  testArrest <- length(testArrestData[testArrestData >= RNAMODR_M7G_ARREST_RATE])
-  if( length(testArrestData) != testArrest ) return(NULL)
-  
-  
-  # # get test values
-  # # overall mean and sd
-  # mean <-  mean(baseData)
-  # sd <-  stats::sd(baseData)
-  # # Use the sigma level as value for signal strength
-  # if( ( mean( as.numeric( as.character(testData) ) - mean) %/% mean)
-  #     <= RNAMODR_D_SIGMA_THRESHOLD) {
-  #   return(NULL)
-  # }
-  
   return(list(n = n,
               testData = testData,
-              baseData = baseData,
-              testArrestData = testArrestData))
+              baseData = baseData))
 }
 
 #' @rdname checkForModification
@@ -132,19 +107,16 @@ setMethod(
   signature = signature(object = "mod_m7G",
                         location = "numeric",
                         locations = "numeric",
-                        data = "list",
-                        nreads = "numeric"),
+                        data = "list"),
   definition = function(object,
                         location,
                         locations,
-                        data,
-                        nreads) {
+                        data) {
     # if(location == 1925) { browser() }
     # get test result for the current location
     locTest <- .calc_M7G_test_values(location,
                                      locations,
-                                     data,
-                                     nreads)
+                                     data)
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
     # dynamic threshold based on the noise of the signal (high sd)
@@ -175,38 +147,29 @@ setMethod(
 # test for m7G at current location
 .calc_M7G_test_values <- function(location,
                                   locations,
-                                  data,
-                                  nreads){
+                                  data){
   # short cut if amount of data is not sufficient
   pretestData <- .do_M7G_pretest(location,
                                  locations,
-                                 data,
-                                 nreads)
+                                 data)
+  # if(location == 1575) browser()
   if(is.null(pretestData)) return(NULL)
   # data from pretest
   testData <- pretestData$testData
   baseData <- pretestData$baseData
-  testArrestData <- pretestData$testArrestData
   n <- pretestData$n
   # lower arrest rate threshold by 1% of maximal difference
   y <- (RNAMODR_M7G_ARREST_RATE - (1 - RNAMODR_M7G_ARREST_RATE)/100)
   # difference to threshold by relative percent
   # minimal value of 1 since y is one percent lower than arrest rate threshold
-  sig <- ((testArrestData - y) / (1 - y)) * 100
-  # normalize to percentage of reads on transcript times 10 
-  # therefore max value = 100
-  # 5 * 1 (100%)
-  # 100 * 0.05 (5%)
-  x <- unlist(lapply(.subset_area_data2(data,location,75),sum))
-  sig <- sig * (testData/x) * 10
-  sig.mean <- floor(mean(sig))
+  sig <- floor((testData - y) / (1 - y) * 100)
+  sig.mean <- mean(sig)
   sig.sd <- stats::sd(sig)
   # Since normality of distribution can not be assumed use the MWU
   # generate p.value for single position
   # Does this have any meaning anymore? Can this be improved?
-  p.value <- suppressWarnings(stats::wilcox.test((baseData/mean(x)), 
-                                                 (testData/mean(x)))$p.value)
-  if(is.nan(p.value)) browser()
+  p.value <- suppressWarnings(stats::wilcox.test(baseData,
+                                                 testData)$p.value)
   return(list(sig = sig,
               sig.mean = sig.mean,
               sig.sd = sig.sd,

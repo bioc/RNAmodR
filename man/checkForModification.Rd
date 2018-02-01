@@ -4,21 +4,21 @@
 \docType{methods}
 \name{checkForModification}
 \alias{checkForModification}
-\alias{checkForModification,mod_D,numeric,numeric,list,numeric-method}
-\alias{checkForModification,mod_m3C,numeric,numeric,list,numeric-method}
-\alias{checkForModification,mod_m7G,numeric,numeric,list,numeric-method}
+\alias{checkForModification,mod_D,numeric,numeric,list-method}
+\alias{checkForModification,mod_m3C,numeric,numeric,list-method}
+\alias{checkForModification,mod_m7G,numeric,numeric,list-method}
 \title{checkForModification}
 \usage{
-checkForModification(object, location, locations, data, nreads)
+checkForModification(object, location, locations, data)
 
-\S4method{checkForModification}{mod_D,numeric,numeric,list,numeric}(object,
-  location, locations, data, nreads)
+\S4method{checkForModification}{mod_D,numeric,numeric,list}(object, location,
+  locations, data)
 
-\S4method{checkForModification}{mod_m3C,numeric,numeric,list,numeric}(object,
-  location, locations, data, nreads)
+\S4method{checkForModification}{mod_m3C,numeric,numeric,list}(object, location,
+  locations, data)
 
-\S4method{checkForModification}{mod_m7G,numeric,numeric,list,numeric}(object,
-  location, locations, data, nreads)
+\S4method{checkForModification}{mod_m7G,numeric,numeric,list}(object, location,
+  locations, data)
 }
 \description{
 \code{mod_D}

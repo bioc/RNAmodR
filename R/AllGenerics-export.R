@@ -304,7 +304,6 @@ setGeneric(
   def = function(object,
                  location,
                  data,
-                 nreads,
                  locations){standardGeneric("preTest")} 
 ) 
 
@@ -318,8 +317,7 @@ setGeneric(
   def = function(object,
                  location,
                  locations,
-                 data,
-                 nreads){standardGeneric("checkForModification")} 
+                 data){standardGeneric("checkForModification")} 
 ) 
 
 

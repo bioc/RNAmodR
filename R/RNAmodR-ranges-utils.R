@@ -45,10 +45,9 @@ NULL
   }
   # offset positions based on how many positions the read has passed from
   # transcription start
-  positions <- unlist(lapply(positions, 
-                             FUN = .move_postion,
-                             posToBeRemoved, 
-                             strand))
+  positions <- .move_positions(positions, 
+                               posToBeRemoved, 
+                               strand)
   # reset to relative positions to gene start
   if(.is_on_minus_strand(gr)){
     positions <- BiocGenerics::end(gr) - positions + 1
@@ -58,11 +57,11 @@ NULL
   return(positions)
 }
 
-# offset positions based on how many positions the read has passed from
-# transcription start
-.move_postion <- function(positions,
-                          posToBeRemoved,
-                          strand){
+# offset positions based on how many positions to be removed the read has passed 
+# from transcription start
+.move_positions <- function(positions,
+                            posToBeRemoved,
+                            strand){
   x <- unlist(posToBeRemoved)
   positions <- positions[!(positions %in% x)]
   unlist(lapply(positions, function(position){
@@ -73,6 +72,19 @@ NULL
     }
     position
   }))
+}
+# offset positions based on how many positions the read has passed from
+# transcription start. used the name for identification
+.move_positions_named <- function(positions,
+                                  posToBeRemoved,
+                                  strand){
+  x <- unlist(posToBeRemoved)
+  names(positions) <- as.numeric(names(positions))
+  positions <- positions[!(names(positions) %in% x)]
+  names(positions) <- .move_positions(as.numeric(names(positions)),
+                                      posToBeRemoved,
+                                      strand)
+  positions
 }
 
 # aggregate the positions occupied by introns
