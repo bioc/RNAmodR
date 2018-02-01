@@ -24,34 +24,30 @@ NULL
 }
 
 # converts global to local positions and modifies data accoringly
-.convert_global_to_local_position <- function(gff,
-                                              gr,
-                                              data,
-                                              posToBeRemoved){
-  if(missing(posToBeRemoved)){
-    # get a list of introns and the position which are void
-    posToBeRemoved <- .get_intron_positions(gff,
-                                            gr$ID)
-  }
-  # GA specific handling
-  # move position based on strand
-  strand <- .get_unique_strand(gr)
-  data <- data[.is_on_correct_strand(data,strand)]
+.convert_global_to_local_position <- function(gr,
+                                              data){
   # interest in read's 5' position
-  if(.is_on_minus_strand(gr)){
-    positions <- BiocGenerics::end(data)
-  } else {
-    positions <- BiocGenerics::start(data)
-  }
-  # offset positions based on how many positions the read has passed from
-  # transcription start
-  positions <- .move_positions(positions, 
-                               posToBeRemoved, 
-                               strand)
   # reset to relative positions to gene start
   if(.is_on_minus_strand(gr)){
+    positions <- BiocGenerics::end(data)
     positions <- BiocGenerics::end(gr) - positions + 1
   } else {
+    positions <- BiocGenerics::start(data)
+    positions <- positions - BiocGenerics::start(gr) + 1
+  }
+  return(positions)
+}
+
+# converts global to local positions and modifies data accoringly
+.convert_global_to_local_position <- function(gr,
+                                              data){
+  # interest in read's 5' position
+  # reset to relative positions to gene start
+  if(.is_on_minus_strand(gr)){
+    positions <- BiocGenerics::end(data)
+    positions <- BiocGenerics::end(gr) - positions + 1
+  } else {
+    positions <- BiocGenerics::start(data)
     positions <- positions - BiocGenerics::start(gr) + 1
   }
   return(positions)
@@ -73,6 +69,27 @@ NULL
     position
   }))
 }
+
+# offset positions based on how many positions to be removed the read has passed 
+# from transcription start
+.move_reads <- function(ga,
+                        posToBeRemoved){
+  browser()
+  x <- unlist(posToBeRemoved)
+  ga <- ga[!(BiocGenerics::start(ga) %in% x) &
+             !(BiocGenerics::end(ga) %in% x)]
+  unlist(lapply(ga, function(read){
+    if(.is_minus_strand(read)){
+      BiocGenerics::start(read) <- BiocGenerics::start(read) + length(x[x>BiocGenerics::start(read)])
+      BiocGenerics::end(read) <- BiocGenerics::end(read) + length(x[x>BiocGenerics::end(read)])
+    } else {
+      BiocGenerics::start(read) <- BiocGenerics::start(read) - length(x[x>BiocGenerics::start(read)])
+      BiocGenerics::end(read) <- BiocGenerics::end(read) - length(x[x>BiocGenerics::end(read)])
+    }
+    read
+  }))
+}
+
 # offset positions based on how many positions the read has passed from
 # transcription start. used the name for identification
 .move_positions_named <- function(positions,

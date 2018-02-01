@@ -35,23 +35,19 @@ setClass("RNAmodR",
          slots = c(
            experimentName = "character",
            inputFile = "character",
-           inputGFF = "character",
            inputFasta = "character",
-           .dataSamples = "data.frame",
+           .dataSamples = "DataFrame",
            .dataFasta = "FaFile",
-           .dataGFF = "GRanges",
+           .txdb = "TxDb",
            .wd = "character",
            .inputFolder = "character",
-           .outputFolder = "character",
-           .mapQuality = "numeric"
+           .outputFolder = "character"
          ),
          prototype=list(
-           .dataSamples = data.frame(),
-           .dataGFF = GenomicRanges::GRanges(),
+           .dataSamples = S4Vectors::DataFrame(),
            .wd = "",
            .inputFolder = "data/",
-           .outputFolder = "results/",
-           .mapQuality = 20
+           .outputFolder = "results/"
          )
 )
 
@@ -63,29 +59,38 @@ setClass("RNAmodR",
 #' @export
 RNAmodR <- function(experimentName, 
                     experimentLayout, 
-                    experimentGFF, 
+                    experimentTxDb, 
                     experimentFasta){
   
   # Input check
-  if(missing(experimentName)) stop("Experimental name not provided")
-  if(missing(experimentLayout)) stop("Experimental layout not provided")
-  if(missing(experimentGFF)) stop("experimentGFF information not provided")
+  if(missing(experimentName)) stop("Experimental name not provided",
+                                   call. = FALSE)
+  if(missing(experimentLayout)) stop("Experimental layout not provided",
+                                     call. = FALSE)
+  if(missing(experimentTxDb)) stop("experimentTxDb information not provided",
+                                   call. = FALSE)
   if(missing(experimentFasta)) 
-    stop("experimentFasta information not provided")
+    stop("experimentFasta information not provided",
+         call. = FALSE)
   
   if(!is.character(experimentName)) 
-    stop("experimentName can only be assigned a character vector of length 1")
+    stop("experimentName can only be assigned a character vector of length 1",
+         call. = FALSE)
   if(!is.character(experimentLayout)) 
-    stop("experimentLayout can only be assigned a character vector of length 1")
-  if(!is.character(experimentGFF)) 
-    stop("experimentGFF can only be assigned a character vector of length 1")
+    stop("experimentLayout can only be assigned a character vector of length 1",
+         call. = FALSE)
+  if(!is_TxDb(experimentTxDb) & !is.character(experimentTxDb))
+    stop("experimentTxDb can only be assigned a TxDb object or a character ",
+         "vector of length 1",
+         call. = FALSE)
   if(!is.character(experimentFasta)) 
-    stop("experimentFasta can only be assigned a character vector of length 1")
+    stop("experimentFasta can only be assigned a character vector of length 1",
+         call. = FALSE)
   
   class <- new("RNAmodR", 
                experimentName, 
                experimentLayout, 
-               experimentGFF, 
+               experimentTxDb, 
                experimentFasta)
   return(class)
 }
@@ -96,10 +101,9 @@ setMethod(
   definition = function(.Object, 
                         experimentName, 
                         experimentLayout, 
-                        experimentGFF, 
+                        experimentTxDb, 
                         experimentFasta) {
     requireNamespace("rtracklayer", quietly = TRUE)
-    
     # Save data to slots
     .Object@experimentName <- experimentName
     .Object@.wd <- paste0("./", .Object@experimentName, "/")
@@ -107,75 +111,86 @@ setMethod(
     .Object@inputFile <- paste0(.Object@.wd, 
                                 .Object@.inputFolder, 
                                 experimentLayout)
-    .Object@inputGFF <- paste0(.Object@.wd, 
-                               .Object@.inputFolder, 
-                               experimentGFF)
     .Object@inputFasta <- paste0(.Object@.wd, 
                                  .Object@.inputFolder, 
                                  experimentFasta)
-    
     # check for existing and readable files
     assertive::assert_all_are_existing_files(c(.Object@inputFile,
-                                               .Object@inputGFF,
                                                .Object@inputFasta))
     
     # Load fasta and gff file
-    .Object@inputFasta <- .matchFastaToGFF(.Object@inputFasta, 
-                                           .Object@inputGFF)
     .Object@.dataFasta <- Rsamtools::FaFile(.Object@inputFasta)
     Rsamtools::indexFa(.Object@inputFasta)
-    .Object@.dataGFF <- rtracklayer::import.gff3(.Object@inputGFF,
-                                                 colnames = RNAMODR_GFF_COLNAMES)
-    if( any( names(Rsamtools::scanFa(.Object@.dataFasta)) != unique(rtracklayer::chrom(.Object@.dataGFF)) ) ) {
+    # save, load, create txdb object
+    .Object@.txdb <- .get_txdb_object(.Object,
+                                      experimentTxDb)
+    if( !all( names(Rsamtools::scanFa(.Object@.dataFasta)) %in% seqlevels(.Object@.txdb) ) ) {
       stop("Names of sequences in the fasta file do not match the chromosome names in the gff file")
     }
-    
     #load sample data
     samples <- .check_sample_data(utils::read.csv(.Object@inputFile, 
                                                   header = TRUE, 
                                                   stringsAsFactors = FALSE, 
-                                                  sep = ";"),
+                                                  sep = ";",
+                                                  fileEncoding = "UTF-8-BOM"),
                                    getInputFolder(.Object))
-    
     .Object@.dataSamples <- samples
-    
     return(.Object)
   }
 )
 
-.check_for_column <- function(sampleData, column){
-  # Does the column exist?
-  if( !(column %in% colnames(sampleData) ) ) return(FALSE)
-  # are they all NA?
-  if( all( is.na(sampleData[,column]) ) ) return(FALSE)
-  return(TRUE)
+# save, load, create txdb object
+.get_txdb_object <- function(.Object,
+                             input){
+  if(is_TxDb(input)) return(input)
+  fileName <- paste0(.Object@.wd, 
+                     .Object@.inputFolder,
+                     input)
+  if(assertive::is_existing_file(fileName)){
+    gff <- rtracklayer::import.gff3(fileName)
+    # Fix bullshit annotations
+    types <- as.character(gff$type)
+    if(any(types == "rRNA_gene")) {
+      types[types == "rRNA_gene"] <- "rRNA"
+    }
+    if(any(types == "tRNA_gene")) {
+      types[types == "tRNA_gene"] <- "tRNA"
+    }
+    gff$type <- types
+    rtracklayer::export.gff3(object = gff, 
+                             con = fileName)
+    return(GenomicFeatures::makeTxDbFromGFF(fileName))
+  }
+  stop("Could not create TxDb object. No TxDb object given and now file found.",
+       call. = FALSE)
 }
 
 # Checks experimental data for validity
-.check_sample_data <- function(samples, inputFolder){
-  standardCols <- c("ExperimentNo","SampleName",
-                    "ShortName","Replicate","BamFile")
+.check_sample_data <- function(samples,
+                               inputFolder){
+  samples <- S4Vectors::DataFrame(samples)
   # Names of the first seven cols will be overwritten and are expected to fit
   # to the data type
   cols <- colnames(samples)
-  if( length(cols) < length(standardCols) |
-      !all(cols[1:length(standardCols)] == standardCols) ) {
+  if( length(cols) < length(RNAMODR_DEFAULT_COLNAMES) |
+      !all(cols[1:length(RNAMODR_DEFAULT_COLNAMES)] == RNAMODR_DEFAULT_COLNAMES) ) {
     stop("Please check the format of the csv file. It should be ; delimited ",
          "and contain at least the following columns: ",
-         paste(standardCols, collapse = ","))
+         paste(RNAMODR_DEFAULT_COLNAMES, collapse = ","),
+         call. = FALSE)
   }
-  cols[1:length(standardCols)] <- standardCols
+  cols[1:length(RNAMODR_DEFAULT_COLNAMES)] <- RNAMODR_DEFAULT_COLNAMES
   colnames(samples) <- cols
-  
   # Check if ExperimentNo and ExperimentName match
   tmpExperimentNo <- as.numeric(samples$ExperimentNo)
-  tmpSampleName <- paste0(as.character(samples$SampleName),"_",as.character(samples$Replicate))
-  
+  tmpSampleName <- paste0(as.character(samples$SampleName),
+                          "_",
+                          as.character(samples$Replicate))
   if( !assertive::are_same_length(tmpExperimentNo, tmpSampleName)){
     stop("ExperimentNo and SampleName/Replicate are ambigeous. Check layout ",
-         "file for errors in these columns.")
+         "file for errors in these columns.",
+         call. = FALSE)
   }
-  
   # Check inputs
   assertive::assert_all_are_positive(samples$ExperimentNo)
   assertive::assert_all_are_whole_numbers(samples$ExperimentNo)
@@ -184,45 +199,21 @@ setMethod(
   assertive::assert_all_are_positive(samples$Replicate)
   assertive::assert_all_are_whole_numbers(samples$Replicate)
   assertive::assert_all_are_existing_files(paste0(inputFolder,samples$BamFile))
-  
-  return(samples)
-}
-
-# matches the names in fasta file to the chromosome identifier in the GFF file
-# to allow easy subsetting with GenomicRanges
-.matchFastaToGFF <- function(inputFasta, 
-                             inputGFF){
-  assertive::assert_all_are_existing_files(c(inputFasta,inputGFF))
-  
-  fsa <- Biostrings::readDNAStringSet(inputFasta)
-  gff <- rtracklayer::import.gff3(inputGFF)
-  
-  # number of chromosomes and sequences have to match
-  if( !assertive::are_same_length(names(fsa), unique(rtracklayer::chrom(gff)))){
-    stop("Fasta and GFF file don't have matching number of sequences/",
-         "sequence identifiers. Please make sure that the number of fasta ",
-         "sequences matches the number of unique chromosome identifiers in ",
-         "the GFF file. The names of the fasta sequences will be overridden ",
-         "with the chromosomal identifier from the GFF file.",
+  assertive::assert_all_are_whole_numbers(samples$MapQuality)
+  # check modifications
+  samples$Modifications <- lapply(samples$Modifications,
+                                  function(str){str_split(str, ",")})
+  modifications <- unique(unlist(samples$Modifications))
+  modClasses <- .load_mod_classes(modifications)
+  # check for valid condition types
+  types <- unique(samples$Conditions)
+  if(!all(types %in% RNAMODR_SAMPLE_TYPES)){
+    stop("Not all condition types are valid. Valid types are:\n",
+         paste(RNAMODR_SAMPLE_TYPES, collapse = ","),
          call. = FALSE)
   }
-  
-  # if identifies already match skip renaming
-  if( all(names(fsa) == unique(rtracklayer::chrom(gff)))){
-    return(inputFasta)
-  }
-  
-  names(fsa) <- unique(rtracklayer::chrom(gff))
-  
-  fileName <- gsub(".fsa","_fixed.fsa",inputFasta)
-  fileName <- gsub(".fasta","_fixed.fasta",fileName)
-  Biostrings::writeXStringSet(fsa, fileName)
-  
-  message(paste0("Fasta file ", fileName, " with modified sequence names",
-                 " written."))
-  return(fileName)
+  return(samples)
 }
-
 
 # default class methods --------------------------------------------------------
 
@@ -274,10 +265,10 @@ setMethod(
 #'
 #' @export
 setMethod(
-  f = "getGFFFile",
+  f = "getTxDb",
   signature = signature(.Object = "RNAmodR"),
   definition = function(.Object){
-    return(.Object@.dataGFF)
+    return(.Object@.txdb)
   }
 )
 #' @rdname RNAmodR-Accessors

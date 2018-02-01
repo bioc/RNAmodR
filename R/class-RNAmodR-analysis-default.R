@@ -46,17 +46,17 @@ setMethod(
   f = "convertReadsToPositions",
   signature = signature(object = "analysis_default",
                         files = "character",
-                        gff = "GRanges",
+                        txdb = "TxDb",
                         param = "ScanBamParam"),
   definition = function(object,
                         files,
-                        gff,
+                        txdb,
                         param) {
     message(Sys.time())
     # detect modifications in each file
     data <- lapply(files,
                    FUN = .get_positions,
-                   gff,
+                   txdb,
                    param)
     data <- data[!is.null(data)]
     if(length(data) == 0){
@@ -72,7 +72,7 @@ setMethod(
 
 # detect modifications in each file
 .get_positions <- function(bamFile,
-                           gff,
+                           txdb,
                            param){
   bamData <- GenomicAlignments::readGAlignments(bamFile,
                                                 param = param)
@@ -80,24 +80,24 @@ setMethod(
   totalCounts <- Rsamtools::idxstatsBam(bamFile,
                                         param = param)
   totalCounts <- sum(totalCounts$mapped)
-  # process result and split into chunks based on gff
-  IDs <- .get_IDs_from_scanBamParam(param)
-  gff_subset <- gff[.get_unique_identifiers(gff) %in% IDs,]
+  # process result and split into chunks based on transcripts
+  browser()
+  transcripts <- transcripts(txdb)
   hits <- IRanges::findOverlaps(bamData,
-                                gff_subset)
+                                transcripts)
   bamData <- IRanges::extractList(bamData, 
                                   S4Vectors::split(
                                     S4Vectors::from(hits),
                                     as.factor(S4Vectors::to(hits))))
-  names(bamData) <- .get_unique_identifiers(gff_subset)[
-    as.numeric(names(bamData))]
+  names(bamData) <- transcripts[unique(to(hits))]$tx_name
   
   # bamData <- bamData[names(bamData) %in% c("RDN18-1") |
   #                      grepl("^t",names(bamData))]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "tE(TTC)B")]
+  bamData <- bamData[names(bamData) %in% c("YAL030W_mRNA")]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
-  #                                          "YAL030W")]
+  #                                          "YAL030W_mRNA")]
   # bamData <- bamData[names(bamData) %in% c("YJL047C",
   #                                          "YHR199C-A")]
   # bamData <- bamData[names(bamData) %in% c("YBR041W",
@@ -122,7 +122,7 @@ setMethod(
                                       bamData,
                                       names(bamData),
                                       MoreArgs = list(totalCounts,
-                                                      gff),
+                                                      txdb),
                                       SIMPLIFY = FALSE)
   # BiocParallel::register(bak_param)
   names(positions) <- names(bamData)
@@ -142,26 +142,30 @@ setMethod(
 .get_position_data_of_transcript <- function(data,
                                              id,
                                              counts,
-                                             gff){
+                                             txdb){
   # skip if transcript does not have data
   if(length(data) == 0) return(NULL)
   # get ID and GRanges
-  gr <- .subset_gff_for_unique_transcript(gff, 
-                                          id)
+  browser()
+  
+  
+  
   # get a list of introns and the position which are void
   posToBeRemoved <- .get_intron_positions(gff,
                                           gr$ID)
+  browser()
   # get the transcript length
   length <- width(gr) - length(unlist(posToBeRemoved))
   # discard reads out of boundaries
+  data <- data[.is_on_correct_strand(data,strand)]
   data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
   data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
+  data <- .move_reads(data,
+                      posToBeRemoved)
   # do position conversion to translate genomic position to local transcript
   # position. take care of introns, etc
-  stops <- .convert_global_to_local_position(gff,
-                                             gr,
-                                             data,
-                                             posToBeRemoved)
+  stops <- .convert_global_to_local_position(gr,
+                                             data)
   # if number of reads per transcript length is not enough - FPKM
   fpk <- length(stops)/(length/1000)
   # message(id, ": ", fpkm)
@@ -175,6 +179,12 @@ setMethod(
     if(length(stopsData[names(stopsData) == i]) == 0) return(0)
     stopsData[names(stopsData) == i]
   }))),1:length)
+  return(list(data = stopsData,
+              reads = data))
+}
+
+.calculate_signal_Data <- function(data,
+                                   stopsData){
   # get coverage
   coverage <- as.numeric(GenomicAlignments::coverage(data, method = "hash")[[id]])
   names(coverage) <- BiocGenerics::start(gr):BiocGenerics::end(gr)
@@ -186,10 +196,8 @@ setMethod(
   # calculate relative amount of stops per coverage as percent
   posData <- .remove_data_from_position_with_low_coverage(stopsData,
                                                           coverage) / coverage
-  return(list(data = posData,
-              stopsData = stopsData,
-              coverage = coverage))
 }
+
 
 .remove_data_from_position_with_low_coverage <- function(stopsData,
                                                          coverage){
@@ -230,11 +238,11 @@ setMethod(
 setMethod(
   f = "parseMod",
   signature = signature(object = "analysis_default",
-                        gff = "GRanges",
+                        txdb = "TxDb",
                         fafile = "FaFile",
                         modClasses = "list"),
   definition = function(object,
-                        gff,
+                        txdb,
                         fafile,
                         modClasses) {
     message(Sys.time())

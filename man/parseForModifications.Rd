@@ -3,13 +3,12 @@
 \docType{methods}
 \name{parseForModifications}
 \alias{parseForModifications}
-\alias{parseForModifications,RNAmodR,numeric,character-method}
+\alias{parseForModifications,RNAmodR,numeric-method}
 \title{parseForModifications}
 \usage{
-parseForModifications(.Object, number, modifications)
+parseForModifications(.Object, number)
 
-\S4method{parseForModifications}{RNAmodR,numeric,character}(.Object, number,
-  modifications)
+\S4method{parseForModifications}{RNAmodR,numeric}(.Object, number)
 }
 \arguments{
 \item{.Object}{a RNAmod object.}

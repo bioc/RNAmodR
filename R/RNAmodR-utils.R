@@ -284,52 +284,6 @@ setMethod(
 
 # sequence handling ------------------------------------------------------------
 
-#' @rdname matchFastaToGff
-#'
-#' @param inputFasta fasta file to be used for renaming
-#' @param inputGFF gff file containing gene, mRNA and CDS annotation data
-#'
-#' @return TRUE
-#' @export
-#' 
-#' @import Biostrings
-#' @import rtracklayer
-setMethod(
-  f = "matchFastaToGff", 
-  signature = signature(inputFasta = "character", 
-                        inputGFF = "character"),
-  definition = function(inputFasta , 
-                        inputGFF){
-    requireNamespace("Biostrings", quietly = TRUE)
-    requireNamespace("rtracklayer", quietly = TRUE)
-    assertive::assert_all_are_existing_files(c(inputFasta,inputGFF))
-    
-    fsa <- readDNAStringSet(inputFasta)
-    gff <- import.gff3(inputGFF)
-    
-    # number of chromosomes and sequences have to match
-    if( !assertive::are_same_length(names(fsa), 
-                                    unique(rtracklayer::chrom(gff)))){
-      stop("Fasta and GFF file don't have matching number of sequences/",
-           "sequence identifiers. Please make sure that the number of ",
-           "fasta sequences matches the number of unique chromosome ",
-           "identifiers in the GFF file. The names of the fasta ",
-           "sequences will be overridden with the chromosomal ",
-           "identifier from the GFF file.",
-           call. = FALSE)
-    }
-    
-    names(fsa) <- unique(chrom(gff))
-    
-    fileName <- gsub(".fsa","_fixed.fsa",inputFasta)
-    writeXStringSet(fsa, fileName)
-    
-    message(paste0("Fasta file ", fileName, " written."))
-    
-    return(invisible(TRUE))
-  }
-)
-
 # retrieve concats DNAStrings based on the strand
 .get_seq_for_unique_transcript <- function(gff,fafile,ID){
   if(length(unique(as.character(BiocGenerics::strand(gff)))) != 1) {

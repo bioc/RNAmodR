@@ -4,21 +4,21 @@
 \docType{methods}
 \name{convertReadsToPositions}
 \alias{convertReadsToPositions}
-\alias{convertReadsToPositions,analysis_default,character,GRanges,ScanBamParam-method}
+\alias{convertReadsToPositions,analysis_default,character,TxDb,ScanBamParam-method}
 \title{convertReadsToPositions}
 \usage{
-convertReadsToPositions(object, files, gff, param)
+convertReadsToPositions(object, files, txdb, param)
 
 
-  \S4method{convertReadsToPositions}{analysis_default,character,GRanges,ScanBamParam}(object,
-  files, gff, param)
+  \S4method{convertReadsToPositions}{analysis_default,character,TxDb,ScanBamParam}(object,
+  files, txdb, param)
 }
 \arguments{
 \item{object}{analysis object}
 
 \item{files}{files which to analyze}
 
-\item{gff}{a GRanges object for the genome}
+\item{txdb}{a TxDb object}
 
 \item{param}{ScanBamParam to use for loading the bam files}
 }

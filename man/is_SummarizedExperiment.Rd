@@ -6,7 +6,7 @@
 \alias{assert_all_are_SummarizedExperiment}
 \title{assertive: SummarizedExperiment}
 \usage{
-is_SummarizedExperiment(x, .xname = get_name_in_parents(x))
+is_SummarizedExperiment(x, .xname = assertive.base::get_name_in_parent(x))
 
 assert_is_SummarizedExperiment(x, severity = getOption("assertive.severity",
   "stop"))

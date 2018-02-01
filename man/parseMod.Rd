@@ -4,18 +4,18 @@
 \docType{methods}
 \name{parseMod}
 \alias{parseMod}
-\alias{parseMod,analysis_default,GRanges,FaFile,list-method}
+\alias{parseMod,analysis_default,TxDb,FaFile,list-method}
 \title{parseMod}
 \usage{
-parseMod(object, gff, fafile, modClasses)
+parseMod(object, txdb, fafile, modClasses)
 
-\S4method{parseMod}{analysis_default,GRanges,FaFile,list}(object, gff, fafile,
+\S4method{parseMod}{analysis_default,TxDb,FaFile,list}(object, txdb, fafile,
   modClasses)
 }
 \arguments{
 \item{object}{mod object}
 
-\item{gff}{a GRanges object for the genome}
+\item{txdb}{a TxDb object}
 
 \item{fafile}{a FaFile object for the genome}
 

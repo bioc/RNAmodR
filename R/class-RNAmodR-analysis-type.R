@@ -106,7 +106,7 @@ setMethod(
     tryCatch(
       class <- new(className),
       error = function(e) stop("Class for '",
-                               analysis[[1]],
+                               analysis[[i]],
                                "' analysis does not exist (",className,").",
                                call. = FALSE)
     )
@@ -143,7 +143,7 @@ setMethod(
     tryCatch(
       class <- new(className),
       error = function(e) stop("Class for detecting ",
-                               modifications[[1]],
+                               modifications[[i]],
                                " does not exist (",className,").",
                                call. = FALSE)
     )
