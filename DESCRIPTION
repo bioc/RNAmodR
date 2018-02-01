@@ -1,8 +1,8 @@
 Package: RNAmodR
 Type: Package
 Title: RNAmodR: detecting post-transcriptional RNA modification
-Version: 0.1
-Date: 2018-01-11
+Version: 0.2
+Date: 2018-02-01
 Authors@R: person("Felix G.M.", 
                   "Ernst", 
                   email = "felix.g.m.ernst@outlook.com", 
