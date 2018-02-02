@@ -6,12 +6,12 @@
 \alias{getInputFolder}
 \alias{getOutputFolder}
 \alias{getExperimentName}
-\alias{getTxDb}
+\alias{getGFFFile}
 \alias{getFastaFile}
 \alias{getInputFolder,RNAmodR-method}
 \alias{getOutputFolder,RNAmodR-method}
 \alias{getExperimentName,RNAmodR-method}
-\alias{getTxDb,RNAmodR-method}
+\alias{getGFFFile,RNAmodR-method}
 \alias{getFastaFile,RNAmodR-method}
 \title{Accessors for RNAmodR Object}
 \usage{
@@ -21,7 +21,7 @@ getOutputFolder(.Object)
 
 getExperimentName(.Object)
 
-getTxDb(.Object)
+getGFFFile(.Object)
 
 getFastaFile(.Object)
 
@@ -31,7 +31,7 @@ getFastaFile(.Object)
 
 \S4method{getExperimentName}{RNAmodR}(.Object)
 
-\S4method{getTxDb}{RNAmodR}(.Object)
+\S4method{getGFFFile}{RNAmodR}(.Object)
 
 \S4method{getFastaFile}{RNAmodR}(.Object)
 }
@@ -45,7 +45,7 @@ getFastaFile(.Object)
 also the path identifier, which is expected to contain the data and source 
 folder.
 
-\code{getTxDb}: the input TxDb object
+\code{getGFFFile}: the information of the input gff file as GRanges object
 
 \code{getFastaFile}: the link to the fasta file as FaFile class
 }
@@ -53,7 +53,7 @@ folder.
 Accessors for RNAmodR Object
 }
 \examples{
-\donttest{#' 
+\donttest{
 unzip(system.file("extdata", package = "RNAmodR", file = "RNAmodR.zip" ))
 mod <- RNAmodR("test",
                "test_layout.csv",
@@ -62,7 +62,7 @@ mod <- RNAmodR("test",
 getInputFolder(mod)  
 getOutputFolder(mod)  
 getExperimentName(mod)  
-getTxDb(mod)  
+getGFFFile(mod)  
 getFastaFile(mod)
 }
 }

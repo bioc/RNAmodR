@@ -47,23 +47,27 @@ setMethod(
     # group the analysis types
     analysisGroups <- stats::setNames(lapply(unique(analysisTypes), 
                                              function(x){
-      names(analysisTypes[analysisTypes == x])
-    }),unique(analysisTypes))
+                                               names(analysisTypes[analysisTypes == x])
+                                             }),unique(analysisTypes))
     # load the analysis classes
     analysisClasses <- .load_analysis_classes(names(analysisGroups))
-    # extract transcripts
-    txdb <- .Object@.txdb
+    # extract gene boundaries
+    gff <- .Object@.dataGFF
+    # subset to relevant annotations 
+    gff_subset <- .get_parent_annotations(
+      .subset_rnamod_containing_features(gff)
+    )
     # combine path and file name
     files <- paste0(getInputFolder(.Object),experiment$BamFile)
     # assemble param for scanBam
-    param <- .assemble_scanBamParam(transcripts(txdb), 
+    param <- .assemble_scanBamParam(gff_subset, 
                                     .Object@.mapQuality,
                                     .get_acceptable_chrom_ident(files))
     # load data into each analysis class
     analysisClasses <- sapply(names(analysisGroups), function(className){
       convertReadsToPositions(analysisClasses[[className]],
                               files,
-                              txdb,
+                              gff,
                               param)
     }, simplify = FALSE, USE.NAMES = TRUE)
     # parse data in each analysis class for the subset of modifications
@@ -73,7 +77,7 @@ setMethod(
                                             getAnalysisType, 
                                             character(1)) == className]
       parseMod(analysisClasses[[className]],
-               txdb,
+               gff,
                .Object@.dataFasta,
                modClassesSubset)
     }, simplify = FALSE, USE.NAMES = TRUE)
@@ -119,8 +123,6 @@ setMethod(
     return(invisible(TRUE))
   }
 )
-
-
 
 # Construct DataFrame from RNAmod results per modification from individual
 # gene results
