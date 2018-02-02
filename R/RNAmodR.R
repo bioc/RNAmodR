@@ -16,6 +16,7 @@ NULL
 #' @import rtracklayer
 #' @import Rsamtools
 #' @import GenomicRanges
+#' @import GenomicFeatures
 #' @import GenomicAlignments
 #' @import ggplot2
 #' @importFrom stats setNames wilcox.test sd median
@@ -25,6 +26,7 @@ requireNamespace("BiocParallel")
 requireNamespace("Biostrings")
 requireNamespace("rtracklayer")
 requireNamespace("GenomicRanges")
+requireNamespace("GenomicFeatures")
 requireNamespace("GenomicAlignments")
 requireNamespace("assertive")
 
@@ -36,6 +38,9 @@ requireNamespace("assertive")
 #                               "biological_region",
 #                               "five_prime_UTR",
 #                               "three_prime_UTR")
+
+
+# GFF/GRanges contants ---------------------------------------------------------
 RNAMODR_GFF_COLNAMES <- c("source",
                          "type",
                          "score",
@@ -75,12 +80,26 @@ RNAMODR_MOD_TRANSCRIPT_FEATURES <- c("gene",
                                     "five_prime_UTR_intron",
                                     "three_prime_UTR_intron")
 
+# Import constants -------------------------------------------------------------
+RNAMODR_SAMPLE_TYPES <- c("Treated",
+                          "Control")
+RNAMODR_DEFAULT_COLNAMES <- c("ExperimentNo",
+                              "SampleName",
+                              "ShortName",
+                              "Replicate",
+                              "Conditions",
+                              "Modifications",
+                              "BamFile",
+                              "MapQuality")
 
-# Settings
-RNAMODR_DEFAULT_PALETTE <- "Set1"
+# parsing settings -------------------------------------------------------------
 RNAMODR_DEFAULT_TRANSCRIPT_MAX_ITERATIONS <- 3
 RNAMODR_DEFAULT_MAPQ <- 5
 
+# Visualization settings -------------------------------------------------------
+RNAMODR_DEFAULT_PALETTE <- "Set1"
+
+# Settings ---------------------------------------------------------------------
 .onLoad <- function(libname,pkgname){
   options("RNAmodR_map_quality" = RNAMODR_DEFAULT_MAPQ)
   options("RNAmodR_sample_transcripts" = c("RDN18-1"))

@@ -46,11 +46,11 @@ setMethod(
   f = "convertReadsToPositions",
   signature = signature(object = "analysis_default",
                         files = "character",
-                        gff = "GRanges",
+                        txdb = "TxDb",
                         param = "ScanBamParam"),
   definition = function(object,
                         files,
-                        gff,
+                        txdb,
                         param) {
     message(Sys.time())
     # detect modifications in each file
@@ -72,25 +72,24 @@ setMethod(
 
 # detect modifications in each file
 get_transcript_data <- function(bamFile,
-                           gff,
-                           param){
+                                gff,
+                                param){
   bamData <- GenomicAlignments::readGAlignments(bamFile,
                                                 param = param)
   # Total counts
   totalCounts <- Rsamtools::idxstatsBam(bamFile,
                                         param = param)
   totalCounts <- sum(totalCounts$mapped)
-  # process result and split into chunks based on gff
-  IDs <- .get_IDs_from_scanBamParam(param)
-  gff_subset <- gff[.get_unique_identifiers(gff) %in% IDs,]
+  # process result and split into chunks based on transcripts
+  browser()
+  transcripts <- transcripts(txdb)
   hits <- IRanges::findOverlaps(bamData,
-                                gff_subset)
+                                transcripts)
   bamData <- IRanges::extractList(bamData, 
                                   S4Vectors::split(
                                     S4Vectors::from(hits),
                                     as.factor(S4Vectors::to(hits))))
-  names(bamData) <- .get_unique_identifiers(gff_subset)[
-    as.numeric(names(bamData))]
+  names(bamData) <- transcripts[unique(to(hits))]$tx_name
   
   bamData <- bamData[names(bamData) %in% c("RDN18-1") |
                        grepl("^t",names(bamData))]
@@ -99,7 +98,7 @@ get_transcript_data <- function(bamFile,
   
   # bamData <- bamData[names(bamData) %in% c("YMR116C")]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
-  #                                          "YAL030W")]
+  #                                          "YAL030W_mRNA")]
   # bamData <- bamData[names(bamData) %in% c("YJL047C",
   #                                          "YHR199C-A")]
   # bamData <- bamData[names(bamData) %in% c("YBR041W",
@@ -143,20 +142,25 @@ get_transcript_data <- function(bamFile,
 .get_position_data_of_transcript <- function(data,
                                              id,
                                              counts,
-                                             gff){
+                                             txdb){
   # skip if transcript does not have data
   if(length(data) == 0) return(NULL)
   # get ID and GRanges
-  gr <- .subset_gff_for_unique_transcript(gff, 
-                                          id)
+  browser()
+  
+  
+  
   # get a list of introns and the position which are void
   posToBeRemoved <- .get_intron_positions(gff,
                                           gr$ID)
   # move position based on strand
   data <- data[.is_on_correct_strand(data,.get_unique_strand(gr))]
   # discard reads out of boundaries
+  data <- data[.is_on_correct_strand(data,strand)]
   data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
   data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
+  data <- .move_reads(data,
+                      posToBeRemoved)
   # do position conversion to translate genomic position to local transcript
   # position. take care of introns, etc
   stopsData <- .convert_global_stops_to_local_stops(gff,
@@ -217,11 +221,11 @@ get_transcript_data <- function(bamFile,
 setMethod(
   f = "parseMod",
   signature = signature(object = "analysis_default",
-                        gff = "GRanges",
+                        txdb = "TxDb",
                         fafile = "FaFile",
                         modClasses = "list"),
   definition = function(object,
-                        gff,
+                        txdb,
                         fafile,
                         modClasses) {
     message(Sys.time())

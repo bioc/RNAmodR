@@ -19,7 +19,7 @@ NULL
 #' also the path identifier, which is expected to contain the data and source 
 #' folder.
 #' 
-#' \code{getGFFFile}: the information of the input gff file as GRanges object
+#' \code{getTxDb}: the input TxDb object
 #' 
 #' \code{getFastaFile}: the link to the fasta file as FaFile class
 #' 
@@ -33,7 +33,7 @@ NULL
 #' getInputFolder(mod)  
 #' getOutputFolder(mod)  
 #' getExperimentName(mod)  
-#' getGFFFile(mod)  
+#' getTxDb(mod)  
 #' getFastaFile(mod)
 #' }
 NULL
@@ -63,8 +63,8 @@ setGeneric(
 #' 
 #' @export
 setGeneric( 
-  name = "getGFFFile",
-  def = function(.Object ){standardGeneric("getGFFFile")} 
+  name = "getTxDb",
+  def = function(.Object ){standardGeneric("getTxDb")} 
 ) 
 #' @rdname RNAmodR-Accessors
 #' 
@@ -236,15 +236,15 @@ setGeneric(
 #' 
 #' @param object analysis object 
 #' @param files files which to analyze
+#' @param txdb a TxDb object
 #' @param param ScanBamParam to use for loading the bam files
-#' @param gff a GRanges object for the genome
 #'
 #' @export
 setGeneric( 
   name = "convertReadsToPositions",
   def = function(object,
                  files,
-                 gff,
+                 txdb,
                  param){standardGeneric("convertReadsToPositions")} 
 ) 
 
@@ -253,7 +253,7 @@ setGeneric(
 #' @title parseMod
 #' 
 #' @param object mod object 
-#' @param gff a GRanges object for the genome
+#' @param txdb a TxDb object
 #' @param fafile a FaFile object for the genome
 #' @param modClasses list of modification classes used for parsing
 #' 
@@ -261,7 +261,7 @@ setGeneric(
 setGeneric( 
   name = "parseMod",
   def = function(object,
-                 gff,
+                 txdb,
                  fafile,
                  modClasses){standardGeneric("parseMod")} 
 ) 

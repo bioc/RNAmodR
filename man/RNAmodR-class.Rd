@@ -8,7 +8,7 @@
 \alias{show,RNAmodR-method}
 \title{RNAmodR Class}
 \usage{
-RNAmodR(experimentName, experimentLayout, experimentGFF, experimentFasta)
+RNAmodR(experimentName, experimentLayout, experimentTxDb, experimentFasta)
 
 \S4method{show}{RNAmodR}(object)
 }

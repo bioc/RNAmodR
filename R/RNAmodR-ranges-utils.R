@@ -29,6 +29,7 @@ NULL
                                                  data,
                                                  posToBeRemoved){
   # interest in read's 5' position
+  # reset to relative positions to gene start
   if(.is_on_minus_strand(gr)){
     stops <- BiocGenerics::end(data)
   } else {
