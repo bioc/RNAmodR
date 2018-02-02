@@ -281,18 +281,6 @@ setGeneric(
 
 # mod type functions -----------------------------------------------------------
 
-#' @name maskPositionData
-#' 
-#' @title maskPositionData
-#' 
-#' @export
-setGeneric( 
-  name = "maskPositionData",
-  def = function(object,
-                 data,
-                 modLocations){standardGeneric("maskPositionData")} 
-) 
-
 #' @name preTest
 #' 
 #' @title preTest

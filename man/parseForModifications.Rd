@@ -27,6 +27,6 @@ mod <- RNAmodR("test",
                "test_layout.csv",
                "test_gff.gff3",
                "test_masked.fasta")
-parseForModifications(mod,1,"m7G")               
+parseForModifications(mod,1)               
 }
 }

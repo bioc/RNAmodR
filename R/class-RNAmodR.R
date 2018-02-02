@@ -45,6 +45,7 @@ setClass("RNAmodR",
          ),
          prototype=list(
            .dataSamples = S4Vectors::DataFrame(),
+           .dataGFF = GenomicRanges::GRanges(),
            .wd = "",
            .inputFolder = "data/",
            .outputFolder = "results/"
@@ -117,7 +118,6 @@ setMethod(
     # check for existing and readable files
     assertive::assert_all_are_existing_files(c(.Object@inputFile,
                                                .Object@inputFasta))
-    
     # Load fasta and gff file
     .Object@.dataFasta <- Rsamtools::FaFile(.Object@inputFasta)
     Rsamtools::indexFa(.Object@inputFasta)
@@ -139,35 +139,8 @@ setMethod(
   }
 )
 
-# save, load, create txdb object
-.get_txdb_object <- function(.Object,
-                             input){
-  if(is_TxDb(input)) return(input)
-  fileName <- paste0(.Object@.wd, 
-                     .Object@.inputFolder,
-                     input)
-  if(assertive::is_existing_file(fileName)){
-    gff <- rtracklayer::import.gff3(fileName)
-    # Fix bullshit annotations
-    types <- as.character(gff$type)
-    if(any(types == "rRNA_gene")) {
-      types[types == "rRNA_gene"] <- "rRNA"
-    }
-    if(any(types == "tRNA_gene")) {
-      types[types == "tRNA_gene"] <- "tRNA"
-    }
-    gff$type <- types
-    rtracklayer::export.gff3(object = gff, 
-                             con = fileName)
-    return(GenomicFeatures::makeTxDbFromGFF(fileName))
-  }
-  stop("Could not create TxDb object. No TxDb object given and now file found.",
-       call. = FALSE)
-}
-
 # Checks experimental data for validity
-.check_sample_data <- function(samples,
-                               inputFolder){
+.check_sample_data <- function(samples, inputFolder){
   samples <- S4Vectors::DataFrame(samples)
   # Names of the first seven cols will be overwritten and are expected to fit
   # to the data type
@@ -210,6 +183,27 @@ setMethod(
   if(!all(types %in% RNAMODR_SAMPLE_TYPES)){
     stop("Not all condition types are valid. Valid types are:\n",
          paste(RNAMODR_SAMPLE_TYPES, collapse = ","),
+         call. = FALSE)
+  }
+  return(samples)
+}
+
+# matches the names in fasta file to the chromosome identifier in the GFF file
+# to allow easy subsetting with GenomicRanges
+.matchFastaToGFF <- function(inputFasta, 
+                             inputGFF){
+  assertive::assert_all_are_existing_files(c(inputFasta,inputGFF))
+  
+  fsa <- Biostrings::readDNAStringSet(inputFasta)
+  gff <- rtracklayer::import.gff3(inputGFF)
+  
+  # number of chromosomes and sequences have to match
+  if( !assertive::are_same_length(names(fsa), unique(rtracklayer::chrom(gff)))){
+    stop("Fasta and GFF file don't have matching number of sequences/",
+         "sequence identifiers. Please make sure that the number of fasta ",
+         "sequences matches the number of unique chromosome identifiers in ",
+         "the GFF file. The names of the fasta sequences will be overridden ",
+         "with the chromosomal identifier from the GFF file.",
          call. = FALSE)
   }
   return(samples)

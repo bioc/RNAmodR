@@ -2,7 +2,7 @@
 NULL
 
 RNAMODR_D_NUCLEOTIDE <- "T"
-RNAMODR_D_ARREST_RATE <- 0.95
+RNAMODR_D_ARREST_RATE <- 0.45
 RNAMODR_D_P_THRESHOLD <- 0.05
 RNAMODR_D_SIG_THRESHOLD <- 5
 
@@ -16,27 +16,6 @@ RNAMODR_D_SIG_THRESHOLD <- 5
 setClass("mod_D",
          contains = "mod",
          prototype = list(modType = "D")
-)
-
-#' @rdname maskPositionData
-#' 
-#' @description 
-#' \code{mod_D}
-#' 
-#' @export
-setMethod(
-  f = "maskPositionData",
-  signature = signature(object = "mod_D",
-                        data = "numeric",
-                        modLocations = "numeric"),
-  definition = function(object,
-                        data,
-                        modLocations) {
-    data[as.numeric(names(data)) %in% (modLocations+1)] <- 
-      data[as.numeric(names(data)) %in% (modLocations+1)] * 
-      (1-RNAMODR_D_ARREST_RATE)
-    return(data)
-  }
 )
 
 #' @rdname preTest
@@ -93,8 +72,7 @@ setMethod(
   if(length(baseData) < (3*n)) return(NULL)
   return(list(n = n,
               testData = testData,
-              baseData = baseData,
-              testArrestData = testArrestData))
+              baseData = baseData))
 }
 
 #' @rdname checkForModification
@@ -113,7 +91,6 @@ setMethod(
                         location,
                         locations,
                         data) {
-    # browser()
     # get test result for the current location
     locTest <- .calc_D_test_values(location,
                                    locations,
