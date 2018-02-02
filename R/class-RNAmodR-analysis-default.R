@@ -55,7 +55,7 @@ setMethod(
     message(Sys.time())
     # detect modifications in each file
     data <- lapply(files,
-                   FUN = .get_positions,
+                   FUN = get_transcript_data,
                    gff,
                    param)
     data <- data[!is.null(data)]
@@ -71,7 +71,7 @@ setMethod(
 
 
 # detect modifications in each file
-.get_positions <- function(bamFile,
+get_transcript_data <- function(bamFile,
                            gff,
                            param){
   bamData <- GenomicAlignments::readGAlignments(bamFile,
@@ -92,10 +92,12 @@ setMethod(
   names(bamData) <- .get_unique_identifiers(gff_subset)[
     as.numeric(names(bamData))]
   
-  # bamData <- bamData[names(bamData) %in% c("RDN18-1") |
-  #                      grepl("^t",names(bamData))]
+  bamData <- bamData[names(bamData) %in% c("RDN18-1") |
+                       grepl("^t",names(bamData))]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "tE(TTC)B")]
+  
+  # bamData <- bamData[names(bamData) %in% c("YMR116C")]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "YAL030W")]
   # bamData <- bamData[names(bamData) %in% c("YJL047C",
@@ -111,25 +113,24 @@ setMethod(
             "'")
     return(NULL)
   }
-  
   # param <- BiocParallel::bpparam()
   # bak_param <- param
   # param$workers <- 2
   # BiocParallel::register(param)
-  positions <- mapply(
-  # positions <- BiocParallel::bpmapply(
-                                      FUN = .get_position_data_of_transcript,
-                                      bamData,
-                                      names(bamData),
-                                      MoreArgs = list(totalCounts,
-                                                      gff),
-                                      SIMPLIFY = FALSE)
+  transcripts <- mapply(
+    # transcripts <- BiocParallel::bpmapply(
+    FUN = .get_position_data_of_transcript,
+    bamData,
+    names(bamData),
+    MoreArgs = list(totalCounts,
+                    gff),
+    SIMPLIFY = FALSE)
   # BiocParallel::register(bak_param)
-  names(positions) <- names(bamData)
+  names(transcripts) <- names(bamData)
   # remove entries for transcript for which position data is sufficient
-  positions <- positions[!vapply(positions, is.null, logical(1))]
-  if(length(positions) == 0) return(NULL)
-  return(positions)
+  transcripts <- transcripts[!vapply(transcripts, is.null, logical(1))]
+  if(length(transcripts) == 0) return(NULL)
+  return(transcripts)
 }
 
 .estimate_number_of_workers <- function(){
@@ -151,56 +152,42 @@ setMethod(
   # get a list of introns and the position which are void
   posToBeRemoved <- .get_intron_positions(gff,
                                           gr$ID)
-  # get the transcript length
-  length <- width(gr) - length(unlist(posToBeRemoved))
+  # move position based on strand
+  data <- data[.is_on_correct_strand(data,.get_unique_strand(gr))]
   # discard reads out of boundaries
   data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
   data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
   # do position conversion to translate genomic position to local transcript
   # position. take care of introns, etc
-  stops <- .convert_global_to_local_position(gff,
-                                             gr,
-                                             data,
-                                             posToBeRemoved)
-  # if number of reads per transcript length is not enough - FPKM
-  fpk <- length(stops)/(length/1000)
-  # message(id, ": ", fpkm)
-  if(fpk < RNAMODR_DEFAULT_FPK_THRESHOLD) return(NULL)
-  # Normalize counts per positions against million of reads in BamFile
-  # posData <- table(pos)/(counts/10^6)
-  stopsData <- table(stops)
-  # spread table with zero values to the length of transcript
-  stopsData <- stats::setNames(as.double(unlist(lapply(1:length, 
-                                              function(i){
-    if(length(stopsData[names(stopsData) == i]) == 0) return(0)
-    stopsData[names(stopsData) == i]
-  }))),1:length)
-  # get coverage
-  coverage <- as.numeric(GenomicAlignments::coverage(data, method = "hash")[[id]])
-  names(coverage) <- BiocGenerics::start(gr):BiocGenerics::end(gr)
-  # take care of intron positions
-  coverage <- .move_positions_named(coverage, 
-                                    posToBeRemoved, 
-                                    .get_unique_strand(gr))
+  stopsData <- .convert_global_stops_to_local_stops(gff,
+                                                    gr,
+                                                    data,
+                                                    posToBeRemoved)
+  # get coverage per position
+  coverage <- .convert_global_coverage_to_local_coverage(gff,
+                                                         gr,
+                                                         data,
+                                                         posToBeRemoved)
   if(length(stopsData) != length(coverage)) browser()
   # calculate relative amount of stops per coverage as percent
-  posData <- .remove_data_from_position_with_low_coverage(stopsData,
-                                                          coverage) / coverage
-  return(list(data = posData,
-              stopsData = stopsData,
-              coverage = coverage))
+  posData <- .calc_relative_stop_data(stopsData,
+                                      coverage)
+  return(list(data = posData))
 }
 
-.remove_data_from_position_with_low_coverage <- function(stopsData,
-                                                         coverage){
+.calc_relative_stop_data <- function(stopsData,
+                                     coverage){
   # remove low coverage positions by setting pos data to zero
   toLowCoverage <- names(coverage[coverage < RNAMODR_DEFAULT_COVERAGE_MIN])
   # add first position since has by definition a value of 1
   toLowCoverage <- c(toLowCoverage,1)
-  stopsData[toLowCoverage] <- 0
-  stopsData
+  # avoid deviding by zero
+  coverage[toLowCoverage] <- 1
+  # calc relative stop data
+  res <- stopsData / coverage
+  res[toLowCoverage] <- 0
+  res
 }
-
 
 #' @rdname parseMod
 #' 
@@ -293,30 +280,9 @@ setMethod(
   res <- .analyze_transcript(ID = ID,
                              modClasses = modClasses,
                              data = data,
-                             locations = locations,
-                             iterationN = 1)
+                             locations = locations)
   res <- res[order(as.numeric(unlist(lapply(res, "[[", "location"))))]
   if(is.null(res)) return(NULL)
-  # recalculate sigma values by masking all positions except the one testing for
-  names <- names(res)
-  res <- lapply(seq_along(res), function(i){
-    x <- data
-    testPosition <- res[[i]]
-    nonTestPositions <- res[seq_along(res) != i]
-    if( length(nonTestPositions) > 0 ){
-      locs <- stats::setNames(
-        as.numeric(unlist(lapply(nonTestPositions, "[[","location"))),
-        unlist(lapply(nonTestPositions, "[[","type")))
-      x <- .mask_data(modClasses,
-                      x,
-                      locs)
-    }
-    return(checkForModification(modClasses[[testPosition$type]],
-                                location = testPosition$location,
-                                locations = locations,
-                                data = x))
-  })
-  names(res) <- names
   return(res)
 }
 
@@ -331,8 +297,7 @@ setMethod(
 .analyze_transcript <- function(ID,
                                 modClasses,
                                 data,
-                                locations,
-                                iterationN){
+                                locations){
   if( iterationN > .get_transcript_max_iteration()) return(NULL)
   # debug
   if( getOption("RNAmodR_debug") ){
@@ -352,43 +317,7 @@ setMethod(
                                  locations)
   modifications <- modifications[!vapply(modifications,is.null,logical(1))]
   if(length(modifications) == 0) return(NULL)
-  # check if by masking found modifications positions additional positions are
-  # picked up - remember the +1 location data
-  modLocations <- stats::setNames(
-    as.numeric(unlist(lapply(modifications, "[[","location"))),
-    unlist(lapply(modifications, "[[","type")))
-  # do not take into account positions found as modification
-  data <- .mask_data(modClasses,
-                     data,
-                     modLocations)
-  locations <- locations[!(locations %in% modLocations)]
-  return(append(modifications,.analyze_transcript(ID = ID,
-                                                  modClasses = modClasses,
-                                                  data = data,
-                                                  locations = locations,
-                                                  (iterationN+1))))
-}
-
-# mask data for know modification locations
-.mask_data <- function(modClasses,
-                       data,
-                       modLocations){
-  # browser()
-  # only use class for which data is present
-  modTypes <- unique(names(modLocations))
-  modClassTypes <- unlist(lapply(modClasses, getModType))
-  data <- lapply(data, function(x){
-    modClassesSubset <- modClasses[modClassTypes %in% modTypes]
-    for(i in seq_along(modClassesSubset)){
-      subsetLocations <- 
-        modLocations[names(modLocations) == getModType(modClassesSubset[[i]])]
-      x <- maskPositionData(modClassesSubset[[i]],
-                       x,
-                       subsetLocations)
-    }
-    x
-  })
-  return(data)
+  return(modifications)
 }
 
 # check for modifications at given position
@@ -397,45 +326,6 @@ setMethod(
                                     data,
                                     locations){
   res <- lapply(modClasses, function(class){
-    # short cut if amount/properties of data are not sufficient
-    if( is.null(preTest(class,
-                        location,
-                        data,
-                        locations))) return(NULL)
-    # If potential modification right in front of current location
-    if(length(locations[locations == (location-1)]) != 0) {
-      locTestPre <- .check_for_modification((location-1),
-                                            modClasses,
-                                            .mask_data(list(class),
-                                                       data, 
-                                                       .get_location_vector(location,
-                                                                            getModType(class))),
-                                            locations[locations != location])
-      if(!is.null(locTestPre)){
-        # udpate data accordingly
-        data <- .mask_data(modClasses,
-                           data, 
-                           .get_location_vector(locTestPre$location,
-                                                locTestPre$type))
-      }
-    }
-    # If potential modification right after of current location
-    if(length(locations[locations == (location+1)]) != 0) {
-      locTestPost <- .check_for_modification((location+1), 
-                                             modClasses,
-                                             .mask_data(list(class),
-                                                        data, 
-                                                        .get_location_vector(location,
-                                                                             getModType(class))),
-                                             locations[locations != location])
-      if(!is.null(locTestPost)){
-        # udpate data accordingly
-        data <- .mask_data(modClasses,
-                           data, 
-                           .get_location_vector(locTestPost$location,
-                                                locTestPost$type))
-      }
-    }
     return(checkForModification(class,
                                 location = location,
                                 locations = locations,
@@ -451,12 +341,6 @@ setMethod(
               signal.sd = res[[1]]$signal.sd,
               p.value = res[[1]]$p.value,
               nbsamples = res[[1]]$nbsamples))
-}
-
-.get_location_vector <- function(location, 
-                                 type){
-  stats::setNames(location,
-                  rep(type,length(location)))
 }
 
 #' @rdname mergePositionsOfReplicates
@@ -500,40 +384,26 @@ setMethod(
 # merge positions in one transcript
 .merge_positions <- function(ID,data){
   data <- .get_data(ID,data)
-  stopsData <- lapply(data,"[[","stopsData")
-  coverage <- lapply(data,"[[","coverage")
   data <- lapply(data,"[[","data")
   positions <- as.numeric(unique(unlist(lapply(data,names))))
   res <- lapply(positions,
                 FUN = .merge_position,
-                data,
-                stopsData,
-                coverage)
+                data)
   df <- data.frame(pos = unlist(lapply(res,"[[","pos")),
                    mean = unlist(lapply(res,"[[","mean")),
                    sd = unlist(lapply(res,"[[","sd")),
-                   stops = unlist(lapply(res,"[[","stops")),
-                   coverage = unlist(lapply(res,"[[","coverage")),
                    stringsAsFactors = FALSE)
   return(df)
 }
 
 # merge position data for one position
 .merge_position <- function(pos,
-                            data,
-                            stopsData,
-                            coverage){
+                            data){
   data <- unlist(lapply(data, "[[",pos))
   data[is.na(data)] <- 0
-  stops <- unlist(lapply(stopsData, "[[",pos))
-  stops[is.na(stops)] <- 0
-  coverage <- unlist(lapply(coverage, "[[",pos))
-  coverage[is.na(coverage)] <- 0
   return(list(pos = pos,
               n = length(data),
               mean = mean(data),
-              sd = stats::sd(data),
-              stops = sum(stops),
-              coverage = sum(coverage)))
+              sd = stats::sd(data)))
 }
 

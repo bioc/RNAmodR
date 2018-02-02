@@ -175,8 +175,7 @@ setGeneric(
 setGeneric( 
   name = "parseForModifications",
   def = function(.Object,
-                 number,
-                 modifications){standardGeneric("parseForModifications")} 
+                 number){standardGeneric("parseForModifications")} 
 ) 
 
 # analysis type accessors ------------------------------------------------------------
@@ -281,18 +280,6 @@ setGeneric(
 
 
 # mod type functions -----------------------------------------------------------
-
-#' @name maskPositionData
-#' 
-#' @title maskPositionData
-#' 
-#' @export
-setGeneric( 
-  name = "maskPositionData",
-  def = function(object,
-                 data,
-                 modLocations){standardGeneric("maskPositionData")} 
-) 
 
 #' @name preTest
 #' 

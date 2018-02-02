@@ -20,28 +20,24 @@ NULL
 #'                "test_layout.csv",
 #'                "test_gff.gff3",
 #'                "test_masked.fasta")
-#' parseForModifications(mod,1,"m7G")               
+#' parseForModifications(mod,1)               
 #' }
 setMethod(
   f = "parseForModifications", 
   signature = signature(.Object = "RNAmodR",
-                        number = "numeric",
-                        modifications = "character"),
+                        number = "numeric"),
   definition = function(.Object,
-                        number,
-                        modifications){
-    # browser()
+                        number){
     # Check input
     assertive::is_a_number(number)
-    assertive::assert_all_are_non_empty_character(modifications)
     # get experiment data and create outout folders
     experiment <- getExperimentData(.Object,number)
     message("Searching for modifications in sample '",
-            unique(experiment["SampleName"]),
+            unique(experiment$SampleName),
             "'...")
-    # browser()
     # add the default modification class, which is just used for handling read 
     # positions (5'-end), but not modification detection.
+    modifications <- unique(unlist(experiment$Modifications))
     modClasses <- .load_mod_classes(modifications)
     # retrieve the analysis types need
     analysisTypes <- stats::setNames(vapply(modClasses, 

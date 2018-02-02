@@ -2,7 +2,7 @@
 NULL
 
 RNAMODR_M7G_NUCLEOTIDE <- "G"
-RNAMODR_M7G_ARREST_RATE <- 0.95
+RNAMODR_M7G_ARREST_RATE <- 0.5
 RNAMODR_M7G_P_THRESHOLD <- 0.05
 RNAMODR_M7G_SIG_THRESHOLD <- 5
 
@@ -16,27 +16,6 @@ RNAMODR_M7G_SIG_THRESHOLD <- 5
 setClass("mod_m7G",
          contains = "mod",
          prototype = list(modType = "m7G")
-)
-
-#' @rdname maskPositionData
-#' 
-#' @description 
-#' \code{mod_m7G}
-#' 
-#' @export
-setMethod(
-  f = "maskPositionData",
-  signature = signature(object = "mod_m7G",
-                        data = "numeric",
-                        modLocations = "numeric"),
-  definition = function(object,
-                        data,
-                        modLocations) {
-    data[as.numeric(names(data)) %in% (modLocations+1)] <- 
-      data[as.numeric(names(data)) %in% (modLocations+1)] * 
-      (1-RNAMODR_M7G_ARREST_RATE)
-    return(data)
-  }
 )
 
 #' @rdname preTest
@@ -68,7 +47,6 @@ setMethod(
 .do_M7G_pretest <- function(location,
                             locations,
                             data){
-  # if(location == 1575) browser()
   # if non G position skip position
   if( names(locations[locations == location]) != RNAMODR_M7G_NUCLEOTIDE){
     return(NULL)
