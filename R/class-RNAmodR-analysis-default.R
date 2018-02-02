@@ -154,7 +154,6 @@ get_transcript_data <- function(bamFile,
   # move position based on strand
   data <- data[.is_on_correct_strand(data,.get_unique_strand(gr))]
   # discard reads out of boundaries
-  data <- data[.is_on_correct_strand(data,strand)]
   data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
   data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
   # do position conversion to translate genomic position to local transcript
