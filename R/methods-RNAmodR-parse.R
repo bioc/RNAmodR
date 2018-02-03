@@ -25,21 +25,76 @@ NULL
 setMethod(
   f = "parseForModifications", 
   signature = signature(.Object = "RNAmodR",
-                        number = "numeric"),
+                        number = "numeric",
+                        name = "missing",
+                        gff = "missing",
+                        fasta = "missing",
+                        files = "missing",
+                        modifications = "missing"),
   definition = function(.Object,
                         number){
     # Check input
     assertive::is_a_number(number)
-    # get experiment data and create outout folders
+    # get experiment name
     experiment <- getExperimentData(.Object,number)
-    message("Searching for modifications in sample '",
-            unique(experiment$SampleName),
-            "'...")
+    name <- unique(experiment$SampleName)
+    # get gff annotation
+    gff <- .Object@.dataGFF
+    fasta <- .Object@.dataFasta
+    # combine path and file name
+    files <- paste0(getInputFolder(.Object),experiment$BamFile)
     # add the default modification class, which is just used for handling read 
     # positions (5'-end), but not modification detection.
     modifications <- unique(unlist(experiment$Modifications))
-    modClasses <- .load_mod_classes(modifications)
+    
+    res <- parseForModifications(name = name,
+                                 gff = gff,
+                                 fasta = fasta,
+                                 files = files,
+                                 modifications = modifications)
+    
+    # Save found modifications as gff file
+    setGffResult(.Object,
+                 res$gr,
+                 number,
+                 modifications)
+    message("Saved detected modifications as gff3 file.")
+    setSummarizedExperiment(.Object,
+                            res$se,
+                            number,
+                            modifications)
+    message("Saved detected modifications as SummarizedExperiment.")
+    return(invisible(TRUE))
+  }
+)
+
+#' @rdname parseForModifications
+#' 
+#' @export
+setMethod(
+  f = "parseForModifications", 
+  signature = signature(name = "character",
+                        gff = "GRanges",
+                        fasta = "FaFile",
+                        files = "character",
+                        modifications = "character",
+                        .Object = "missing",
+                        number = "missing"),
+  definition = function(name,
+                        gff,
+                        fasta,
+                        files,
+                        modifications){
+    # Input checks
+    assertive::assert_is_a_non_missing_nor_empty_string(name)
+    assertive::assert_all_are_existing_files(files)
+    assertive::assert_all_are_non_empty_character(modifications)
+    
+    message("Searching for modifications in sample '",
+            name,
+            "'...")
     # retrieve the analysis types need
+    modClasses <- .load_mod_classes(modifications)
     analysisTypes <- stats::setNames(vapply(modClasses, 
                                             getAnalysisType, 
                                             character(1)),
@@ -51,18 +106,16 @@ setMethod(
                                              }),unique(analysisTypes))
     # load the analysis classes
     analysisClasses <- .load_analysis_classes(names(analysisGroups))
-    # extract gene boundaries
-    gff <- .Object@.dataGFF
     # subset to relevant annotations 
     gff_subset <- .get_parent_annotations(
       .subset_rnamod_containing_features(gff)
     )
-    # combine path and file name
-    files <- paste0(getInputFolder(.Object),experiment$BamFile)
     # assemble param for scanBam
     param <- .assemble_scanBamParam(gff_subset, 
                                     .Object@.mapQuality,
                                     .get_acceptable_chrom_ident(files))
+    
+    message(Sys.time(), ": Getting read data...")
     # load data into each analysis class
     analysisClasses <- sapply(names(analysisGroups), function(className){
       convertReadsToPositions(analysisClasses[[className]],
@@ -72,13 +125,14 @@ setMethod(
     }, simplify = FALSE, USE.NAMES = TRUE)
     # parse data in each analysis class for the subset of modifications
     # this merges data from all replicates for the analysis
+    message(Sys.time(), ": Parsing for modifications...")
     analysisClasses <- sapply(names(analysisGroups), function(className){
       modClassesSubset <- modClasses[vapply(modClasses, 
                                             getAnalysisType, 
                                             character(1)) == className]
       parseMod(analysisClasses[[className]],
                gff,
-               .Object@.dataFasta,
+               fasta,
                modClassesSubset)
     }, simplify = FALSE, USE.NAMES = TRUE)
     # check if any modification could be detected
@@ -90,6 +144,7 @@ setMethod(
            call. = FALSE)
     }
     # Merge position data
+    message(Sys.time(), ": Summarizing data...")
     analysisClasses <- sapply(names(analysisGroups), function(className){
       mergePositionsOfReplicates(analysisClasses[[className]])
     }, simplify = FALSE, USE.NAMES = TRUE)
@@ -104,23 +159,15 @@ setMethod(
     # Construct DataFrame from found modifications
     df <- .construct_DataFrame_from_mod_result(mod_positions,
                                                gff_subset)
-    # Save found modifications as gff file
-    setGffResult(.Object,
-                 GRanges(df),
-                 number,
-                 modifications)
-    message("Saved detected modifications as gff3 file.")
+    gr <- GRanges(df)
     # Save found modifications asSummarizedExperiment
-    se <- .construct_SE_from_mod_result(experiment,
+    se <- .construct_SE_from_mod_result(name,
+                                        files,
                                         gff_subset,
                                         df,
                                         positions)
-    setSummarizedExperiment(.Object,
-                            se,
-                            number,
-                            modifications)
-    message("Saved detected modifications as SummarizedExperiment.")
-    return(invisible(TRUE))
+    return(list(gr = gr,
+                se = se))
   }
 )
 
@@ -201,7 +248,8 @@ setMethod(
 }
 
 # conctructs a SummarizedExperiment from modifications and position data
-.construct_SE_from_mod_result <- function(experiment,
+.construct_SE_from_mod_result <- function(name,
+                                          files,
                                           gff,
                                           data,
                                           positions){
@@ -212,8 +260,8 @@ setMethod(
     S4Vectors::mcols(gff[is.na(S4Vectors::mcols(gff)$ID),])$Name
   
   # generate col- and rowdata
-  colData <- experiment[, c(colnames(experiment)[1:3])]
-  colData <- colData[1,]
+  colData <- S4Vectors::DataFrame(name = name, 
+                                  files = S4Vectors::SimpleList(files))
   rowData <- gff
   
   # generate additional row data

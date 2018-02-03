@@ -2,7 +2,7 @@
 NULL
 
 RNAMODR_M7G_NUCLEOTIDE <- "G"
-RNAMODR_M7G_ARREST_RATE <- 0.5
+RNAMODR_M7G_ARREST_RATE <- 0.65
 RNAMODR_M7G_P_THRESHOLD <- 0.05
 RNAMODR_M7G_SIG_THRESHOLD <- 5
 
@@ -136,11 +136,10 @@ setMethod(
   testData <- pretestData$testData
   baseData <- pretestData$baseData
   n <- pretestData$n
-  # lower arrest rate threshold by 1% of maximal difference
-  y <- (RNAMODR_M7G_ARREST_RATE - (1 - RNAMODR_M7G_ARREST_RATE)/100)
   # difference to threshold by relative percent
   # minimal value of 1 since y is one percent lower than arrest rate threshold
-  sig <- floor((testData - y) / (1 - y) * 100)
+  sig <- floor((testData - RNAMODR_M7G_ARREST_RATE) / 
+                 (1 - RNAMODR_M7G_ARREST_RATE) * 100)
   sig.mean <- mean(sig)
   sig.sd <- stats::sd(sig)
   # Since normality of distribution can not be assumed use the MWU

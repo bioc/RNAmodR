@@ -28,11 +28,13 @@ setMethod(
                         number = "ANY"),
   definition = function(.Object, 
                         number){
-    return(.get_experiment_data(.Object,number))
+    return(.get_experiment_data(.Object,
+                                number))
   }
 )
 
-.get_experiment_data <- function(.Object,number){
+.get_experiment_data <- function(.Object,
+                                 number){
   if( missing(number) || assertive::is_identical_to_false(number) ) {
     return(.Object@.dataSamples)
   }
@@ -40,14 +42,12 @@ setMethod(
     df <- .Object@.dataSamples
     if (nrow(df[df$ExperimentNo %in% number, ]) == 1) {
       ret <- as.list(df[df$ExperimentNo == number,])
-      ret["ExperimentNo"] <- as.numeric(ret["ExperimentNo"])
       ret[!(names(ret) == "ExperimentNo")] <- 
         as.character(ret[!(names(ret) == "ExperimentNo")])
       return(ret)
     }
     if (nrow(df[df$ExperimentNo %in% number, ]) > 1) {
       ret <- df[df$ExperimentNo %in% number,]
-      ret$ExperimentNo <- as.numeric(ret$ExperimentNo)
       return(ret)
     }
   }
@@ -159,7 +159,7 @@ setMethod(
     folder <- fileName <- paste0(getOutputFolder(.Object),
                                  "SE/",
                                  "RNAmodR_",
-                                 unique(experiment["SampleName"]),
+                                 unique(experiment$SampleName),
                                  "_")
     fileNames <- paste0(folder,
                         modification,
@@ -269,7 +269,7 @@ setMethod(
     }
     fileNames <- paste0(folder,
                         "RNAmodR_",
-                        unique(experiment["SampleName"]),
+                        unique(experiment$SampleName),
                         "_",
                         modification,
                         ".RData")
@@ -338,7 +338,10 @@ setMethod(
     experiment <- getExperimentData(.Object, number)
     .check_for_experiment(experiment, number)
     
-    se <- .saveSummarizedExperiments(.Object, se, experiment, modification)
+    se <- .saveSummarizedExperiments(.Object, 
+                                     se, 
+                                     experiment,
+                                     modification)
     return(invisible(se))
   }
 )
@@ -397,7 +400,7 @@ setMethod(
     .check_for_experiment(experiment, number)
     
     fileNames <- .get_gff_filenames(.Object,
-                                    unique(experiment["SampleName"]),
+                                    unique(experiment$SampleName),
                                     modification)
     fileNames <- fileNames[vapply(fileNames, 
                                   assertive::is_existing_file,
@@ -411,7 +414,9 @@ setMethod(
   }
 )
 
-.get_gff_filenames <- function(.Object,sampleName,modification){
+.get_gff_filenames <- function(.Object,
+                               sampleName,
+                               modification){
   folder <- paste0(getOutputFolder(.Object),
                    "gff/")
   paste0(folder,
@@ -478,7 +483,7 @@ setMethod(
                         experiment,
                         modification) {
     fileNames <- .get_gff_filenames(.Object,
-                                    unique(experiment["SampleName"]),
+                                    unique(experiment$SampleName),
                                     modification)
     folder <- unique(dirname(fileNames))
     if(!assertive::is_dir(folder)){

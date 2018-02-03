@@ -228,20 +228,25 @@ setMethod(
                (!is.na(S4Vectors::mcols(gff)$ID) & 
                   S4Vectors::mcols(gff)$ID == ID),]
   if(!wo.childs){
-    gr <- append(gr, .get_childs(gff,ID))
+    gr <- append(gr, .get_childs(gff,
+                                 as.character(GenomeInfoDb::seqnames(gr)),
+                                 ID))
   }
   .order_GRanges(gr)
 }
 # recursive search for all childs of an ID
-.get_childs <- function(gff, ID){
-  gr <- gff[!is.na(as.character(gff$Parent)) & 
+.get_childs <- function(gff,
+                        chrom,
+                        ID){
+  gr <- gff[as.character(GenomeInfoDb::seqnames(gff)) == chrom & 
+              !is.na(as.character(gff$Parent)) & 
               as.character(gff$Parent) == ID,]
   if(length(gr) == 0) return(GRanges())
   # Use ID and Name for child search
   IDs <- .get_gr_ids(gr)
   IDs <- IDs[IDs != ID]
   # Walk up the parent chain
-  grl <- append(list(gr),lapply(IDs, function(x){.get_childs(gff,x)}))
+  grl <- append(list(gr),lapply(IDs, function(x){.get_childs(gff,chrom,x)}))
   grl <- grl[!vapply(grl,is.null,logical(1))]
   return(unlist(GRangesList(grl)))
 }

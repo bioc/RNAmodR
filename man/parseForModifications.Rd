@@ -3,12 +3,19 @@
 \docType{methods}
 \name{parseForModifications}
 \alias{parseForModifications}
-\alias{parseForModifications,RNAmodR,numeric-method}
+\alias{parseForModifications,RNAmodR,numeric,missing,missing,missing,missing,missing-method}
+\alias{parseForModifications,missing,missing,character,GRanges,FaFile,character,character-method}
 \title{parseForModifications}
 \usage{
-parseForModifications(.Object, number)
+parseForModifications(.Object, number, name, gff, fasta, files, modifications)
 
-\S4method{parseForModifications}{RNAmodR,numeric}(.Object, number)
+
+  \S4method{parseForModifications}{RNAmodR,numeric,missing,missing,missing,missing,missing}(.Object,
+  number)
+
+
+  \S4method{parseForModifications}{missing,missing,character,GRanges,FaFile,character,character}(name,
+  gff, fasta, files, modifications)
 }
 \arguments{
 \item{.Object}{a RNAmod object.}

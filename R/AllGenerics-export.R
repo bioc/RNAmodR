@@ -175,7 +175,12 @@ setGeneric(
 setGeneric( 
   name = "parseForModifications",
   def = function(.Object,
-                 number){standardGeneric("parseForModifications")} 
+                 number,
+                 name,
+                 gff,
+                 fasta,
+                 files,
+                 modifications){standardGeneric("parseForModifications")} 
 ) 
 
 # analysis type accessors ------------------------------------------------------------

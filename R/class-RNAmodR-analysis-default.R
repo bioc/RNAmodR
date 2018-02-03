@@ -2,8 +2,8 @@
 #' @include class-RNAmodR-analysis-type.R
 NULL
 
-RNAMODR_DEFAULT_FPK_THRESHOLD <- 100
-RNAMODR_DEFAULT_COVERAGE_MIN <- 10
+RNAMODR_DEFAULT_COVERAGE_MIN <- 150
+RNAMODR_DEFAULT_AVR_COVERAGE_MIN <- 10
 
 #' @name analysis_default
 #' 
@@ -52,7 +52,6 @@ setMethod(
                         files,
                         gff,
                         param) {
-    message(Sys.time())
     # detect modifications in each file
     data <- lapply(files,
                    FUN = get_transcript_data,
@@ -91,8 +90,8 @@ get_transcript_data <- function(bamFile,
   names(bamData) <- .get_unique_identifiers(gff_subset)[
     as.numeric(names(bamData))]
   
-  bamData <- bamData[names(bamData) %in% c("RDN18-1") |
-                       grepl("^t",names(bamData))]
+  # bamData <- bamData[names(bamData) %in% c("RDN18-1") |
+  #                      grepl("^t",names(bamData))]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "tE(TTC)B")]
   
@@ -116,8 +115,8 @@ get_transcript_data <- function(bamFile,
   # bak_param <- param
   # param$workers <- 2
   # BiocParallel::register(param)
-  transcripts <- mapply(
-  # transcripts <- BiocParallel::bpmapply(
+  # transcripts <- mapply(
+  transcripts <- BiocParallel::bpmapply(
                                         FUN = .get_position_data_of_transcript,
                                         bamData,
                                         names(bamData),
@@ -167,6 +166,10 @@ get_transcript_data <- function(bamFile,
                                                          gr,
                                                          data,
                                                          posToBeRemoved)
+  # If avergae coverage is to low
+  if((sum(coverage)/length(coverage)) < RNAMODR_DEFAULT_AVR_COVERAGE_MIN) {
+    return(NULL)
+  }
   if(length(stopsData) != length(coverage)) browser()
   # calculate relative amount of stops per coverage as percent
   posData <- .calc_relative_stop_data(stopsData,
@@ -223,19 +226,17 @@ setMethod(
                         gff,
                         fafile,
                         modClasses) {
-    message(Sys.time())
-    # browser()
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
     # detect modification per transcript
-    res <- lapply(IDs,
-                  # res <- BiocParallel::bplapply(IDs,
-                  FUN = .analyze_transcript_prep,
-                  data = object@data,
-                  gff = gff,
-                  fafile = fafile,
-                  modClasses = modClasses)
+    # res <- lapply(IDs,
+    res <- BiocParallel::bplapply(IDs,
+                                  FUN = .analyze_transcript_prep,
+                                  data = object@data,
+                                  gff = gff,
+                                  fafile = fafile,
+                                  modClasses = modClasses)
     names(res) <- IDs
     res <- res[!vapply(res, is.null, logical(1))]
     # If not results are present return NA instead of NULL
@@ -356,12 +357,11 @@ setMethod(
   f = "mergePositionsOfReplicates",
   signature = signature(object = "analysis_default"),
   definition = function(object) {
-    message(Sys.time())
     # Process only genes found in all datasets
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
-    res <- lapply(IDs,
-    # res <- BiocParallel::bplapply(IDs,
+    # res <- lapply(IDs,
+    res <- BiocParallel::bplapply(IDs,
                                   FUN = .merge_positions,
                                   object@data)
     names(res) <- IDs
