@@ -66,7 +66,7 @@ setMethod(
                                  files = files,
                                  mapQuality = mapQuality,
                                  modifications = modifications)
-    
+    if(is.null(res)) return(NULL)
     # Save found modifications as gff file
     setGffResult(.Object,
                  res$gr,
@@ -156,8 +156,8 @@ setMethod(
       length(getModifications(analysisClasses[[className]]))
     }, numeric(1))
     if( sum(nMods) == 0){
-      stop("No modifications detected. Aborting...",
-           call. = FALSE)
+      message("No modifications detected. Aborting...")
+      return(NULL)
     }
     # Merge position data
     message(Sys.time(), ": Summarizing data...")
@@ -243,7 +243,7 @@ setMethod(
   df <- do.call(rbind,l)
   df <- df[,c("chrom","start","end","strand","source","type","score","ID",
               "Parent","RNAmodR_type","RNAmodR_signal","RNAmodR_signal_sd",
-              "RNAmodR_p.value","RNAmodR_nbReplicates")]
+              "RNAmodR_z","RNAmodR_nbReplicates")]
   
   df$source <- factor(df$source)
   df$type <- factor(df$type)
@@ -258,7 +258,7 @@ setMethod(
               RNAmodR_type = vapply(gene,"[[",character(1),"type"),
               RNAmodR_signal = vapply(gene,"[[",numeric(1),"signal"),
               RNAmodR_signal_sd = vapply(gene,"[[",numeric(1),"signal.sd"),
-              RNAmodR_p.value = vapply(gene,"[[",numeric(1),"p.value"),
+              RNAmodR_z = vapply(gene,"[[",numeric(1),"z"),
               RNAmodR_nbReplicates = vapply(gene,"[[",numeric(1),"nbsamples"))
   return(df)
 }

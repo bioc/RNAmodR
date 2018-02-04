@@ -3,7 +3,7 @@ NULL
 
 RNAMODR_M3C_NUCLEOTIDE <- "C"
 RNAMODR_M3C_ARREST_RATE <- 0.65
-RNAMODR_M3C_P_THRESHOLD <- 0.05
+RNAMODR_M3C_Z_THRESHOLD <- 3
 RNAMODR_M3C_SIG_THRESHOLD <- 5
 
 
@@ -66,10 +66,10 @@ setMethod(
   # base data to compare against
   baseData <- .aggregate_area_data(data, 
                                    (location + 1), 
-                                   60)
+                                   50)
   baseData <- baseData[baseData > 0]
   # if not enough data is present
-  if(length(baseData) < (3*n)) return(NULL)
+  if(length(baseData) < (3 * n)) return(NULL)
   return(list(n = n,
               testData = testData,
               baseData = baseData))
@@ -99,9 +99,9 @@ setMethod(
     if(is.null(locTest)) return(NULL)
     # dynamic threshold based on the noise of the signal (high sd)
     if(!.validate_M3C_pos(RNAMODR_M3C_SIG_THRESHOLD, 
-                          RNAMODR_M3C_P_THRESHOLD, 
+                          RNAMODR_M3C_Z_THRESHOLD, 
                           locTest$sig.mean, 
-                          locTest$p.value) ) {
+                          locTest$z) ) {
       # debug
       if( getOption("RNAmodR_debug") ){
         .print_location_info(paste(location,"_no"),locations)
@@ -117,7 +117,7 @@ setMethod(
                 type = getModType(object),
                 signal = locTest$sig.mean,
                 signal.sd = locTest$sig.sd,
-                p.value = locTest$p.value,
+                z = locTest$z,
                 nbsamples = locTest$n))
   }
 )
@@ -141,15 +141,12 @@ setMethod(
                  (1 - RNAMODR_M3C_ARREST_RATE) * 100)
   sig.mean <- mean(sig)
   sig.sd <- stats::sd(sig)
-  # Since normality of distribution can not be assumed use the MWU
-  # generate p.value for single position
-  # Does this have any meaning anymore? Can this be improved?
-  p.value <- suppressWarnings(stats::wilcox.test(baseData,
-                                                 testData)$p.value)
+  # generate z score
+  z <- mean((testData - mean(baseData))/sd(baseData))
   return(list(sig = sig,
               sig.mean = sig.mean,
               sig.sd = sig.sd,
-              p.value = p.value,
+              z = z,
               n = n))
 }
 
@@ -157,9 +154,9 @@ setMethod(
 .validate_M3C_pos <- function(sig.threshold, 
                               p.threshold, 
                               sig, 
-                              p.value){
+                              z){
   ((sig > sig.threshold &&
-      p.value <= p.threshold) ||
+      z >= p.threshold) ||
      (sig > sig.threshold &&
         !.get_use_p()))
 }

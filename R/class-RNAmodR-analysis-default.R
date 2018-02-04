@@ -95,7 +95,8 @@ get_transcript_data <- function(bamFile,
   #                      grepl("^t",names(bamData))]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "tE(TTC)B")]
-  
+  # bamData <- bamData[names(bamData) %in% c("RDN25-1")]
+  # 
   # bamData <- bamData[names(bamData) %in% c("YMR116C")]
   # bamData <- bamData[names(bamData) %in% c("RDN18-1",
   #                                          "YAL030W_mRNA")]
@@ -231,8 +232,8 @@ setMethod(
     IDs <- lapply(object@data,names)
     IDs <- Reduce(intersect, IDs)
     # detect modification per transcript
-    # res <- lapply(IDs,
-    res <- BiocParallel::bplapply(IDs,
+    res <- lapply(IDs,
+    # res <- BiocParallel::bplapply(IDs,
                                   FUN = .analyze_transcript_prep,
                                   data = object@data,
                                   gff = gff,
@@ -335,7 +336,7 @@ setMethod(
               type = res[[1]]$type,
               signal = res[[1]]$signal,
               signal.sd = res[[1]]$signal.sd,
-              p.value = res[[1]]$p.value,
+              z = res[[1]]$z,
               nbsamples = res[[1]]$nbsamples))
 }
 

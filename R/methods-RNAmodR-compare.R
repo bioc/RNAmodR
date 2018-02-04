@@ -95,7 +95,7 @@ setMethod(
     if(nrow(x) == 0) return(NULL)
     x$sample <- names(data[i])
     x[,c("sample","ID","Parent","RNAmodR_type","RNAmodR_signal","RNAmodR_signal_sd",
-         "RNAmodR_p.value","RNAmodR_nbReplicates")]
+         "RNAmodR_z","RNAmodR_nbReplicates")]
   })
   res <- .clean_output(res)
   if(sum(vapply(res,nrow,numeric(1))) == 0) 

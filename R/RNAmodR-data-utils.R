@@ -13,7 +13,7 @@ NULL
                 mcols[,!(colnames(mcols) %in% c("phase"))])
     DF$RNAmodR_signal <- as.numeric(DF$RNAmodR_signal)
     DF$RNAmodR_signal_sd <- as.numeric(DF$RNAmodR_signal_sd)
-    DF$RNAmodR_p.value <- as.numeric(DF$RNAmodR_p.value)
+    DF$RNAmodR_z <- as.numeric(DF$RNAmodR_z)
     DF$RNAmodR_nbReplicates <- as.numeric(DF$RNAmodR_nbReplicates)
     rownames(DF) <- DF$ID
     DF
@@ -28,7 +28,7 @@ NULL
                   seGetModifications(se))
     DF$RNAmodR_signal <- as.numeric(DF$RNAmodR_signal)
     DF$RNAmodR_signal_sd <- as.numeric(DF$RNAmodR_signal_sd)
-    DF$RNAmodR_p.value <- as.numeric(DF$RNAmodR_p.value)
+    DF$RNAmodR_z <- as.numeric(DF$RNAmodR_z)
     DF$RNAmodR_nbReplicates <- as.numeric(DF$RNAmodR_nbReplicates)
     DF
   })
@@ -99,8 +99,8 @@ NULL
                               location, 
                               width){
   lapply(data,function(dataPerReplicate){
-    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) < (location + width) &
-                              as.numeric(names(dataPerReplicate)) > (location - width) &
+    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) <= (location + width) &
+                              as.numeric(names(dataPerReplicate)) >= (location - width) &
                               as.numeric(names(dataPerReplicate)) != location])
   })
 }
@@ -108,7 +108,7 @@ NULL
                                location, 
                                width){
   lapply(data,function(dataPerReplicate){
-    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) < (location + width) &
-                              as.numeric(names(dataPerReplicate)) > (location - width)])
+    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) <= (location + width) &
+                              as.numeric(names(dataPerReplicate)) >= (location - width)])
   })
 }
