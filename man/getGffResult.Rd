@@ -3,12 +3,12 @@
 \docType{methods}
 \name{getGffResult}
 \alias{getGffResult}
-\alias{getGffResult,RNAmodR,numeric,character,logical-method}
+\alias{getGffResult,RNAmodR,numeric,character-method}
 \title{getGffResult}
 \usage{
 getGffResult(.Object, number, modification, genomicCoordinates = FALSE)
 
-\S4method{getGffResult}{RNAmodR,numeric,character,logical}(.Object, number,
+\S4method{getGffResult}{RNAmodR,numeric,character}(.Object, number,
   modification, genomicCoordinates = FALSE)
 }
 \arguments{

@@ -36,6 +36,18 @@ NULL
   res
 }
 
+# position access for SE and GRL --------------------------------------------
+
+.extract_position_info_from_se <- function(ses){
+  browser()
+  res <- lapply(ses, function(se){
+    DF <- do.call(rbind,
+                  seGetPositions(se))
+    DF
+  })
+  names(res) <- names(ses)
+  res
+}
 
 # common function for converting data ------------------------------------------
 

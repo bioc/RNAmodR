@@ -351,7 +351,8 @@ setMethod(
   }
 )
 
-.check_for_experiment <- function(experiment, number){
+.check_for_experiment <- function(experiment, 
+                                  number){
   if( assertive::is_a_bool(experiment)) {
     if( assertive::is_false(experiment) ) {
       stop("Incorrect experiment identifier given: ",
@@ -394,16 +395,18 @@ setMethod(
   f = "getGffResult",
   signature = signature(.Object = "RNAmodR",
                         number = "numeric",
-                        modification = "character",
-                        genomicCoordinates = "logical"),
+                        modification = "character"),
   definition = function(.Object,
                         number,
                         modification,
                         genomicCoordinates) {
+    # Input check
     assertive::assert_all_are_non_empty_character(modification)
+    assertive::assert_is_a_bool(genomicCoordinates)
+    # get experiment data
     experiment <- getExperimentData(.Object, number)
     .check_for_experiment(experiment, number)
-    
+    # get file names
     fileNames <- .get_gff_filenames(.Object,
                                     unique(experiment$SampleName),
                                     modification)

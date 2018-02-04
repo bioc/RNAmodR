@@ -381,10 +381,11 @@ setGeneric(
   name = "heatmapModifications",
   def = function(.Object,
                  number,
-                 genes,
+                 sampleNames,
                  ses,
                  grl,
-                 modifications){standardGeneric("heatmapModifications")}
+                 modifications,
+                 genes){standardGeneric("heatmapModifications")}
 )
 #' @rdname heatmapModifications
 #'
@@ -393,10 +394,11 @@ setGeneric(
   name = "saveHeatmapModifications",
   def = function(.Object,
                  number,
-                 genes,
+                 sampleNames,
                  ses,
                  grl,
-                 modifications){standardGeneric("saveHeatmapModifications")}
+                 modifications,
+                 genes){standardGeneric("saveHeatmapModifications")}
 )
 
 # comparison -------------------------------------------------------------------

@@ -94,6 +94,19 @@ saveModPlot(mod,se3,modifications,c(tRNA),filetype = "png")
 
 ```
 
+# plotting
+
+```{r RNAmodR, eval=FALSE}
+grl <- GenomicRanges::GRangesList(wt = getGffResult(mod,1,modifications),
+                                  Bud23 = getGffResult(mod,2,modifications),
+                                  Trm8 = getGffResult(mod,3,modifications))
+genes <- as.character(grl[[1]]$Parent)
+genes <- genes[grepl("^t", genes)]
+
+
+```
+
+
 # Session info
 
 ```{r sessionInfo}
