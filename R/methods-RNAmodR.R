@@ -5,6 +5,9 @@ NULL
 #' 
 #' @title getExperimentData
 #' 
+#' @description returns setup data for the experiments based on the input
+#' layout csv-file.
+#' 
 #' @param .Object a RNAmod object
 #' @param number optional number to return results for one experiment only
 #'
@@ -14,6 +17,7 @@ NULL
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' data("RNAmodR_test", package = "RNAmodR")
 #' 
 #' # All experiments
@@ -22,6 +26,7 @@ NULL
 #' getSampleData(experiment, 1)
 #' # Two experiments as data.frame
 #' getSampleData(experiment, c(1,2))
+#' }
 setMethod(
   f = "getExperimentData", 
   signature = signature(.Object = "RNAmodR", 
@@ -561,14 +566,32 @@ setMethod(
 
 # easy access functions to results ---------------------------------------------
 
-#' Title
+#' @rdname seGetModifications
+#' @aliases seGetModifications seGetPositions
+#' @title Getting Position and Modification data from SummarizedExperiment 
+#' objects
+#' 
+#' @description 
+#' \code{seGetModifications} and \code{seGetPositions} returns modification and
+#' position data, respectively, from a SummarizedExperiment object. The function
+#' expects the data to be stored as provided and defined by the RNAmodR package 
+#' as rowData and assay data.
 #'
-#' @param se SummarizedExperiment. 
+#' @param se a SummarizedExperiment object
+#' @param genes gene names used for subsetting the results 
+#' @param modifications \code{seGetModifications} modification types used for 
+#' subsetting the results 
 #'
 #' @return
+#' DataFrame containing the information on saved modifications
 #' @export
 #'
 #' @examples
+#' \donttest{
+#' seGetModifications(se)
+#' seGetModifications(se,"RDN18-1")
+#' seGetModifications(se,"RDN18-1","m7G")
+#' }
 setMethod(
   f = "seGetModifications",
   signature = signature(se = "SummarizedExperiment"),
@@ -621,14 +644,17 @@ setMethod(
   return(invisible(TRUE))
 }
 
-#' Title
-#'
-#' @param se SummarizedExperiment. 
+#' @rdname seGetModifications
 #'
 #' @return
+#' a list of DataFrames containing the position data
 #' @export
 #'
 #' @examples
+#' \donttest{
+#' seGetPositions(se)
+#' seGetPositions(se,"RDN18-1")
+#' }
 setMethod(
   f = "seGetPositions",
   signature = signature(se = "SummarizedExperiment"),

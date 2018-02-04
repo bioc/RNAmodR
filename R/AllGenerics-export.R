@@ -1,7 +1,6 @@
 #' @include AllGenerics.R
 NULL
 
-
 # RNAmodR ================================================================
 #' @name RNAmodR-Accessors 
 #' 
@@ -87,18 +86,6 @@ setGeneric(
   def = function(experimentName){standardGeneric("setupWorkEnvir")} 
 ) 
 
-#' @title matchFastaToGff
-#' 
-#' @description
-#' title
-#' 
-#' @export
-setGeneric( 
-  name = "matchFastaToGff", 
-  def = function(inputFasta,
-                 inputGFF){standardGeneric("matchFastaToGff")} 
-) 
-
 
 # experiment data---------------------------------------------------------------
 
@@ -180,6 +167,7 @@ setGeneric(
                  gff,
                  fasta,
                  files,
+                 mapQuality,
                  modifications){standardGeneric("parseForModifications")} 
 ) 
 
@@ -212,6 +200,7 @@ setGeneric(
 # mod type accessors -----------------------------------------------------------
 
 #' @name mod-accessors
+#' @aliases getAnalysisType getModType
 #' 
 #' @title accessors for \code{mod} class objects
 #' 
@@ -275,7 +264,7 @@ setGeneric(
 #' 
 #' @title mergePositionsOfReplicates
 #' 
-#' @param object mod object 
+#' @param object a mod object 
 #' 
 #' @export
 setGeneric( 
@@ -288,20 +277,31 @@ setGeneric(
 
 #' @name preTest
 #' 
-#' @title preTest
+#' @title Testing data for compatibility with modification detection
+#' 
+#' 
+#' @param object a mod class
+#' @param location a local position on a transcript
+#' @param locations all local positions on the transcript
+#' @param data the data to be analyzed
 #' 
 #' @export
 setGeneric( 
   name = "preTest",
   def = function(object,
                  location,
-                 data,
-                 locations){standardGeneric("preTest")} 
+                 locations,
+                 data){standardGeneric("preTest")} 
 ) 
 
 #' @name checkForModification
 #' 
-#' @title checkForModification
+#' @title checking for modifications
+#' 
+#' @param object a mod class
+#' @param location a local position on a transcript
+#' @param locations all local positions on the transcript
+#' @param data the data to be analyzed
 #' 
 #' @export
 setGeneric( 
@@ -316,28 +316,32 @@ setGeneric(
 # modification visualization ---------------------------------------------------
 
 #' @name getModPlot
-#'
-#' @title getModPlot
 #' 
 #' @export
 setGeneric( 
   name = "getModPlot",
   def = function(.Object,
+                 number,
                  se,
+                 gff,
+                 fasta,
                  modifications,
                  gene,
                  focus = FALSE){standardGeneric("getModPlot")} 
 )
 
 #' @rdname getModPlot
-#' 
 #' @export
 setGeneric( 
   name = "saveModPlot",
   def = function(.Object,
+                 number,
                  se,
+                 gff,
+                 fasta,
                  modifications,
                  genes,
+                 folder,
                  focus = FALSE,
                  filetype = "pdf"){standardGeneric("saveModPlot")} 
 )
@@ -347,7 +351,10 @@ setGeneric(
 #' @export
 setGeneric(
   name = "heatmapModifications",
-  def = function(ses,
+  def = function(.Object,
+                 number,
+                 genes,
+                 ses,
                  grl,
                  modifications){standardGeneric("heatmapModifications")}
 )
@@ -356,7 +363,10 @@ setGeneric(
 #' @export
 setGeneric(
   name = "saveHeatmapModifications",
-  def = function(ses,
+  def = function(.Object,
+                 number,
+                 genes,
+                 ses,
                  grl,
                  modifications){standardGeneric("saveHeatmapModifications")}
 )
@@ -367,6 +377,10 @@ setGeneric(
 #'
 #' @title compareSample
 #' 
+#' @param .Object 
+#' @param number 
+#' @param modifications 
+#' 
 #' @export
 setGeneric( 
   name = "compareSample",
@@ -375,9 +389,15 @@ setGeneric(
                  modifications){standardGeneric("compareSample")} 
 )
 
+#'
 #' @name compareAsHeatmap
 #'
 #' @title compareAsHeatmap
+#' 
+#' @param .Object 
+#' @param number 
+#' @param modifications 
+#' @param genes 
 #' 
 #' @export
 setGeneric( 
@@ -393,8 +413,6 @@ setGeneric(
 
 
 #' @name seGetModifications
-#'
-#' @title seGetModifications
 #' 
 #' @export
 setGeneric( 
@@ -403,9 +421,7 @@ setGeneric(
                  genes,
                  modifications){standardGeneric("seGetModifications")} 
 )
-#' @name seGetPositions
-#'
-#' @title seGetPositions
+#' @rdname seGetModifications
 #' 
 #' @export
 setGeneric( 

@@ -13,6 +13,14 @@ RNAmodR(experimentName, experimentLayout, experimentGFF, experimentFasta)
 \S4method{show}{RNAmodR}(object)
 }
 \arguments{
+\item{experimentName}{a character string used for identifying an experiment}
+
+\item{experimentLayout}{a csv-file name containing the experimental layout}
+
+\item{experimentGFF}{a file anme for the input gff3 annotation}
+
+\item{experimentFasta}{a file name for the input fasta sequences}
+
 \item{object}{a RNAmod object.}
 }
 \value{
@@ -20,9 +28,33 @@ a RNAmodR object
 }
 \description{
 \code{RNAmodR}
-
-title
 }
+\section{Slots}{
+
+\describe{
+\item{\code{experimentName}}{}
+
+\item{\code{inputFile}}{}
+
+\item{\code{inputGFF}}{}
+
+\item{\code{inputFasta}}{}
+
+\item{\code{.dataSamples}}{}
+
+\item{\code{.dataFasta}}{}
+
+\item{\code{.dataGFF}}{}
+
+\item{\code{.wd}}{}
+
+\item{\code{.inputFolder}}{}
+
+\item{\code{.outputFolder}}{}
+
+\item{\code{.mapQuality}}{}
+}}
+
 \examples{
 \donttest{
 unzip(system.file("extdata", package = "RNAmodR", file = "RNAmodR.zip" ))

@@ -6,3 +6,10 @@
 \usage{
 compareSample(.Object, number, modifications)
 }
+\arguments{
+\item{.Object}{}
+
+\item{number}{}
+
+\item{modifications}{}
+}

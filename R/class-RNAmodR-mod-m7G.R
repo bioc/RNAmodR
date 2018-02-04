@@ -7,10 +7,10 @@ RNAMODR_M7G_P_THRESHOLD <- 0.05
 RNAMODR_M7G_SIG_THRESHOLD <- 5
 
 
-#' @rdname mod
+#' @rdname RNAmodR-mod-class
 #'
 #' @description 
-#' \code{mod_m7G}
+#' \code{mod_m7G}:
 #' 
 #' @export
 setClass("mod_m7G",
@@ -28,12 +28,12 @@ setMethod(
   f = "preTest",
   signature = signature(object = "mod_m7G",
                         location = "numeric",
-                        data = "list",
-                        locations = "numeric"),
+                        locations = "numeric",
+                        data = "list"),
   definition = function(object,
                         location,
-                        data,
-                        locations) {
+                        locations,
+                        data) {
     # do pretest
     res <- .do_M7G_pretest(location,
                            locations,

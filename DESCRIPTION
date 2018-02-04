@@ -41,6 +41,7 @@ Collate:
 Imports:
   methods,
   assertive,
+  assertive.base,
   stats,
   stringr,
   ggplot2,
@@ -52,6 +53,7 @@ Imports:
   Biostrings,
   BiocParallel,
   GenomicRanges,
+  GenomicFeatures,
   GenomicAlignments,
   IRanges,
   SummarizedExperiment,

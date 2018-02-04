@@ -3,29 +3,45 @@
 \docType{methods}
 \name{parseForModifications}
 \alias{parseForModifications}
-\alias{parseForModifications,RNAmodR,numeric,missing,missing,missing,missing,missing-method}
-\alias{parseForModifications,missing,missing,character,GRanges,FaFile,character,character-method}
+\alias{parseForModifications,RNAmodR,numeric,missing,missing,missing,missing,missing,missing-method}
+\alias{parseForModifications,missing,missing,character,GRanges,FaFile,character,numeric,character-method}
 \title{parseForModifications}
 \usage{
-parseForModifications(.Object, number, name, gff, fasta, files, modifications)
+parseForModifications(.Object, number, name, gff, fasta, files, mapQuality,
+  modifications)
 
 
-  \S4method{parseForModifications}{RNAmodR,numeric,missing,missing,missing,missing,missing}(.Object,
+  \S4method{parseForModifications}{RNAmodR,numeric,missing,missing,missing,missing,missing,missing}(.Object,
   number)
 
 
-  \S4method{parseForModifications}{missing,missing,character,GRanges,FaFile,character,character}(name,
-  gff, fasta, files, modifications)
+  \S4method{parseForModifications}{missing,missing,character,GRanges,FaFile,character,numeric,character}(name,
+  gff, fasta, files, mapQuality, modifications)
 }
 \arguments{
 \item{.Object}{a RNAmod object.}
 
 \item{number}{a number defining an experiment.}
 
+\item{name}{a character string for identification}
+
+\item{gff}{a gff3 file name}
+
+\item{fasta}{a fasta file name}
+
+\item{files}{file names for the bam input files}
+
+\item{mapQuality}{mapping quality threshold for reading the bam input files}
+
 \item{modifications}{name of modification to be used for analysis.}
 }
 \value{
 TRUE if the analysis does finish without error
+}
+\description{
+\code{parseForModifications} uses the input information from GRanges, Fafile
+and bam input files to look for known patterns of RNA post-transcriptional
+modifications.
 }
 \examples{
 \donttest{

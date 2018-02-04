@@ -2,14 +2,19 @@
 #' @include class-RNAmodR.R
 NULL
 
-
-#' @name mod
+#' @name RNAmodR-mod-class
 #' 
-#' @title mod
+#' @title RNAmodR mod class
 #' 
 #' @description 
 #' Virtual class for modification detection.
 #' 
+#' @slot analysisType 
+#' @slot modType 
+#' 
+#' @return a RNAmodR mod class object
+#' 
+#' @import methods
 #' @export
 setClass("mod",
          contains = "VIRTUAL",
@@ -17,18 +22,24 @@ setClass("mod",
                    modType = "character"),
          prototype = list(analysisType = "default")
 )
-
+#' @rdname RNAmodR-mod-class
+#'
+#' @param object a RNAmodR mod class object 
+#' 
+#' @export
 setMethod(
   f = "show", 
   signature = signature(object = "mod"),
   definition = function(object) {
-    
+    NULL
   }
 )
 
-
 #' @rdname mod-accessors
+#' @aliases getAnalysisType getModType
 #'
+#' @param object a RNAmodR mod class object 
+#' 
 #' @return character defining the plot type for this modification class
 #' @export
 #'
@@ -44,7 +55,6 @@ setMethod(
     return(object@analysisType)
   }
 )
-
 #' @rdname mod-accessors
 #'
 #' @return character defining the modification type for this modification

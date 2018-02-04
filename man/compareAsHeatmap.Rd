@@ -6,3 +6,12 @@
 \usage{
 compareAsHeatmap(.Object, number, modifications, genes)
 }
+\arguments{
+\item{.Object}{}
+
+\item{number}{}
+
+\item{modifications}{}
+
+\item{genes}{}
+}

@@ -7,7 +7,7 @@
 \alias{checkForModification,mod_D,numeric,numeric,list-method}
 \alias{checkForModification,mod_m3C,numeric,numeric,list-method}
 \alias{checkForModification,mod_m7G,numeric,numeric,list-method}
-\title{checkForModification}
+\title{checking for modifications}
 \usage{
 checkForModification(object, location, locations, data)
 
@@ -19,6 +19,15 @@ checkForModification(object, location, locations, data)
 
 \S4method{checkForModification}{mod_m7G,numeric,numeric,list}(object, location,
   locations, data)
+}
+\arguments{
+\item{object}{a mod class}
+
+\item{location}{a local position on a transcript}
+
+\item{locations}{all local positions on the transcript}
+
+\item{data}{the data to be analyzed}
 }
 \description{
 \code{mod_D}

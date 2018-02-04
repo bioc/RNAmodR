@@ -12,7 +12,7 @@ mergePositionsOfReplicates(object)
 \S4method{mergePositionsOfReplicates}{analysis_default}(object)
 }
 \arguments{
-\item{object}{mod object}
+\item{object}{a mod object}
 }
 \value{
 a modified \code{analysis} class object now containing the aggregated

@@ -7,6 +7,9 @@
 \alias{getPositions}
 \alias{getModifications}
 \alias{getPlotType,analysis-method}
+\alias{getPlotType}
+\alias{getPositions}
+\alias{getModifications}
 \alias{getPositions,analysis-method}
 \alias{getModifications,analysis-method}
 \title{Accessor for \code{analysis} class objects}
@@ -24,7 +27,7 @@ getModifications(object)
 \S4method{getModifications}{analysis}(object)
 }
 \arguments{
-\item{object}{analysis object}
+\item{object}{a analysis object}
 }
 \value{
 character defining the plot type for this analysis class

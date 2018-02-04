@@ -1,3 +1,4 @@
+#' @name RNAmodR
 #' @title RNAmodR
 #' 
 #' @author Felix G M Ernst [aut]
@@ -6,7 +7,6 @@
 #' todo
 #'
 #' @docType package
-#' @name RNAmodR
 NULL
 
 #' @import methods

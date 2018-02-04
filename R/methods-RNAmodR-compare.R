@@ -2,15 +2,22 @@
 NULL
 
 #' @rdname heatmapModifications
-#'
 #' @aliases heatmapModifications saveHeatmapModifications
 #'
 #' @title Comparative visualization of modifications
+#' 
+#' @description 
+#' compares different experiments as a heatmap for selected genes and/or 
+#' modifications
 #'
 #' @param .Object a RNAmod object.
-#' @param se a SummarizedExperiment containg the experimental data.
-#' @param modifications name of modification to be used for analysis.
-#' @param gene a single gene name
+#' @param number an experiment number
+#' @param ses a named list of SummarizedExperiment objects containg the 
+#' experimental data to be used for comparison
+#' @param grl a named GRangesList containg the experimental data.
+#' @param genes gene names to be included in the analysis
+#' @param modifications name of modification to be used for analysis. These
+#' should be defined as the format gene-name_nucleotide_position.
 #'
 #' @return a heatmap plot for given experiments and modifications positions
 #' @export
@@ -19,21 +26,17 @@ NULL
 #'
 #' @examples
 #' \donttest{
+#' heatmapModifications(grl,"RDN18-1_G_1575")
 #' }
 setMethod(
   f = "heatmapModifications",
-  signature = signature(ses = "list",
-                        grl = "missing",
-                        modifications = "character"),
-  definition = function(ses,
-                        modifications){
-    RNAmodR::assert_all_are_SummarizedExperiment(ses)
-    assertive::assert_all_are_non_missing_nor_empty_character(modifications)
-    
-    # get data as list of DataFrames
-    data <- .extract_modification_info_from_se(ses)
-  
-  
+  signature = signature(.Object = "RNAmodR",
+                        number = "numeric",
+                        genes = "character"),
+  definition = function(.Object,
+                        number,
+                        genes){
+    NULL  
   }
 )
 #' @rdname heatmapModifications
@@ -41,9 +44,34 @@ setMethod(
 #' @export
 setMethod(
   f = "heatmapModifications",
-  signature = signature(ses = "missing",
-                        grl = "GRangesList",
-                        modifications = "character"),
+  signature = signature(ses = "list",
+                        modifications = "character",
+                        grl = "missing",
+                        .Object = "missing",
+                        number = "missing",
+                        genes = "missing"),
+  definition = function(ses,
+                        modifications){
+    RNAmodR::assert_all_are_SummarizedExperiment(ses)
+    assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+    
+    # get data as list of DataFrames
+    data <- .extract_modification_info_from_se(ses)
+    
+    
+  }
+)
+#' @rdname heatmapModifications
+#' 
+#' @export
+setMethod(
+  f = "heatmapModifications",
+  signature = signature(grl = "GRangesList",
+                        modifications = "character",
+                        ses = "missing",
+                        .Object = "missing",
+                        number = "missing",
+                        genes = "missing"),
   definition = function(grl,
                         modifications){
     assertive::assert_all_are_non_missing_nor_empty_character(modifications)
@@ -107,23 +135,42 @@ setMethod(
 #' @export
 setMethod(
   f = "saveHeatmapModifications",
-  signature = signature(ses = "list",
-                        grl = "missing",
-                        modifications = "character"),
-  definition = function(ses,
-                        modifications){
+  signature = signature(.Object = "RNAmodR",
+                        number = "numeric",
+                        genes = "character"),
+  definition = function(.Object,
+                        number,
+                        genes){
     NULL
   }
 )
-
 #' @rdname heatmapModifications
 #'
 #' @export
 setMethod(
   f = "saveHeatmapModifications",
-  signature = signature(ses = "missing",
-                        grl = "GRangesList",
-                        modifications = "character"),
+  signature = signature(ses = "list",
+                        modifications = "character",
+                        grl = "missing",
+                        .Object = "missing",
+                        number = "missing",
+                        genes = "missing"),
+  definition = function(ses,
+                        modifications){
+    NULL
+  }
+)
+#' @rdname heatmapModifications
+#'
+#' @export
+setMethod(
+  f = "saveHeatmapModifications",
+  signature = signature(grl = "GRangesList",
+                        modifications = "character",
+                        ses = "missing",
+                        .Object = "missing",
+                        number = "missing",
+                        genes = "missing"),
   definition = function(grl,
                         modifications){
     NULL

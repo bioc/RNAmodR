@@ -5,7 +5,11 @@
 \name{mod-accessors}
 \alias{mod-accessors}
 \alias{getAnalysisType}
+\alias{getModType}
+\alias{getAnalysisType}
 \alias{getAnalysisType,mod-method}
+\alias{getAnalysisType}
+\alias{getModType}
 \alias{getModType,mod-method}
 \title{accessors for \code{mod} class objects}
 \usage{
@@ -16,6 +20,9 @@ getAnalysisType(object)
 \S4method{getAnalysisType}{mod}(object)
 
 \S4method{getModType}{mod}(object)
+}
+\arguments{
+\item{object}{a RNAmodR mod class object}
 }
 \value{
 character defining the plot type for this modification class

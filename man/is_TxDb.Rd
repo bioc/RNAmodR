@@ -4,14 +4,12 @@
 \alias{is_TxDb}
 \title{assertive: TxDb}
 \usage{
-is_TxDb(x, .xname = assertive.base::get_name_in_parent(x))
+is_TxDb(x, .xname = assertive::get_name_in_parent(x))
 }
 \arguments{
 \item{x}{object to test}
 
 \item{.xname}{name of the object in parent env}
-
-\item{severity}{assertions only: severity of failing assertion}
 }
 \value{
 logical

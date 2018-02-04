@@ -9,34 +9,80 @@ RNAMODR_PLOT_FOCUS_WINDOW <- 50
 RNAMODR_PLOT_MM_TO_INCH_F <- 0.03937008
 
 #' @rdname getModPlot
-#' 
 #' @aliases getModPlot saveModPlots
 #' 
 #' @title Visualization of modifications
 #' 
+#' @description 
+#' \code{getModPlot} and \code{saveModPlot} plot the results by combining
+#' position data and modifications with transcript layout data.
+#' 
 #' @param .Object a RNAmod object. 
+#' @param number an experiemnt numnber. 
 #' @param se a SummarizedExperiment containg the experimental data. 
+#' @param gff a GRanges object with the genomic annotation data
+#' @param fasta a FaFile object with the genomic sequences
 #' @param modifications name of modification to be used for analysis. 
-#' @param gene a single gene name
+#' @param gene a single gene name used by \code{getModPlot}
+#' @param genes gene names used by \code{saveModPlots}
+#' @param folder folder for saving the output used by \code{saveModPlots}
+#' @param focus optional: logical, whether to plot only the region next to the 
+#' modification
+#' @param filetype file type used for \code{saveModPlots}
 #'
-#' @return a grid of layer plot and any mod plot
+#' @return 
+#' \code{getModPlot}: a grid of layer plot and any mod plot
 #' @export
 #' 
 #' @import ggplot2
+#' @importFrom ggrepel geom_label_repel
 #'
 #' @examples
 #' \donttest{
 #' getModPlot(mod,1,"m7G","RDN18-1")
-#' saveModPlot(mod,1,"m7G",c("RDN18-1","tS\(CGA\)P"))
+#' saveModPlot(mod,1,"m7G",c("RDN18-1","tS\\(CGA\\)P"))
 #' }
 setMethod(
   f = "getModPlot", 
   signature = signature(.Object = "RNAmodR",
-                        se = "SummarizedExperiment",
+                        number = "numeric",
                         modifications = "character",
-                        gene = "character"),
+                        gene = "character",
+                        focus = "logical",
+                        se = "missing",
+                        gff = "missing",
+                        fasta = "missing"),
   definition = function(.Object,
-                        se,
+                        number,
+                        modifications,
+                        gene,
+                        focus){
+    se <- getSummarizedExperiment(.Object,number,modifications)
+    gff <- .Object@.dataGFF
+    fasta <- .Object@.dataFasta
+    getModPlot(se,
+               gff,
+               fasta,
+               modifications,
+               gene,
+               focus)
+  }
+)
+#' @rdname getModPlot
+#' @export
+setMethod(
+  f = "getModPlot", 
+  signature = signature(se = "SummarizedExperiment",
+                        gff = "GRanges",
+                        fasta = "FaFile",
+                        modifications = "character",
+                        gene = "character",
+                        focus = "logical",
+                        .Object = "missing",
+                        number = "missing"),
+  definition = function(se,
+                        gff,
+                        fasta,
                         modifications,
                         gene,
                         focus){
@@ -63,10 +109,10 @@ setMethod(
     genesAvail <- unlist(genesAvail)
     assertive::assert_is_a_non_empty_string(genesAvail)
     
-    positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions[[1]]
-    mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods[[1]]
-    gff <- .Object@.dataGFF
-    fasta <- .Object@.dataFasta
+    positions <- seGetPositions(se,genesAvail)
+    mods <- seGetModifications(se,genesAvail,modifications)
+    # positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions[[1]]
+    # mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods[[1]]
     
     modClasses <- .load_mod_classes(modifications)
     if(!focus){
@@ -105,21 +151,117 @@ setMethod(
 
 #' @rdname getModPlot
 #'
-#' @return TRUE if successful
-#' @export
+#' @return 
+#' \code{saveModPlot}: TRUE if successful
 #' 
-#' @import ggplot2
-#' @importFrom ggrepel geom_label_repel
+#' @export
 setMethod(
   f = "saveModPlot", 
   signature = signature(.Object = "RNAmodR",
-                        se = "SummarizedExperiment",
+                        number = "numeric",
                         modifications = "character",
-                        genes = "character"),
+                        genes = "character",
+                        focus = "logical",
+                        se = "missing",
+                        gff = "missing",
+                        fasta = "missing",
+                        folder = "missing"),
   definition = function(.Object,
-                        se,
+                        number,
                         modifications,
                         genes,
+                        focus,
+                        filetype){
+    se <- getSummarizedExperiment(.Object,
+                                  number,
+                                  modifications)
+    gff <- .Object@.dataGFF
+    fasta <- .Object@.dataFasta
+    # create folder
+    folder <- paste0(getOutputFolder(.Object),
+                     "ModPlots/",
+                     unique(SummarizedExperiment::colData(se)$SampleName),
+                     "/")
+    return(saveModPlot(se,
+                       gff,
+                       fasta,
+                       modifications,
+                       genes,
+                       folder,
+                       focus,
+                       filetype))
+  }
+)
+#' @rdname getModPlot
+#' @export
+setMethod(
+  f = "saveModPlot", 
+  signature = signature(.Object = "RNAmodR",
+                        number = "numeric",
+                        modifications = "character",
+                        focus = "logical",
+                        genes = "missing",
+                        se = "missing",
+                        gff = "missing",
+                        fasta = "missing",
+                        folder = "missing"),
+  definition = function(.Object,
+                        number,
+                        modifications,
+                        focus,
+                        filetype){
+    se <- getSummarizedExperiment(.Object,
+                                  number,
+                                  modifications)
+    gff <- .Object@.dataGFF
+    fasta <- .Object@.dataFasta
+    
+    assays <- SummarizedExperiment::assays(se)[modifications]
+    l <- lapply(seq_along(assays), function(i){
+      assay <- assays[i]
+      names(assay[assay > 0,])
+    })
+    l <- unlist(l)
+    if(length(l) == 0){
+      stop("No modifications for any genes found.",
+           call. = FALSE)
+    }
+    transcripts <- unique(l)
+    
+    # create folder
+    folder <- paste0(getOutputFolder(.Object),
+                     "ModPlots/",
+                     unique(SummarizedExperiment::colData(se)$SampleName),
+                     "/")
+    return(saveModPlot(se,
+                       gff,
+                       fasta,
+                       modifications,
+                       transcripts,
+                       folder,
+                       focus,
+                       filetype))
+  }
+)
+#' @rdname getModPlot
+#' @export
+setMethod(
+  f = "saveModPlot", 
+  signature = signature(se = "SummarizedExperiment",
+                        gff = "GRanges",
+                        fasta = "FaFile",
+                        modifications = "character",
+                        genes = "character",
+                        folder = "character",
+                        focus = "logical",
+                        .Object = "missing",
+                        number = "missing"),
+  definition = function(se,
+                        gff,
+                        fasta,
+                        modifications,
+                        genes,
+                        folder,
                         focus,
                         filetype){
     # Check input
@@ -130,8 +272,7 @@ setMethod(
                       filetype)
     
     # create folder
-    folder <- paste0(getOutputFolder(.Object),
-                     "ModPlots/",
+    folder <- paste0(folder,
                      unique(SummarizedExperiment::colData(se)$SampleName),
                      "/")
     if(!assertive::is_dir(folder)){
@@ -153,13 +294,12 @@ setMethod(
     }
     
     # browser()
-    positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions
-    mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods
-    gff <- .Object@.dataGFF
-    fasta <- .Object@.dataFasta
+    positions <- seGetPositions(se,genesAvail)
+    mods <- seGetModifications(se,genesAvail,modifications)
+    # positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions
+    # mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods
     
     modClasses <- .load_mod_classes(modifications)
-    
     
     for(i in seq_along(genesAvail)){
       if(length(positions[[i]][!vapply(positions[[i]],is.null,logical(1))]) == 0){

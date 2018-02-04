@@ -5,21 +5,30 @@ NULL
 #' @name RNAmodR-class
 #' 
 #' @title RNAmodR Class
-#' 
-#' @description 
-#' \code{RNAmodR}
-NULL
-
-#' @title RNAmodR-class
-#' 
-#' @rdname RNAmodR-class 
 #'
 #' @description 
-#' title
+#' \code{RNAmodR}
+#' 
+NULL
+
+#' @rdname RNAmodR-class 
+#' 
+#' @slot experimentName 
+#' @slot inputFile 
+#' @slot inputGFF 
+#' @slot inputFasta 
+#' @slot .dataSamples 
+#' @slot .dataFasta 
+#' @slot .dataGFF 
+#' @slot .wd 
+#' @slot .inputFolder 
+#' @slot .outputFolder 
+#' @slot .mapQuality 
 #'
 #' @return a RNAmodR object
 #' @export
 #' 
+#' @import methods
 #' @import Rsamtools
 #' @importClassesFrom GenomicRanges GRanges
 #'
@@ -57,6 +66,11 @@ setClass("RNAmodR",
 
 
 #' @rdname RNAmodR-class
+#' 
+#' @param experimentName a character string used for identifying an experiment
+#' @param experimentLayout a csv-file name containing the experimental layout  
+#' @param experimentGFF a file anme for the input gff3 annotation
+#' @param experimentFasta a file name for the input fasta sequences
 #'
 #' @importFrom utils read.csv
 #'
@@ -226,7 +240,6 @@ setMethod(
 # default class methods --------------------------------------------------------
 
 #' @rdname RNAmodR-class
-#' 
 #' @param object a RNAmod object.
 setMethod(
   f = "show",

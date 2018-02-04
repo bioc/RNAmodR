@@ -8,6 +8,9 @@
 \usage{
 YBR041W
 }
+\description{
+contains a list of example data for the YBR041W gene
+}
 \keyword{RNAmod}
 \keyword{YBR041W}
 \keyword{datasets}

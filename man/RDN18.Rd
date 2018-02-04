@@ -8,6 +8,9 @@
 \usage{
 RDN18
 }
+\description{
+contains a list of example data for the RDN18 gene
+}
 \keyword{RDN18}
 \keyword{RNAmod}
 \keyword{datasets}

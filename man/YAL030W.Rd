@@ -8,6 +8,9 @@
 \usage{
 YAL030W
 }
+\description{
+contains a list of example data for the YAL030W gene
+}
 \keyword{RNAmod}
 \keyword{YAL030W}
 \keyword{datasets}

@@ -4,21 +4,30 @@
 \docType{methods}
 \name{preTest}
 \alias{preTest}
-\alias{preTest,mod_D,numeric,list,numeric-method}
-\alias{preTest,mod_m3C,numeric,list,numeric-method}
-\alias{preTest,mod_m7G,numeric,list,numeric-method}
-\title{preTest}
+\alias{preTest,mod_D,numeric,numeric,list-method}
+\alias{preTest,mod_m3C,numeric,numeric,list-method}
+\alias{preTest,mod_m7G,numeric,numeric,list-method}
+\title{Testing data for compatibility with modification detection}
 \usage{
-preTest(object, location, data, locations)
+preTest(object, location, locations, data)
 
-\S4method{preTest}{mod_D,numeric,list,numeric}(object, location, data,
-  locations)
+\S4method{preTest}{mod_D,numeric,numeric,list}(object, location, locations,
+  data)
 
-\S4method{preTest}{mod_m3C,numeric,list,numeric}(object, location, data,
-  locations)
+\S4method{preTest}{mod_m3C,numeric,numeric,list}(object, location, locations,
+  data)
 
-\S4method{preTest}{mod_m7G,numeric,list,numeric}(object, location, data,
-  locations)
+\S4method{preTest}{mod_m7G,numeric,numeric,list}(object, location, locations,
+  data)
+}
+\arguments{
+\item{object}{a mod class}
+
+\item{location}{a local position on a transcript}
+
+\item{locations}{all local positions on the transcript}
+
+\item{data}{the data to be analyzed}
 }
 \description{
 \code{mod_D}

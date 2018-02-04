@@ -2,13 +2,12 @@
 #' @include class-RNAmodR.R
 NULL
 
-#' @name analysis
+#' @name RNAmodR-analysis-class
 #' 
-#' @title analysis
+#' @title RNAmodR analysis class
 #' 
 #' @description
 #' The class is virtual and has to be extended from, eg. \code{analysis_default}
-#'  
 #' The analysis class is the main function for detecting modifications. It works
 #' usually in a three step manner.
 #' \itemize{
@@ -24,6 +23,13 @@ NULL
 #'   position mean and sd or equivalent.}
 #' }
 #' 
+#' @slot plotType 
+#' @slot data 
+#' @slot modifications 
+#' 
+#' @return a RNAmodR analysis class object
+#' 
+#' @import methods
 #' @export
 setClass("analysis",
          contains = "VIRTUAL",
@@ -34,15 +40,20 @@ setClass("analysis",
                           data = list(),
                           modifications = list())
 )
+#' @rdname RNAmodR-analysis-class
+#'
+#' @param object a RNAmodR analysis object. 
+#' @export
 setMethod(
   f = "show", 
   signature = signature(object = "analysis"),
   definition = function(object) {
-    
+    NULL
   }
 )
 
 #' @rdname analysis-accessors
+#' @aliases getPlotType getPositions getModifications
 #' 
 #' @title Accessor for \code{analysis} class objects
 #' 
@@ -50,7 +61,7 @@ setMethod(
 #' The accessor function to \code{analysis} class objects can be used to access
 #' the data saved in slots of the object. See examples for available functions.
 #' 
-#' @param object analysis object 
+#' @param object a analysis object 
 #' 
 #' @return character defining the plot type for this analysis class
 #' @export

@@ -5,18 +5,19 @@ NULL
 RNAMODR_DEFAULT_COVERAGE_MIN <- 150
 RNAMODR_DEFAULT_AVR_COVERAGE_MIN <- 10
 
-#' @name analysis_default
-#' 
-#' @title the default analysis class for RNAmodR
+#' @rdname RNAmodR-analysis-class
 #'
 #' @description 
+#' @section
 #' \code{analysis_default}: the class can be used for analyzing the 5'-end of
 #' reads to detect specific post-transcriptional modifications.
 #' 
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' ad <- new("analysis_default")
+#' }
 setClass("analysis_default",
          contains = "analysis")
 

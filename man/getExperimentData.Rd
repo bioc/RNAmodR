@@ -19,7 +19,12 @@ getExperimentData(.Object, number)
 a list containg the information on the experiment or a data.frame 
 with all the information
 }
+\description{
+returns setup data for the experiments based on the input
+layout csv-file.
+}
 \examples{
+\donttest{
 data("RNAmodR_test", package = "RNAmodR")
 
 # All experiments
@@ -28,4 +33,5 @@ getSampleData(experiment)
 getSampleData(experiment, 1)
 # Two experiments as data.frame
 getSampleData(experiment, c(1,2))
+}
 }

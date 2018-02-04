@@ -8,6 +8,9 @@
 \usage{
 counts
 }
+\description{
+example data - total number of counts
+}
 \keyword{RNAmod}
 \keyword{counts}
 \keyword{datasets}

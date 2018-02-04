@@ -9,17 +9,34 @@ RNAMODR_MOD_SEQ_FEATURES_PREP <- c("five_prime_UTR",
                                   "exon")
 
 #' @name convertGeneToChrom
-#' 
 #' @aliases convertGeneToChrom convertGeneTypeToChrom
 #' 
 #' @title convert gene sequences to individual chromosomes
+#' 
+#' @description
+#' \code{convertGeneToChrom} and \code{convertGeneTypeToChrom} extract gene
+#' annotation and sequences and saves them as distinct chromosome annotations
+#' per gene. Theis function can be used to extract genes with multiple copies,
+#' such as rRNA and tRNA genes. The resulting data can be used directly for
+#' mapping and depleting sequence data before other transcript mapping.
+#' 
+#' \code{converttRNAscanToChrom} expects a tRNAscan-SE output file as input and
+#' creates custom chromosome annotations per tRNA. 
+#' \code{removeDuplicateSeqs = TRUE} is set automatically.
 #'
-#' @param gfffile 
-#' @param fafile 
-#' @param geneTypes 
-#' @param ident 
-#' @param saveTrimmedFile  
-#' @param removeDuplicateSeqs 
+#' @param gfffile a file name for a gff3 file
+#' @param fafile a file name for a fasta file
+#' @param geneTypes a character vector for gene types mapped to the types column
+#' of the gff3 annotation.
+#' @param genes a character vector containing valid gene names mapped to the ID, 
+#' Name or gene column of the gff3 file
+#' @param ident a identifying string used for naming result files. Is appended
+#' to the given file names. 
+#' @param saveTrimmedFile  Whether to save the input file with removed 
+#' annotations
+#' @param removeDuplicateSeqs whether to check for exact duplicate sequences and 
+#' keep only a single on. If a lot of genes are in the results, this might cause
+#' long run times.
 #'
 #' @return named list containing the filenames used for input and several 
 #' outputs
@@ -81,8 +98,6 @@ convertGeneTypeToChrom <- function(gfffile,
 }
 
 #' @rdname convertGeneToChrom
-#'
-#' @param genes 
 #' 
 #' @export
 convertGeneToChrom <- function(gfffile,
@@ -385,22 +400,20 @@ convertGeneToChrom <- function(gfffile,
 
 #' @rdname convertGeneToChrom
 #' 
-#' @param tRNAscanfile 
+#' @param tRNAscanfile a file name for a tRNAscan-SE output file
 #'
 #' @export
 converttRNAscanToChrom <- function(gfffile,
                                    fafile,
                                    tRNAscanfile,
                                    ident,
-                                   saveTrimmedFile = FALSE,
-                                   appendToOriginal = FALSE){
+                                   saveTrimmedFile = FALSE){
   # Check inputs
   assertive::assert_all_are_existing_files(gfffile)
   assertive::assert_all_are_existing_files(fafile)
   assertive::assert_all_are_existing_files(tRNAscanfile)
   assertive::assert_is_a_non_empty_string(ident)
   assertive::assert_is_a_bool(saveTrimmedFile)
-  assertive::assert_is_a_bool(appendToOriginal)
   # get the aggregated file names
   fileNames <- .get_file_names(gfffile,
                                fafile,
@@ -667,17 +680,16 @@ converttRNAscanToChrom <- function(gfffile,
 # appending two or more fasta/gff files ----------------------------------------
 
 #' @name appendFastaFiles
-#' 
-#' @title appendFastaFiles
-#' 
 #' @aliases appendFastaFiles appendGFF
+#' 
+#' @title Appending multiple fasta or gff3 files
 #' 
 #' @description
 #' append one or more fasta or gff files
 #'
-#' @param ... 
-#' @param ident 
-#' @param msg 
+#' @param ... any character will interpreted as file name used for appending
+#' @param ident a string used for naming the output file
+#' @param msg a message to be displayed
 #'
 #' @return file name of the saved file
 #' @export

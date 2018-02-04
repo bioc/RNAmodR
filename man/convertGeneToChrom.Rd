@@ -14,28 +14,45 @@ convertGeneToChrom(gfffile, fafile, genes, ident, saveTrimmedFile = FALSE,
   removeDuplicateSeqs = FALSE)
 
 converttRNAscanToChrom(gfffile, fafile, tRNAscanfile, ident,
-  saveTrimmedFile = FALSE, appendToOriginal = FALSE)
+  saveTrimmedFile = FALSE)
 }
 \arguments{
-\item{gfffile}{}
+\item{gfffile}{a file name for a gff3 file}
 
-\item{fafile}{}
+\item{fafile}{a file name for a fasta file}
 
-\item{geneTypes}{}
+\item{geneTypes}{a character vector for gene types mapped to the types column
+of the gff3 annotation.}
 
-\item{ident}{}
+\item{ident}{a identifying string used for naming result files. Is appended
+to the given file names.}
 
-\item{saveTrimmedFile}{}
+\item{saveTrimmedFile}{Whether to save the input file with removed 
+annotations}
 
-\item{removeDuplicateSeqs}{}
+\item{removeDuplicateSeqs}{whether to check for exact duplicate sequences and 
+keep only a single on. If a lot of genes are in the results, this might cause
+long run times.}
 
-\item{genes}{}
+\item{genes}{a character vector containing valid gene names mapped to the ID, 
+Name or gene column of the gff3 file}
 
-\item{tRNAscanfile}{}
+\item{tRNAscanfile}{a file name for a tRNAscan-SE output file}
 }
 \value{
 named list containing the filenames used for input and several 
 outputs
+}
+\description{
+\code{convertGeneToChrom} and \code{convertGeneTypeToChrom} extract gene
+annotation and sequences and saves them as distinct chromosome annotations
+per gene. Theis function can be used to extract genes with multiple copies,
+such as rRNA and tRNA genes. The resulting data can be used directly for
+mapping and depleting sequence data before other transcript mapping.
+
+\code{converttRNAscanToChrom} expects a tRNAscan-SE output file as input and
+creates custom chromosome annotations per tRNA. 
+\code{removeDuplicateSeqs = TRUE} is set automatically.
 }
 \examples{
 \donttest{

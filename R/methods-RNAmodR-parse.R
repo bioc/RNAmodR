@@ -5,11 +5,21 @@ NULL
 #' @rdname parseForModifications
 #' 
 #' @title parseForModifications
+#' 
+#' @description 
+#' \code{parseForModifications} uses the input information from GRanges, Fafile
+#' and bam input files to look for known patterns of RNA post-transcriptional
+#' modifications. 
 #'
 #' @param .Object a RNAmod object. 
 #' @param number a number defining an experiment. 
 #' @param modifications name of modification to be used for analysis. 
-#'
+#' @param name a character string for identification
+#' @param gff a gff3 file name
+#' @param fasta a fasta file name
+#' @param files file names for the bam input files
+#' @param mapQuality mapping quality threshold for reading the bam input files
+#' 
 #' @return TRUE if the analysis does finish without error
 #' @export
 #' 
@@ -29,6 +39,7 @@ setMethod(
                         name = "missing",
                         gff = "missing",
                         fasta = "missing",
+                        mapQuality = "missing",
                         files = "missing",
                         modifications = "missing"),
   definition = function(.Object,
@@ -46,11 +57,14 @@ setMethod(
     # add the default modification class, which is just used for handling read 
     # positions (5'-end), but not modification detection.
     modifications <- unique(unlist(experiment$Modifications))
+    # get mapping quality threshold
+    mapQuality <- .Object@.mapQuality
     
     res <- parseForModifications(name = name,
                                  gff = gff,
                                  fasta = fasta,
                                  files = files,
+                                 mapQuality = mapQuality,
                                  modifications = modifications)
     
     # Save found modifications as gff file
@@ -77,6 +91,7 @@ setMethod(
                         gff = "GRanges",
                         fasta = "FaFile",
                         files = "character",
+                        mapQuality = "numeric",
                         modifications = "character",
                         .Object = "missing",
                         number = "missing"),
@@ -84,6 +99,7 @@ setMethod(
                         gff,
                         fasta,
                         files,
+                        mapQuality,
                         modifications){
     # Input checks
     assertive::assert_is_a_non_missing_nor_empty_string(name)
@@ -112,7 +128,7 @@ setMethod(
     )
     # assemble param for scanBam
     param <- .assemble_scanBamParam(gff_subset, 
-                                    .Object@.mapQuality,
+                                    mapQuality,
                                     .get_acceptable_chrom_ident(files))
     
     message(Sys.time(), ": Getting read data...")

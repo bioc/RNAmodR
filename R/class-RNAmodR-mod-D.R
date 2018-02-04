@@ -7,10 +7,10 @@ RNAMODR_D_P_THRESHOLD <- 0.05
 RNAMODR_D_SIG_THRESHOLD <- 5
 
 
-#' @rdname mod
+#' @rdname RNAmodR-mod-class
 #'
 #' @description 
-#' \code{mod_D}
+#' \code{mod_D}:
 #' 
 #' @export
 setClass("mod_D",
@@ -28,12 +28,12 @@ setMethod(
   f = "preTest",
   signature = signature(object = "mod_D",
                         location = "numeric",
-                        data = "list",
-                        locations = "numeric"),
+                        locations = "numeric",
+                        data = "list"),
   definition = function(object,
                         location,
-                        data,
-                        locations) {
+                        locations,
+                        data) {
     # do pretest
     res <- .do_D_pretest(location,
                          locations,

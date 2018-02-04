@@ -5,41 +5,67 @@
 \name{heatmapModifications}
 \alias{heatmapModifications}
 \alias{saveHeatmapModifications}
-\alias{heatmapModifications,list,missing,character-method}
+\alias{heatmapModifications,RNAmodR,numeric,character,ANY,ANY,ANY-method}
 \alias{heatmapModifications}
 \alias{saveHeatmapModifications}
-\alias{heatmapModifications,missing,GRangesList,character-method}
-\alias{saveHeatmapModifications,list,missing,character-method}
-\alias{saveHeatmapModifications,missing,GRangesList,character-method}
+\alias{heatmapModifications,missing,missing,missing,list,missing,character-method}
+\alias{heatmapModifications,missing,missing,missing,missing,GRangesList,character-method}
+\alias{saveHeatmapModifications,RNAmodR,numeric,character,ANY,ANY,ANY-method}
+\alias{saveHeatmapModifications,missing,missing,missing,list,missing,character-method}
+\alias{saveHeatmapModifications,missing,missing,missing,missing,GRangesList,character-method}
 \title{Comparative visualization of modifications}
 \usage{
-heatmapModifications(ses, grl, modifications)
+heatmapModifications(.Object, number, genes, ses, grl, modifications)
 
-saveHeatmapModifications(ses, grl, modifications)
+saveHeatmapModifications(.Object, number, genes, ses, grl, modifications)
 
-\S4method{heatmapModifications}{list,missing,character}(ses, modifications)
+\S4method{heatmapModifications}{RNAmodR,numeric,character,ANY,ANY,ANY}(.Object,
+  number, genes)
 
-\S4method{heatmapModifications}{missing,GRangesList,character}(grl,
+
+  \S4method{heatmapModifications}{missing,missing,missing,list,missing,character}(ses,
   modifications)
 
-\S4method{saveHeatmapModifications}{list,missing,character}(ses, modifications)
 
-\S4method{saveHeatmapModifications}{missing,GRangesList,character}(grl,
+  \S4method{heatmapModifications}{missing,missing,missing,missing,GRangesList,character}(grl,
+  modifications)
+
+
+  \S4method{saveHeatmapModifications}{RNAmodR,numeric,character,ANY,ANY,ANY}(.Object,
+  number, genes)
+
+
+  \S4method{saveHeatmapModifications}{missing,missing,missing,list,missing,character}(ses,
+  modifications)
+
+
+  \S4method{saveHeatmapModifications}{missing,missing,missing,missing,GRangesList,character}(grl,
   modifications)
 }
 \arguments{
-\item{modifications}{name of modification to be used for analysis.}
-
 \item{.Object}{a RNAmod object.}
 
-\item{se}{a SummarizedExperiment containg the experimental data.}
+\item{number}{an experiment number}
 
-\item{gene}{a single gene name}
+\item{genes}{gene names to be included in the analysis}
+
+\item{ses}{a named list of SummarizedExperiment objects containg the 
+experimental data to be used for comparison}
+
+\item{grl}{a named GRangesList containg the experimental data.}
+
+\item{modifications}{name of modification to be used for analysis. These
+should be defined as the format gene-name_nucleotide_position.}
 }
 \value{
 a heatmap plot for given experiments and modifications positions
 }
+\description{
+compares different experiments as a heatmap for selected genes and/or 
+modifications
+}
 \examples{
 \donttest{
+heatmapModifications(grl,"RDN18-1_G_1575")
 }
 }

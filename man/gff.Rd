@@ -8,6 +8,9 @@
 \usage{
 gff
 }
+\description{
+example data - GRanges object
+}
 \keyword{RNAmod}
 \keyword{datasets}
 \keyword{gff}

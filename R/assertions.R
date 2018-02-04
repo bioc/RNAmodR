@@ -1,4 +1,5 @@
 #' @include RNAmodR.R
+#' @importFrom assertive get_name_in_parent
 NULL
 
 # these are used just internally and can be switched to different package
@@ -13,9 +14,9 @@ NULL
   TRUE
 }
 
-# GRanges
+# GRanges ----------------------------------------------------------------------
 
-is_GRanges <- function(x, .xname = assertive.base::get_name_in_parent(x)){
+is_GRanges <- function(x, .xname = assertive::get_name_in_parent(x)){
   .is_object_class(x, .xname, "GRanges")
 }
 
@@ -23,13 +24,13 @@ assert_is_GRanges <- function(x,
                               severity = getOption("assertive.severity","stop")){
   assert_engine(is_GRanges, 
                 x, 
-                .xname = assertive.base::get_name_in_parent(x),
+                .xname = assertive::get_name_in_parent(x),
                 severity = severity)
 }
 
 assert_all_are_GRanges <- function(x, 
                                    severity = getOption("assertive.severity","stop")){
-  .xname <- assertive.base::get_name_in_parent(x)
+  .xname <- assertive::get_name_in_parent(x)
   msg <- gettextf("%s are not all all GRanges objects.", .xname)
   assert_engine(is_GRanges, 
                 x, 
@@ -38,9 +39,9 @@ assert_all_are_GRanges <- function(x,
                 severity = severity)
 }
 
-# FaFile
+# FaFile -----------------------------------------------------------------------
 
-is_FaFile <- function(x, .xname = assertive.base::get_name_in_parent(x)){
+is_FaFile <- function(x, .xname = assertive::get_name_in_parent(x)){
   .is_object_class(x, .xname, "FaFile")
 }
 
@@ -48,13 +49,13 @@ assert_is_FaFile <- function(x,
                              severity = getOption("assertive.severity","stop")){
   assert_engine(is_FaFile, 
                 x, 
-                .xname = assertive.base::get_name_in_parent(x),
+                .xname = assertive::get_name_in_parent(x),
                 severity = severity)
 }
 
 assert_all_are_FaFile <- function(x, 
                                   severity = getOption("assertive.severity","stop")){
-  .xname <- assertive.base::get_name_in_parent(x)
+  .xname <- assertive::get_name_in_parent(x)
   msg <- gettextf("%s are not all all FaFile objects.", .xname)
   assert_engine(is_FaFile, 
                 x, 
@@ -63,7 +64,7 @@ assert_all_are_FaFile <- function(x,
                 severity = severity)
 }
 
-
+# TxDb -------------------------------------------------------------------------
 
 #' @name is_TxDb
 #' 
@@ -75,15 +76,14 @@ assert_all_are_FaFile <- function(x,
 #' 
 #' @param x object to test
 #' @param .xname name of the object in parent env
-#' @param severity assertions only: severity of failing assertion
 #'
 #' @return logical
 #' @export
-is_TxDb <- function(x, .xname = assertive.base::get_name_in_parent(x)){
+is_TxDb <- function(x, .xname = assertive::get_name_in_parent(x)){
   .is_object_class(x, .xname, "TxDb")
 }
 
-# SummarizedExperiment
+# SummarizedExperiment ---------------------------------------------------------
 
 #' @name is_SummarizedExperiment
 #' 
@@ -101,7 +101,7 @@ is_TxDb <- function(x, .xname = assertive.base::get_name_in_parent(x)){
 #'
 #' @return logical
 #' @export
-is_SummarizedExperiment <- function(x, .xname = assertive.base::get_name_in_parent(x)){
+is_SummarizedExperiment <- function(x, .xname = assertive::get_name_in_parent(x)){
   .is_object_class(x, .xname, "SummarizedExperiment")
 }
 
@@ -113,7 +113,7 @@ assert_is_SummarizedExperiment <- function(x,
                              severity = getOption("assertive.severity","stop")){
   assert_engine(is_SummarizedExperiment, 
                 x, 
-                .xname = assertive.base::get_name_in_parent(x),
+                .xname = assertive::get_name_in_parent(x),
                 severity = severity)
 }
 
@@ -123,7 +123,7 @@ assert_is_SummarizedExperiment <- function(x,
 #' @return invisible logical
 assert_all_are_SummarizedExperiment <- function(x, 
                                   severity = getOption("assertive.severity","stop")){
-  .xname <- assertive.base::get_name_in_parent(x)
+  .xname <- assertive::get_name_in_parent(x)
   msg <- gettextf("%s are not all all SummarizedExperiment objects.", .xname)
   assert_engine(is_SummarizedExperiment, 
                 x, 

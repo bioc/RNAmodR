@@ -7,10 +7,10 @@ RNAMODR_M3C_P_THRESHOLD <- 0.05
 RNAMODR_M3C_SIG_THRESHOLD <- 5
 
 
-#' @rdname mod
+#' @rdname RNAmodR-mod-class
 #'
 #' @description 
-#' \code{mod_m3C}
+#' \code{mod_m3C}:
 #' 
 #' @export
 setClass("mod_m3C",
@@ -28,12 +28,12 @@ setMethod(
   f = "preTest",
   signature = signature(object = "mod_m3C",
                         location = "numeric",
-                        data = "list",
-                        locations = "numeric"),
+                        locations = "numeric",
+                        data = "list"),
   definition = function(object,
                         location,
-                        data,
-                        locations) {
+                        locations,
+                        data) {
     # do pretest
     res <- .do_M3C_pretest(location,
                            locations,

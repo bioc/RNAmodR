@@ -4,18 +4,18 @@
 \alias{appendFastaFiles}
 \alias{appendGFF}
 \alias{appendGFF}
-\title{appendFastaFiles}
+\title{Appending multiple fasta or gff3 files}
 \usage{
 appendFastaFiles(..., ident, msg)
 
 appendGFF(..., ident, msg)
 }
 \arguments{
-\item{...}{}
+\item{...}{any character will interpreted as file name used for appending}
 
-\item{ident}{}
+\item{ident}{a string used for naming the output file}
 
-\item{msg}{}
+\item{msg}{a message to be displayed}
 }
 \value{
 file name of the saved file
