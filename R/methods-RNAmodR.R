@@ -602,6 +602,7 @@ setMethod(
     .check_row_data(se, "mods")
     # get data
     mods <- SummarizedExperiment::rowData(se)$mods
+    names(mods) <- rownames(se)
     # subset if defined
     if(!missing(genes)){
       assertive::assert_all_are_non_empty_character(genes)

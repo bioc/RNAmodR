@@ -8,18 +8,21 @@ RNAMODR_DEFAULT_AVR_COVERAGE_MIN <- 10
 #' @rdname RNAmodR-analysis-class
 #'
 #' @description 
-#' @section
 #' \code{analysis_default}: the class can be used for analyzing the 5'-end of
 #' reads to detect specific post-transcriptional modifications.
 #' 
 #' @export
+#' @importFrom scales scientific
 #'
 #' @examples
 #' \donttest{
 #' ad <- new("analysis_default")
 #' }
 setClass("analysis_default",
-         contains = "analysis")
+         contains = "analysis",
+         prototype = list(plotType = "default",
+                          dataLabel = "mean(relative arrest rate)",
+                          dataFormat = scales::scientific))
 
 
 #' @rdname convertReadsToPositions
