@@ -6,12 +6,16 @@
 \alias{analysis-accessors}
 \alias{getPositions}
 \alias{getModifications}
+\alias{getDataLabel}
+\alias{getDataFormat}
 \alias{getPlotType,analysis-method}
 \alias{getPlotType}
 \alias{getPositions}
 \alias{getModifications}
 \alias{getPositions,analysis-method}
 \alias{getModifications,analysis-method}
+\alias{getDataLabel,analysis-method}
+\alias{getDataFormat,analysis-method}
 \title{Accessor for \code{analysis} class objects}
 \usage{
 getPlotType(object)
@@ -20,11 +24,19 @@ getPositions(object)
 
 getModifications(object)
 
+getDataLabel(object)
+
+getDataFormat(object)
+
 \S4method{getPlotType}{analysis}(object)
 
 \S4method{getPositions}{analysis}(object)
 
 \S4method{getModifications}{analysis}(object)
+
+\S4method{getDataLabel}{analysis}(object)
+
+\S4method{getDataFormat}{analysis}(object)
 }
 \arguments{
 \item{object}{a analysis object}
@@ -35,6 +47,11 @@ character defining the plot type for this analysis class
 a list of data as a lists of list(replicate) of DataFrame(transcript)
 
 a list of data as a lists of list(replicate) of DataFrame(transcript)
+
+the description of the type of position data, which can be used eg. 
+as a label for printing
+
+a function for formating the label of the position data
 }
 \description{
 The accessor function to \code{analysis} class objects can be used to access

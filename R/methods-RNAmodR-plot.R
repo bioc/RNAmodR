@@ -9,7 +9,7 @@ RNAMODR_PLOT_FOCUS_WINDOW <- 50
 RNAMODR_PLOT_MM_TO_INCH_F <- 0.03937008
 
 #' @rdname getModPlot
-#' @aliases getModPlot saveModPlots
+#' @aliases getModPlot saveModPlots saveModPlotFromSummarizedExperiment
 #' 
 #' @title Visualization of modifications
 #' 
@@ -31,7 +31,7 @@ RNAMODR_PLOT_MM_TO_INCH_F <- 0.03937008
 #' @param filetype file type used for \code{saveModPlots}
 #'
 #' @return 
-#' \code{getModPlot}: a grid of layer plot and any mod plot
+#' \code{getModPlot}: a \code{TableGrob} of layer plot and any mod plot
 #' @export
 #' 
 #' @import ggplot2
@@ -47,39 +47,34 @@ setMethod(
   signature = signature(.Object = "RNAmodR",
                         number = "numeric",
                         modifications = "character",
-                        gene = "character",
-                        focus = "logical",
-                        se = "missing",
-                        gff = "missing",
-                        fasta = "missing"),
+                        gene = "character"),
   definition = function(.Object,
                         number,
                         modifications,
                         gene,
                         focus){
+    # get se, gff and fasta
     se <- getSummarizedExperiment(.Object,number,modifications)
     gff <- .Object@.dataGFF
     fasta <- .Object@.dataFasta
-    getModPlot(se,
-               gff,
-               fasta,
-               modifications,
-               gene,
-               focus)
+    # call plotting function
+    getModPlotFromSummarizedExperiment(se = se,
+                                       gff = gff,
+                                       fasta = fasta,
+                                       modifications = modifications,
+                                       gene = gene,
+                                       focus = focus)
   }
 )
 #' @rdname getModPlot
 #' @export
 setMethod(
-  f = "getModPlot", 
+  f = "getModPlotFromSummarizedExperiment", 
   signature = signature(se = "SummarizedExperiment",
                         gff = "GRanges",
                         fasta = "FaFile",
                         modifications = "character",
-                        gene = "character",
-                        focus = "logical",
-                        .Object = "missing",
-                        number = "missing"),
+                        gene = "character"),
   definition = function(se,
                         gff,
                         fasta,
@@ -109,10 +104,8 @@ setMethod(
     genesAvail <- unlist(genesAvail)
     assertive::assert_is_a_non_empty_string(genesAvail)
     
-    positions <- seGetPositions(se,genesAvail)
-    mods <- seGetModifications(se,genesAvail,modifications)
-    # positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions[[1]]
-    # mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods[[1]]
+    positions <- seGetPositions(se,genesAvail)[[1]]
+    mods <- seGetModifications(se,genesAvail,modifications)[[1]]
     
     modClasses <- .load_mod_classes(modifications)
     if(!focus){
@@ -160,18 +153,14 @@ setMethod(
   signature = signature(.Object = "RNAmodR",
                         number = "numeric",
                         modifications = "character",
-                        genes = "character",
-                        focus = "logical",
-                        se = "missing",
-                        gff = "missing",
-                        fasta = "missing",
-                        folder = "missing"),
+                        genes = "character"),
   definition = function(.Object,
                         number,
                         modifications,
                         genes,
                         focus,
                         filetype){
+    # get se, gff and fasta
     se <- getSummarizedExperiment(.Object,
                                   number,
                                   modifications)
@@ -179,17 +168,15 @@ setMethod(
     fasta <- .Object@.dataFasta
     # create folder
     folder <- paste0(getOutputFolder(.Object),
-                     "ModPlots/",
-                     unique(SummarizedExperiment::colData(se)$SampleName),
-                     "/")
-    return(saveModPlot(se,
-                       gff,
-                       fasta,
-                       modifications,
-                       genes,
-                       folder,
-                       focus,
-                       filetype))
+                     "ModPlots/")
+    return(saveModPlotFromSummarizedExperiment(se = se,
+                                               gff = gff,
+                                               fasta = fasta,
+                                               modifications = modifications,
+                                               genes = genes,
+                                               folder = folder,
+                                               focus = focus,
+                                               filetype = filetype))
   }
 )
 #' @rdname getModPlot
@@ -199,26 +186,22 @@ setMethod(
   signature = signature(.Object = "RNAmodR",
                         number = "numeric",
                         modifications = "character",
-                        focus = "logical",
-                        genes = "missing",
-                        se = "missing",
-                        gff = "missing",
-                        fasta = "missing",
-                        folder = "missing"),
+                        genes = "missing"),
   definition = function(.Object,
                         number,
                         modifications,
                         focus,
                         filetype){
+    # get se, gff and fasta
     se <- getSummarizedExperiment(.Object,
                                   number,
                                   modifications)
     gff <- .Object@.dataGFF
     fasta <- .Object@.dataFasta
-    
+    # get transcript names with modifications
     assays <- SummarizedExperiment::assays(se)[modifications]
     l <- lapply(seq_along(assays), function(i){
-      assay <- assays[i]
+      assay <- assays[[i]]
       names(assay[assay > 0,])
     })
     l <- unlist(l)
@@ -227,35 +210,30 @@ setMethod(
            call. = FALSE)
     }
     transcripts <- unique(l)
-    
     # create folder
     folder <- paste0(getOutputFolder(.Object),
-                     "ModPlots/",
-                     unique(SummarizedExperiment::colData(se)$SampleName),
-                     "/")
-    return(saveModPlot(se,
-                       gff,
-                       fasta,
-                       modifications,
-                       transcripts,
-                       folder,
-                       focus,
-                       filetype))
+                     "ModPlots/")
+    # call plotting function
+    return(saveModPlotFromSummarizedExperiment(se = se,
+                                               gff = gff,
+                                               fasta = fasta,
+                                               modifications = modifications,
+                                               genes = transcripts,
+                                               folder = folder,
+                                               focus = focus,
+                                               filetype = filetype))
   }
 )
 #' @rdname getModPlot
 #' @export
 setMethod(
-  f = "saveModPlot", 
+  f = "saveModPlotFromSummarizedExperiment", 
   signature = signature(se = "SummarizedExperiment",
                         gff = "GRanges",
                         fasta = "FaFile",
                         modifications = "character",
                         genes = "character",
-                        folder = "character",
-                        focus = "logical",
-                        .Object = "missing",
-                        number = "missing"),
+                        folder = "character"),
   definition = function(se,
                         gff,
                         fasta,
@@ -273,7 +251,8 @@ setMethod(
     
     # create folder
     folder <- paste0(folder,
-                     unique(SummarizedExperiment::colData(se)$SampleName),
+                     # unique(SummarizedExperiment::colData(se)$SampleName),
+                     unique(SummarizedExperiment::colData(se)$name),
                      "/")
     if(!assertive::is_dir(folder)){
       dir.create(folder, recursive = TRUE)
@@ -296,8 +275,6 @@ setMethod(
     # browser()
     positions <- seGetPositions(se,genesAvail)
     mods <- seGetModifications(se,genesAvail,modifications)
-    # positions <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$positions
-    # mods <- SummarizedExperiment::rowData(se[rownames(se) %in% genesAvail,])$mods
     
     modClasses <- .load_mod_classes(modifications)
     
@@ -374,19 +351,18 @@ setMethod(
   # to inhibit plotting by grid.arrange
   grDevices::pdf(file = NULL)
   
-  dataPlots <- lapply(names(posData), function(type){
-    pos <- posData[[type]]
-    mods <- modData[[type]]
-    
-    plot <- .get_mod_plot(pos,
-                          mods)
-    return(plot)
+  dataPlots <- lapply(names(posData$data), function(type){
+    return(.get_mod_plot(pos = posData$data[[type]],
+                         mods = modData[[type]],
+                         label = posData$label[[type]],
+                         format = posData$format[[type]])
+    )
   })
-  #layerPlot <- .get_gene_plot(geneName, layer, posData[[1]])
+  #layerPlot <- .get_gene_plot(geneName, layer, posData$data[[1]])
   layerPlot <- list()
   
   nrow <- length(layerPlot) + length(dataPlots)
-  width <- 80 + nrow(posData[[1]]) * RNAMODR_PLOT_POS_WIDTH
+  width <- 80 + nrow(posData$data[[1]]) * RNAMODR_PLOT_POS_WIDTH
   height <- length(layerPlot) * RNAMODR_PLOT_LAYER_HEIGHT + 
     length(dataPlots) * RNAMODR_PLOT_DATA_HEIGHT
   
@@ -439,9 +415,9 @@ setMethod(
   modData <- do.call(rbind,modData)
   
   plots <- lapply(1:nrow(modData), function(i){
+    # subset tp temporary data
     mod <- modData[i,]
-    pos <- posData[[mod$plotType]]
-    
+    pos <- posData$data[[mod$plotType]]
     # focus on a modification
     localStart <- as.numeric(pos[as.numeric(pos$pos) %in% mods$start,"pos"]) - 
       RNAMODR_PLOT_FOCUS_WINDOW
@@ -449,24 +425,23 @@ setMethod(
       RNAMODR_PLOT_FOCUS_WINDOW
     pos <- pos[as.numeric(pos$pos) > localStart &
                  as.numeric(pos$pos) < localEnd,]
-    
     # to inhibit plotting by grid.arrange
     grDevices::pdf(file = NULL)
-    
     # get plots
     # layerPlot <- .get_gene_plot(geneName, layer, pos)
     layerPlot <- list()
-    plot <- .get_mod_plot(pos,
-                          mod)
-    
+    plot <- .get_mod_plot(pos = pos,
+                          mods = mod,
+                          label = posData$label[[mod$plotType]],
+                          format = posData$format[[mod$plotType]])
+    # get dimensions of the plot
     nrow <- length(layerPlot) + 1
     width <- 80 + nrow(pos) * RNAMODR_PLOT_POS_WIDTH
     height <- RNAMODR_PLOT_LAYER_HEIGHT + 
       RNAMODR_PLOT_DATA_HEIGHT
-    
+    # create grid
     # grid <- gridExtra::grid.arrange(plot, layerPlot, nrow = nrow)
     grid <- gridExtra::grid.arrange(plot, nrow = nrow)
-    
     # to inhibit plotting by grid.arrange
     grDevices::dev.off()
     return(list(plot = grid,
@@ -511,8 +486,16 @@ setMethod(
     res$letters <- letters
     return(res)
   }, data)
+  # load the analysis classes
+  analysisClasses <- .load_analysis_classes(plotTypes)
+  label <- lapply(analysisClasses, getDataLabel)
+  format <- lapply(analysisClasses, getDataFormat)
   names(data) <- plotTypes
-  return(data)
+  names(label) <- plotTypes
+  names(format) <- plotTypes
+  return(list(data = data,
+              label = label,
+              format = format))
 }
 
 # aggregates the modification data
@@ -541,9 +524,11 @@ setMethod(
 
 # modification visualization ---------------------------------------------------
 
-#' @importFrom scales scientific
 # returns a plot showing all modifications on one type of position data
-.get_mod_plot <- function(pos,mods){
+.get_mod_plot <- function(pos,
+                          mods,
+                          label,
+                          format){
   requireNamespace("ggplot2", quietly = TRUE)
   # browser()
   break_FUN <- function(lim){
@@ -560,8 +545,8 @@ setMethod(
   plot <- ggplot(pos, aes_(x = ~as.numeric(pos), y = ~mean, label = ~letters)) +
     scale_x_continuous(name = "position of transcript [nt]",
                        expand = c(0,10)) +
-    scale_y_continuous(name = "mean(number of read ends)",
-                       labels = scales::scientific,
+    scale_y_continuous(name = label,
+                       labels = format,
                        limits = c(NA,max(pos$mean)*1.3)) +
     theme_bw()
   

@@ -174,7 +174,6 @@ setGeneric(
 # analysis type accessors ------------------------------------------------------------
 
 #' @name analysis-accessors
-#' 
 #' @export
 setGeneric( 
   name = "getPlotType",
@@ -182,7 +181,6 @@ setGeneric(
 ) 
 
 #' @rdname analysis-accessors
-#' 
 #' @export
 setGeneric( 
   name = "getPositions",
@@ -190,11 +188,24 @@ setGeneric(
 ) 
 
 #' @rdname analysis-accessors
-#' 
 #' @export
 setGeneric( 
   name = "getModifications",
   def = function(object){standardGeneric("getModifications")} 
+) 
+
+#' @rdname analysis-accessors
+#' @export
+setGeneric( 
+  name = "getDataLabel",
+  def = function(object){standardGeneric("getDataLabel")} 
+) 
+
+#' @rdname analysis-accessors
+#' @export
+setGeneric( 
+  name = "getDataFormat",
+  def = function(object){standardGeneric("getDataFormat")} 
 ) 
 
 # mod type accessors -----------------------------------------------------------
@@ -322,12 +333,20 @@ setGeneric(
   name = "getModPlot",
   def = function(.Object,
                  number,
-                 se,
+                 modifications,
+                 gene,
+                 focus = FALSE){standardGeneric("getModPlot")} 
+)
+#' @rdname getModPlot
+#' @export
+setGeneric( 
+  name = "getModPlotFromSummarizedExperiment",
+  def = function(se,
                  gff,
                  fasta,
                  modifications,
                  gene,
-                 focus = FALSE){standardGeneric("getModPlot")} 
+                 focus = FALSE){standardGeneric("getModPlotFromSummarizedExperiment")} 
 )
 
 #' @rdname getModPlot
@@ -336,14 +355,23 @@ setGeneric(
   name = "saveModPlot",
   def = function(.Object,
                  number,
-                 se,
+                 modifications,
+                 genes,
+                 focus = FALSE,
+                 filetype = "pdf"){standardGeneric("saveModPlot")} 
+)
+#' @rdname getModPlot
+#' @export
+setGeneric( 
+  name = "saveModPlotFromSummarizedExperiment",
+  def = function(se,
                  gff,
                  fasta,
                  modifications,
                  genes,
                  folder,
                  focus = FALSE,
-                 filetype = "pdf"){standardGeneric("saveModPlot")} 
+                 filetype = "pdf"){standardGeneric("saveModPlotFromSummarizedExperiment")} 
 )
 
 #' @name heatmapModifications

@@ -3,9 +3,7 @@
 NULL
 
 #' @name RNAmodR-analysis-class
-#' 
 #' @title RNAmodR analysis class
-#' 
 #' @description
 #' The class is virtual and has to be extended from, eg. \code{analysis_default}
 #' The analysis class is the main function for detecting modifications. It works
@@ -22,26 +20,23 @@ NULL
 #'   base data further for storage. This involves usually generating a per
 #'   position mean and sd or equivalent.}
 #' }
-#' 
 #' @slot plotType 
 #' @slot data 
 #' @slot modifications 
-#' 
 #' @return a RNAmodR analysis class object
-#' 
 #' @import methods
 #' @export
 setClass("analysis",
          contains = "VIRTUAL",
-         slots = c(plotType = "character",
+         slots = c(dataLabel = "character",
+                   dataFormat = "function",
+                   plotType = "character",
                    data = "list",
                    modifications = "list"),
-         prototype = list(plotType = "default",
-                          data = list(),
+         prototype = list(data = list(),
                           modifications = list())
 )
 #' @rdname RNAmodR-analysis-class
-#'
 #' @param object a RNAmodR analysis object. 
 #' @export
 setMethod(
@@ -54,18 +49,13 @@ setMethod(
 
 #' @rdname analysis-accessors
 #' @aliases getPlotType getPositions getModifications
-#' 
 #' @title Accessor for \code{analysis} class objects
-#' 
 #' @description
 #' The accessor function to \code{analysis} class objects can be used to access
 #' the data saved in slots of the object. See examples for available functions.
-#' 
 #' @param object a analysis object 
-#' 
 #' @return character defining the plot type for this analysis class
 #' @export
-#'
 #' @examples
 #' \donttest{
 #' getPlotType(analysis)
@@ -81,7 +71,6 @@ setMethod(
 )
 
 #' @rdname analysis-accessors
-#'
 #' @return a list of data as a lists of list(replicate) of DataFrame(transcript)
 #' @export
 setMethod(
@@ -93,7 +82,6 @@ setMethod(
 )
 
 #' @rdname analysis-accessors
-#'
 #' @return a list of data as a lists of list(replicate) of DataFrame(transcript)
 #' @export
 setMethod(
@@ -101,6 +89,29 @@ setMethod(
   signature = signature(object = "analysis"),
   definition = function(object) {
     return(object@modifications)
+  }
+)
+
+#' @rdname analysis-accessors
+#' @return the description of the type of position data, which can be used eg. 
+#' as a label for printing
+#' @export
+setMethod(
+  f = "getDataLabel", 
+  signature = signature(object = "analysis"),
+  definition = function(object) {
+    return(object@dataLabel)
+  }
+)
+
+#' @rdname analysis-accessors
+#' @return a function for formating the label of the position data
+#' @export
+setMethod(
+  f = "getDataFormat", 
+  signature = signature(object = "analysis"),
+  definition = function(object) {
+    return(object@dataFormat)
   }
 )
 

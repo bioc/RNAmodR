@@ -32,6 +32,9 @@ usually in a three step manner.
   base data further for storage. This involves usually generating a per
   position mean and sd or equivalent.}
 }
+
+\code{analysis_default}: the class can be used for analyzing the 5'-end of
+reads to detect specific post-transcriptional modifications.
 }
 \section{Slots}{
 
@@ -42,11 +45,6 @@ usually in a three step manner.
 
 \item{\code{modifications}}{}
 }}
-
-\section{\code{analysis_default}}{
- the class can be used for analyzing the 5'-end of
-reads to detect specific post-transcriptional modifications.
-}
 
 \examples{
 \donttest{
