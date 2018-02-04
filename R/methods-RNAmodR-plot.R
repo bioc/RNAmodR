@@ -581,12 +581,12 @@ setMethod(
     
   # plot modifications for single positions each
   # setup p value text
-  p_text <- unlist(lapply(as.numeric(modsPositions$RNAmodR_p.value), 
-                          function(p){
-    if( p < 0.0001){
+  z_text <- unlist(lapply(as.numeric(modsPositions$RNAmodR_z), 
+                          function(z){
+    if( z < 0.0001){
       return(paste0("< ",0.0001))
     } else {
-      return(paste0(": ",round(p, digits = 4)))
+      return(paste0(": ",round(z, digits = 4)))
     }
   }))
   # setup modification labels
@@ -595,8 +595,8 @@ setMethod(
                                 rownames(modsPositions),
                                 "\n \u03C3: ",
                                 modsPositions$RNAmodR_signal,
-                                " (p ",
-                                p_text,
+                                " (z ",
+                                z_text,
                                 ")")
   # plot modification marker
   plot <- plot + geom_segment(data = as.data.frame(modsPositions),

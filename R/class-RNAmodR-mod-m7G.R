@@ -3,7 +3,7 @@ NULL
 
 RNAMODR_M7G_NUCLEOTIDE <- "G"
 RNAMODR_M7G_ARREST_RATE <- 0.65
-RNAMODR_M7G_P_THRESHOLD <- 0.05
+RNAMODR_M7G_Z_THRESHOLD <- 3
 RNAMODR_M7G_SIG_THRESHOLD <- 5
 
 
@@ -53,6 +53,7 @@ setMethod(
   }
   # do not take into account position 1
   if(location == 1) return(NULL)
+  # if(location == 1575) browser()
   # number of replicates
   n <- length(data)
   # merge data for positions
@@ -65,10 +66,10 @@ setMethod(
   # base data to compare against
   baseData <- .aggregate_area_data(data, 
                                    (location + 1), 
-                                   60)
+                                   50)
   baseData <- baseData[baseData > 0]
   # if not enough data is present
-  if(length(baseData) < (3*n)) return(NULL)
+  if(length(baseData) < n) return(NULL)
   return(list(n = n,
               testData = testData,
               baseData = baseData))
@@ -99,9 +100,9 @@ setMethod(
     if(is.null(locTest)) return(NULL)
     # dynamic threshold based on the noise of the signal (high sd)
     if(!.validate_M7G_pos(RNAMODR_M7G_SIG_THRESHOLD, 
-                          RNAMODR_M7G_P_THRESHOLD, 
+                          RNAMODR_M7G_Z_THRESHOLD, 
                           locTest$sig.mean, 
-                          locTest$p.value) ) {
+                          locTest$z) ) {
       # debug
       if( getOption("RNAmodR_debug") ){
         .print_location_info(paste(location,"_no"),locations)
@@ -117,7 +118,7 @@ setMethod(
                 type = getModType(object),
                 signal = locTest$sig.mean,
                 signal.sd = locTest$sig.sd,
-                p.value = locTest$p.value,
+                z = locTest$z,
                 nbsamples = locTest$n))
   }
 )
@@ -142,15 +143,12 @@ setMethod(
                  (1 - RNAMODR_M7G_ARREST_RATE) * 100)
   sig.mean <- mean(sig)
   sig.sd <- stats::sd(sig)
-  # Since normality of distribution can not be assumed use the MWU
-  # generate p.value for single position
-  # Does this have any meaning anymore? Can this be improved?
-  p.value <- suppressWarnings(stats::wilcox.test(baseData,
-                                                 testData)$p.value)
+  # generate z score
+  z <- mean((testData - mean(baseData))/sd(baseData))
   return(list(sig = sig,
               sig.mean = sig.mean,
               sig.sd = sig.sd,
-              p.value = p.value,
+              z = z,
               n = n))
 }
 
@@ -158,9 +156,9 @@ setMethod(
 .validate_M7G_pos <- function(sig.threshold, 
                               p.threshold, 
                               sig, 
-                              p.value){
+                              z){
   ((sig > sig.threshold &&
-      p.value <= p.threshold) ||
+      z >= p.threshold) ||
      (sig > sig.threshold &&
         !.get_use_p()))
 }
