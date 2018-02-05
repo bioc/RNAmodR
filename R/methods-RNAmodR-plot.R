@@ -17,17 +17,18 @@ RNAMODR_PLOT_MM_TO_INCH_F <- 0.03937008
 #' \code{getModPlot} and \code{saveModPlot} plot the results by combining
 #' position data and modifications with transcript layout data.
 #' 
-#' @param .Object a RNAmod object. 
-#' @param number an experiemnt numnber. 
-#' @param se a SummarizedExperiment containg the experimental data. 
-#' @param gff a GRanges object with the genomic annotation data
-#' @param fasta a FaFile object with the genomic sequences
+#' @param x a RNAmod object or a SummarizedExperiment containg the experimental data. 
+#' @param number an experiemnt number, if \code{x} is RNAmodR
 #' @param modifications name of modification to be used for analysis. 
 #' @param gene a single gene name used by \code{getModPlot}
 #' @param genes gene names used by \code{saveModPlots}
-#' @param folder folder for saving the output used by \code{saveModPlots}
+#' @param gff a GRanges object with the genomic annotation data. Mandatory, if 
+#' \code{x} is RNAmodR
+#' @param fasta a FaFile object with the genomic sequences, if 
+#' \code{x} is RNAmodR
 #' @param focus optional: logical, whether to plot only the region next to the 
 #' modification
+#' @param folder folder for saving the output used by \code{saveModPlots}
 #' @param filetype file type used for \code{saveModPlots}
 #'
 #' @return 
@@ -44,50 +45,59 @@ RNAMODR_PLOT_MM_TO_INCH_F <- 0.03937008
 #' }
 setMethod(
   f = "getModPlot", 
-  signature = signature(.Object = "RNAmodR",
+  signature = signature(x = "RNAmodR",
                         number = "numeric",
-                        modifications = "character",
-                        gene = "character"),
-  definition = function(.Object,
+                        modifications = "character"),
+  definition = function(x,
                         number,
                         modifications,
                         gene,
                         focus){
+    # check input
+    assertive::assert_is_a_number(number)
+    assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+    assertive::assert_is_a_string(gene)
+    assertive::assert_is_a_bool(focus)
     # get se, gff and fasta
-    se <- getSummarizedExperiment(.Object,number,modifications)
-    gff <- .Object@.dataGFF
-    fasta <- .Object@.dataFasta
+    se <- getSummarizedExperiment(x,number,modifications)
+    gff <- x@.dataGFF
+    fasta <- x@.dataFasta
+    # Check input again
+    .check_plot_input(se,
+                      gff,
+                      fasta,
+                      "pdf")
     # call plotting function
-    getModPlotFromSummarizedExperiment(se = se,
-                                       gff = gff,
-                                       fasta = fasta,
-                                       modifications = modifications,
-                                       gene = gene,
-                                       focus = focus)
+    getModPlot(x = se,
+               modifications = modifications,
+               gene = gene,
+               gff = gff,
+               fasta = fasta,
+               focus = focus)
   }
 )
 #' @rdname getModPlot
 #' @export
 setMethod(
-  f = "getModPlotFromSummarizedExperiment", 
-  signature = signature(se = "SummarizedExperiment",
-                        gff = "GRanges",
-                        fasta = "FaFile",
-                        modifications = "character",
-                        gene = "character"),
-  definition = function(se,
-                        gff,
-                        fasta,
+  f = "getModPlot", 
+  signature = signature(x = "SummarizedExperiment",
+                        number = "missing",
+                        modifications = "character"),
+  definition = function(x,
                         modifications,
                         gene,
+                        gff,
+                        fasta,
                         focus){
-    # Check input
+    se <- x
+    # check input
     .check_plot_input(se,
-                      modifications,
-                      gene,
-                      focus,
+                      gff,
+                      fasta,
                       "pdf")
-    
+    assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+    assertive::assert_is_a_string(gene)
+    assertive::assert_is_a_bool(focus)
     # get intersection of requested and available genes
     genesAvail <- intersect(rownames(se), gene)
     if(length(genesAvail) != length(gene)){
@@ -128,13 +138,12 @@ setMethod(
 )
 
 .check_plot_input <- function(se,
-                              modifications,
-                              genes,
-                              focus,
+                              gff,
+                              fasta,
                               filetype){
-  assertive::assert_all_are_non_empty_character(modifications)
-  assertive::assert_all_are_non_empty_character(genes)
-  assertive::assert_is_a_bool(focus)
+  assertive::is_SummarizedExperiment(se)
+  assertive::is_GRanges(gff)
+  assertive::is_FaFile(fasta)
   checkFileTypes <- c("pdf","png")
   if(!assertive::is_subset(filetype, checkFileTypes))
     stop("Unsupported file type '",filetype,"'",
@@ -150,105 +159,80 @@ setMethod(
 #' @export
 setMethod(
   f = "saveModPlot", 
-  signature = signature(.Object = "RNAmodR",
+  signature = signature(x = "RNAmodR",
                         number = "numeric",
-                        modifications = "character",
-                        genes = "character"),
-  definition = function(.Object,
+                        modifications = "character"),
+  definition = function(x,
                         number,
                         modifications,
                         genes,
                         focus,
                         filetype){
+    # check input
+    assertive::assert_is_a_number(number)
+    assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+    assertive::assert_is_a_bool(focus)
     # get se, gff and fasta
-    se <- getSummarizedExperiment(.Object,
-                                  number,
-                                  modifications)
-    gff <- .Object@.dataGFF
-    fasta <- .Object@.dataFasta
+    se <- getSummarizedExperiment(x,number,modifications)
+    gff <- x@.dataGFF
+    fasta <- x@.dataFasta
+    # Check input again
+    .check_plot_input(se,
+                      gff,
+                      fasta,
+                      filetype)
+    # get transcript names with modifications
+    if( missing(genes) || length(genes) == 0 ){
+      assays <- SummarizedExperiment::assays(se)[modifications]
+      l <- lapply(seq_along(assays), function(i){
+        assay <- assays[[i]]
+        names(assay[assay > 0,])
+      })
+      l <- unlist(l)
+      if(length(l) == 0){
+        stop("No modifications for any genes found.",
+             call. = FALSE)
+      }
+      genes <- unique(l)
+    }
     # create folder
-    folder <- paste0(getOutputFolder(.Object),
+    folder <- paste0(getOutputFolder(x),
                      "ModPlots/")
-    return(saveModPlotFromSummarizedExperiment(se = se,
-                                               gff = gff,
-                                               fasta = fasta,
-                                               modifications = modifications,
-                                               genes = genes,
-                                               folder = folder,
-                                               focus = focus,
-                                               filetype = filetype))
+    return(saveModPlot(x = se,
+                       modifications = modifications,
+                       genes = genes,
+                       gff = gff,
+                       fasta = fasta,
+                       focus = focus,
+                       folder = folder,
+                       filetype = filetype))
   }
 )
 #' @rdname getModPlot
 #' @export
 setMethod(
   f = "saveModPlot", 
-  signature = signature(.Object = "RNAmodR",
-                        number = "numeric",
-                        modifications = "character",
-                        genes = "missing"),
-  definition = function(.Object,
-                        number,
-                        modifications,
-                        focus,
-                        filetype){
-    # get se, gff and fasta
-    se <- getSummarizedExperiment(.Object,
-                                  number,
-                                  modifications)
-    gff <- .Object@.dataGFF
-    fasta <- .Object@.dataFasta
-    # get transcript names with modifications
-    assays <- SummarizedExperiment::assays(se)[modifications]
-    l <- lapply(seq_along(assays), function(i){
-      assay <- assays[[i]]
-      names(assay[assay > 0,])
-    })
-    l <- unlist(l)
-    if(length(l) == 0){
-      stop("No modifications for any genes found.",
-           call. = FALSE)
-    }
-    transcripts <- unique(l)
-    # create folder
-    folder <- paste0(getOutputFolder(.Object),
-                     "ModPlots/")
-    # call plotting function
-    return(saveModPlotFromSummarizedExperiment(se = se,
-                                               gff = gff,
-                                               fasta = fasta,
-                                               modifications = modifications,
-                                               genes = transcripts,
-                                               folder = folder,
-                                               focus = focus,
-                                               filetype = filetype))
-  }
-)
-#' @rdname getModPlot
-#' @export
-setMethod(
-  f = "saveModPlotFromSummarizedExperiment", 
-  signature = signature(se = "SummarizedExperiment",
-                        gff = "GRanges",
-                        fasta = "FaFile",
-                        modifications = "character",
-                        genes = "character",
-                        folder = "character"),
-  definition = function(se,
-                        gff,
-                        fasta,
+  signature = signature(x = "SummarizedExperiment",
+                        number = "missing",
+                        modifications = "character"),
+  definition = function(x,
                         modifications,
                         genes,
-                        folder,
+                        gff,
+                        fasta,
                         focus,
+                        folder,
                         filetype){
+    se <- x
+    assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+    assertive::assert_all_are_non_missing_nor_empty_character(genes)
+    assertive::assert_is_a_bool(focus)
     # Check input
     .check_plot_input(se,
-                      modifications,
-                      genes,
-                      focus,
+                      gff,
+                      fasta,
                       filetype)
-    
+    assertive::assert_all_are_dirs(folder)
     # create folder
     folder <- paste0(folder,
                      # unique(SummarizedExperiment::colData(se)$SampleName),

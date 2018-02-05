@@ -22,7 +22,7 @@ NULL
   res
 }
 
-.extract_modification_info_from_se <- function(ses){
+.extract_modification_info_from_ses <- function(ses){
   res <- lapply(ses, function(se){
     DF <- do.call(rbind,
                   seGetModifications(se))
@@ -38,7 +38,7 @@ NULL
 
 # position access for SE and GRL --------------------------------------------
 
-.extract_position_info_from_se <- function(ses){
+.extract_position_info_from_ses <- function(ses){
   browser()
   res <- lapply(ses, function(se){
     DF <- do.call(rbind,

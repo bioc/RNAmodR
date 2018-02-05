@@ -3,16 +3,12 @@
 \name{is_SummarizedExperiment}
 \alias{is_SummarizedExperiment}
 \alias{assert_is_SummarizedExperiment}
-\alias{assert_all_are_SummarizedExperiment}
 \title{assertive: SummarizedExperiment}
 \usage{
 is_SummarizedExperiment(x, .xname = assertive::get_name_in_parent(x))
 
 assert_is_SummarizedExperiment(x, severity = getOption("assertive.severity",
   "stop"))
-
-assert_all_are_SummarizedExperiment(x,
-  severity = getOption("assertive.severity", "stop"))
 }
 \arguments{
 \item{x}{object to test}
@@ -23,8 +19,6 @@ assert_all_are_SummarizedExperiment(x,
 }
 \value{
 logical
-
-invisible logical
 
 invisible logical
 }

@@ -331,47 +331,28 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "getModPlot",
-  def = function(.Object,
+  def = function(x,
                  number,
                  modifications,
                  gene,
-                 focus = FALSE){standardGeneric("getModPlot")} 
-)
-#' @rdname getModPlot
-#' @export
-setGeneric( 
-  name = "getModPlotFromSummarizedExperiment",
-  def = function(se,
                  gff,
                  fasta,
-                 modifications,
-                 gene,
-                 focus = FALSE){standardGeneric("getModPlotFromSummarizedExperiment")} 
+                 focus = FALSE){standardGeneric("getModPlot")} 
 )
 
 #' @rdname getModPlot
 #' @export
 setGeneric( 
   name = "saveModPlot",
-  def = function(.Object,
+  def = function(x,
                  number,
                  modifications,
                  genes,
-                 focus = FALSE,
-                 filetype = "pdf"){standardGeneric("saveModPlot")} 
-)
-#' @rdname getModPlot
-#' @export
-setGeneric( 
-  name = "saveModPlotFromSummarizedExperiment",
-  def = function(se,
                  gff,
                  fasta,
-                 modifications,
-                 genes,
-                 folder,
                  focus = FALSE,
-                 filetype = "pdf"){standardGeneric("saveModPlotFromSummarizedExperiment")} 
+                 folder,
+                 filetype = "pdf"){standardGeneric("saveModPlot")} 
 )
 
 #' @name heatmapModifications
@@ -379,11 +360,9 @@ setGeneric(
 #' @export
 setGeneric(
   name = "heatmapModifications",
-  def = function(.Object,
-                 number,
+  def = function(x,
+                 numbers,
                  sampleNames,
-                 ses,
-                 grl,
                  modifications,
                  genes){standardGeneric("heatmapModifications")}
 )
@@ -392,11 +371,9 @@ setGeneric(
 #' @export
 setGeneric(
   name = "saveHeatmapModifications",
-  def = function(.Object,
-                 number,
+  def = function(x,
+                 numbers,
                  sampleNames,
-                 ses,
-                 grl,
                  modifications,
                  genes){standardGeneric("saveHeatmapModifications")}
 )

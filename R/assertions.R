@@ -4,7 +4,9 @@ NULL
 
 # these are used just internally and can be switched to different package
 
-.is_object_class <- function(x, .xname, className){
+.is_object_class <- function(x, 
+                             .xname, 
+                             className){
   if( class(x) != className ){
     return(false("%s is not of an object of class '%s'.", .xname, className))
   }
@@ -16,8 +18,11 @@ NULL
 
 # GRanges ----------------------------------------------------------------------
 
-is_GRanges <- function(x, .xname = assertive::get_name_in_parent(x)){
-  .is_object_class(x, .xname, "GRanges")
+is_GRanges <- function(x, 
+                       .xname = assertive::get_name_in_parent(x)){
+  .is_object_class(x, 
+                   .xname, 
+                   "GRanges")
 }
 
 assert_is_GRanges <- function(x, 
@@ -28,21 +33,13 @@ assert_is_GRanges <- function(x,
                 severity = severity)
 }
 
-assert_all_are_GRanges <- function(x, 
-                                   severity = getOption("assertive.severity","stop")){
-  .xname <- assertive::get_name_in_parent(x)
-  msg <- gettextf("%s are not all all GRanges objects.", .xname)
-  assert_engine(is_GRanges, 
-                x, 
-                .xname = .xname, 
-                msg = msg,
-                severity = severity)
-}
-
 # FaFile -----------------------------------------------------------------------
 
-is_FaFile <- function(x, .xname = assertive::get_name_in_parent(x)){
-  .is_object_class(x, .xname, "FaFile")
+is_FaFile <- function(x, 
+                      .xname = assertive::get_name_in_parent(x)){
+  .is_object_class(x, 
+                   .xname, 
+                   "FaFile")
 }
 
 assert_is_FaFile <- function(x, 
@@ -50,17 +47,6 @@ assert_is_FaFile <- function(x,
   assert_engine(is_FaFile, 
                 x, 
                 .xname = assertive::get_name_in_parent(x),
-                severity = severity)
-}
-
-assert_all_are_FaFile <- function(x, 
-                                  severity = getOption("assertive.severity","stop")){
-  .xname <- assertive::get_name_in_parent(x)
-  msg <- gettextf("%s are not all all FaFile objects.", .xname)
-  assert_engine(is_FaFile, 
-                x, 
-                .xname = .xname, 
-                msg = msg,
                 severity = severity)
 }
 
@@ -79,8 +65,11 @@ assert_all_are_FaFile <- function(x,
 #'
 #' @return logical
 #' @export
-is_TxDb <- function(x, .xname = assertive::get_name_in_parent(x)){
-  .is_object_class(x, .xname, "TxDb")
+is_TxDb <- function(x, 
+                    .xname = assertive::get_name_in_parent(x)){
+  .is_object_class(x, 
+                   .xname, 
+                   "TxDb")
 }
 
 # SummarizedExperiment ---------------------------------------------------------
@@ -101,8 +90,14 @@ is_TxDb <- function(x, .xname = assertive::get_name_in_parent(x)){
 #'
 #' @return logical
 #' @export
-is_SummarizedExperiment <- function(x, .xname = assertive::get_name_in_parent(x)){
-  .is_object_class(x, .xname, "SummarizedExperiment")
+is_SummarizedExperiment <- function(x, 
+                                    .xname = assertive::get_name_in_parent(x)){
+  any(.is_object_class(x, 
+                       .xname, 
+                       "SummarizedExperiment"),
+      .is_object_class(x, 
+                       .xname, 
+                       "RangedSummarizedExperiment"))
 }
 
 #' @rdname is_SummarizedExperiment
@@ -114,20 +109,5 @@ assert_is_SummarizedExperiment <- function(x,
   assert_engine(is_SummarizedExperiment, 
                 x, 
                 .xname = assertive::get_name_in_parent(x),
-                severity = severity)
-}
-
-#' @rdname is_SummarizedExperiment
-#' 
-#' @export
-#' @return invisible logical
-assert_all_are_SummarizedExperiment <- function(x, 
-                                  severity = getOption("assertive.severity","stop")){
-  .xname <- assertive::get_name_in_parent(x)
-  msg <- gettextf("%s are not all all SummarizedExperiment objects.", .xname)
-  assert_engine(is_SummarizedExperiment, 
-                x, 
-                .xname = .xname, 
-                msg = msg,
                 severity = severity)
 }

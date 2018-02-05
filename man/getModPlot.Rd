@@ -3,70 +3,56 @@
 \docType{methods}
 \name{getModPlot}
 \alias{getModPlot}
-\alias{getModPlotFromSummarizedExperiment}
 \alias{saveModPlot}
-\alias{saveModPlotFromSummarizedExperiment}
-\alias{getModPlot,RNAmodR,numeric,character,character-method}
+\alias{getModPlot,RNAmodR,numeric,character-method}
 \alias{getModPlot}
 \alias{saveModPlots}
 \alias{saveModPlotFromSummarizedExperiment}
-\alias{getModPlotFromSummarizedExperiment,SummarizedExperiment,GRanges,FaFile,character,character-method}
-\alias{saveModPlot,RNAmodR,numeric,character,character-method}
-\alias{saveModPlot,RNAmodR,numeric,character,missing-method}
-\alias{saveModPlotFromSummarizedExperiment,SummarizedExperiment,GRanges,FaFile,character,character,character-method}
+\alias{getModPlot,SummarizedExperiment,missing,character-method}
+\alias{saveModPlot,RNAmodR,numeric,character-method}
+\alias{saveModPlot,SummarizedExperiment,missing,character-method}
 \title{Visualization of modifications}
 \usage{
-getModPlot(.Object, number, modifications, gene, focus = FALSE)
+getModPlot(x, number, modifications, gene, gff, fasta, focus = FALSE)
 
-getModPlotFromSummarizedExperiment(se, gff, fasta, modifications, gene,
-  focus = FALSE)
+saveModPlot(x, number, modifications, genes, gff, fasta, focus = FALSE,
+  folder, filetype = "pdf")
 
-saveModPlot(.Object, number, modifications, genes, focus = FALSE,
-  filetype = "pdf")
+\S4method{getModPlot}{RNAmodR,numeric,character}(x, number, modifications, gene,
+  focus)
 
-saveModPlotFromSummarizedExperiment(se, gff, fasta, modifications, genes,
-  folder, focus = FALSE, filetype = "pdf")
+\S4method{getModPlot}{SummarizedExperiment,missing,character}(x, modifications,
+  gene, gff, fasta, focus)
 
-\S4method{getModPlot}{RNAmodR,numeric,character,character}(.Object, number,
-  modifications, gene, focus = FALSE)
+\S4method{saveModPlot}{RNAmodR,numeric,character}(x, number, modifications,
+  genes, focus, filetype)
 
-
-  \S4method{getModPlotFromSummarizedExperiment}{SummarizedExperiment,GRanges,FaFile,character,character}(se,
-  gff, fasta, modifications, gene, focus = FALSE)
-
-\S4method{saveModPlot}{RNAmodR,numeric,character,character}(.Object, number,
-  modifications, genes, focus = FALSE, filetype = "pdf")
-
-\S4method{saveModPlot}{RNAmodR,numeric,character,missing}(.Object, number,
-  modifications, focus, filetype)
-
-
-  \S4method{saveModPlotFromSummarizedExperiment}{SummarizedExperiment,GRanges,FaFile,character,character,character}(se,
-  gff, fasta, modifications, genes, folder, focus = FALSE, filetype = "pdf")
+\S4method{saveModPlot}{SummarizedExperiment,missing,character}(x, modifications,
+  genes, gff, fasta, focus, folder, filetype)
 }
 \arguments{
-\item{.Object}{a RNAmod object.}
+\item{x}{a RNAmod object or a SummarizedExperiment containg the experimental data.}
 
-\item{number}{an experiemnt numnber.}
+\item{number}{an experiemnt number, if \code{x} is RNAmodR}
 
 \item{modifications}{name of modification to be used for analysis.}
 
 \item{gene}{a single gene name used by \code{getModPlot}}
 
+\item{gff}{a GRanges object with the genomic annotation data. Mandatory, if 
+\code{x} is RNAmodR}
+
+\item{fasta}{a FaFile object with the genomic sequences, if 
+\code{x} is RNAmodR}
+
 \item{focus}{optional: logical, whether to plot only the region next to the 
 modification}
 
-\item{se}{a SummarizedExperiment containg the experimental data.}
-
-\item{gff}{a GRanges object with the genomic annotation data}
-
-\item{fasta}{a FaFile object with the genomic sequences}
-
 \item{genes}{gene names used by \code{saveModPlots}}
 
-\item{filetype}{file type used for \code{saveModPlots}}
-
 \item{folder}{folder for saving the output used by \code{saveModPlots}}
+
+\item{filetype}{file type used for \code{saveModPlots}}
 }
 \value{
 \code{getModPlot}: a \code{TableGrob} of layer plot and any mod plot
