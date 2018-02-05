@@ -22,7 +22,7 @@ setClass("analysis_default",
          contains = "analysis",
          prototype = list(plotType = "default",
                           dataLabel = "mean(relative arrest rate)",
-                          dataFormat = scales::scientific))
+                          dataFormat = scales::percent))
 
 
 #' @rdname convertReadsToPositions

@@ -3,7 +3,7 @@ NULL
 
 RNAMODR_PLOT_POS_WIDTH <- 1
 RNAMODR_PLOT_LAYER_HEIGHT <- 50
-RNAMODR_PLOT_SEQ_SIZE <- 1
+RNAMODR_PLOT_SEQ_SIZE <- 1.2
 RNAMODR_PLOT_DATA_HEIGHT <- 100
 RNAMODR_PLOT_FOCUS_WINDOW <- 50
 RNAMODR_PLOT_MM_TO_INCH_F <- 0.03937008
@@ -399,7 +399,6 @@ setMethod(
                                       seq)
   # create description layer plot
   layer <- .create_layer_data(gff,gff_sub)
-  
   # get data for different plot types
   posData <- .aggregate_pos_data(gff_sub,
                                  positions,
@@ -413,15 +412,15 @@ setMethod(
     y
   })
   modData <- do.call(rbind,modData)
-  
+  # create plots
   plots <- lapply(1:nrow(modData), function(i){
     # subset tp temporary data
     mod <- modData[i,]
     pos <- posData$data[[mod$plotType]]
     # focus on a modification
-    localStart <- as.numeric(pos[as.numeric(pos$pos) %in% mods$start,"pos"]) - 
+    localStart <- as.numeric(pos[as.numeric(pos$pos) %in% mod$start,"pos"]) - 
       RNAMODR_PLOT_FOCUS_WINDOW
-    localEnd <- as.numeric(pos[as.numeric(pos$pos) %in% mods$end,"pos"]) + 
+    localEnd <- as.numeric(pos[as.numeric(pos$pos) %in% mod$end,"pos"]) + 
       RNAMODR_PLOT_FOCUS_WINDOW
     pos <- pos[as.numeric(pos$pos) > localStart &
                  as.numeric(pos$pos) < localEnd,]
@@ -530,17 +529,6 @@ setMethod(
                           label,
                           format){
   requireNamespace("ggplot2", quietly = TRUE)
-  # browser()
-  break_FUN <- function(lim){
-    if(length(lim[is.na(lim)])>0) return(lim)
-    x <- 0
-    y <- floor(abs(max(lim)/100))*100
-    diff <- y - x
-    n <- floor(diff / 100)
-    as.numeric(c(x,unlist(lapply(1:n,function(z){100*z})),round(max(lim))))
-  }
-  
-  
   # initial plot setup
   plot <- ggplot(pos, aes_(x = ~as.numeric(pos), y = ~mean, label = ~letters)) +
     scale_x_continuous(name = "position of transcript [nt]",
@@ -549,16 +537,13 @@ setMethod(
                        labels = format,
                        limits = c(NA,max(pos$mean)*1.3)) +
     theme_bw()
-  
   # plot position data
   plot <- plot + geom_bar(stat = "identity") +
     geom_text(mapping = aes_(y = 0),
               vjust = 1.5,
               size = RNAMODR_PLOT_SEQ_SIZE)
-  
   # if no mod data available
   if(is.null(mods)) return(plot)
-  
   # prepare mod data
   mods$localStart <- as.numeric(pos[as.numeric(pos$pos) %in% mods$start,"pos"])
   mods$localEnd <- as.numeric(pos[as.numeric(pos$pos) %in% mods$end,"pos"])
@@ -570,15 +555,12 @@ setMethod(
   }))
   modsPositions <- mods[mods$start == mods$end,]
   modsArea<- mods[mods$start != mods$end,]
-  
   # plot modifications for an area
   if( nrow(modsArea) > 0){
     
   }
-  
   # if no mod data available
   if( nrow(modsPositions) == 0) return(plot)
-    
   # plot modifications for single positions each
   # setup p value text
   z_text <- unlist(lapply(as.numeric(modsPositions$RNAmodR_z), 
@@ -593,7 +575,7 @@ setMethod(
   modsPositions$label <- paste0(modsPositions$RNAmodR_type,
                                 "\n",
                                 rownames(modsPositions),
-                                "\n \u03C3: ",
+                                "\nsignal: ",
                                 modsPositions$RNAmodR_signal,
                                 " (z ",
                                 z_text,
@@ -620,7 +602,7 @@ setMethod(
                               ylim = c(max(pos$mean)*1.07,
                                        NA),
                               size = 3)
-  
+  # return the final plot
   return(plot)
 }
 

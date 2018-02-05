@@ -103,6 +103,17 @@ grl <- GenomicRanges::GRangesList(wt = getGffResult(mod,1,modifications),
 genes <- as.character(grl[[1]]$Parent)
 genes <- genes[grepl("^t", genes)]
 
+ses <- list(wt = getSummarizedExperiment(mod,1,modifications),
+                                  Bud23 = getSummarizedExperiment(mod,2,modifications),
+                                  Trm8 = getSummarizedExperiment(mod,3,modifications))
+
+transcripts <- unique(unlist(lapply(ses, function(se){
+    c(names(SummarizedExperiment::assays(se)$m7G[SummarizedExperiment::assays(se)$m7G > 0,]),
+    names(SummarizedExperiment::assays(se)$m3C[SummarizedExperiment::assays(se)$m3C > 0,]),
+    names(SummarizedExperiment::assays(se)$D[SummarizedExperiment::assays(se)$D > 0,]))
+})))
+tRNAgenes <- transcripts[grepl("^t", transcripts)]
+
 
 ```
 
