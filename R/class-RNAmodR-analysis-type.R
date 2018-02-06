@@ -20,6 +20,7 @@ NULL
 #'   base data further for storage. This involves usually generating a per
 #'   position mean and sd or equivalent.}
 #' }
+#' 
 #' @slot plotType 
 #' @slot data 
 #' @slot modifications 
@@ -50,10 +51,12 @@ setMethod(
 #' @rdname analysis-accessors
 #' @aliases getPlotType getPositions getModifications
 #' @title Accessor for \code{analysis} class objects
+#' 
 #' @description
 #' The accessor function to \code{analysis} class objects can be used to access
 #' the data saved in slots of the object. See examples for available functions.
-#' @param object a analysis object 
+#' 
+#' @param object an analysis object 
 #' @return character defining the plot type for this analysis class
 #' @export
 #' @examples

@@ -10,9 +10,7 @@ NULL
 #' Virtual class for modification detection.
 #' 
 #' @slot analysisType 
-#' @slot modType 
-#' 
-#' @return a RNAmodR mod class object
+#' @slot modType
 #' 
 #' @import methods
 #' @export

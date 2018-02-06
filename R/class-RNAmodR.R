@@ -1,7 +1,3 @@
-#' @include AllGenerics.R
-#' @include AllGenerics-export.R
-NULL
-
 #' @name RNAmodR-class
 #' 
 #' @title RNAmodR Class
@@ -246,59 +242,5 @@ setMethod(
   signature = signature(object = "RNAmodR"),
   definition = function(object) {
     print("test")
-  }
-)
-
-
-# getters and setters ----------------------------------------------------------
-
-#' @rdname RNAmodR-Accessors
-#'
-#' @export
-setMethod(
-  f = "getInputFolder",
-  signature = signature(.Object = "RNAmodR"),
-  definition = function(.Object){
-    return(paste0(.Object@.wd, .Object@.inputFolder))
-  }
-)
-#' @rdname RNAmodR-Accessors
-#'
-#' @export
-setMethod(
-  f = "getOutputFolder",
-  signature = signature(.Object = "RNAmodR"),
-  definition = function(.Object){
-    return(paste0(.Object@.wd, .Object@.outputFolder))
-  }
-)
-#' @rdname RNAmodR-Accessors
-#'
-#' @export
-setMethod(
-  f = "getExperimentName",
-  signature = signature(.Object = "RNAmodR"),
-  definition = function(.Object){
-    return(.Object@experimentName)
-  }
-)
-#' @rdname RNAmodR-Accessors
-#'
-#' @export
-setMethod(
-  f = "getGFFFile",
-  signature = signature(.Object = "RNAmodR"),
-  definition = function(.Object){
-    return(.Object@.dataGFF)
-  }
-)
-#' @rdname RNAmodR-Accessors
-#'
-#' @export
-setMethod(
-  f = "getFastaFile",
-  signature = signature(.Object = "RNAmodR"),
-  definition = function(.Object){
-    return(.Object@.dataFasta)
   }
 )

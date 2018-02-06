@@ -16,9 +16,6 @@
 \arguments{
 \item{object}{a RNAmodR mod class object}
 }
-\value{
-a RNAmodR mod class object
-}
 \description{
 Virtual class for modification detection.
 

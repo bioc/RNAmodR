@@ -39,7 +39,7 @@ getDataFormat(object)
 \S4method{getDataFormat}{analysis}(object)
 }
 \arguments{
-\item{object}{a analysis object}
+\item{object}{an analysis object}
 }
 \value{
 character defining the plot type for this analysis class

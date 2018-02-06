@@ -1,6 +1,7 @@
 #' @include RNAmodR.R
 NULL
 
+
 # experiment data---------------------------------------------------------------
 
 #' @title .loadSummarizedExperiment

@@ -1,11 +1,61 @@
 #' @include RNAmodR.R
 NULL
 
+
+# getters and setters ----------------------------------------------------------
+
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getInputFolder",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(paste0(.Object@.wd, .Object@.inputFolder))
+  }
+)
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getOutputFolder",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(paste0(.Object@.wd, .Object@.outputFolder))
+  }
+)
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getExperimentName",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(.Object@experimentName)
+  }
+)
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getGFFFile",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(.Object@.dataGFF)
+  }
+)
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getFastaFile",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(.Object@.dataFasta)
+  }
+)
+
 #' @rdname getExperimentData
 #' 
 #' @title getExperimentData
 #' 
-#' @description returns setup data for the experiments based on the input
+#' @description 
+#' returns setup data for the experiments based on the input
 #' layout csv-file.
 #' 
 #' @param .Object a RNAmod object
@@ -367,7 +417,8 @@ setMethod(
 #'
 #' @title getGffResult
 #'
-#' @description With this function the results of the parseForModification are
+#' @description 
+#' With this function the results of the parseForModification are
 #' returned, if they are saved on disk. Any combination of modifications can be
 #' requested, but only found results for the given modification are returned.
 #' The results contain the local coordinates per transscript.
