@@ -15,7 +15,8 @@ RNAMODR_D_SIG_THRESHOLD <- 5
 #' @export
 setClass("mod_D",
          contains = "mod",
-         prototype = list(modType = "D")
+         prototype = list(modType = "D",
+                          positionOffset = 1)
 )
 
 #' @rdname preTest

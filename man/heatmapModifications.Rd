@@ -10,14 +10,14 @@
 \alias{saveHeatmapModifications}
 \alias{heatmapModifications,GRangesList,missing,missing,character,character-method}
 \alias{heatmapModifications,list,missing,missing,character,character-method}
-\alias{saveHeatmapModifications,RNAmodR,numeric,character,character,character-method}
-\alias{saveHeatmapModifications,GRangesList,missing,missing,character,character-method}
-\alias{saveHeatmapModifications,list,missing,missing,character,character-method}
+\alias{saveHeatmapModifications,RNAmodR,numeric,character,character,character,missing-method}
+\alias{saveHeatmapModifications,GRangesList,missing,missing,character,character,character-method}
+\alias{saveHeatmapModifications,list,missing,missing,character,character,character-method}
 \title{Comparative visualization of modifications}
 \usage{
 heatmapModifications(x, numbers, sampleNames, modifications, genes)
 
-saveHeatmapModifications(x, numbers, sampleNames, modifications, genes)
+saveHeatmapModifications(x, numbers, sampleNames, modifications, genes, folder)
 
 
   \S4method{heatmapModifications}{RNAmodR,numeric,character,character,character}(x,
@@ -31,16 +31,16 @@ saveHeatmapModifications(x, numbers, sampleNames, modifications, genes)
   modifications, genes)
 
 
-  \S4method{saveHeatmapModifications}{RNAmodR,numeric,character,character,character}(x,
+  \S4method{saveHeatmapModifications}{RNAmodR,numeric,character,character,character,missing}(x,
   numbers, sampleNames, modifications, genes)
 
 
-  \S4method{saveHeatmapModifications}{GRangesList,missing,missing,character,character}(x,
-  modifications, genes)
+  \S4method{saveHeatmapModifications}{GRangesList,missing,missing,character,character,character}(x,
+  modifications, genes, folder)
 
 
-  \S4method{saveHeatmapModifications}{list,missing,missing,character,character}(x,
-  modifications, genes)
+  \S4method{saveHeatmapModifications}{list,missing,missing,character,character,character}(x,
+  modifications, genes, folder)
 }
 \arguments{
 \item{x}{a RNAmod object or a named list of SummarizedExperiment objects containg the 

@@ -212,12 +212,17 @@ setGeneric(
   name = "getModType",
   def = function(object){standardGeneric("getModType")} 
 ) 
-
 #' @rdname mod-accessors
 #' @export
 setGeneric( 
   name = "getAnalysisType",
   def = function(object){standardGeneric("getAnalysisType")} 
+) 
+#' @rdname mod-accessors
+#' @export
+setGeneric( 
+  name = "getPositionOffset",
+  def = function(object){standardGeneric("getPositionOffset")} 
 ) 
 
 
@@ -360,7 +365,8 @@ setGeneric(
                  numbers,
                  sampleNames,
                  modifications,
-                 genes){standardGeneric("saveHeatmapModifications")}
+                 genes,
+                 folder){standardGeneric("saveHeatmapModifications")}
 )
 
 # comparison -------------------------------------------------------------------

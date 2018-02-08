@@ -22,10 +22,14 @@ NULL
   res
 }
 
-.extract_modification_info_from_ses <- function(ses){
+.extract_modification_info_from_ses <- function(ses,
+                                                genes,
+                                                modifications){
   res <- lapply(ses, function(se){
     DF <- do.call(rbind,
-                  seGetModifications(se))
+                  seGetModifications(se,
+                                     genes,
+                                     modifications))
     DF$RNAmodR_signal <- as.numeric(DF$RNAmodR_signal)
     DF$RNAmodR_signal_sd <- as.numeric(DF$RNAmodR_signal_sd)
     DF$RNAmodR_z <- as.numeric(DF$RNAmodR_z)
@@ -38,11 +42,12 @@ NULL
 
 # position access for SE and GRL --------------------------------------------
 
-.extract_position_info_from_ses <- function(ses){
-  browser()
+.extract_position_info_from_ses <- function(ses,
+                                            genes){
   res <- lapply(ses, function(se){
     DF <- do.call(rbind,
-                  seGetPositions(se))
+                  seGetPositions(se,
+                                 genes))
     DF
   })
   names(res) <- names(ses)

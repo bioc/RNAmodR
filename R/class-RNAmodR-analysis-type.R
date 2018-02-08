@@ -73,6 +73,17 @@ setMethod(
   }
 )
 
+.get_plot_types_for_modifications <- function(modifications){
+  assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+  modifications <- unique(modifications)
+  l <- lapply(.load_analysis_classes(.get_analysis_type(modifications)),
+              getPlotType)
+  if(length(l) != length(modifications))
+    stop("Incompatibble modification and analysis classes.")
+  names(l) <- modifications
+  l
+}
+
 #' @rdname analysis-accessors
 #' @return a list of data as a lists of list(replicate) of DataFrame(transcript)
 #' @export
@@ -107,6 +118,17 @@ setMethod(
   }
 )
 
+.get_data_label_for_modifications <- function(modifications){
+  assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+  modifications <- unique(modifications)
+  l <- lapply(.load_analysis_classes(.get_analysis_type(modifications)),
+              getDataLabel)
+  if(length(l) != length(modifications))
+    stop("Incompatibble modification and analysis classes.")
+  names(l) <- modifications
+  l
+}
+
 #' @rdname analysis-accessors
 #' @return a function for formating the label of the position data
 #' @export
@@ -117,6 +139,17 @@ setMethod(
     return(object@dataFormat)
   }
 )
+
+.get_data_format_for_modifications <- function(modifications){
+  assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+  modifications <- unique(modifications)
+  l <- lapply(.load_analysis_classes(.get_analysis_type(modifications)),
+              getDataFormat)
+  if(length(l) != length(modifications))
+    stop("Incompatibble modification and analysis classes.")
+  names(l) <- modifications
+  l
+}
 
 
 # analysis class handling ------------------------------------------------------

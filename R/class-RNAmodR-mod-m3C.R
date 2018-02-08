@@ -15,7 +15,8 @@ RNAMODR_M3C_SIG_THRESHOLD <- 5
 #' @export
 setClass("mod_m3C",
          contains = "mod",
-         prototype = list(modType = "m3C")
+         prototype = list(modType = "m3C",
+                          positionOffset = 1)
 )
 
 #' @rdname preTest

@@ -7,28 +7,37 @@
 \alias{getAnalysisType}
 \alias{getModType}
 \alias{getAnalysisType}
-\alias{getAnalysisType,mod-method}
+\alias{getPositionOffset}
+\alias{getModType,mod-method}
 \alias{getAnalysisType}
 \alias{getModType}
-\alias{getModType,mod-method}
+\alias{getAnalysisType,mod-method}
+\alias{getPositionOffset,mod-method}
 \title{accessors for \code{mod} class objects}
 \usage{
 getModType(object)
 
 getAnalysisType(object)
 
-\S4method{getAnalysisType}{mod}(object)
+getPositionOffset(object)
 
 \S4method{getModType}{mod}(object)
+
+\S4method{getAnalysisType}{mod}(object)
+
+\S4method{getPositionOffset}{mod}(object)
 }
 \arguments{
 \item{object}{a RNAmodR mod class object}
 }
 \value{
-character defining the plot type for this modification class
-
 character defining the modification type for this modification
 class
+
+character defining the plot type for this modification class
+
+a position offset for scoring a modified positions, e.g. +1 for
+a 5'-read stop at tlast unmodified position
 }
 \description{
 title
