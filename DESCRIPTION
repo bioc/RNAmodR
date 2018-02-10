@@ -15,29 +15,30 @@ License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
 Collate: 
-  'RNAmodR.R'
-  'AllGenerics.R'
-  'AllGenerics-export.R'
-  'class-RNAmodR.R'
-  'class-RNAmodR-analysis-type.R'
-  'RNAmodR-data-utils.R'
-  'RNAmodR-data.R'
-  'RNAmodR-options.R'
-  'methods-RNAmodR-plot.R'
-  'RNAmodR-plot-utils.R'
-  'RNAmodR-ranges-utils.R'
-  'RNAmodR-utils-preparations.R'
-  'RNAmodR-utils.R'
-  'assertions.R'
-  'class-RNAmodR-mod-type.R'
-  'class-RNAmodR-analysis-default.R'
-  'class-RNAmodR-mod-D.R'
-  'class-RNAmodR-mod-m3C.R'
-  'class-RNAmodR-mod-m7G.R'
-  'methods-RNAmodR-analysis.R'
-  'methods-RNAmodR-compare.R'
-  'methods-RNAmodR-parse.R'
-  'methods-RNAmodR.R'
+    'RNAmodR.R'
+    'AllGenerics.R'
+    'AllGenerics-export.R'
+    'class-RNAmodR.R'
+    'class-RNAmodR-analysis-type.R'
+    'class-RNAmodR-mod-type.R'
+    'class-RNAmodR-analysis-default.R'
+    'class-RNAmodR-mod-D.R'
+    'class-RNAmodR-mod-m3C.R'
+    'class-RNAmodR-mod-m7G.R'
+    'datasets.R'
+    'methods-RNAmodR-analysis.R'
+    'methods-RNAmodR-compare.R'
+    'methods-RNAmodR-parse.R'
+    'methods-RNAmodR-plot.R'
+    'methods-RNAmodR.R'
+    'utils-assertions.R'
+    'utils-bam.R'
+    'utils-misc.R'
+    'utils-modifications.R'
+    'utils-options.R'
+    'utils-plot.R'
+    'utils-ranges.R'
+    'utils-sequences.R'
 Imports:
   methods,
   assertive,
@@ -59,12 +60,9 @@ Imports:
   SummarizedExperiment,
   GenomeInfoDb,
   Rsamtools,
-  rtracklayer,
-  tRNAscan2GRanges
+  rtracklayer
 Suggests: testthat,
   knitr,
   rmarkdown
-Remotes:
-  FelixErnst/tRNAscan2GRanges@master
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1

@@ -1,6 +1,129 @@
 #' @include class-RNAmodR-analysis-type.R
 NULL
 
+# BiocGeneric helper functions -------------------------------------------------
+
+# strand related functions
+.get_strand <- function(x){
+  as.character(BiocGenerics::strand(x))
+}
+.get_unique_strand <- function(x){
+  unique(.get_strand(x))
+}
+.is_minus_strand <- function(x) {
+  all(as.logical(.get_strand(x) == "-"))
+}
+.is_on_minus_strand <- function(x) {
+  all(.is_on_correct_strand(x,"-"))
+}
+# is on the minus strand?
+.is_on_correct_strand <- function(x, strand) {
+  as.logical(.get_strand(x) == strand) 
+}
+.is_on_correct_strand2 <- function(x, gr) {
+  as.logical(.get_strand(x) == .get_unique_strand(gr)) 
+}
+
+# GRanges helper functions -----------------------------------------------------
+
+# get aggregated identifiers
+.get_gr_ids <- function(gr,
+                        na.rm = TRUE){
+  IDs <- unique(c(gr$ID,gr$Name))
+  if(na.rm){
+    IDs <- IDs[!is.na(IDs)]
+  }
+  IDs
+}
+
+# get unique ids
+# returns all identifiers which can be used as a identifier in the Parent
+# column aggrgated by precident: ID > Name > gene
+.get_unique_identifiers <- function(gr){
+  ids <- as.character(gr$ID)
+  ids[is.na(ids)] <- as.character(gr[is.na(ids)]$Name)
+  ids[is.na(ids)] <- as.character(gr[is.na(ids)]$gene)
+  ids
+}
+
+# subset to types present in RNAMODR_MOD_SEQ_FEATURES
+.subset_rnamod_transcript_features <- function(gr){
+  gr[S4Vectors::mcols(gr)$type %in% RNAMODR_MOD_TRANSCRIPT_FEATURES,]
+}
+# subset to types present in RNAMODR_MOD_SEQ_FEATURES
+.subset_rnamod_containing_features <- function(gr){
+  gr[S4Vectors::mcols(gr)$type %in% RNAMODR_MOD_CONTAINING_FEATURES,]
+}
+
+# subsets a gRanges object for entries concerning a single ID
+# - Name/ID for parent entry
+# - all childs based on Parent name equals ID
+.subset_gff_for_unique_transcript <- function(gff, 
+                                              ID,
+                                              wo.childs = TRUE){
+  gr <- gff[(is.na(S4Vectors::mcols(gff)$ID) & 
+               S4Vectors::mcols(gff)$Name == ID) |
+              (!is.na(S4Vectors::mcols(gff)$ID) & 
+                 S4Vectors::mcols(gff)$ID == ID),]
+  if(!wo.childs){
+    gr <- append(gr, .get_childs(gff,
+                                 as.character(GenomeInfoDb::seqnames(gr)),
+                                 ID))
+  }
+  .order_GRanges(gr)
+}
+# recursive search for all childs of an ID
+.get_childs <- function(gff,
+                        chrom,
+                        ID){
+  gr <- gff[as.character(GenomeInfoDb::seqnames(gff)) == chrom & 
+              !is.na(as.character(gff$Parent)) & 
+              as.character(gff$Parent) == ID,]
+  if(length(gr) == 0) return(GRanges())
+  # Use ID and Name for child search
+  IDs <- .get_gr_ids(gr)
+  IDs <- IDs[IDs != ID]
+  # Walk up the parent chain
+  grl <- append(list(gr),lapply(IDs, function(x){.get_childs(gff,chrom,x)}))
+  grl <- grl[!vapply(grl,is.null,logical(1))]
+  return(unlist(GRangesList(grl)))
+}
+
+# subset GRanges for highest ranking parent
+.get_parent_annotations <- function(gr,
+                                    forceSingle = FALSE,
+                                    doRecursiveSearch = FALSE,
+                                    IDs){
+  if(!doRecursiveSearch){
+    res <- gr[is.na(as.character(gr$Parent)),]
+    if(length(res) > 1 && forceSingle) 
+      stop("No distinct single parent annotation detectable.")
+    return(res)
+  }
+  if(missing(IDs)) IDs <- .get_gr_ids(gr)
+  l <- lapply(IDs, .get_parent, gr = gr)
+  l <- unique(unlist(l[!vapply(l,is.null,logical(1))]))
+  .order_GRanges(gr[(!is.na(gr$ID) & gr$ID %in% l) |
+                      (!is.na(gr$Name) & gr$Name %in% l),])
+}
+# quasi recursive search for all possible parents
+.get_parent <- function(ID,
+                        gr){
+  parent <- as.character(gr[(!is.na(gr$ID) & gr$ID == ID) |
+                              (!is.na(gr$Name) & gr$Name == ID),]$Parent)
+  parent <- parent[!is.na(parent)]
+  if(length(parent) == 0) return(ID)
+  return(unlist(lapply(parent, .get_parent, gr)))
+}
+
+# returns an order based on the named of the chromosome and start and end 
+# coordinates
+.order_GRanges <- function(gr){
+  gr[order(GenomeInfoDb::seqnames(gr),
+           BiocGenerics::start(gr),
+           BiocGenerics::end(gr))]
+}
+
 # common function handling positions -------------------------------------------
 
 # converts the position on a transcript from start to end, to the correct

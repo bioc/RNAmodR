@@ -2,7 +2,7 @@
 title: "RNAmod: pre-mapping preparation of genome and annotation"
 author: "Felix G.M. Ernst"
 date: "`r Sys.Date()`"
-package: tRNAscan2GRanges
+package: RNAmodR
 abstract: >
   Example conversion of extracting of sequences and annotation to construct a
   special transcriptome to map reads against
