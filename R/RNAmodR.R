@@ -1,12 +1,12 @@
-#' @name RNAmodR
 #' @title RNAmodR
 #' 
 #' @author Felix G M Ernst [aut]
 #' 
 #' @description
-#' todo
+#' todo xczCZXcZZcc cCX 
 #'
 #' @docType package
+#' @name RNAmodR
 NULL
 
 #' @import methods
@@ -30,7 +30,6 @@ requireNamespace("GenomicFeatures")
 requireNamespace("GenomicAlignments")
 requireNamespace("assertive")
 
-
 # RNAMODR_GFF_FEATURE_TYPES <- c("gene",
 #                               "mRNA",
 #                               "transcript",
@@ -42,43 +41,43 @@ requireNamespace("assertive")
 
 # GFF/GRanges contants ---------------------------------------------------------
 RNAMODR_GFF_COLNAMES <- c("source",
-                         "type",
-                         "score",
-                         "phase",
-                         "ID",
-                         "Name",
-                         "Parent",
-                         "Alias",
-                         "gene",
-                         "protein_id",
-                         "transcript_id")
+                          "type",
+                          "score",
+                          "phase",
+                          "ID",
+                          "Name",
+                          "Parent",
+                          "Alias",
+                          "gene",
+                          "protein_id",
+                          "transcript_id")
 RNAMODR_MOD_CONTAINING_FEATURES <- c("transcript",
-                                    "gene",
-                                    "mRNA",
-                                    "rRNA",
-                                    "rRNA_gene",
-                                    "tRNA",
-                                    "tRNA_gene",
-                                    "ncRNA",
-                                    "ncRNA_gene",
-                                    "snoRNA",
-                                    "snoRNA_gene",
-                                    "snRNA",
-                                    "snRNA_gene",
-                                    "SRP_RNA")
+                                     "gene",
+                                     "mRNA",
+                                     "rRNA",
+                                     "rRNA_gene",
+                                     "tRNA",
+                                     "tRNA_gene",
+                                     "ncRNA",
+                                     "ncRNA_gene",
+                                     "snoRNA",
+                                     "snoRNA_gene",
+                                     "snRNA",
+                                     "snRNA_gene",
+                                     "SRP_RNA")
 RNAMODR_MOD_INVALID_FEATURES <- c("chromosome",
-                                 "telomere",
-                                 "telomeric_repeat")
+                                  "telomere",
+                                  "telomeric_repeat")
 RNAMODR_MOD_TRANSCRIPT_FEATURES <- c("gene",
-                                    "mRNA",
-                                    "five_prime_UTR",
-                                    "three_prime_UTR",
-                                    "CDS",
-                                    "noncoding_exon",
-                                    "exon",
-                                    "intron",
-                                    "five_prime_UTR_intron",
-                                    "three_prime_UTR_intron")
+                                     "mRNA",
+                                     "five_prime_UTR",
+                                     "three_prime_UTR",
+                                     "CDS",
+                                     "noncoding_exon",
+                                     "exon",
+                                     "intron",
+                                     "five_prime_UTR_intron",
+                                     "three_prime_UTR_intron")
 
 # Import constants -------------------------------------------------------------
 RNAMODR_SAMPLE_TYPES <- c("Treated",
@@ -112,3 +111,7 @@ RNAMODR_DEFAULT_PALETTE <- "Set1"
   options("RNAmodR_debug" = FALSE)
   options("RNAmodR_debug_transcripts" = c("tG(UCC)G"))
 }
+
+# # class unions for S4 functions
+# setClassUnion("missingORcharacter", 
+#               members = c("missing","character"))

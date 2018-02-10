@@ -4,27 +4,23 @@
 \name{getSummarizedExperiment}
 \alias{getSummarizedExperiment}
 \alias{getSummarizedExperiments}
-\alias{getSummarizedExperiment,RNAmodR,numeric,character-method}
-\alias{getSummarizedExperiments,RNAmodR,numeric,character-method}
+\alias{getSummarizedExperiment,RNAmodR,numeric-method}
+\alias{getSummarizedExperiments,RNAmodR,numeric-method}
 \title{returns one or more SummarizedExperiment}
 \usage{
-getSummarizedExperiment(.Object, number, modification)
+getSummarizedExperiment(.Object, number)
 
-getSummarizedExperiments(.Object, number, modification)
+getSummarizedExperiments(.Object, number)
 
-\S4method{getSummarizedExperiment}{RNAmodR,numeric,character}(.Object, number,
-  modification)
+\S4method{getSummarizedExperiment}{RNAmodR,numeric}(.Object, number)
 
-\S4method{getSummarizedExperiments}{RNAmodR,numeric,character}(.Object, number,
-  modification)
+\S4method{getSummarizedExperiments}{RNAmodR,numeric}(.Object, number)
 }
 \arguments{
 \item{.Object}{an RNAmod object}
 
 \item{number}{a number defining the experiment. For 
 getSummarizedExperiments() more than number can be defined as numeric vector.}
-
-\item{modification}{name of modification, one or more character}
 }
 \value{
 \code{getSummarizedExperiment()}: SummarizedExperiment
@@ -39,7 +35,7 @@ list of experiment results.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{.Object = RNAmodR,number = numeric,modification = character}: 
+\item \code{.Object = RNAmodR,number = numeric}: 
 }}
 
 \examples{

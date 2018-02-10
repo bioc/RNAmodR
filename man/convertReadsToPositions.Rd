@@ -4,14 +4,14 @@
 \docType{methods}
 \name{convertReadsToPositions}
 \alias{convertReadsToPositions}
-\alias{convertReadsToPositions,analysis_default,character,GRanges,ScanBamParam-method}
+\alias{convertReadsToPositions,analysis_default,character,character,GRanges,ScanBamParam-method}
 \title{convertReadsToPositions}
 \usage{
-convertReadsToPositions(object, files, gff, param)
+convertReadsToPositions(object, files, conditions, gff, param)
 
 
-  \S4method{convertReadsToPositions}{analysis_default,character,GRanges,ScanBamParam}(object,
-  files, gff, param)
+  \S4method{convertReadsToPositions}{analysis_default,character,character,GRanges,ScanBamParam}(object,
+  files, conditions, gff, param)
 }
 \arguments{
 \item{object}{analysis object}

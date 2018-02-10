@@ -15,6 +15,5 @@ is_TxDb(x, .xname = assertive::get_name_in_parent(x))
 logical
 }
 \description{
-\code{is_TxDb} Check 
-if input is a TxDb object
+\code{is_TxDb}: Check if input is a TxDb object
 }

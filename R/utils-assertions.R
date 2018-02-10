@@ -53,12 +53,10 @@ assert_is_FaFile <- function(x,
 # TxDb -------------------------------------------------------------------------
 
 #' @name is_TxDb
-#' 
 #' @title assertive: TxDb
 #' 
 #' @description 
-#' \code{is_TxDb} Check 
-#' if input is a TxDb object
+#' \code{is_TxDb}: Check if input is a TxDb object
 #' 
 #' @param x object to test
 #' @param .xname name of the object in parent env

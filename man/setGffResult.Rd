@@ -3,13 +3,12 @@
 \docType{methods}
 \name{setGffResult}
 \alias{setGffResult}
-\alias{setGffResult,RNAmodR,GRanges,numeric,character-method}
+\alias{setGffResult,RNAmodR,GRanges,numeric-method}
 \title{setGffResult}
 \usage{
-setGffResult(.Object, gff, number, modification)
+setGffResult(.Object, gff, number)
 
-\S4method{setGffResult}{RNAmodR,GRanges,numeric,character}(.Object, gff, number,
-  modification)
+\S4method{setGffResult}{RNAmodR,GRanges,numeric}(.Object, gff, number)
 }
 \arguments{
 \item{.Object}{RNAmod.}

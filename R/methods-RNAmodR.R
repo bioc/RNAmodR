@@ -1,11 +1,61 @@
 #' @include RNAmodR.R
 NULL
 
+
+# getters and setters ----------------------------------------------------------
+
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getInputFolder",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(paste0(.Object@.wd, .Object@.inputFolder))
+  }
+)
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getOutputFolder",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(paste0(.Object@.wd, .Object@.outputFolder))
+  }
+)
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getExperimentName",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(.Object@experimentName)
+  }
+)
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getGFFFile",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(.Object@.dataGFF)
+  }
+)
+#' @rdname RNAmodR-Accessors
+#' @export
+setMethod(
+  f = "getFastaFile",
+  signature = signature(.Object = "RNAmodR"),
+  definition = function(.Object){
+    return(.Object@.dataFasta)
+  }
+)
+
 #' @rdname getExperimentData
 #' 
 #' @title getExperimentData
 #' 
-#' @description returns setup data for the experiments based on the input
+#' @description 
+#' returns setup data for the experiments based on the input
 #' layout csv-file.
 #' 
 #' @param .Object a RNAmod object
@@ -73,7 +123,6 @@ setMethod(
 #' @param .Object an RNAmod object 
 #' @param number a number defining the experiment. For 
 #' getSummarizedExperiments() more than number can be defined as numeric vector.
-#' @param modification name of modification, one or more character 
 #'
 #' @return \code{getSummarizedExperiment()}: SummarizedExperiment
 #' 
@@ -87,12 +136,9 @@ setMethod(
 setMethod(
   f = "getSummarizedExperiment", 
   signature = signature(.Object = "RNAmodR", 
-                        number = "numeric",
-                        modification = "character"),
+                        number = "numeric"),
   definition = function(.Object, 
-                        number,
-                        modification) {
-    assertive::assert_all_are_non_empty_character(modification)
+                        number) {
     if( !assertive::is_scalar(number)){
       stop(paste0("Multiple numbers provided. only one excepted.",
                   call. = FALSE))
@@ -101,7 +147,7 @@ setMethod(
     .check_for_experiment(experiment, number)
     return(.loadSummarizedExperiment(.Object, 
                                      experiment, 
-                                     modification, 
+                                     unique(unlist(experiment$Modifications)), 
                                      failOnNonExist = TRUE))
   }
 )
@@ -113,14 +159,11 @@ setMethod(
 setMethod(
   f = "getSummarizedExperiments", 
   signature = signature(.Object = "RNAmodR",
-                        number = "numeric",
-                        modification = "character"),
+                        number = "numeric"),
   definition = function(.Object, 
-                        number,
-                        modification) {
+                        number) {
     if( length(number) == 0 ) stop("no experiment number given")
     assertive::assert_all_are_whole_numbers(number)
-    assertive::assert_all_are_non_empty_character(modification)
     
     ses <- lapply(number, function(x){
         getSummarizedExperiment(.Object, 
@@ -319,7 +362,6 @@ setMethod(
 #' @param .Object a RNAmod object 
 #' @param se a RangedSummarizedExperiment object
 #' @param number a number defining the experiment
-#' @param modification name of modification, one or more character 
 #' 
 #' @return the RpfSummarizedExperiment
 #' @export
@@ -332,21 +374,17 @@ setMethod(
   f = "setSummarizedExperiment", 
   signature = signature(.Object = "RNAmodR", 
                         se = "RangedSummarizedExperiment", 
-                        number = "numeric",
-                        modification = "character"),
+                        number = "numeric"),
   definition = function(.Object, 
                         se, 
-                        number,
-                        modification) {
-    assertive::assert_all_are_non_empty_character(modification)
-    
+                        number) {
     experiment <- getExperimentData(.Object, number)
     .check_for_experiment(experiment, number)
     
     se <- .saveSummarizedExperiments(.Object, 
                                      se, 
                                      experiment,
-                                     modification)
+                                     unique(unlist(experiment$Modifications)))
     return(invisible(se))
   }
 )
@@ -367,7 +405,8 @@ setMethod(
 #'
 #' @title getGffResult
 #'
-#' @description With this function the results of the parseForModification are
+#' @description 
+#' With this function the results of the parseForModification are
 #' returned, if they are saved on disk. Any combination of modifications can be
 #' requested, but only found results for the given modification are returned.
 #' The results contain the local coordinates per transscript.
@@ -394,14 +433,11 @@ setMethod(
 setMethod(
   f = "getGffResult",
   signature = signature(.Object = "RNAmodR",
-                        number = "numeric",
-                        modification = "character"),
+                        number = "numeric"),
   definition = function(.Object,
                         number,
-                        modification,
                         genomicCoordinates) {
     # Input check
-    assertive::assert_all_are_non_empty_character(modification)
     assertive::assert_is_a_bool(genomicCoordinates)
     # get experiment data
     experiment <- getExperimentData(.Object, number)
@@ -409,7 +445,7 @@ setMethod(
     # get file names
     fileNames <- .get_gff_filenames(.Object,
                                     unique(experiment$SampleName),
-                                    modification)
+                                    unique(unlist(experiment$Modifications)))
     fileNames <- fileNames[vapply(fileNames, 
                                   assertive::is_existing_file,
                                   logical(1))]
@@ -543,14 +579,10 @@ setMethod(
   f = "setGffResult",
   signature = signature(.Object = "RNAmodR",
                         gff = "GRanges",
-                        number = "numeric",
-                        modification = "character"),
+                        number = "numeric"),
   definition = function(.Object,
                         gff,
-                        number,
-                        modification) {
-    assertive::assert_all_are_non_empty_character(modification)
-    
+                        number) {
     experiment <- getExperimentData(.Object, number)
     
     if( assertive::is_a_bool(experiment)) {
@@ -561,7 +593,10 @@ setMethod(
       }
     }
     
-    gff <- .saveGffResult(.Object, gff, experiment, modification)
+    gff <- .saveGffResult(.Object, 
+                          gff, 
+                          experiment, 
+                          unique(unlist(experiment$Modifications)))
     return(invisible(gff))
   }
 )

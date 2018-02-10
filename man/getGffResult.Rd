@@ -3,23 +3,23 @@
 \docType{methods}
 \name{getGffResult}
 \alias{getGffResult}
-\alias{getGffResult,RNAmodR,numeric,character-method}
+\alias{getGffResult,RNAmodR,numeric-method}
 \title{getGffResult}
 \usage{
-getGffResult(.Object, number, modification, genomicCoordinates = FALSE)
+getGffResult(.Object, number, genomicCoordinates = FALSE)
 
-\S4method{getGffResult}{RNAmodR,numeric,character}(.Object, number,
-  modification, genomicCoordinates = FALSE)
+\S4method{getGffResult}{RNAmodR,numeric}(.Object, number,
+  genomicCoordinates = FALSE)
 }
 \arguments{
 \item{.Object}{RNAmod.}
 
 \item{number}{numeric.}
 
-\item{modification}{character.}
-
 \item{genomicCoordinates}{logical value, whether to return results with local
 transcript coordinates or genomic coordinates. (default = FALSE)}
+
+\item{modification}{character.}
 }
 \value{
 the found modifications as a GRanges object in the gff3 format.

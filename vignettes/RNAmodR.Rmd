@@ -25,19 +25,22 @@ create RNAmod
 ```{r RNAmodR, eval=FALSE}
 library(RNAmodR)
 library(SummarizedExperiment)
-mod <- RNAmodR("test",
-              "experiment_layout.csv",
-              "sacCer3_R64-2-1_masked.gff3",
-              "sacCer3_R64-2-1_masked.fasta")
-modifications <- c("m7G","D","m3C")
+mod_sce_rRNA_tRNA <- RNAmodR("test",
+                             "sce_rRNA_tRNA.csv",
+                             "sacCer3_R64-2-1_rRNA_append_rRNA_tRNA.gff3",
+                             "sacCer3_R64-2-1_rRNA_append_rRNA_tRNA.fasta")
+
 no <- unique(getExperimentData(mod)$ExperimentNo)
 for(i in seq_along(no)){
-  parseForModifications(mod,no[i],modifications)
-  se <- getSummarizedExperiment(mod,no[i],modifications)
+  parseForModifications(mod_sce_rRNA_tRNA,no[i])
+  se <- getSummarizedExperiment(mod,no[i])
   transcripts <- unique(c(names(assays(se)$m7G[assays(se)$m7G > 0,]),
                           names(assays(se)$m3C[assays(se)$m3C > 0,]),
                           names(assays(se)$D[assays(se)$D > 0,])))
-  saveModPlot(mod,se,modifications,transcripts)
+  saveModPlot(mod,
+              se,
+              getExperimentData(mod)$Modifications,
+              transcripts)
 }
 gc()
 

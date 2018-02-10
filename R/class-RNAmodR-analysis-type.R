@@ -20,6 +20,7 @@ NULL
 #'   base data further for storage. This involves usually generating a per
 #'   position mean and sd or equivalent.}
 #' }
+#' 
 #' @slot plotType 
 #' @slot data 
 #' @slot modifications 
@@ -32,8 +33,10 @@ setClass("analysis",
                    dataFormat = "function",
                    plotType = "character",
                    data = "list",
+                   conditions = "character",
                    modifications = "list"),
          prototype = list(data = list(),
+                          conditions = c(),
                           modifications = list())
 )
 #' @rdname RNAmodR-analysis-class
@@ -50,10 +53,12 @@ setMethod(
 #' @rdname analysis-accessors
 #' @aliases getPlotType getPositions getModifications
 #' @title Accessor for \code{analysis} class objects
+#' 
 #' @description
 #' The accessor function to \code{analysis} class objects can be used to access
 #' the data saved in slots of the object. See examples for available functions.
-#' @param object a analysis object 
+#' 
+#' @param object an analysis object 
 #' @return character defining the plot type for this analysis class
 #' @export
 #' @examples
@@ -69,6 +74,17 @@ setMethod(
     return(object@plotType)
   }
 )
+
+.get_plot_types_for_modifications <- function(modifications){
+  assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+  modifications <- unique(modifications)
+  l <- lapply(.load_analysis_classes(.get_analysis_type(modifications)),
+              getPlotType)
+  if(length(l) != length(modifications))
+    stop("Incompatibble modification and analysis classes.")
+  names(l) <- modifications
+  l
+}
 
 #' @rdname analysis-accessors
 #' @return a list of data as a lists of list(replicate) of DataFrame(transcript)
@@ -104,6 +120,17 @@ setMethod(
   }
 )
 
+.get_data_label_for_modifications <- function(modifications){
+  assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+  modifications <- unique(modifications)
+  l <- lapply(.load_analysis_classes(.get_analysis_type(modifications)),
+              getDataLabel)
+  if(length(l) != length(modifications))
+    stop("Incompatibble modification and analysis classes.")
+  names(l) <- modifications
+  l
+}
+
 #' @rdname analysis-accessors
 #' @return a function for formating the label of the position data
 #' @export
@@ -114,6 +141,17 @@ setMethod(
     return(object@dataFormat)
   }
 )
+
+.get_data_format_for_modifications <- function(modifications){
+  assertive::assert_all_are_non_missing_nor_empty_character(modifications)
+  modifications <- unique(modifications)
+  l <- lapply(.load_analysis_classes(.get_analysis_type(modifications)),
+              getDataFormat)
+  if(length(l) != length(modifications))
+    stop("Incompatibble modification and analysis classes.")
+  names(l) <- modifications
+  l
+}
 
 
 # analysis class handling ------------------------------------------------------
