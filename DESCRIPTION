@@ -42,7 +42,6 @@ Collate:
 Imports:
   methods,
   assertive,
-  assertive.base,
   stats,
   stringr,
   ggplot2,
