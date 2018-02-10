@@ -55,22 +55,37 @@ setMethod(
   # do not take into account position 1
   if(location == 1) return(NULL)
   # if(location == 1575) browser()
+  # split into conditions
+  res <- mapply(FUN = .get_data_per_condition_M7G,
+                split(data,names(data)),
+                MoreArgs = list(location = location),
+                SIMPLIFY = FALSE)
+  res <- res[!vapply(res,is.null,logical(1))]
+  # check if Treated condition has valid data. Otherwise return NULL (Abort)
+  if(is.null(res$Treated)) return(NULL)
+  return(res)
+}
+
+.get_data_per_condition_M7G <- function(data, location){
   # number of replicates
   n <- length(data)
   # merge data for positions
   # data on the N+1 location
-  testData <- .aggregate_location_data(data, (location + 1))
+  testData <- .aggregate_location_data(data, 
+                                       (location + 1))
   # if number of data points is not high enough
-  if(length(testData) < n) return(NULL)
-  # if stop coverage is to low
-  if(length(testData[testData > RNAMODR_M7G_ARREST_RATE]) < n) return(NULL)
+  if(any(is.na(testData))) return(NULL)
   # base data to compare against
   baseData <- .aggregate_area_data(data, 
                                    (location + 1), 
                                    50)
-  baseData <- baseData[baseData > 0]
   # if not enough data is present
-  if(length(baseData) < n) return(NULL)
+  if(sum(vapply(lapply(baseData, 
+                       function(x){x[!is.na(x)]}),
+                length,
+                numeric(1))) < n) {
+    return(NULL)
+  }
   return(list(n = n,
               testData = testData,
               baseData = baseData))
@@ -92,7 +107,6 @@ setMethod(
                         location,
                         locations,
                         data) {
-    # if(location == 1925) { browser() }
     # get test result for the current location
     locTest <- .calc_M7G_test_values(location,
                                      locations,
@@ -132,25 +146,68 @@ setMethod(
   pretestData <- .do_M7G_pretest(location,
                                  locations,
                                  data)
-  # if(location == 1575) browser()
   if(is.null(pretestData)) return(NULL)
-  # data from pretest
-  testData <- pretestData$testData
-  baseData <- pretestData$baseData
-  n <- pretestData$n
-  # difference to threshold by relative percent
-  # minimal value of 1 since y is one percent lower than arrest rate threshold
-  sig <- floor((testData - RNAMODR_M7G_ARREST_RATE) / 
-                 (1 - RNAMODR_M7G_ARREST_RATE) * 100)
-  sig.mean <- mean(sig)
-  sig.sd <- stats::sd(sig)
-  # generate z score
-  z <- mean((testData - mean(baseData))/sd(baseData))
+  
+  # If Control sample is available
+  if(!is.null(pretestData$Control)){
+    # data from pretest
+    testData <- pretestData$Treated$testData
+    baseData <- pretestData$Treated$baseData
+    n <- pretestData$Treated$n
+    testDataC <- pretestData$Control$testData
+    baseDataC <- pretestData$Control$baseData
+    nC <- pretestData$Control$n
+    testDataCombined <- unlist(testData) - mean(unlist(testDataC))
+    # if stop coverage is to low
+    if(any(testDataCombined < (RNAMODR_M7G_ARREST_RATE - mean(unlist(testDataC))))) return(NULL)
+    # difference to threshold by relative percent
+    # minimal value of 1 since y is one percent lower than arrest rate threshold
+    sig <- floor((testDataCombined - (RNAMODR_M7G_ARREST_RATE - mean(unlist(testDataC)))) / 
+                   (1 - (RNAMODR_M7G_ARREST_RATE - mean(unlist(testDataC)))) * 100)
+    sig.mean <- mean(sig)
+    # approx. sd since covariance of testData and testDataC cannot not be 
+    # assumed in case of unequal observations
+    sig.sd <- sqrt(stats::sd(unlist(testData))^2 + 
+                     stats::sd(unlist(testDataC))^2)
+    #
+    baseData <- .merge_base_data_M7G(baseData,
+                                     baseDataC)
+    # generate z score
+    z <- mean((testDataCombined - mean(baseData)) / sd(baseData))
+  } else {
+    # data from pretest
+    testData <- unlist(pretestData$Treated$testData)
+    baseData <- unlist(pretestData$Treated$baseData)
+    n <- pretestData$Treated$n
+    # if stop coverage is to low
+    if(any(testData < RNAMODR_M7G_ARREST_RATE)) return(NULL)
+    browser()
+    # difference to threshold by relative percent
+    # minimal value of 1 since y is one percent lower than arrest rate threshold
+    sig <- floor((testData - RNAMODR_M7G_ARREST_RATE) / 
+                   (1 - RNAMODR_M7G_ARREST_RATE) * 100)
+    sig.mean <- mean(sig)
+    sig.sd <- stats::sd(sig)
+    # generate z score
+    z <- mean((testData - mean(baseData)) / sd(baseData))
+  }
   return(list(sig = sig,
               sig.mean = sig.mean,
               sig.sd = sig.sd,
               z = z,
               n = n))
+}
+# iterates on every position and calculates the difference of the means
+.merge_base_data_M7G <- function(treated,
+                             control){
+  df <- data.frame(append(treated,control))
+  colnames(df) <- c(names(treated),names(control))
+  df <- df[complete.cases(df),]
+  treated <- df[,colnames(df) == "Treated"]
+  control <- df[,colnames(df) == "Control"]
+  res <- rowMeans(treated) - rowMeans(control)
+  res[res < 0] <- 0
+  return(res)
 }
 
 # call yes or nor position

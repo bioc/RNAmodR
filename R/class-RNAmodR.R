@@ -186,15 +186,25 @@ setMethod(
   samples$Modifications <- lapply(samples$Modifications,
                                   function(str){str_split(str, ",")})
   modifications <- unique(unlist(samples$Modifications))
-  modClasses <- .load_mod_classes(modifications)
+  .check_for_mod_classes(modifications)
   # check for valid condition types
-  types <- unique(samples$Conditions)
-  if(!all(types %in% RNAMODR_SAMPLE_TYPES)){
+  .check_sample_conditions(unique(samples$Conditions))
+  return(samples)
+}
+
+.check_sample_conditions <- function(conditions){
+  if(!all(conditions %in% RNAMODR_SAMPLE_TYPES)){
     stop("Not all condition types are valid. Valid types are:\n",
          paste(RNAMODR_SAMPLE_TYPES, collapse = ","),
          call. = FALSE)
   }
-  return(samples)
+}
+.check_for_mod_classes <- function(modifications){
+  modClasses <- .load_mod_classes(modifications)
+  if(!all(modifications %in% names(modClasses))){
+    stop("Not all modification types are valid. Valid types are.",
+         call. = FALSE)
+  }
 }
 
 # matches the names in fasta file to the chromosome identifier in the GFF file

@@ -3,20 +3,20 @@
 \docType{methods}
 \name{parseForModifications}
 \alias{parseForModifications}
-\alias{parseForModifications,RNAmodR,numeric,missing,missing,missing,missing,missing,missing-method}
-\alias{parseForModifications,missing,missing,character,GRanges,FaFile,character,numeric,character-method}
+\alias{parseForModifications,RNAmodR,numeric,missing,missing,missing,missing,missing,missing,missing-method}
+\alias{parseForModifications,missing,missing,character,GRanges,FaFile,character,character,numeric,character-method}
 \title{parseForModifications}
 \usage{
-parseForModifications(.Object, number, name, gff, fasta, files, mapQuality,
-  modifications)
+parseForModifications(.Object, number, name, gff, fasta, files, conditions,
+  mapQuality, modifications)
 
 
-  \S4method{parseForModifications}{RNAmodR,numeric,missing,missing,missing,missing,missing,missing}(.Object,
+  \S4method{parseForModifications}{RNAmodR,numeric,missing,missing,missing,missing,missing,missing,missing}(.Object,
   number)
 
 
-  \S4method{parseForModifications}{missing,missing,character,GRanges,FaFile,character,numeric,character}(name,
-  gff, fasta, files, mapQuality, modifications)
+  \S4method{parseForModifications}{missing,missing,character,GRanges,FaFile,character,character,numeric,character}(name,
+  gff, fasta, files, conditions, mapQuality, modifications)
 }
 \arguments{
 \item{.Object}{a RNAmod object.}

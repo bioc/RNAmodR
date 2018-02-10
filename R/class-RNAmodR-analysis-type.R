@@ -33,8 +33,10 @@ setClass("analysis",
                    dataFormat = "function",
                    plotType = "character",
                    data = "list",
+                   conditions = "character",
                    modifications = "list"),
          prototype = list(data = list(),
+                          conditions = c(),
                           modifications = list())
 )
 #' @rdname RNAmodR-analysis-class

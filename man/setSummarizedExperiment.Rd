@@ -3,14 +3,14 @@
 \docType{methods}
 \name{setSummarizedExperiment}
 \alias{setSummarizedExperiment}
-\alias{setSummarizedExperiment,RNAmodR,RangedSummarizedExperiment,numeric,character-method}
+\alias{setSummarizedExperiment,RNAmodR,RangedSummarizedExperiment,numeric-method}
 \title{sets a SummarizedExperiment object}
 \usage{
-setSummarizedExperiment(.Object, se, number, modification)
+setSummarizedExperiment(.Object, se, number)
 
 
-  \S4method{setSummarizedExperiment}{RNAmodR,RangedSummarizedExperiment,numeric,character}(.Object,
-  se, number, modification)
+  \S4method{setSummarizedExperiment}{RNAmodR,RangedSummarizedExperiment,numeric}(.Object,
+  se, number)
 }
 \arguments{
 \item{.Object}{a RNAmod object}
@@ -18,8 +18,6 @@ setSummarizedExperiment(.Object, se, number, modification)
 \item{se}{a RangedSummarizedExperiment object}
 
 \item{number}{a number defining the experiment}
-
-\item{modification}{name of modification, one or more character}
 }
 \value{
 the RpfSummarizedExperiment

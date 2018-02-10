@@ -95,22 +95,23 @@ NULL
 
 .aggregate_location_data <- function(data, 
                                      location){
-  unlist(lapply(data,function(dataPerReplicate){
+  lapply(data,function(dataPerReplicate){
     return(dataPerReplicate[as.numeric(names(dataPerReplicate)) == location])
-  }))
+  })
 }
 .aggregate_not_location_data <- function(data,
                                          location){
-  unlist(lapply(data,function(dataPerReplicate){
+  lapply(data,function(dataPerReplicate){
     return(dataPerReplicate[as.numeric(names(dataPerReplicate)) != location])
-  }))
+  })
+  
 }
 .aggregate_area_data <- function(data, 
                                  location, 
                                  width){
-  unlist(.subset_area_data(data, 
-                           location, 
-                           width))
+  .subset_area_data(data, 
+                    location, 
+                    width)
 }
 .subset_area_data <- function(data, 
                               location, 

@@ -39,8 +39,9 @@ setMethod(
                         name = "missing",
                         gff = "missing",
                         fasta = "missing",
-                        mapQuality = "missing",
                         files = "missing",
+                        conditions = "missing",
+                        mapQuality = "missing",
                         modifications = "missing"),
   definition = function(.Object,
                         number){
@@ -54,29 +55,29 @@ setMethod(
     fasta <- .Object@.dataFasta
     # combine path and file name
     files <- paste0(getInputFolder(.Object),experiment$BamFile)
+    conditions <- experiment$Conditions
     # add the default modification class, which is just used for handling read 
     # positions (5'-end), but not modification detection.
     modifications <- unique(unlist(experiment$Modifications))
     # get mapping quality threshold
-    mapQuality <- .Object@.mapQuality
+    mapQuality <- experiment$MapQuality
     
-    res <- parseForModifications(name = name,
-                                 gff = gff,
-                                 fasta = fasta,
-                                 files = files,
-                                 mapQuality = mapQuality,
-                                 modifications = modifications)
+    res <- .parse_for_modification(name = name,
+                                   gff = gff,
+                                   fasta = fasta,
+                                   files = files,
+                                   conditions = conditions,
+                                   mapQuality = mapQuality,
+                                   modifications = modifications)
     if(is.null(res)) return(NULL)
     # Save found modifications as gff file
     setGffResult(.Object,
                  res$gr,
-                 number,
-                 modifications)
+                 number)
     message("Saved detected modifications as gff3 file.")
     setSummarizedExperiment(.Object,
                             res$se,
-                            number,
-                            modifications)
+                            number)
     message("Saved detected modifications as SummarizedExperiment.")
     return(invisible(TRUE))
   }
@@ -87,105 +88,134 @@ setMethod(
 #' @export
 setMethod(
   f = "parseForModifications", 
-  signature = signature(name = "character",
+  signature = signature(.Object = "missing",
+                        number = "missing",
+                        name = "character",
                         gff = "GRanges",
                         fasta = "FaFile",
                         files = "character",
+                        conditions = "character",
                         mapQuality = "numeric",
-                        modifications = "character",
-                        .Object = "missing",
-                        number = "missing"),
+                        modifications = "character"),
   definition = function(name,
                         gff,
                         fasta,
                         files,
+                        conditions,
                         mapQuality,
                         modifications){
-    # Input checks
-    assertive::assert_is_a_non_missing_nor_empty_string(name)
-    assertive::assert_all_are_existing_files(files)
-    assertive::assert_all_are_non_empty_character(modifications)
-    
-    message("Searching for modifications in sample '",
-            name,
-            "'...")
-    # retrieve the analysis types need
-    modClasses <- .load_mod_classes(modifications)
-    analysisTypes <- stats::setNames(vapply(modClasses, 
-                                            getAnalysisType, 
-                                            character(1)),
-                                     modifications)
-    # group the analysis types
-    analysisGroups <- stats::setNames(lapply(unique(analysisTypes), 
-                                             function(x){
-                                               names(analysisTypes[analysisTypes == x])
-                                             }),unique(analysisTypes))
-    # load the analysis classes
-    analysisClasses <- .load_analysis_classes(names(analysisGroups))
-    # subset to relevant annotations 
-    gff_subset <- .get_parent_annotations(
-      .subset_rnamod_containing_features(gff)
-    )
-    # assemble param for scanBam
-    param <- .assemble_scanBamParam(gff_subset, 
-                                    mapQuality,
-                                    .get_acceptable_chrom_ident(files))
-    
-    message(Sys.time(), ": Getting read data...")
-    # load data into each analysis class
-    analysisClasses <- sapply(names(analysisGroups), function(className){
-      convertReadsToPositions(analysisClasses[[className]],
-                              files,
-                              gff,
-                              param)
-    }, simplify = FALSE, USE.NAMES = TRUE)
-    # parse data in each analysis class for the subset of modifications
-    # this merges data from all replicates for the analysis
-    message(Sys.time(), ": Parsing for modifications...")
-    analysisClasses <- sapply(names(analysisGroups), function(className){
-      modClassesSubset <- modClasses[vapply(modClasses, 
-                                            getAnalysisType, 
-                                            character(1)) == className]
-      parseMod(analysisClasses[[className]],
-               gff,
-               fasta,
-               modClassesSubset)
-    }, simplify = FALSE, USE.NAMES = TRUE)
-    # check if any modification could be detected
-    nMods <- vapply(names(analysisGroups), function(className){
-      length(getModifications(analysisClasses[[className]]))
-    }, numeric(1))
-    if( sum(nMods) == 0){
-      message("No modifications detected. Aborting...")
-      return(NULL)
-    }
-    # Merge position data
-    message(Sys.time(), ": Summarizing data...")
-    analysisClasses <- sapply(names(analysisGroups), function(className){
-      mergePositionsOfReplicates(analysisClasses[[className]])
-    }, simplify = FALSE, USE.NAMES = TRUE)
-    # Retrieve position data
-    positions <- sapply(names(analysisGroups), function(className){
-      getPositions(analysisClasses[[className]])
-    }, simplify = FALSE)
-    # Retrieve modification data
-    mod_positions <- sapply(names(analysisGroups), function(className){
-      getModifications(analysisClasses[[className]])
-    }, simplify = FALSE)
-    # Construct DataFrame from found modifications
-    df <- .construct_DataFrame_from_mod_result(mod_positions,
-                                               gff_subset)
-    gr <- GRanges(df)
-    # Save found modifications asSummarizedExperiment
-    se <- .construct_SE_from_mod_result(name,
-                                        files,
-                                        gff_subset,
-                                        df,
-                                        positions)
-    return(list(gr = gr,
-                se = se))
+    return(.parse_for_modification(name,
+                                   gff,
+                                   fasta,
+                                   files,
+                                   conditions,
+                                   mapQuality,
+                                   modifications))
   }
 )
+
+
+.parse_for_modification <- function(name,
+                                    gff,
+                                    fasta,
+                                    files,
+                                    conditions,
+                                    mapQuality,
+                                    modifications){
+  # Input checks
+  assertive::assert_is_a_non_missing_nor_empty_string(name)
+  assertive::assert_all_are_existing_files(files)
+  assertive::assert_all_are_non_empty_character(conditions)
+  assertive::assert_all_are_whole_numbers(mapQuality)
+  if( length(files) != length(conditions) ||
+      length(files) != length(mapQuality) ){
+    stop("Input of files, conditions and mapQuality all must have the same ",
+         "length.",
+         call. = FALSE)
+  }
+  .check_sample_conditions(conditions)
+  assertive::assert_all_are_non_empty_character(modifications)
+  
+  message("Searching for modifications in sample '",
+          name,
+          "'...")
+  # retrieve the analysis types need
+  modClasses <- .load_mod_classes(modifications)
+  analysisTypes <- stats::setNames(vapply(modClasses, 
+                                          getAnalysisType, 
+                                          character(1)),
+                                   modifications)
+  # group the analysis types
+  analysisGroups <- stats::setNames(lapply(unique(analysisTypes), 
+                                           function(x){
+                                             names(analysisTypes[analysisTypes == x])
+                                           }),unique(analysisTypes))
+  # load the analysis classes
+  analysisClasses <- .load_analysis_classes(names(analysisGroups))
+  # subset to relevant annotations 
+  gff_subset <- .get_parent_annotations(
+    .subset_rnamod_containing_features(gff)
+  )
+  # assemble param for scanBam
+  param <- .assemble_scanBamParam(gff_subset, 
+                                  mapQuality,
+                                  .get_acceptable_chrom_ident(files))
+  
+  message(Sys.time(), ": Getting read data...")
+  # load data into each analysis class
+  analysisClasses <- sapply(names(analysisGroups), function(className){
+    convertReadsToPositions(analysisClasses[[className]],
+                            files,
+                            conditions,
+                            gff,
+                            param)
+  }, simplify = FALSE, USE.NAMES = TRUE)
+  # parse data in each analysis class for the subset of modifications
+  # this merges data from all replicates for the analysis
+  message(Sys.time(), ": Parsing for modifications...")
+  analysisClasses <- sapply(names(analysisGroups), function(className){
+    modClassesSubset <- modClasses[vapply(modClasses, 
+                                          getAnalysisType, 
+                                          character(1)) == className]
+    parseMod(analysisClasses[[className]],
+             gff,
+             fasta,
+             modClassesSubset)
+  }, simplify = FALSE, USE.NAMES = TRUE)
+  # check if any modification could be detected
+  nMods <- vapply(names(analysisGroups), function(className){
+    length(getModifications(analysisClasses[[className]]))
+  }, numeric(1))
+  if( sum(nMods) == 0){
+    message("No modifications detected. Aborting...")
+    return(NULL)
+  }
+  # Merge position data
+  message(Sys.time(), ": Summarizing data...")
+  analysisClasses <- sapply(names(analysisGroups), function(className){
+    mergePositionsOfReplicates(analysisClasses[[className]])
+  }, simplify = FALSE, USE.NAMES = TRUE)
+  # Retrieve position data
+  positions <- sapply(names(analysisGroups), function(className){
+    getPositions(analysisClasses[[className]])
+  }, simplify = FALSE)
+  # Retrieve modification data
+  mod_positions <- sapply(names(analysisGroups), function(className){
+    getModifications(analysisClasses[[className]])
+  }, simplify = FALSE)
+  # Construct DataFrame from found modifications
+  df <- .construct_DataFrame_from_mod_result(mod_positions,
+                                             gff_subset)
+  gr <- GRanges(df)
+  # Save found modifications asSummarizedExperiment
+  se <- .construct_SE_from_mod_result(name,
+                                      files,
+                                      gff_subset,
+                                      df,
+                                      positions)
+  return(list(gr = gr,
+              se = se))
+}
 
 # Construct DataFrame from RNAmod results per modification from individual
 # gene results

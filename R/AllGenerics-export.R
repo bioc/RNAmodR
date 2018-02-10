@@ -98,8 +98,7 @@ setGeneric(
 setGeneric( 
   name = "getSummarizedExperiment",
   def = function(.Object,
-                 number, 
-                 modification){standardGeneric("getSummarizedExperiment")} 
+                 number){standardGeneric("getSummarizedExperiment")} 
 ) 
 
 #' @rdname  getSummarizedExperiment
@@ -107,8 +106,7 @@ setGeneric(
 setGeneric( 
   name = "getSummarizedExperiments",
   def = function(.Object,
-                 number, 
-                 modification){standardGeneric("getSummarizedExperiments")} 
+                 number){standardGeneric("getSummarizedExperiments")} 
 ) 
 
 #' @name setSummarizedExperiment
@@ -117,8 +115,7 @@ setGeneric(
   name = "setSummarizedExperiment",
   def = function(.Object,
                  se,
-                 number, 
-                 modification ){standardGeneric("setSummarizedExperiment")} 
+                 number){standardGeneric("setSummarizedExperiment")} 
 ) 
 
 #' @name getGffResult
@@ -127,7 +124,6 @@ setGeneric(
   name = "getGffResult",
   def = function(.Object,
                  number, 
-                 modification,
                  genomicCoordinates = FALSE){standardGeneric("getGffResult")} 
 ) 
 
@@ -140,8 +136,7 @@ setGeneric(
   name = "setGffResult",
   def = function(.Object,
                  gff,
-                 number, 
-                 modification){standardGeneric("setGffResult")} 
+                 number){standardGeneric("setGffResult")} 
 ) 
 
 # parsing ----------------------------------------------------------------------
@@ -156,6 +151,7 @@ setGeneric(
                  gff,
                  fasta,
                  files,
+                 conditions,
                  mapQuality,
                  modifications){standardGeneric("parseForModifications")} 
 ) 
@@ -242,6 +238,7 @@ setGeneric(
   name = "convertReadsToPositions",
   def = function(object,
                  files,
+                 conditions,
                  gff,
                  param){standardGeneric("convertReadsToPositions")} 
 ) 
