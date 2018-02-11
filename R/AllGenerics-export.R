@@ -276,25 +276,6 @@ setGeneric(
 
 # mod type functions -----------------------------------------------------------
 
-#' @name preTest
-#' 
-#' @title Testing data for compatibility with modification detection
-#' 
-#' 
-#' @param object a mod class
-#' @param location a local position on a transcript
-#' @param locations all local positions on the transcript
-#' @param data the data to be analyzed
-#' 
-#' @export
-setGeneric( 
-  name = "preTest",
-  def = function(object,
-                 location,
-                 locations,
-                 data){standardGeneric("preTest")} 
-) 
-
 #' @name checkForModification
 #' 
 #' @title checking for modifications

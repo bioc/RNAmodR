@@ -301,13 +301,3 @@ setMethod(
   }
   return(unlist(seq))
 }
-
-
-# debug helper -----------------------------------------------------------------
-
-.print_location_info <- function(location, locs){
-  message("location: ",location," //locs: ",paste(locs,collapse = ","))
-}
-.print_transcript_info <- function(ID, iterationN){
-  message(ID, " - iteration: ",iterationN)
-}

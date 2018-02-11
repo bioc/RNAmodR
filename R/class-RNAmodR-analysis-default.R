@@ -2,8 +2,7 @@
 #' @include class-RNAmodR-analysis-type.R
 NULL
 
-RNAMODR_DEFAULT_COVERAGE_MIN <- 150
-RNAMODR_DEFAULT_COVERAGE_MIN_TR_CTRL <- 10
+RNAMODR_DEFAULT_COVERAGE_MIN <- 50
 RNAMODR_DEFAULT_AVR_COVERAGE_MIN <- 10
 
 #' @rdname RNAmodR-analysis-class
@@ -59,19 +58,12 @@ setMethod(
                         conditions,
                         gff,
                         param) {
-    # depending on whether control and treated conditions are available
-    if( all(RNAMODR_SAMPLE_TYPES %in% conditions)){
-      functionCleanUp <- .calc_relative_stop_data_tr_ctrl_condition
-    } else {
-      functionCleanUp <- .calc_relative_stop_data_single_condition
-    }
     object@conditions <- conditions
     # detect modifications in each file
     data <- lapply(files,
                    FUN = .get_transcript_data,
                    gff,
-                   param,
-                   functionCleanUp)
+                   param)
     names(data) <- conditions
     data <- data[!is.null(data)]
     if(length(data) == 0){
@@ -79,8 +71,9 @@ setMethod(
            paste(files, collapse = "\n"),
            call. = FALSE)
     }
-    # Process only genes found in all datasets
+    # Process only genes found in all treated datasets
     IDs <- lapply(data,names)
+    IDs <- IDs[names(IDs) == "Treated"]
     IDs <- Reduce(intersect, IDs)
     res <- lapply(IDs,
                   FUN = .get_data,
@@ -99,52 +92,14 @@ setMethod(
                       data,
                       conditions){
   res <- lapply(data,"[[",ID)
-  names(res) <- conditions
   res <- res[!vapply(res,is.null,logical(1))]
   return(res)
-}
-
-# If only treated sample is available
-.calc_relative_stop_data_single_condition <- function(stopsData,
-                                     coverage){
-  # remove low coverage positions by setting pos data to zero
-  toLowCoverage <- names(coverage[coverage < RNAMODR_DEFAULT_COVERAGE_MIN])
-  # add first position since has by definition a value of 1
-  toLowCoverage <- c(toLowCoverage,1)
-  # avoid deviding by zero
-  coverage[toLowCoverage] <- 1
-  # calc relative stop data
-  res <- stopsData / coverage
-  res[toLowCoverage] <- NA
-  # If the result is 1, this mean, that all reads have stopped at that position
-  # this quenches unsepecific results
-  res[res == 1] <- NA
-  res
-}
-
-# if control and treated sample is available
-.calc_relative_stop_data_tr_ctrl_condition <- function(stopsData,
-                                                       coverage){
-  # remove low coverage positions by setting pos data to zero
-  toLowCoverage <- names(coverage[coverage < RNAMODR_DEFAULT_COVERAGE_MIN_TR_CTRL])
-  # add first position since has by definition a value of 1
-  toLowCoverage <- c(toLowCoverage,1)
-  # avoid deviding by zero
-  coverage[toLowCoverage] <- 1
-  # calc relative stop data
-  res <- stopsData / coverage
-  res[toLowCoverage] <- NA
-  # If the result is 1, this mean, that all reads have stopped at that position
-  # this quenches unsepecific results
-  res[res == 1] <- NA
-  res
 }
 
 # detect modifications in each file
 .get_transcript_data <- function(bamFile,
                                  gff,
-                                 param,
-                                 functionCleanUp){
+                                 param){
   bamData <- GenomicAlignments::readGAlignments(bamFile,
                                                 param = param)
   # Total counts
@@ -165,15 +120,16 @@ setMethod(
   
   # bamData <- bamData[names(bamData) %in% c("RDN18-1") |
   #                      grepl("^t",names(bamData))]
-  bamData <- bamData[names(bamData) %in% c("RDN18-1",
-                                           "tE(TTC)B",
-                                           "tG(GCC)B",
-                                           "tH(GTG)E1")]
-  # bamData <- bamData[names(bamData) %in% c("RDN25-1")]
-  # 
+  # bamData <- bamData[names(bamData) %in% c("tE(TTC)B",
+  #                                          "tG(GCC)B",
+  #                                          "tH(GTG)E1",
+  #                                          "tS(CGA)C")]  
+  # bamData <- bamData[names(bamData) %in% c("tS(CGA)C")]
+  # bamData <- bamData[names(bamData) %in% c("tH(GTG)E1")]
+  # bamData <- bamData[names(bamData) %in% c("RDN25-1",
+  #                                          "RDN18-1")]
   # bamData <- bamData[names(bamData) %in% c("YMR116C")]
-  # bamData <- bamData[names(bamData) %in% c("RDN18-1",
-  #                                          "YAL030W_mRNA")]
+  # bamData <- bamData[names(bamData) %in% c("RDN18-1")]
   # bamData <- bamData[names(bamData) %in% c("YJL047C",
   #                                          "YHR199C-A")]
   # bamData <- bamData[names(bamData) %in% c("YBR041W",
@@ -197,8 +153,7 @@ setMethod(
                                         bamData,
                                         names(bamData),
                                         MoreArgs = list(totalCounts,
-                                                        gff,
-                                                        functionCleanUp),
+                                                        gff),
                                         SIMPLIFY = FALSE)
   # BiocParallel::register(bak_param)
   names(transcripts) <- names(bamData)
@@ -218,8 +173,11 @@ setMethod(
 .get_position_data_of_transcript <- function(data,
                                              id,
                                              counts,
-                                             gff,
-                                             functionCleanUp){
+                                             gff){
+  # debug
+  if( getOption("RNAmodR_debug") ){
+    message(id)
+  }
   # skip if transcript does not have data
   if(length(data) == 0) return(NULL)
   # get ID and GRanges
@@ -233,12 +191,6 @@ setMethod(
   # discard reads out of boundaries
   data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
   data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
-  # do position conversion to translate genomic position to local transcript
-  # position. take care of introns, etc
-  stopsData <- .convert_global_stops_to_local_stops(gff,
-                                                    gr,
-                                                    data,
-                                                    posToBeRemoved)
   # get coverage per position
   coverage <- .convert_global_coverage_to_local_coverage(gff,
                                                          gr,
@@ -248,12 +200,37 @@ setMethod(
   if((sum(coverage)/length(coverage)) < RNAMODR_DEFAULT_AVR_COVERAGE_MIN) {
     return(NULL)
   }
+  # do position conversion to translate genomic position to local transcript
+  # position. take care of introns, etc
+  stopsData <- .convert_global_stops_to_local_stops(gff,
+                                                    gr,
+                                                    data,
+                                                    posToBeRemoved)
   if(length(stopsData) != length(coverage)) browser()
   # calculate relative amount of stops per coverage as percent
-  posData <- functionCleanUp(stopsData,
-                             coverage)
+  posData <- .calc_relative_stop_data(stopsData,
+                                      coverage)
   return(list(data = posData,
               coverage = coverage))
+}
+
+# if control and treated sample is available
+.calc_relative_stop_data <- function(stopsData,
+                                     coverage){
+  # remove low coverage positions by setting pos data to zero
+  toLowCoverage <- as.numeric(names(coverage[coverage < RNAMODR_DEFAULT_COVERAGE_MIN]))
+  zeroCoverage <- as.numeric(names(coverage[coverage == 0]))
+  # offset to not cover the end of coverage
+  zeroCoverage <- zeroCoverage + 1
+  zeroCoverage <- zeroCoverage[zeroCoverage <= max(as.numeric(names(coverage)))]
+  # avoid deviding by zero
+  coverage[toLowCoverage] <- 1
+  # calc relative stop data
+  res <- stopsData / coverage
+  res[toLowCoverage] <- NA
+  # this quenches unsepecific results
+  res[c(1,zeroCoverage)] <- NA
+  res
 }
 
 #' @rdname parseMod
@@ -292,8 +269,8 @@ setMethod(
                         fafile,
                         modClasses) {
     # detect modification per transcript
-    res <- mapply(
-    # res <- BiocParallel::bpmapply(
+    # res <- mapply(
+    res <- BiocParallel::bpmapply(
                                   FUN = .analyze_transcript_prep,
                                   names(object@data),
                                   object@data,
@@ -312,11 +289,6 @@ setMethod(
   }
 )
 
-.get_single_position_letters <- function(x) {
-  x <- as.character(x)
-  substring(x, 1:nchar(x), 1:nchar(x))  
-}
-
 # detect and merge modification positions in one transcript
 .analyze_transcript_prep <- function(ID,
                                      data,
@@ -325,7 +297,7 @@ setMethod(
                                      modClasses){
   # debug
   if( getOption("RNAmodR_debug") ){
-    .print_transcript_info(paste(ID," prep"), "")
+    message(ID)
   }
   # get sequence of transcript and subset gff for single transcript data
   gr <- .subset_gff_for_unique_transcript(gff, ID)
@@ -336,25 +308,7 @@ setMethod(
   # generate a location vector
   locations <- 1:length(seq)
   names(locations) <- seq
-  # split data
-  conditions <- names(data)
-  data <- lapply(data,"[[","data")
-  names(data) <- conditions
   # analyze the transcript
-  res <- .analyze_transcript(ID = ID,
-                             modClasses = modClasses,
-                             data = data,
-                             locations = locations)
-  res <- res[order(as.numeric(unlist(lapply(res, "[[", "location"))))]
-  if(is.null(res)) return(NULL)
-  return(res)
-}
-
-# merge positions in one transcript
-.analyze_transcript <- function(ID,
-                                modClasses,
-                                data,
-                                locations){
   # Retrieve modifications positions
   modifications <- lapply(locations,
                           .check_for_modification,
@@ -368,7 +322,10 @@ setMethod(
                                  "_",
                                  locations)
   modifications <- modifications[!vapply(modifications,is.null,logical(1))]
-  if(length(modifications) == 0) return(NULL)
+  if(is.null(modifications) || length(modifications) == 0) return(NULL)
+  modifications <- modifications[order(as.numeric(unlist(lapply(modifications, 
+                                                                "[[", 
+                                                                "location"))))]
   return(modifications)
 }
 
@@ -384,8 +341,7 @@ setMethod(
                                 data = data))
   })
   res <- res[!vapply(res, is.null, logical(1))]
-  if(length(res) > 1) return(NULL)
-  if(length(res) == 0) return(NULL)
+  if(length(res) != 1) return(NULL)
   # Return data
   return(list(location = location,
               type = res[[1]]$type,
@@ -403,6 +359,9 @@ setMethod(
 #' @return a modified \code{analysis} class object now containing the aggregated
 #' pre-processed data of the input. This data is used for saving.
 #' 
+#' @importFrom matrixStats rowSds
+#' @importFrom stats complete.cases
+#' 
 #' @export
 #'
 #' @examples
@@ -414,8 +373,9 @@ setMethod(
   f = "mergePositionsOfReplicates",
   signature = signature(object = "analysis_default"),
   definition = function(object) {
-    # res <- mapply(IDs,
-    res <- BiocParallel::bpmapply(FUN = .merge_positions,
+    res <- mapply(
+    # res <- BiocParallel::bpmapply(
+                                  FUN = .merge_positions,
                                   names(object@data),
                                   object@data)
     names(res) <- names(object@data)
@@ -431,26 +391,61 @@ setMethod(
 
 # merge positions in one transcript
 .merge_positions <- function(ID,data){
+  # debug
+  if( getOption("RNAmodR_debug") ){
+    message(ID)
+  }
+  # get mean of coverage
+  coverage <- lapply(data,"[[","coverage")
+  coverage <- split(coverage,names(coverage))
+  coverage <- .merge_coverage_data(coverage)
+  # get mean of position stop data
   data <- lapply(data,"[[","data")
   positions <- as.numeric(unique(unlist(lapply(data,names))))
-  res <- lapply(positions,
-                FUN = .merge_position,
-                data)
-  df <- data.frame(pos = unlist(lapply(res,"[[","pos")),
-                   mean = unlist(lapply(res,"[[","mean")),
-                   sd = unlist(lapply(res,"[[","sd")),
+  data <- split(data,names(data))
+  data <- .merge_position_data(data)
+  df <- data.frame(pos = positions,
+                   mean = data$mean,
+                   sd = data$sd,
+                   coverage = coverage$mean,
                    stringsAsFactors = FALSE)
   return(df)
 }
 
-# merge position data for one position
-.merge_position <- function(pos,
-                            data){
-  data <- unlist(lapply(data, "[[",pos))
-  data[is.na(data)] <- 0
-  return(list(pos = pos,
-              n = length(data),
-              mean = mean(data),
-              sd = stats::sd(data)))
+# iterates on every position and calculates the difference of the means and sd
+.merge_position_data <- function(data){
+  treated <- data$Treated
+  control <- data$Control
+  if(is.null(control)){
+    df <- S4Vectors::DataFrame(treated)
+    colnames(df) <- names(treated)
+    # remove incomplete 
+    df[!stats::complete.cases(as.data.frame(df)),] <- 0
+    mean <- rowMeans(as.matrix(df))
+    sd <- matrixStats::rowSds(as.matrix(df))
+  } else {
+    df <- S4Vectors::DataFrame(append(treated,control))
+    colnames(df) <- c(names(treated),names(control))
+    treated <- df[,colnames(df) == "Treated",drop = FALSE]
+    treated[!stats::complete.cases(as.data.frame(treated)),] <- 0
+    control <- df[,colnames(df) == "Control",drop = FALSE]
+    control[!stats::complete.cases(as.data.frame(control)),] <- 0
+    mean <- rowMeans(as.matrix(treated)) - 
+      rowMeans(as.matrix(control))
+    mean[mean < 0] <- 0
+    sd <- matrixStats::rowSds(as.matrix(treated)) + 
+      matrixStats::rowSds(as.matrix(control))
+  }
+  return(list(mean = mean,
+              sd = sd))
 }
 
+# iterates on every position and calculates a mean coverage
+.merge_coverage_data <- function(coverage){
+  treated <- coverage$Treated
+  df <- data.frame(treated)
+  colnames(df) <- names(treated)
+  df[!complete.cases(df),] <- rep(0, ncol(df))
+  mean <- rowMeans(df)
+  return(list(mean = mean))
+}

@@ -101,7 +101,6 @@ RNAMODR_DEFAULT_PALETTE <- "Set1"
 # Settings ---------------------------------------------------------------------
 .onLoad <- function(libname,pkgname){
   options("RNAmodR_map_quality" = RNAMODR_DEFAULT_MAPQ)
-  options("RNAmodR_sample_transcripts" = c("RDN18-1"))
   options("RNAmodR_transcript_max_iteration" = 
             RNAMODR_DEFAULT_TRANSCRIPT_MAX_ITERATIONS)
   options("RNAmodR_use_p" = TRUE)
@@ -109,7 +108,6 @@ RNAMODR_DEFAULT_PALETTE <- "Set1"
   options("RNAmodR_dpi" = 600)
   options("RNAmodR_use_cairo" = FALSE)
   options("RNAmodR_debug" = FALSE)
-  options("RNAmodR_debug_transcripts" = c("tG(UCC)G"))
 }
 
 # # class unions for S4 functions
