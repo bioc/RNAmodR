@@ -19,7 +19,7 @@ setClass("mod",
          slots = c(analysisType = "character",
                    modType = "character",
                    positionOffset = "numeric"),
-         prototype = list(analysisType = "default")
+         prototype = list(analysisType = "5end")
 )
 #' @rdname RNAmodR-mod-class
 #'

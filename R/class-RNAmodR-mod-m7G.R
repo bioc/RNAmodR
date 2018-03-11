@@ -62,7 +62,7 @@ setClass("mod_m7G",
   # if minimal arrest rate requires to low coverage
   testCoverage <- .aggregate_location_data(coverage, 
                                            (location + 1))
-  if(any( (unlist(testCoverage) * RNAMODR_M7G_ARREST_RATE_INV) < RNAMODR_DEFAULT_COVERAGE_MIN )) return(NULL)
+  if(any( (unlist(testCoverage) * RNAMODR_M7G_ARREST_RATE_INV) < RNAMODR_5END_COVERAGE_MIN )) return(NULL)
   # base data to compare against
   baseData <- .aggregate_area_data(data, 
                                    (location + 1), 

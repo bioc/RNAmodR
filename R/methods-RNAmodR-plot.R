@@ -323,7 +323,6 @@ setMethod(
                                       seq)
   # create description layer plot
   layer <- .create_layer_data(gff,gff_sub)
-  
   # get data for different plot types
   posData <- .aggregate_pos_data(gff_sub,
                                  positions,
@@ -331,10 +330,8 @@ setMethod(
                                  modClasses)
   mods <- mods[order(mods$start),]
   modData <- .aggregate_mod_data(mods,modClasses)
-  
-  # to inhibit plotting by grid.arrange
-  grDevices::pdf(file = NULL)
-  
+  # get modification plots per plot type, which is stored as name of 
+  # posData$data
   dataPlots <- lapply(names(posData$data), function(type){
     return(.get_mod_plot(pos = posData$data[[type]],
                          mods = modData[[type]],
@@ -353,12 +350,8 @@ setMethod(
   # grid <- do.call(gridExtra::grid.arrange, append(dataPlots,
   #                                                 layerPlot,
   #                                                 list(nrow = nrow)))
-  grid <- do.call(gridExtra::grid.arrange, append(dataPlots,
-                                                  list(nrow = nrow)))
-  
-  # to inhibit plotting by grid.arrange
-  grDevices::dev.off()
-  
+  grid <- do.call(gridExtra::arrangeGrob, append(dataPlots,
+                                                 list(nrow = nrow)))
   return(list(plot = list(grid),
               width = list(width),
               height = list(height)))
@@ -397,7 +390,7 @@ setMethod(
   })
   modData <- do.call(rbind,modData)
   # create plots
-  plots <- lapply(1:nrow(modData), function(i){
+  plots <- lapply(seq_len(nrow(modData)), function(i){
     # subset tp temporary data
     mod <- modData[i,]
     pos <- posData$data[[mod$plotType]]
@@ -471,6 +464,7 @@ setMethod(
   }, data)
   # load the analysis classes
   analysisClasses <- .load_analysis_classes(plotTypes)
+  # get label and format
   label <- lapply(analysisClasses, getDataLabel)
   format <- lapply(analysisClasses, getDataFormat)
   names(data) <- plotTypes
@@ -514,7 +508,9 @@ setMethod(
                           format){
   requireNamespace("ggplot2", quietly = TRUE)
   # initial plot setup
-  plot <- ggplot(pos, aes_(x = ~as.numeric(pos), y = ~mean, label = ~letters)) +
+  plot <- ggplot(pos, aes_(x = ~as.numeric(pos), 
+                           y = ~mean, 
+                           label = ~letters)) +
     scale_x_continuous(name = "position of transcript [nt]",
                        expand = c(0,10)) +
     scale_y_continuous(name = label,

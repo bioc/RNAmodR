@@ -21,7 +21,7 @@ Collate:
     'class-RNAmodR.R'
     'class-RNAmodR-analysis-type.R'
     'class-RNAmodR-mod-type.R'
-    'class-RNAmodR-analysis-default.R'
+    'class-RNAmodR-analysis-5end.R'
     'class-RNAmodR-mod-D.R'
     'class-RNAmodR-mod-m3C.R'
     'class-RNAmodR-mod-m7G.R'

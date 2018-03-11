@@ -3,6 +3,7 @@
 NULL
 
 #' @name RNAmodR-analysis-class
+#' @aliases m7G m3C Dihydrouridine
 #' @title RNAmodR analysis class
 #' @description
 #' The class is virtual and has to be extended from, eg. \code{analysis_default}
