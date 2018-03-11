@@ -16,84 +16,22 @@ RNAMODR_M3C_SIG_THRESHOLD <- 5
 #' @export
 setClass("mod_m3C",
          contains = "mod",
-         prototype = list(modType = "m3C",
+         prototype = list(dataType = "5end",
+                          modType = "m3C",
                           positionOffset = 1)
 )
-
-# check if any data is available to proceed with test
-# this is in a seperate function since it is also called by checkForModification
-.do_M3C_pretest <- function(location,
-                            locations,
-                            data,
-                            coverage){
-  # if non C position skip position
-  if( names(locations[locations == location]) != RNAMODR_M3C_NUCLEOTIDE){
-    return(NULL)
-  }
-  # do not take into account position 1 or the other end
-  if(location == 1 || location > (max(locations) - 5) ) return(NULL)
-  # split into conditions
-  res <- mapply(FUN = .get_data_per_condition_M3C,
-                split(data,names(data)),
-                split(coverage,names(coverage)),
-                MoreArgs = list(location = location),
-                SIMPLIFY = FALSE)
-  res <- res[!vapply(res,is.null,logical(1))]
-  # check if Treated condition has valid data. Otherwise return NULL (Abort)
-  if(is.null(res$Treated) || 
-     any(is.na(res$Treated$testData))){
-    return(NULL)
-  }
-  return(res)
-}
-
-.get_data_per_condition_M3C <- function(data, 
-                                        coverage,
-                                        location){
-  # number of replicates
-  n <- length(data)
-  # data on the N location
-  posData <- .aggregate_location_data(data,
-                                      location)
-  # data on the N+1 location
-  testData <- .aggregate_location_data(data, 
-                                       (location + 1))
-  # if number of data points is not high enough or their are empty
-  if(any(is.na(testData)) || length(unlist(testData)) == 0 ) return(NULL)
-  # if minimal arrest rate requires to low coverage
-  testCoverage <- .aggregate_location_data(coverage, 
-                                           (location + 1))
-  if(any( (unlist(testCoverage) * RNAMODR_M3C_ARREST_RATE_INV) < RNAMODR_5END_COVERAGE_MIN )) return(NULL)
-  # base data to compare against
-  baseData <- .aggregate_area_data(data, 
-                                   (location + 1), 
-                                   50)
-  # if not enough data is present
-  if(sum(vapply(lapply(baseData, 
-                       function(x){x[!is.na(x)]}),
-                length,
-                numeric(1))) < n) {
-    return(NULL)
-  }
-  return(list(n = n,
-              posData = posData,
-              testData = testData,
-              baseData = baseData))
-}
 
 #' @rdname checkForModification
 #' 
 #' @description 
 #' \code{mod_m3C}
-#' 
-#' @export
 setMethod(
   f = "checkForModification",
-  signature = signature(object = "mod_m3C",
+  signature = signature(x = "mod_m3C",
                         location = "numeric",
                         locations = "numeric",
                         data = "list"),
-  definition = function(object,
+  definition = function(x,
                         location,
                         locations,
                         data) {
@@ -112,7 +50,7 @@ setMethod(
     }
     # Return data
     return(list(location = location,
-                type = getModType(object),
+                type = getModType(x),
                 signal = locTest$sig.mean,
                 signal.sd = locTest$sig.sd,
                 z = locTest$z,
@@ -192,6 +130,68 @@ setMethod(
               z = z,
               n = n))
 }
+
+# check if any data is available to proceed with test
+# this is in a seperate function since it is also called by checkForModification
+.do_M3C_pretest <- function(location,
+                            locations,
+                            data,
+                            coverage){
+  # if non C position skip position
+  if( names(locations[locations == location]) != RNAMODR_M3C_NUCLEOTIDE){
+    return(NULL)
+  }
+  # do not take into account position 1 or the other end
+  if(location == 1 || location > (max(locations) - 5) ) return(NULL)
+  # split into conditions
+  res <- mapply(FUN = .get_data_per_condition_M3C,
+                split(data,names(data)),
+                split(coverage,names(coverage)),
+                MoreArgs = list(location = location),
+                SIMPLIFY = FALSE)
+  res <- res[!vapply(res,is.null,logical(1))]
+  # check if Treated condition has valid data. Otherwise return NULL (Abort)
+  if(is.null(res$Treated) || 
+     any(is.na(res$Treated$testData))){
+    return(NULL)
+  }
+  return(res)
+}
+
+.get_data_per_condition_M3C <- function(data, 
+                                        coverage,
+                                        location){
+  # number of replicates
+  n <- length(data)
+  # data on the N location
+  posData <- .aggregate_location_data(data,
+                                      location)
+  # data on the N+1 location
+  testData <- .aggregate_location_data(data, 
+                                       (location + 1))
+  # if number of data points is not high enough or their are empty
+  if(any(is.na(testData)) || length(unlist(testData)) == 0 ) return(NULL)
+  # if minimal arrest rate requires to low coverage
+  testCoverage <- .aggregate_location_data(coverage, 
+                                           (location + 1))
+  if(any( (unlist(testCoverage) * RNAMODR_M3C_ARREST_RATE_INV) < RNAMODR_5END_COVERAGE_MIN )) return(NULL)
+  # base data to compare against
+  baseData <- .aggregate_area_data(data, 
+                                   (location + 1), 
+                                   50)
+  # if not enough data is present
+  if(sum(vapply(lapply(baseData, 
+                       function(x){x[!is.na(x)]}),
+                length,
+                numeric(1))) < n) {
+    return(NULL)
+  }
+  return(list(n = n,
+              posData = posData,
+              testData = testData,
+              baseData = baseData))
+}
+
 # iterates on every position and calculates the difference of the means
 .merge_base_data_M3C <- function(treated,
                                  control){

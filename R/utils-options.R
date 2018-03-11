@@ -34,7 +34,7 @@ NULL
   useP
 }
 
-
+# returns the default colour palette
 .get_color_palette <- function(){
   palette <- getOption("RNAmodR_palette")
   if(!assertive::is_a_string(palette)){
@@ -47,15 +47,30 @@ NULL
   palette
 }
 
-
-.get_transcript_max_iteration <- function(){
-  iterations <- getOption("RNAmodR_transcript_max_iteration")
-  if(!assertive::is_a_number(iterations)){
-    iterations <- RNAMODR_DEFAULT_TRANSCRIPT_MAX_ITERATIONS
-    warning("The option 'RNAmodR_transcript_max_iteration' is not a single ",
-            "number. Please set 'RNAmodR_palette' to a valid palette ",
-            "identifier using a single string.",
+# returns the width used for RiboMethScore calculate
+.get_ribometh_score_width <- function(){
+  width <- getOption("RNAmodR_RiboMethScore_width")
+  if(!assertive::is_a_number(width) || !assertive::is_positive(width)){
+    width <- RNAMODR_DEFAULT_RMS_WIDTH
+    warning("The option 'RNAmodR_RiboMethScore_width' is not a number. ",
+            "Please set 'RNAmodR_RiboMethScore_width' to a positive number. ",
             call. = FALSE)
   }
-  iterations
+  width
+}
+# returns the width used for RiboMethScore calculate
+.get_ribometh_score_weights <- function(){
+  weights <- getOption("RNAmodR_RiboMethScore_weights")
+  if(length(weights) != ( 2 * .get_ribometh_score_width() + 1 ) ){
+    stop("The option 'RNAmodR_RiboMethScore_weights' is not a compatible with ",
+         "the width of 'RNAmodR_RiboMethScore_width'. ",
+         "Please set 'RNAmodR_RiboMethScore_weights' to a named list of ",
+         "weights. ",
+         call. = FALSE)
+  }
+  if(weights["0"] != 0){
+    stop("Error in weighting list.")
+  }
+  ## more checks needed XXX
+  weights
 }

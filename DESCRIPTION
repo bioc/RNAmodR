@@ -19,12 +19,14 @@ Collate:
     'AllGenerics.R'
     'AllGenerics-export.R'
     'class-RNAmodR.R'
-    'class-RNAmodR-analysis-type.R'
+    'class-RNAmodR-data-type.R'
     'class-RNAmodR-mod-type.R'
-    'class-RNAmodR-analysis-5end.R'
+    'class-RNAmodR-data-5end.R'
+    'class-RNAmodR-data-allends.R'
     'class-RNAmodR-mod-D.R'
     'class-RNAmodR-mod-m3C.R'
     'class-RNAmodR-mod-m7G.R'
+    'class-RNAmodR-mod-ribometh.R'
     'datasets.R'
     'methods-RNAmodR-analysis.R'
     'methods-RNAmodR-compare.R'
@@ -39,6 +41,7 @@ Collate:
     'utils-plot.R'
     'utils-ranges.R'
     'utils-sequences.R'
+    'utils-statistics.R'
 Imports:
   methods,
   assertive,

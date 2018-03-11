@@ -16,10 +16,9 @@ NULL
 #' @export
 setClass("mod",
          contains = "VIRTUAL",
-         slots = c(analysisType = "character",
+         slots = c(dataType = "character",
                    modType = "character",
-                   positionOffset = "numeric"),
-         prototype = list(analysisType = "5end")
+                   positionOffset = "numeric")
 )
 #' @rdname RNAmodR-mod-class
 #'
@@ -35,7 +34,7 @@ setMethod(
 )
 
 #' @rdname mod-accessors
-#' @aliases getAnalysisType getModType
+#' @aliases getDataType getModType
 #'
 #' @param object a RNAmodR mod class object 
 #' 
@@ -45,7 +44,7 @@ setMethod(
 #'
 #' @examples
 #' \donttest{
-#' getAnalysisType(mod)
+#' getDataType(mod)
 #' getModType(mod)
 #' }
 setMethod(
@@ -74,10 +73,10 @@ setMethod(
 #' 
 #' @export
 setMethod(
-  f = "getAnalysisType", 
+  f = "getDataType", 
   signature = signature(object = "mod"),
   definition = function(object) {
-    return(object@analysisType)
+    return(object@dataType)
   }
 )
 
@@ -85,7 +84,7 @@ setMethod(
   assertive::assert_all_are_non_missing_nor_empty_character(modifications)
   modifications <- unique(modifications)
   l <- lapply(.load_mod_classes(modifications),
-              getAnalysisType)
+              getDataType)
   if(length(l) != length(modifications)){
     stop("Modification types do not match.")
   }

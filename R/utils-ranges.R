@@ -1,4 +1,4 @@
-#' @include class-RNAmodR-analysis-type.R
+#' @include class-RNAmodR-data-type.R
 NULL
 
 # BiocGeneric helper functions -------------------------------------------------
@@ -126,61 +126,6 @@ NULL
 
 # common function handling positions -------------------------------------------
 
-# converts the position on a transcript from start to end, to the correct
-# genomic position
-.convert_local_to_global_locations <- function(gff,
-                                               loc){
-  
-  
-  
-  # browser()
-  # Intron handling needs to be added
-  strand <- unique(as.character(strand(gff)))
-  if(strand == "-"){
-    locations <- (end(gff) - loc) + 1
-  } else {
-    locations <- (start(gff) + loc) - 1
-  }
-  
-  
-  return(locations)
-}
-
-# converts global to local positions and modifies data accoringly
-.convert_global_stops_to_local_stops <- function(gff,
-                                                 gr,
-                                                 data,
-                                                 posToBeRemoved){
-  # interest in read's 5' position
-  # reset to relative positions to gene start
-  if(.is_on_minus_strand(gr)){
-    stops <- BiocGenerics::end(data)
-  } else {
-    stops <- BiocGenerics::start(data)
-  }
-  # offset stops based on how many stops the read has passed from
-  # transcription start
-  stops <- .move_positions(stops, 
-                           posToBeRemoved, 
-                           .get_unique_strand(gr))
-  # reset to relative stops to gene start
-  if(.is_on_minus_strand(gr)){
-    stops <- BiocGenerics::end(gr) - stops + 1
-  } else {
-    stops <- stops - BiocGenerics::start(gr) + 1
-  }
-  # get stops per position
-  stops <- table(stops)
-  # get the transcript length
-  length <- width(gr) - length(unlist(posToBeRemoved))
-  # spread table with zero values to the length of transcript
-  stops <- stats::setNames(as.double(unlist(lapply(1:length, 
-                                                   function(i){
-                                                     if(length(stops[names(stops) == i]) == 0) return(0)
-                                                     stops[names(stops) == i]
-                                                   }))),1:length)
-  return(stops)
-}
 # offset positions based on how many positions to be removed the read has passed 
 # from transcription start
 .move_positions <- function(positions,
@@ -198,30 +143,6 @@ NULL
   }))
 }
 
-# converts global to local positions and modifies data accoringly
-.convert_global_coverage_to_local_coverage <- function(gff,
-                                                       gr,
-                                                       data,
-                                                       posToBeRemoved){
-  # get coverage
-  coverage <- as.numeric(GenomicAlignments::coverage(data, 
-                                                     shift = -BiocGenerics::start(gr)+1,
-                                                     width = BiocGenerics::width(gr),
-                                                     method = "hash")[GenomeInfoDb::seqnames(gr)][[1]])
-  names(coverage) <- BiocGenerics::start(gr):BiocGenerics::end(gr)
-  # take care of intron positions
-  coverage <- .move_positions_named(coverage, 
-                                    posToBeRemoved, 
-                                    .get_unique_strand(gr))
-  # reset to relative positions to gene start
-  if(.is_on_minus_strand(gr)){
-    names(coverage) <- BiocGenerics::end(gr) - as.numeric(names(coverage)) + 1
-  } else {
-    names(coverage) <- as.numeric(names(coverage)) - BiocGenerics::start(gr) + 1
-  }
-  coverage <- coverage[order(as.numeric(names(coverage)))]
-  return(coverage)
-}
 # offset positions based on how many positions the read has passed from
 # transcription start. used the name for identification
 .move_positions_named <- function(positions,
@@ -232,21 +153,10 @@ NULL
   names(positions) <- .move_positions(as.numeric(names(positions)),
                                       posToBeRemoved,
                                       strand)
-  positions
+  return(positions)
 }
 
-# aggregate the positions occupied by introns
-.get_intron_positions <- function(gff, 
-                                  ID){
-  # get childs
-  childs <- .subset_gff_for_unique_transcript(gff, 
-                                              ID, 
-                                              wo.childs = FALSE)
-  lapply(childs[grepl("intron",childs$type),], 
-         function(intron){
-           Biostrings::start(intron):Biostrings::end(intron)
-         })
-}
+# sequences --------------------------------------------------------------------
 
 # get transcript sequence without removed
 .get_transcript_sequence <- function(gff,ID,seq){
@@ -273,4 +183,60 @@ NULL
 .get_single_position_letters <- function(x) {
   x <- as.character(x)
   substring(x, 1:nchar(x), 1:nchar(x))  
+}
+
+# Global to Local --------------------------------------------------------------
+
+# converts global to local positions and modifies data accoringly
+.convert_global_coverage_to_local_coverage <- function(gff,
+                                                       gr,
+                                                       data,
+                                                       posToBeRemoved){
+  # get coverage
+  coverage <- as.numeric(GenomicAlignments::coverage(data, 
+                                                     shift = -BiocGenerics::start(gr)+1,
+                                                     width = BiocGenerics::width(gr),
+                                                     method = "hash")[GenomeInfoDb::seqnames(gr)][[1]])
+  names(coverage) <- BiocGenerics::start(gr):BiocGenerics::end(gr)
+  # take care of intron positions
+  coverage <- .move_positions_named(coverage, 
+                                    posToBeRemoved, 
+                                    .get_unique_strand(gr))
+  # reset to relative positions to gene start
+  if(.is_on_minus_strand(gr)){
+    names(coverage) <- BiocGenerics::end(gr) - as.numeric(names(coverage)) + 1
+  } else {
+    names(coverage) <- as.numeric(names(coverage)) - BiocGenerics::start(gr) + 1
+  }
+  coverage <- coverage[order(as.numeric(names(coverage)))]
+  return(coverage)
+}
+
+# aggregate the positions occupied by introns
+.get_intron_positions <- function(gff, 
+                                  ID){
+  # get childs
+  childs <- .subset_gff_for_unique_transcript(gff, 
+                                              ID, 
+                                              wo.childs = FALSE)
+  lapply(childs[grepl("intron",childs$type),], 
+         function(intron){
+           Biostrings::start(intron):Biostrings::end(intron)
+         })
+}
+
+# Local to Global --------------------------------------------------------------
+
+# converts the position on a transcript from start to end, to the correct
+# genomic position
+.convert_local_to_global_locations <- function(gff,
+                                               loc){
+  # Intron handling needs to be added
+  strand <- unique(as.character(strand(gff)))
+  if(strand == "-"){
+    locations <- (end(gff) - loc) + 1
+  } else {
+    locations <- (start(gff) + loc) - 1
+  }
+  return(locations)
 }

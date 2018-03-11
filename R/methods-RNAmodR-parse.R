@@ -142,7 +142,7 @@ setMethod(
   # retrieve the analysis types need
   modClasses <- .load_mod_classes(modifications)
   analysisTypes <- stats::setNames(vapply(modClasses, 
-                                          getAnalysisType, 
+                                          getDataType, 
                                           character(1)),
                                    modifications)
   # group the analysis types
@@ -164,18 +164,18 @@ setMethod(
   message(Sys.time(), ": Getting read data...")
   # load data into each analysis class
   analysisClasses <- sapply(names(analysisGroups), function(className){
-    convertReadsToPositions(analysisClasses[[className]],
-                            files,
-                            conditions,
-                            gff,
-                            param)
+    convertReadsToData(analysisClasses[[className]],
+                       files,
+                       conditions,
+                       gff,
+                       param)
   }, simplify = FALSE, USE.NAMES = TRUE)
   # parse data in each analysis class for the subset of modifications
   # this merges data from all replicates for the analysis
   message(Sys.time(), ": Parsing for modifications...")
   analysisClasses <- sapply(names(analysisGroups), function(className){
     modClassesSubset <- modClasses[vapply(modClasses, 
-                                          getAnalysisType, 
+                                          getDataType, 
                                           character(1)) == className]
     parseMod(analysisClasses[[className]],
              gff,
@@ -193,7 +193,7 @@ setMethod(
   # Merge position data
   message(Sys.time(), ": Summarizing data...")
   analysisClasses <- sapply(names(analysisGroups), function(className){
-    mergePositionsOfReplicates(analysisClasses[[className]])
+    mergeDataOfReplicates(analysisClasses[[className]])
   }, simplify = FALSE, USE.NAMES = TRUE)
   # Retrieve position data
   positions <- sapply(names(analysisGroups), function(className){

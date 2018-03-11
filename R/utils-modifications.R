@@ -1,4 +1,4 @@
-#' @include class-RNAmodR-analysis-type.R
+#' @include class-RNAmodR-data-type.R
 NULL
 
 # modificaton access for SE and GRL --------------------------------------------
@@ -106,27 +106,40 @@ NULL
   })
   
 }
+
+# aggregate of area data -------------------------------------------------------
 .aggregate_area_data <- function(data, 
                                  location, 
                                  width){
-  .subset_area_data(data, 
-                    location, 
-                    width)
-}
-.subset_area_data <- function(data, 
-                              location, 
-                              width){
   lapply(data,function(dataPerReplicate){
     return(dataPerReplicate[as.numeric(names(dataPerReplicate)) <= (location + width) &
                               as.numeric(names(dataPerReplicate)) >= (location - width) &
                               as.numeric(names(dataPerReplicate)) != location])
   })
 }
-.subset_area_data2 <- function(data, 
-                               location, 
-                               width){
+.aggregate_area_data2 <- function(data, 
+                                  location, 
+                                  width){
   lapply(data,function(dataPerReplicate){
     return(dataPerReplicate[as.numeric(names(dataPerReplicate)) <= (location + width) &
                               as.numeric(names(dataPerReplicate)) >= (location - width)])
+  })
+}
+
+.aggregate_area_data_left <- function(data, 
+                                      location, 
+                                      width){
+  lapply(data,function(dataPerReplicate){
+    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) >= (location - width) &
+                              as.numeric(names(dataPerReplicate)) < location])
+  })
+}
+
+.aggregate_area_data_right <- function(data, 
+                                       location, 
+                                       width){
+  lapply(data,function(dataPerReplicate){
+    return(dataPerReplicate[as.numeric(names(dataPerReplicate)) <= (location + width) &
+                              as.numeric(names(dataPerReplicate)) > location])
   })
 }

@@ -444,7 +444,7 @@ setMethod(
                                 data, 
                                 letters,
                                 modClasses){
-  plotTypes <- vapply(modClasses, getAnalysisType, character(1))
+  plotTypes <- vapply(modClasses, getDataType, character(1))
   plotTypes <- unique(plotTypes)
   data <- lapply(plotTypes, function(type, data){
     if(is.null(data[[type]])){
@@ -487,7 +487,7 @@ setMethod(
     data[data$RNAmodR_type == type,]
   })
   # set name of plot type
-  names(data) <- vapply(modClasses, getAnalysisType, character(1))
+  names(data) <- vapply(modClasses, getDataType, character(1))
   # aggregated data based on plot type
   data <- stats::setNames(lapply(unique(names(data)), function(name){
     x <- do.call(rbind, data[names(data) == name])

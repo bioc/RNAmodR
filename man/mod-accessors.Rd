@@ -4,26 +4,26 @@
 \docType{methods}
 \name{mod-accessors}
 \alias{mod-accessors}
-\alias{getAnalysisType}
+\alias{getDataType}
 \alias{getModType}
-\alias{getAnalysisType}
+\alias{getDataType}
 \alias{getPositionOffset}
 \alias{getModType,mod-method}
-\alias{getAnalysisType}
+\alias{getDataType}
 \alias{getModType}
-\alias{getAnalysisType,mod-method}
+\alias{getDataType,mod-method}
 \alias{getPositionOffset,mod-method}
 \title{accessors for \code{mod} class objects}
 \usage{
 getModType(object)
 
-getAnalysisType(object)
+getDataType(object)
 
 getPositionOffset(object)
 
 \S4method{getModType}{mod}(object)
 
-\S4method{getAnalysisType}{mod}(object)
+\S4method{getDataType}{mod}(object)
 
 \S4method{getPositionOffset}{mod}(object)
 }
@@ -44,7 +44,7 @@ title
 }
 \examples{
 \donttest{
-getAnalysisType(mod)
+getDataType(mod)
 getModType(mod)
 }
 }
