@@ -1,31 +1,27 @@
-#' @include class-RNAmodR-mod-type.R
+#' @include class-RNAmodR-ident.R
 NULL
 
-RNAMODR_RIBOMETH_SCORE_A_THRESHOLD <- 0.5
-RNAMODR_RIBOMETH_SCORE_B_THRESHOLD <- 3.2
-
-#' @rdname RNAmodR-mod-class
+#' @rdname RNAmodR-ident-class
 #'
 #' @description 
-#' \code{mod_ribometh}:
+#' \code{RNAmodRident_RiboMeth}:
 #' 
 #' @export
-setClass("mod_ribometh",
-         contains = "mod",
+setClass("RNAmodRident_RiboMeth",
+         contains = "RNAmodRident",
          prototype = list(dataType = "allends",
-                          modType = "ribometh",
-                          positionOffset = 0)
+                          modType = "RiboMeth")
 )
 
-#' @rdname checkForModification
+#' @rdname identifyModificationPerTranscript
 #' 
 #' @description 
-#' \code{mod_ribometh}
+#' \code{RNAmodRident_RiboMeth}
 #' 
 #' @export
 setMethod(
-  f = "checkForModification",
-  signature = signature(x = "mod_ribometh",
+  f = "identifyModificationsPerTranscript",
+  signature = signature(x = "RNAmodRident_RiboMeth",
                         location = "numeric",
                         locations = "numeric",
                         data = "list"),

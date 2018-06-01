@@ -1,33 +1,25 @@
-#' @include class-RNAmodR-mod-type.R
+#' @include class-RNAmodR-ident.R
 NULL
 
-RNAMODR_M7G_NUCLEOTIDE <- "G"
-RNAMODR_M7G_ARREST_RATE <- 0.65
-RNAMODR_M7G_ARREST_RATE_INV <- 1 - RNAMODR_M7G_ARREST_RATE
-RNAMODR_M7G_Z_THRESHOLD <- 3
-RNAMODR_M7G_SIG_THRESHOLD <- 5
-
-
-#' @rdname RNAmodR-mod-class
+#' @rdname RNAmodR-ident-class
 #'
 #' @description 
-#' \code{mod_m7G}:
+#' \code{RNAmodRident_m7G}:
 #' 
 #' @export
-setClass("mod_m7G",
-         contains = "mod",
+setClass("RNAmodRident_m7G",
+         contains = "RNAmodRident",
          prototype = list(dataType = "5end",
-                          modType = "m7G",
-                          positionOffset = 1)
+                          modType = "m7G")
 )
 
-#' @rdname checkForModification
+#' @rdname identifyModificationPerTranscript
 #' 
 #' @description 
-#' \code{mod_m7G}
+#' \code{RNAmodRident_m7G}
 setMethod(
-  f = "checkForModification",
-  signature = signature(x = "mod_m7G",
+  f = "identifyModificationsPerTranscript",
+  signature = signature(x = "RNAmodRident_m7G",
                         location = "numeric",
                         locations = "numeric",
                         data = "list"),

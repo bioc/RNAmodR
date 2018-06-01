@@ -28,6 +28,66 @@ NULL
   res[!vapply(res, is.null, logical(1))]
 }
 
+# fix for arrangeGrob opening drawing device, where it should't
+.arrangeGrob.fixed <- function(...){
+  grDevices::pdf(file = NULL)
+  grid <- do.call(gridExtra::arrangeGrob, list(...))
+  grDevices::dev.off()
+  return(grid)
+}
+
+#input type checks
+.checkValueValidity <- function(value,
+                                checkValues,
+                                .xvalue = assertive::get_name_in_parent(value)){
+  if(!(value %in% checkValues)){
+    stop("'",.xvalue,
+         "' must be one of the following values: '",
+         paste(checkValues, collapse = "', '"),
+         "'.",
+         call. = FALSE)
+  }
+  return(invisible(TRUE))
+}
+.check_sample_conditions <- function(conditions){
+  .checkValueValidity(conditions,
+                      RNAMODR_SAMPLE_TYPES)
+}
+.check_for_mod_classes <- function(modifications){
+  modClasses <- .load_mod_classes(modifications)
+  .checkValueValidity(conditions,
+                      names(modClasses))
+}
+
+# check list members for class name
+.checkListForClass <- function(x,
+                               classname,
+                               checkFunction = FALSE,
+                               .xname = assertive::get_name_in_parent(x)){
+  check <- vapply(x,
+                  function(x){
+                    class(x) == classname
+                  },
+                  logical(1))
+  if(!all(check)){
+    stop("'",.xname,"' does contain elements, which are not of class '",
+         classname,
+         "'.",
+         call. = FALSE)
+  }
+  if(is.function(checkFunction)){
+    check <- vapply(x,
+                    checkFunction,
+                    logical(1))
+    if(!all(check)){
+      stop("'",.xname,"' does contain elements, which do not contain ",
+           "the required data.",
+           call. = FALSE)
+    }
+  }
+  return(invisible(TRUE))
+}
+
 
 # debug helper -----------------------------------------------------------------
 

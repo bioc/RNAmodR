@@ -1,0 +1,9 @@
+Identifier	Name		Value
+m3C		nucleotide	C
+m3C		data_type	Nplus1_5end
+m3C		arrest_rate	0.75
+m3C		Z_cutoff	3
+m3C		SIG_cutoff	5
+m3C		read_cutoff	1
+m3C		peak_cutoff	2
+m3C		window_size	150

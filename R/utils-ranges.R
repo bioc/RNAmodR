@@ -1,4 +1,4 @@
-#' @include class-RNAmodR-data-type.R
+#' @include class-RNAmodR-quant.R
 NULL
 
 # BiocGeneric helper functions -------------------------------------------------

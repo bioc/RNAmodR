@@ -1,33 +1,25 @@
-#' @include class-RNAmodR-mod-type.R
+#' @include class-RNAmodR-ident.R
 NULL
 
-RNAMODR_D_NUCLEOTIDE <- "T"
-RNAMODR_D_ARREST_RATE <- 0.6
-RNAMODR_D_ARREST_RATE_INV <- 1 - RNAMODR_D_ARREST_RATE
-RNAMODR_D_Z_THRESHOLD <- 3
-RNAMODR_D_SIG_THRESHOLD <- 5
-
-
-#' @rdname RNAmodR-mod-class
+#' @rdname RNAmodR-ident-class
 #'
 #' @description 
-#' \code{mod_D}:
+#' \code{RNAmodRident_D}:
 #' 
 #' @export
-setClass("mod_D",
-         contains = "mod",
+setClass("RNAmodRident_D",
+         contains = "RNAmodRident",
          prototype = list(dataType = "5end",
-                          modType = "D",
-                          positionOffset = 1)
+                          modType = "D")
 )
 
-#' @rdname checkForModification
+#' @rdname identifyModificationPerTranscript
 #' 
 #' @description 
-#' \code{mod_D}
+#' \code{RNAmodRident_D}
 setMethod(
-  f = "checkForModification",
-  signature = signature(x = "mod_D",
+  f = "identifyModificationsPerTranscript",
+  signature = signature(x = "RNAmodRident_D",
                         location = "numeric",
                         locations = "numeric",
                         data = "list"),

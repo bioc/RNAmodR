@@ -1,11 +1,11 @@
-#' @include class-RNAmodR-mod-type.R
-#' @include class-RNAmodR-data-type.R
+#' @include class-RNAmodR-ident.R
+#' @include class-RNAmodR-quant.R
 NULL
 
 RNAMODR_ALLENDS_COVERAGE_MIN <- 500
 RNAMODR_ALLENDS_AVR_COVERAGE_MIN <- 20
 
-#' @rdname RNAmodR-data-class
+#' @rdname RNAmodR-quant-class
 #'
 #' @description 
 #' \code{data_allends}: the class can be used for analyzing both the 5'-end 
@@ -17,31 +17,27 @@ RNAMODR_ALLENDS_AVR_COVERAGE_MIN <- 20
 #'
 #' @examples
 #' \donttest{
-#' ad <- new("data_allends")
+#' ad <- new("RNAmodRquant_allends")
 #' }
-setClass("data_allends",
-         contains = "data",
+setClass("RNAmodRquant_allends",
+         contains = "RNAmodRquant",
          prototype = list(plotType = "allends",
                           dataLabel = "mean(relative arrest rate)",
                           dataFormat = scales::percent))
 
 
-#' @rdname .getDataOfTranscript
-#'
-#' @param x an object for data class. 
-#' @param bamData a list of GAlignments objects. 
-#' @param counts total read count in bam file. 
-#' @param gff GRanges annotation data. 
-#'
-#' @return a named list
+#' @rdname quantifiyReadDataPerTranscript
+#' @export
 setMethod(
-  f = ".getDataOfTranscript",
-  signature = signature(x = "data_allends",
+  f = "quantifiyReadDataPerTranscript",
+  signature = signature(x = "RNAmodRquant_allends",
                         bamData = "GAlignments",
+                        args = "RNAmodRargs",
                         counts = "numeric",
                         gff = "GRanges"),
   definition = function(x,
                         bamData,
+                        args,
                         counts,
                         gff) {
     transcripts <- BiocParallel::bpmapply(

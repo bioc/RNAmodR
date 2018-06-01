@@ -1,0 +1,9 @@
+Identifier	Name		Value
+D		nucleotide	U
+D		data_type	Nplus1_5end
+D		arrest_rate	0.75
+D		Z_cutoff	3
+D		SIG_cutoff	5
+D		read_cutoff	1
+D		peak_cutoff	2
+D		window_size	150

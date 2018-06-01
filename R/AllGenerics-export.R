@@ -81,6 +81,30 @@ setGeneric(
   def = function(experimentName) standardGeneric("setupWorkEnvir")
 ) 
 
+# RNAModRargs ------------------------------------------------------------------
+
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
+  name = "getArgs",
+  def = function(x,
+                 identifier,
+                 param) standardGeneric("getArgs")
+)
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
+  name = "loadQuantifier",
+  def = function(x) standardGeneric("loadQuantifier")
+)
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
+  name = "loadIdentifier",
+  def = function(x) standardGeneric("loadIdentifier")
+)
+
+
 
 # experiment data---------------------------------------------------------------
 
@@ -91,33 +115,6 @@ setGeneric(
   def = function(.Object,
                  number) standardGeneric("getExperimentData")
 ) 
-
-
-#' @name getSummarizedExperiment
-#' @export
-setGeneric( 
-  name = "getSummarizedExperiment",
-  def = function(.Object,
-                 number) standardGeneric("getSummarizedExperiment")
-) 
-
-#' @rdname  getSummarizedExperiment
-#' @export
-setGeneric( 
-  name = "getSummarizedExperiments",
-  def = function(.Object,
-                 number) standardGeneric("getSummarizedExperiments")
-) 
-
-#' @name setSummarizedExperiment
-#' @export
-setGeneric( 
-  name = "setSummarizedExperiment",
-  def = function(.Object,
-                 se,
-                 number) standardGeneric("setSummarizedExperiment")
-) 
-
 #' @name getGffResult
 #' @export
 setGeneric( 
@@ -125,8 +122,7 @@ setGeneric(
   def = function(.Object,
                  number, 
                  genomicCoordinates = FALSE) standardGeneric("getGffResult")
-) 
-
+)
 #' @name setGffResult
 #' 
 #' @description setGff
@@ -139,87 +135,134 @@ setGeneric(
                  number) standardGeneric("setGffResult")
 ) 
 
+
+
+
 # parsing ----------------------------------------------------------------------
 
 #' @name parseForModifications
 #' @export
 setGeneric( 
   name = "parseForModifications",
-  def = function(.Object,
+  def = function(x,
                  number,
+                 param) standardGeneric("parseForModifications")
+) 
+#' @name parseForModifications
+#' @export
+setGeneric( 
+  name = "parseForModificationsWithArgs",
+  def = function(x,
                  name,
                  gff,
-                 fasta,
-                 files,
-                 conditions,
-                 mapQuality,
-                 modifications) standardGeneric("parseForModifications")
-) 
+                 fasta) standardGeneric("parseForModificationsWithArgs")
+)
 
-# analysis type accessors ------------------------------------------------------------
+# quantifier class accessors ---------------------------------------------------
 
-#' @name data-accessors
+#' @name RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getPlotType",
-  def = function(object) standardGeneric("getPlotType")
+  def = function(x) standardGeneric("getPlotType")
 ) 
 
-#' @rdname data-accessors
+#' @rdname RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getPositions",
-  def = function(object) standardGeneric("getPositions")
+  def = function(x) standardGeneric("getPositions")
 ) 
 
-#' @rdname data-accessors
+#' @rdname RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getModifications",
-  def = function(object) standardGeneric("getModifications")
+  def = function(x) standardGeneric("getModifications")
 ) 
 
-#' @rdname data-accessors
+#' @rdname RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getDataLabel",
-  def = function(object) standardGeneric("getDataLabel")
+  def = function(x) standardGeneric("getDataLabel")
 ) 
 
-#' @rdname data-accessors
+#' @rdname RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getDataFormat",
-  def = function(object) standardGeneric("getDataFormat")
+  def = function(x) standardGeneric("getDataFormat")
 ) 
 
-# mod type accessors -----------------------------------------------------------
+# quantifier -------------------------------------------------------------------
 
-#' @name mod-accessors
-#' @aliases getDataType getModType
-#' 
-#' @title accessors for \code{mod} class objects
-#' 
-#' @description 
-#' title 
-#' 
+#' @name quantifyReadData
+#' @export
+setGeneric( 
+  name = "quantifyReadData",
+  def = function(x,
+                 args,
+                 gff,
+                 param) standardGeneric("quantifyReadData")
+) 
+
+#' @name quantifiyReadDataPerTranscript
+#' @title Returns the data for each transcript
+setGeneric ( 
+  name = "quantifiyReadDataPerTranscript", 
+  def = function(x,
+                 bamData,
+                 args,
+                 counts,
+                 gff) standardGeneric("quantifiyReadDataPerTranscript")
+) 
+
+
+# ident class accessors --------------------------------------------------------
+
+#' @name RNAmodRident-accessors
 #' @export
 setGeneric( 
   name = "getModType",
-  def = function(object) standardGeneric("getModType")
+  def = function(x) standardGeneric("getModType")
 ) 
 #' @rdname mod-accessors
 #' @export
 setGeneric( 
   name = "getDataType",
-  def = function(object) standardGeneric("getDataType")
+  def = function(x) standardGeneric("getDataType")
 ) 
 #' @rdname mod-accessors
 #' @export
 setGeneric( 
   name = "getPositionOffset",
-  def = function(object) standardGeneric("getPositionOffset")
+  def = function(x) standardGeneric("getPositionOffset")
 ) 
+
+# identifier -------------------------------------------------------------------
+
+#' @name identifyModification
+#' @export
+setGeneric( 
+  name = "identifyModifications",
+  def = function(x,
+                 args,
+                 data,
+                 gff,
+                 fafile) standardGeneric("identifyModifications")
+) 
+
+#' @name identifyModificationPerTranscript
+#' @title Returns the data for each transcript
+setGeneric ( 
+  name = "identifyModificationsPerTranscript", 
+  def = function(x,
+                 location,
+                 locations,
+                 data) standardGeneric("identifyModificationsPerTranscript")
+) 
+
 
 
 # modification visualization ---------------------------------------------------

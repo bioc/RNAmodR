@@ -1,33 +1,25 @@
-#' @include class-RNAmodR-mod-type.R
+#' @include class-RNAmodR-ident.R
 NULL
 
-RNAMODR_M3C_NUCLEOTIDE <- "C"
-RNAMODR_M3C_ARREST_RATE <- 0.65
-RNAMODR_M3C_ARREST_RATE_INV <- 1 - RNAMODR_M3C_ARREST_RATE
-RNAMODR_M3C_Z_THRESHOLD <- 3
-RNAMODR_M3C_SIG_THRESHOLD <- 5
-
-
-#' @rdname RNAmodR-mod-class
+#' @rdname RNAmodR-ident-class
 #'
 #' @description 
-#' \code{mod_m3C}:
+#' \code{RNAmodRident_m3C}:
 #' 
 #' @export
-setClass("mod_m3C",
-         contains = "mod",
+setClass("RNAmodRident_m3C",
+         contains = "RNAmodRident",
          prototype = list(dataType = "5end",
-                          modType = "m3C",
-                          positionOffset = 1)
+                          modType = "m3C")
 )
 
-#' @rdname checkForModification
+#' @rdname identifyModificationPerTranscript
 #' 
 #' @description 
-#' \code{mod_m3C}
+#' \code{RNAmodRident_m3C}
 setMethod(
-  f = "checkForModification",
-  signature = signature(x = "mod_m3C",
+  f = "identifyModificationsPerTranscript",
+  signature = signature(x = "RNAmodRident_m3C",
                         location = "numeric",
                         locations = "numeric",
                         data = "list"),

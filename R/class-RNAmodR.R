@@ -1,3 +1,6 @@
+#' @include RNAmodR.R
+NULL
+
 #' @name RNAmodR-class
 #' 
 #' @title RNAmodR Class
@@ -50,7 +53,7 @@ setClass("RNAmodR",
            .outputFolder = "character",
            .mapQuality = "numeric"
          ),
-         prototype=list(
+         prototype = list(
            .dataSamples = S4Vectors::DataFrame(),
            .dataGFF = GenomicRanges::GRanges(),
            .wd = "",
@@ -190,21 +193,6 @@ setMethod(
   # check for valid condition types
   .check_sample_conditions(unique(samples$Conditions))
   return(samples)
-}
-
-.check_sample_conditions <- function(conditions){
-  if(!all(conditions %in% RNAMODR_SAMPLE_TYPES)){
-    stop("Not all condition types are valid. Valid types are:\n",
-         paste(RNAMODR_SAMPLE_TYPES, collapse = ","),
-         call. = FALSE)
-  }
-}
-.check_for_mod_classes <- function(modifications){
-  modClasses <- .load_mod_classes(modifications)
-  if(!all(modifications %in% names(modClasses))){
-    stop("Not all modification types are valid. Valid types are.",
-         call. = FALSE)
-  }
 }
 
 # matches the names in fasta file to the chromosome identifier in the GFF file

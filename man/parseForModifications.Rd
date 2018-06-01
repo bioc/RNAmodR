@@ -3,23 +3,23 @@
 \docType{methods}
 \name{parseForModifications}
 \alias{parseForModifications}
-\alias{parseForModifications,RNAmodR,numeric,missing,missing,missing,missing,missing,missing,missing-method}
-\alias{parseForModifications,missing,missing,character,GRanges,FaFile,character,character,numeric,character-method}
+\alias{parseForModifications}
+\alias{parseForModifications,RNAmodR,numeric,character-method}
+\alias{parseForModificationsWithArgs,RNAmodRargs,character,GRanges,FaFile-method}
 \title{parseForModifications}
 \usage{
-parseForModifications(.Object, number, name, gff, fasta, files, conditions,
-  mapQuality, modifications)
+parseForModifications(x, number, param)
+
+parseForModificationsWithArgs(x, name, gff, fasta)
+
+\S4method{parseForModifications}{RNAmodR,numeric,character}(x, number, param)
 
 
-  \S4method{parseForModifications}{RNAmodR,numeric,missing,missing,missing,missing,missing,missing,missing}(.Object,
-  number)
-
-
-  \S4method{parseForModifications}{missing,missing,character,GRanges,FaFile,character,character,numeric,character}(name,
-  gff, fasta, files, conditions, mapQuality, modifications)
+  \S4method{parseForModificationsWithArgs}{RNAmodRargs,character,GRanges,FaFile}(x,
+  name, gff, fasta)
 }
 \arguments{
-\item{.Object}{a RNAmod object.}
+\item{x}{a RNAmod object.}
 
 \item{number}{a number defining an experiment.}
 
@@ -29,11 +29,11 @@ parseForModifications(.Object, number, name, gff, fasta, files, conditions,
 
 \item{fasta}{a fasta file name}
 
+\item{args}{arguments for modification parsing as an RNAmodRargs object}
+
 \item{files}{file names for the bam input files}
 
-\item{mapQuality}{mapping quality threshold for reading the bam input files}
-
-\item{modifications}{name of modification to be used for analysis.}
+\item{conditions}{treated or control}
 }
 \value{
 TRUE if the analysis does finish without error
