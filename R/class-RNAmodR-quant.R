@@ -29,15 +29,10 @@ NULL
 #' @export
 setClass("RNAmodRquant",
          contains = "VIRTUAL",
-         slots = c(dataLabel = "character",
-                   dataFormat = "function",
-                   plotType = "character",
-                   data = "list",
-                   conditions = "character",
-                   modifications = "list"),
-         prototype = list(data = list(),
-                          conditions = c(),
-                          modifications = list())
+         slots = c(dataType = "character",
+                   dataLabel = "character",
+                   dataFormat = "function"),
+         prototype = list(args = list())
 )
 #' @rdname RNAmodR-data-class
 #' @param object a RNAmodR data object. 
@@ -46,7 +41,10 @@ setMethod(
   f = "show", 
   signature = signature(object = "RNAmodRquant"),
   definition = function(object) {
-    NULL
+    cat(paste0(class(object), " object:"))
+    cat(paste0("# Data type: ", object@dataType))
+    cat(paste0("# Data label: ", object@dataLabel))
+    cat(paste0("# Data format: ", structure(object@dataFormat)))
   }
 )
 
@@ -175,10 +173,12 @@ setMethod(
   signature = signature(x = "RNAmodRquant",
                         args = "RNAmodRargs",
                         gff = "GRanges",
+                        fafile = "FaFile",
                         param = "ScanBamParam"),
   definition = function(x,
                         args,
                         gff,
+                        fafile,
                         param) {
     # detect modifications in each file
     data <- lapply(getInputFiles(args),
@@ -186,8 +186,8 @@ setMethod(
                    x,
                    args,
                    gff,
+                   fafile,
                    param)
-    names(data) <- getConditions(args)
     data <- data[!is.null(data)]
     if(length(data) == 0){
       stop("No reads detected in any bam file :\n",
@@ -196,12 +196,10 @@ setMethod(
     }
     # Process only genes found in all treated datasets
     IDs <- lapply(data,names)
-    IDs <- IDs[names(IDs) == "Treated"]
     IDs <- Reduce(intersect, IDs)
     res <- lapply(IDs,
                   FUN = .subset_to_intersecting_transcripts,
-                  data = data,
-                  conditions = names(data))
+                  data = data)
     names(res) <- IDs
     res <- res[!vapply(res,is.null,logical(1))]
     # attach some attributes?
@@ -215,6 +213,7 @@ setMethod(
                                          quant,
                                          args,
                                          gff,
+                                         fafile,
                                          param){
   # load the bamfile
   bamData <- GenomicAlignments::readGAlignments(bamFile,
@@ -241,6 +240,9 @@ setMethod(
             "'")
     return(NULL)
   }
+  
+  # bamData <- bamData[names(bamData) %in% c("tY(GTA)A")]
+  
   # get data for transcript. this is analysis specific. each list entry must 
   # have aggregated read end position data and coverage data: 
   # list(data = ..., coverage = ...)
@@ -248,7 +250,8 @@ setMethod(
                                                 bamData,
                                                 args,
                                                 totalCounts,
-                                                gff)
+                                                gff,
+                                                fafile)
   # remove entries for transcript for which position data is sufficient
   transcripts <- transcripts[!vapply(transcripts, is.null, logical(1))]
   if(length(transcripts) == 0) return(NULL)
@@ -258,11 +261,10 @@ setMethod(
 # returns the position data for analysis as a list of data per replicate for
 # individual transcript
 .subset_to_intersecting_transcripts <- function(ID,
-                                                data,
-                                                conditions){
+                                                data){
   res <- lapply(data,"[[",ID)
   res <- res[!vapply(res,is.null,logical(1))]
-  return(res)
+  return(GRangesList(res))
 }
 
 #' @rdname quantifiyReadDataPerTranscript

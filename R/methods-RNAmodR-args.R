@@ -5,12 +5,39 @@ NULL
 #' @rdname RNAmodR-args-class
 #'
 #' @param x a RNAmodRargs class object
+#'
+#' @return a list of input files
+#' @export
+setMethod(
+  f = "getInputFiles",
+  signature = signature(x = "RNAmodRargs"),
+  definition = function(x){
+    return(x@files)
+  }
+)
+#' @rdname RNAmodR-args-class
+#'
+#' @param x a RNAmodRargs class object
+#'
+#' @return the conditions of each input file. Either "Control" or "Treated"
+#' @export
+setMethod(
+  f = "getConditions",
+  signature = signature(x = "RNAmodRargs"),
+  definition = function(x){
+    return(x@conditions)
+  }
+)
+
+#' @rdname RNAmodR-args-class
+#'
+#' @param x a RNAmodRargs class object
 #' @param identifier an optional identifier for subsetting the arguments
 #'
 #' @return a data.frame with the selected arguments
 #' @export
 setMethod(
-  f = "getArgs",
+  f = "getParam",
   signature = signature(x = "RNAmodRargs"),
   definition = function(x,
                         identifier,
@@ -51,8 +78,41 @@ setMethod(
   f = "loadQuantifier",
   signature = signature(x = "RNAmodRargs"),
   definition = function(x){
-    quantifier <- unique(getArgs(x, param = "data_type"))
-    
+    quantifier <- unique(getParam(x, param = "data_type"))
+    quantifierClasses <- 
+      lapply(quantifier,
+             function(quant){
+               className <- paste0("RNAmodRquant_",quant)
+               # try to create modification detection classes
+               tryCatch(
+                 class <- new(className),
+                 error = function(e) stop("Class for gathering '",
+                                          quant,
+                                          "' data does not exist (",
+                                          className,
+                                          ").",
+                                          call. = FALSE)
+               )
+               # if( !existsMethod("convertReadsToPositions",signature(class(class),
+               #                                                       "numeric",
+               #                                                       "GRanges",
+               #                                                       "DataFrame") ) )
+               #   stop("Function convertReadsToPositions() not defined for ",class(class))
+               # if( !existsMethod("parseMod",signature(class(class),
+               #                                        "GRanges",
+               #                                        "FaFile",
+               #                                        "list") ) )
+               #   stop("Function parseMod() not defined for ",class(class))
+               # if( !existsMethod("mergePositionsOfReplicates",signature(class(class),
+               #                                                          "GRanges",
+               #                                                          "FaFile",
+               #                                                          "list") ) )
+               #   stop("Function mergePositionsOfReplicates() not defined for ",
+               #        class(class))
+               
+             })
+    names(quantifierClasses) <- quantifier
+    return(quantifierClasses)
   }
 )
 
@@ -67,39 +127,47 @@ setMethod(
   signature = signature(x = "RNAmodRargs"),
   definition = function(x){
     # get modifictions
-    modifications <- unique(x@args$Identifier)
+    identifier <- unique(x@args$Identifier)
     #
-    modClasses <- vector(mode = "list", length = length(modifications))
-    for(i in seq_along(modifications)){
-      className <- paste0("mod_",modifications[[i]])
-      # try to create modification detection classes
-      tryCatch(
-        class <- new(className),
-        error = function(e) stop("Class for detecting ",
-                                 modifications[[i]],
-                                 " does not exist (",className,").",
-                                 call. = FALSE)
-      )
-      # if( !existsMethod("convertReadsToPositions",signature(class(class),
-      #                                                       "numeric",
-      #                                                       "GRanges",
-      #                                                       "DataFrame") ) )
-      #   stop("Function convertReadsToPositions() not defined for ",class(class))
-      # if( !existsMethod("parseMod",signature(class(class),
-      #                                        "GRanges",
-      #                                        "FaFile",
-      #                                        "list") ) )
-      #   stop("Function parseMod() not defined for ",class(class))
-      # if( !existsMethod("mergePositionsOfReplicates",signature(class(class),
-      #                                                          "GRanges",
-      #                                                          "FaFile",
-      #                                                          "list") ) )
-      #   stop("Function mergePositionsOfReplicates() not defined for ",
-      #        class(class))
-      modClasses[[i]] <- class
-    }
-    names(modClasses) <- modifications
-    return(modClasses)
+    identifierClasses <- 
+      lapply(identifier,
+             function(ident){
+               className <- paste0("RNAmodRident_",ident)
+               params <- getParam(x,
+                                  identifier = ident)
+               param <- params$Value
+               names(param) <- params$Param
+               # try to create modification detection classes
+               tryCatch(
+                 class <- new(className,
+                              param),
+                 error = function(e) stop("Class for detecting ",
+                                          ident,
+                                          " modification does not exist (",
+                                          className,
+                                          ").",
+                                          call. = FALSE)
+               )
+               # if( !existsMethod("convertReadsToPositions",signature(class(class),
+               #                                                       "numeric",
+               #                                                       "GRanges",
+               #                                                       "DataFrame") ) )
+               #   stop("Function convertReadsToPositions() not defined for ",class(class))
+               # if( !existsMethod("parseMod",signature(class(class),
+               #                                        "GRanges",
+               #                                        "FaFile",
+               #                                        "list") ) )
+               #   stop("Function parseMod() not defined for ",class(class))
+               # if( !existsMethod("mergePositionsOfReplicates",signature(class(class),
+               #                                                          "GRanges",
+               #                                                          "FaFile",
+               #                                                          "list") ) )
+               #   stop("Function mergePositionsOfReplicates() not defined for ",
+               #        class(class))
+               
+             })
+    names(identifierClasses) <- identifier
+    return(identifierClasses)
     
   }
 )

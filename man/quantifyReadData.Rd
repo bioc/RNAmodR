@@ -3,13 +3,14 @@
 \docType{methods}
 \name{quantifyReadData}
 \alias{quantifyReadData}
-\alias{quantifyReadData,RNAmodRquant,RNAmodRargs,GRanges,ScanBamParam-method}
+\alias{quantifyReadData,RNAmodRquant,RNAmodRargs,GRanges,FaFile,ScanBamParam-method}
 \title{Convert reads to data for search for modifications}
 \usage{
-quantifyReadData(x, args, gff, param)
+quantifyReadData(x, args, gff, fafile, param)
 
-\S4method{quantifyReadData}{RNAmodRquant,RNAmodRargs,GRanges,ScanBamParam}(x,
-  args, gff, param)
+
+  \S4method{quantifyReadData}{RNAmodRquant,RNAmodRargs,GRanges,FaFile,ScanBamParam}(x,
+  args, gff, fafile, param)
 }
 \arguments{
 \item{x}{RNAmodRquant object}

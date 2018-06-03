@@ -114,7 +114,8 @@ setMethod(
     requireNamespace("rtracklayer", quietly = TRUE)
     # Save data to slots
     .Object@experimentName <- experimentName
-    .Object@.wd <- paste0("./", .Object@experimentName, "/")
+    # .Object@.wd <- paste0("./", .Object@experimentName, "/")
+    .Object@.wd <- paste0("./")
     
     .Object@inputFile <- paste0(.Object@.wd, 
                                 .Object@.inputFolder, 
@@ -184,12 +185,6 @@ setMethod(
   assertive::assert_all_are_positive(samples$Replicate)
   assertive::assert_all_are_whole_numbers(samples$Replicate)
   assertive::assert_all_are_existing_files(paste0(inputFolder,samples$BamFile))
-  assertive::assert_all_are_whole_numbers(samples$MapQuality)
-  # check modifications
-  samples$Modifications <- lapply(samples$Modifications,
-                                  function(str){str_split(str, ",")})
-  modifications <- unique(unlist(samples$Modifications))
-  .check_for_mod_classes(modifications)
   # check for valid condition types
   .check_sample_conditions(unique(samples$Conditions))
   return(samples)
@@ -239,6 +234,23 @@ setMethod(
   f = "show",
   signature = signature(object = "RNAmodR"),
   definition = function(object) {
-    print("test")
+    
+    printLine <- function(...){
+      lines <- list(...)
+      lapply(lines, function(line){cat(paste0("# ",line, "\n"))})
+    }
+    
+    printLine(paste0("Experiment name: ",object@experimentName))
+    printLine(paste0("Experiment layout file: ",object@inputFile))
+    printLine(paste0("GFF annotation file: ",object@inputGFF))
+    printLine(paste0("Fasta genome sequence file: ",object@inputFasta))
+    
+    printLine(paste0("Number of samples: ",length(getExperimentData(object)$ExperimentNo) ))
+    apply(getExperimentData(object), 1, function(exp){
+      printLine(paste0("Sample name ",
+                       exp["ExperimentNo"],": ",
+                       exp["SampleName"]))
+    })
+    printLine("Replicates are not listed individually.")
   }
 )

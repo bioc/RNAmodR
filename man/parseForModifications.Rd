@@ -6,7 +6,25 @@
 \alias{parseForModifications}
 \alias{parseForModifications,RNAmodR,numeric,character-method}
 \alias{parseForModificationsWithArgs,RNAmodRargs,character,GRanges,FaFile-method}
-\title{parseForModifications}
+\title{#' @name getGffResult
+#' @export
+setGeneric( 
+  name = "getGffResult",
+  def = function(.Object,
+                 number, 
+                 genomicCoordinates = FALSE) standardGeneric("getGffResult")
+)
+#' @name setGffResult
+#' 
+#' @description setGff
+#' 
+#' @export
+setGeneric( 
+  name = "setGffResult",
+  def = function(.Object,
+                 gff,
+                 number) standardGeneric("setGffResult")
+)}
 \usage{
 parseForModifications(x, number, param)
 
@@ -39,6 +57,26 @@ parseForModificationsWithArgs(x, name, gff, fasta)
 TRUE if the analysis does finish without error
 }
 \description{
+#' @name getGffResult
+#' @export
+setGeneric( 
+  name = "getGffResult",
+  def = function(.Object,
+                 number, 
+                 genomicCoordinates = FALSE) standardGeneric("getGffResult")
+)
+#' @name setGffResult
+#' 
+#' @description setGff
+#' 
+#' @export
+setGeneric( 
+  name = "setGffResult",
+  def = function(.Object,
+                 gff,
+                 number) standardGeneric("setGffResult")
+)
+
 \code{parseForModifications} uses the input information from GRanges, Fafile
 and bam input files to look for known patterns of RNA post-transcriptional
 modifications.

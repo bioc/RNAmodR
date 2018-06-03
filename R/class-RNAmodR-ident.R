@@ -18,20 +18,21 @@ setClass("RNAmodRident",
          contains = "VIRTUAL",
          slots = c(dataType = "character",
                    modType = "character",
-                   args = "numeric")
+                   param = "list"),
+         prototype = list(args = list())
 )
-
-
-
-
-
-
-
-
-
-
-
-
+setMethod(
+  f = "initialize", 
+  signature = signature(.Object = "RNAmodRident"),
+  definition = function(.Object, 
+                        param) {
+    param <- as.list(param)
+    param[vapply(param, assertive::is_numeric_string, logical(1))] <-
+      as.numeric(param[vapply(param, assertive::is_numeric_string, logical(1))])
+    .Object@param <- param
+    return(.Object)
+  }
+)
 #' @rdname RNAmodR-ident-class
 #'
 #' @param object a RNAmodRident class object 
@@ -41,7 +42,9 @@ setMethod(
   f = "show", 
   signature = signature(object = "RNAmodRident"),
   definition = function(object) {
-    NULL
+    print(paste0("# Data type: ", object@dataType))
+    print(paste0("# Modification type: ", object@modType))
+    print(paste0("# Arguments: ", object@args))
   }
 )
 
@@ -136,50 +139,133 @@ setMethod(
   }
 )
 
+#' @rdname scoreModifications
+#' 
+#' @description 
+#' title
+#' 
+#' @param x a RNAmodRident object
+#' @param data the aggregated read data per file and per transcript
+#' @param args a RNAmodRargs object 
+#' 
+#' @return the result
+setMethod(
+  f = "scoreModifications",
+  signature = signature(x = "RNAmodRident",
+                        data = "list",
+                        args = "RNAmodRargs"),
+  definition = function(x,
+                        data,
+                        args) {
+    # Input check
+    nucleotide <- getParam(args,
+                           getModType(x),
+                           "nucleotide")
+    if(!(nucleotide %in% names(IUPAC_CODE_MAP))){
+      stop("Invalid nucleotide '",nucleotide,"'. Valid codes are IUPAC ",
+           "conform: ",
+           paste(names(IUPAC_CODE_MAP), collapse = ", "),
+           ".",
+           call. = FALSE)
+    }
+    # detect modification per transcript
+    res <- mapply(
+    # res <- BiocParallel::bpmapply(
+      FUN = .score_mod_in_transcript,
+      names(data),
+      data,
+      MoreArgs = list(ident = x,
+                      args = args),
+      SIMPLIFY = FALSE)
+    browser()
+    names(res) <- names(object@data)
+    res <- res[!vapply(res, is.null, logical(1))]
+    # If not results are present return NA instead of NULL
+    if(is.null(res)){
+      res <- NA
+    }
+    return(res)
+  }
+)
+
+# detect and merge modification positions in one transcript
+.score_mod_in_transcript <- function(ID,
+                                     data,
+                                     ident,
+                                     args){
+  # debug
+  if( getOption("RNAmodR_debug") ){
+    message(ID)
+  }
+  # get locations which match the nucleotide preference
+  nucleotide <- getParam(args,
+                         getModType(ident),
+                         "nucleotide")
+  nucleotide <- IUPAC_CODE_MAP[names(IUPAC_CODE_MAP) == nucleotide]
+  nucleotide <- substring(nucleotide, 1:nchar(nucleotide), 1:nchar(nucleotide))
+  locations <- unique(unlist(lapply(data, 
+                             function(d){
+    pos(d[mcols(d)$nucleotide %in% nucleotide])
+  })))
+  locations <- locations[order(locations)]
+  endLocation <- max(locations)
+  # analyze the transcript
+  # Retrieve scores for positions
+  scores <- scoreModificationsPerTranscript(ident,
+                                            locations = locations,
+                                            data = data,
+                                            args = args,
+                                            endLocation = endLocation)
+  # name the locations based on sequence position
+  mcols(scores)$ID <- ID 
+  mcols(scores)$ModID <- paste0(ID,
+                                "_",
+                                as.character(mcols(scores)$nucleotide),
+                                "_",
+                                pos(scores))
+  return(scores)
+}
+
+#' @rdname scoreModificationsPerTranscript
+#'
+#' @param x a RNAmodRident object. 
+#' @param location current location to be analyzed
+#' @param data a GRangesList of GPos objects
+#' @param args a RNAmodRargs object
+#' @param endLocation end position of the transcript
+#'
+#' @return the data input list with calculated scores
+NULL
+
+
+
 #' @rdname identifyModifications
 #' 
 #' @description 
 #' title
 #' 
 #' @param x a RNAmodRident object
-#'
+#' @param data the aggregated read data per file and per transcript
 #' @param args a RNAmodRargs object 
-#' @param data the qaggregated read data per file and per transcript
-#' @param gff the gene annotation
-#' @param fafile the genomic sequence file 
 #' 
 #' @return the result
-#' 
-#' @importFrom stringr str_locate_all
 setMethod(
   f = "identifyModifications",
   signature = signature(x = "RNAmodRident",
-                        args = "RNAmodRargs",
-                        data = "GRangesList",
-                        gff = "GRanges",
-                        fafile = "FaFile"),
+                        data = "list",
+                        args = "RNAmodRargs"),
   definition = function(x,
-                        args,
                         data,
-                        gff,
-                        fafile) {
-    
-    # get sequence of transcript and subset gff for single transcript data
-    grl <- .subset_gff_for_unique_transcript(gff, ID)
-    # get the genomic sequences
-    seqs <- .get_seq_for_unique_transcript(gr,fafile,ID)
-    # get transcript sequence by removing intron sequences
-    seqs <- .get_transcript_sequence(gff,gr$ID,seq)
-    
+                        args) {
+    browser()
     # detect modification per transcript
-    # res <- mapply(
-    res <- BiocParallel::bpmapply(
+    res <- mapply(
+      # res <- BiocParallel::bpmapply(
       FUN = .identify_mod_in_transcript,
-      names(object@data),
-      object@data,
-      grl,
-      seqs,
-      MoreArgs = list(args = args),
+      names(data),
+      data,
+      MoreArgs = list(ident = x,
+                      args = args),
       SIMPLIFY = FALSE)
     names(res) <- names(object@data)
     res <- res[!vapply(res, is.null, logical(1))]
@@ -194,66 +280,24 @@ setMethod(
 # detect and merge modification positions in one transcript
 .identify_mod_in_transcript <- function(ID,
                                         data,
-                                        gr,
-                                        seq,
+                                        ident,
                                         args){
   # debug
   if( getOption("RNAmodR_debug") ){
     message(ID)
   }
-  # generate a location vector
-  locations <- 1:length(seq)
-  names(locations) <- seq
-  # analyze the transcript
-  # Retrieve modifications positions
-  modifications <- lapply(locations,
-                          .check_for_modification,
-                          modClasses,
-                          data,
-                          locations)
-  # name the locations based on sequence position
-  names(modifications) <- paste0(ID,
-                                 "_",
-                                 names(locations),
-                                 "_",
-                                 locations)
-  modifications <- modifications[!vapply(modifications,is.null,logical(1))]
-  if(is.null(modifications) || length(modifications) == 0) return(NULL)
-  modifications <- modifications[order(as.numeric(unlist(lapply(modifications, 
-                                                                "[[", 
-                                                                "location"))))]
+  # identify modifications based on scores
+  modifications <- identifyModificationsPerTranscript(ident,
+                                                      data = data,
+                                                      args = args)
   return(modifications)
 }
 
-# check for modifications at given position
-.check_for_modification <- function(location, 
-                                    modClasses,
-                                    data,
-                                    locations){
-  res <- lapply(modClasses, function(class){
-    return(checkForModification(class,
-                                location = location,
-                                locations = locations,
-                                data = data))
-  })
-  res <- res[!vapply(res, is.null, logical(1))]
-  if(length(res) != 1) return(NULL)
-  # Return data
-  return(list(location = location,
-              type = res[[1]]$type,
-              signal = res[[1]]$signal,
-              signal.sd = res[[1]]$signal.sd,
-              z = res[[1]]$z,
-              nbsamples = res[[1]]$nbsamples))
-}
-
-
-#' @rdname identifyModificationPerTranscript
+#' @rdname identifyModificationsPerTranscript
 #'
 #' @param x a RNAmodRident object. 
-#' @param bamData a list of GAlignments objects. 
-#' @param counts total read count in bam file. 
-#' @param gff GRanges annotation data. 
+#' @param data a GRangesList of GPos objects
+#' @param args a RNAmodRargs object
 #'
-#' @return a named list
+#' @return a subset of input data, which pass the thresholds set
 NULL

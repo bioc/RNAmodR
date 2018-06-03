@@ -41,6 +41,7 @@ Collate:
     'utils-modifications.R'
     'utils-options.R'
     'utils-plot.R'
+    'utils-quant.R'
     'utils-ranges.R'
     'utils-sequences.R'
     'utils-statistics.R'
@@ -60,7 +61,6 @@ Imports:
   GenomicRanges,
   GenomicFeatures,
   GenomicAlignments,
-  GenomicScores,
   IRanges,
   SummarizedExperiment,
   GenomeInfoDb,

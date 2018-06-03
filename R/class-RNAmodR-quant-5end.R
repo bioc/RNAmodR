@@ -2,9 +2,6 @@
 #' @include class-RNAmodR-quant.R
 NULL
 
-RNAMODR_5END_COVERAGE_MIN <- 50
-RNAMODR_5END_AVR_COVERAGE_MIN <- 10
-
 #' @rdname RNAmodR-quant-class
 #'
 #' @description 
@@ -21,7 +18,7 @@ RNAMODR_5END_AVR_COVERAGE_MIN <- 10
 #' }
 setClass("RNAmodRquant_5end",
          contains = "RNAmodRquant",
-         prototype = list(plotType = "5end",
+         prototype = list(dataType = "5end",
                           dataLabel = "mean(relative arrest rate)",
                           dataFormat = scales::percent))
 
@@ -30,26 +27,29 @@ setClass("RNAmodRquant_5end",
 setMethod(
   f = "quantifiyReadDataPerTranscript",
   signature = signature(x = "RNAmodRquant_5end",
-                        bamData = "GAlignments",
+                        bamData = "GAlignmentsList",
                         args = "RNAmodRargs",
                         counts = "numeric",
-                        gff = "GRanges"),
+                        gff = "GRanges",
+                        fafile = "FaFile"),
   definition = function(x,
                         bamData,
                         args,
                         counts,
-                        gff) {
-    # transcripts <- mapply(
-    transcripts <- BiocParallel::bpmapply(
+                        gff,
+                        fafile) {
+    transcriptPos <- mapply(
+    # transcriptPos <- BiocParallel::bpmapply(
       FUN = .get_position_data_of_transcript_5end,
       bamData,
       names(bamData),
       MoreArgs = list(args,
-                      totalCounts,
-                      gff),
+                      counts,
+                      gff,
+                      fafile),
       SIMPLIFY = FALSE)
-    names(transcripts) <- names(bamData)
-    return(transcripts)
+    names(transcriptPos) <- names(bamData)
+    return(transcriptPos)
   }
 )
 # For each transcript get positional data
@@ -58,7 +58,8 @@ setMethod(
                                                   id,
                                                   args,
                                                   counts,
-                                                  gff){
+                                                  gff,
+                                                  fafile){
   # debug
   if( getOption("RNAmodR_debug") ){
     message(id)
@@ -68,37 +69,32 @@ setMethod(
   # get ID and GRanges
   gr <- .subset_gff_for_unique_transcript(gff, 
                                           id)
-  # get a list of introns and the position which are void
-  posToBeRemoved <- .get_intron_positions(gff,
-                                          gr$ID)
+  # get the genomic sequences
+  seq <- .get_seq_for_unique_transcript(gr,fafile)
   # move position based on strand
   data <- data[.is_on_correct_strand(data,.get_unique_strand(gr))]
   # discard reads out of boundaries
   data <- data[BiocGenerics::end(data) <= BiocGenerics::end(gr),]
   data <- data[BiocGenerics::start(data) >= BiocGenerics::start(gr),]
   # create result GRanges object
-  resgr <- .create_per_position_grange(gr)
-  resgr <- .save_5end_counts_to_gr(resgr,
-                                   data)
-  resgr <- .keep_non_intron_positions(resgr,
-                                      gff)
-  return(resgr)
+  respos <- .create_per_position_grange(gr,
+                                        seq)
+  respos <- .save_5end_counts_to_gpos(respos,
+                                       data)
+  respos <- .keep_non_intron_positions(respos,
+                                       gff,
+                                       gr$ID)
+  return(respos)
 }
 
-.create_per_position_grange <- function(gr){
-  
+.save_5end_counts_to_gpos <- function(gpos,
+                                      data){
+  t <- table(start(data))
+  t <- as.data.frame(t)
+  colnames(t) <- c("pos","value")
+  gpos[pos(gpos) %in% t$pos]$counts <- t$value
+  return(gpos)
 }
-
-.save_5end_counts_to_gr <- function(gr,
-                                    data){
-  
-}
-
-.keep_non_intron_positions <- function(gr,
-                                       gff){
-  
-}
-
 
 # .calc_relative_stop_data <- function(stopsData,
 #                                      coverage){

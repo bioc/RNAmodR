@@ -4,17 +4,17 @@
 \docType{methods}
 \name{quantifiyReadDataPerTranscript}
 \alias{quantifiyReadDataPerTranscript}
-\alias{quantifiyReadDataPerTranscript,RNAmodRquant_5end,GAlignments,RNAmodRargs,numeric,GRanges-method}
-\alias{quantifiyReadDataPerTranscript,RNAmodRquant_allends,GAlignments,RNAmodRargs,numeric,GRanges-method}
+\alias{quantifiyReadDataPerTranscript,RNAmodRquant_5end,GAlignmentsList,RNAmodRargs,numeric,GRanges,FaFile-method}
+\alias{quantifiyReadDataPerTranscript,RNAmodRquant_allends,GAlignmentsList,RNAmodRargs,numeric,GRanges,FaFile-method}
 \title{Returns the data for each transcript}
 \usage{
-quantifiyReadDataPerTranscript(x, bamData, args, counts, gff)
+quantifiyReadDataPerTranscript(x, bamData, args, counts, gff, fafile)
 
 
-  \S4method{quantifiyReadDataPerTranscript}{RNAmodRquant_5end,GAlignments,RNAmodRargs,numeric,GRanges}(x,
-  bamData, args, counts, gff)
+  \S4method{quantifiyReadDataPerTranscript}{RNAmodRquant_5end,GAlignmentsList,RNAmodRargs,numeric,GRanges,FaFile}(x,
+  bamData, args, counts, gff, fafile)
 
 
-  \S4method{quantifiyReadDataPerTranscript}{RNAmodRquant_allends,GAlignments,RNAmodRargs,numeric,GRanges}(x,
-  bamData, args, counts, gff)
+  \S4method{quantifiyReadDataPerTranscript}{RNAmodRquant_allends,GAlignmentsList,RNAmodRargs,numeric,GRanges,FaFile}(x,
+  bamData, args, counts, gff, fafile)
 }

@@ -18,15 +18,17 @@ setClass("RNAmodRident_m3C",
 #' @description 
 #' \code{RNAmodRident_m3C}
 setMethod(
-  f = "identifyModificationsPerTranscript",
+  f = "scoreModificationsPerTranscript",
   signature = signature(x = "RNAmodRident_m3C",
-                        location = "numeric",
                         locations = "numeric",
-                        data = "list"),
+                        data = "GRangesList",
+                        args = "RNAmodRargs",
+                        endLocation = "numeric"),
   definition = function(x,
-                        location,
                         locations,
-                        data) {
+                        data,
+                        args,
+                        endLocation) {
     # get test result for the current location
     locTest <- .calc_M3C_test_values(location,
                                      locations,
@@ -207,3 +209,24 @@ setMethod(
      (sig > sig.threshold &&
         !.get_use_p()))
 }
+
+#' @rdname identifyModificationsPerTranscript
+#' 
+#' @description 
+#' \code{RNAmodRident_m3C}
+#' 
+#' @export
+setMethod(
+  f = "identifyModificationsPerTranscript",
+  signature = signature(x = "RNAmodRident_m3C",
+                        data = "GRangesList",
+                        args = "RNAmodRargs"),
+  definition = function(x,
+                        data,
+                        args) {
+    browser()
+    
+    
+    return(return(gpos))
+  }
+)

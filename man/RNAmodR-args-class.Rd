@@ -2,19 +2,27 @@
 % Please edit documentation in R/AllGenerics-export.R, R/class-RNAmodR-args.R,
 %   R/methods-RNAmodR-args.R
 \docType{class}
-\name{getArgs}
-\alias{getArgs}
+\name{getInputFiles}
+\alias{getInputFiles}
+\alias{getConditions}
+\alias{getParam}
 \alias{loadQuantifier}
 \alias{loadIdentifier}
 \alias{RNAmodR-args-class}
 \alias{RNAmodRargs-class}
 \alias{RNAmodRargs}
-\alias{getArgs,RNAmodRargs-method}
+\alias{getInputFiles,RNAmodRargs-method}
+\alias{getConditions,RNAmodRargs-method}
+\alias{getParam,RNAmodRargs-method}
 \alias{loadQuantifier,RNAmodRargs-method}
 \alias{loadIdentifier,RNAmodRargs-method}
 \title{RNAmodR arguments class}
 \usage{
-getArgs(x, identifier, param)
+getInputFiles(x)
+
+getConditions(x)
+
+getParam(x, identifier, param)
 
 loadQuantifier(x)
 
@@ -22,7 +30,11 @@ loadIdentifier(x)
 
 RNAmodRargs(param, files, conditions)
 
-\S4method{getArgs}{RNAmodRargs}(x, identifier, param)
+\S4method{getInputFiles}{RNAmodRargs}(x)
+
+\S4method{getConditions}{RNAmodRargs}(x)
+
+\S4method{getParam}{RNAmodRargs}(x, identifier, param)
 
 \S4method{loadQuantifier}{RNAmodRargs}(x)
 
@@ -36,9 +48,17 @@ RNAmodRargs(param, files, conditions)
 \item{x}{a RNAmodRargs class object}
 
 \item{x}{a RNAmodRargs class object}
+
+\item{x}{a RNAmodRargs class object}
+
+\item{x}{a RNAmodRargs class object}
 }
 \value{
 a RNAmodRargs object
+
+a list of input files
+
+the conditions of each input file. Either "Control" or "Treated"
 
 a data.frame with the selected arguments
 

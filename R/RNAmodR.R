@@ -28,7 +28,6 @@ requireNamespace("rtracklayer")
 requireNamespace("GenomicRanges")
 requireNamespace("GenomicFeatures")
 requireNamespace("GenomicAlignments")
-requireNamespace("GenomicScores")
 requireNamespace("assertive")
 
 # RNAMODR_GFF_FEATURE_TYPES <- c("gene",
@@ -81,6 +80,10 @@ RNAMODR_MOD_TRANSCRIPT_FEATURES <- c("gene",
                                      "three_prime_UTR_intron")
 
 # Import constants -------------------------------------------------------------
+RNAMODR_MIN_MAPQUALITY <- 5
+RNAMODR_PARAM_COL <- c("Identifier",
+                       "Param",
+                       "Value")
 RNAMODR_SAMPLE_TYPES <- c("Treated",
                           "Control")
 RNAMODR_DEFAULT_COLNAMES <- c("ExperimentNo",
@@ -88,9 +91,7 @@ RNAMODR_DEFAULT_COLNAMES <- c("ExperimentNo",
                               "ShortName",
                               "Replicate",
                               "Conditions",
-                              "Modifications",
-                              "BamFile",
-                              "MapQuality")
+                              "BamFile")
 
 # Visualization settings -------------------------------------------------------
 RNAMODR_DEFAULT_PALETTE <- "Set1"
@@ -100,5 +101,6 @@ RNAMODR_DEFAULT_PALETTE <- "Set1"
   options("RNAmodR_palette" = RNAMODR_DEFAULT_PALETTE)
   options("RNAmodR_dpi" = 600)
   options("RNAmodR_debug" = FALSE)
+  options("RNAmodR_min_mapquality" = RNAMODR_MIN_MAPQUALITY)
 }
 

@@ -18,15 +18,17 @@ setClass("RNAmodRident_D",
 #' @description 
 #' \code{RNAmodRident_D}
 setMethod(
-  f = "identifyModificationsPerTranscript",
+  f = "scoreModificationsPerTranscript",
   signature = signature(x = "RNAmodRident_D",
-                        location = "numeric",
                         locations = "numeric",
-                        data = "list"),
+                        data = "GRangesList",
+                        args = "RNAmodRargs",
+                        endLocation = "numeric"),
   definition = function(x,
-                        location,
                         locations,
-                        data) {
+                        data,
+                        args,
+                        endLocation) {
     # get test result for the current location
     locTest <- .calc_D_test_values(location,
                                    locations,
@@ -207,3 +209,27 @@ setMethod(
      (sig > sig.threshold &&
         !.get_use_p()))
 }
+
+
+
+
+#' @rdname identifyModificationsPerTranscript
+#' 
+#' @description 
+#' \code{RNAmodRident_D}
+#' 
+#' @export
+setMethod(
+  f = "identifyModificationsPerTranscript",
+  signature = signature(x = "RNAmodRident_D",
+                        data = "GRangesList",
+                        args = "RNAmodRargs"),
+  definition = function(x,
+                        data,
+                        args) {
+    browser()
+    
+    
+    return(return(gpos))
+  }
+)

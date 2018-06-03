@@ -61,11 +61,32 @@ setMethod(
                         files,
                         conditions) {
     # assigning data to slots
-    .Object@args <- read.delim(param, comment.char = "#")
+    .Object@args <- do.call(rbind,lapply(param, 
+                                         read.delim, 
+                                         comment.char = "#",
+                                         stringsAsFactors = FALSE))
     .Object@files <- files
     .Object@conditions <- conditions
     # validation step
-    
+    if(length(RNAMODR_PARAM_COL) != length(colnames(.Object@args)) |
+      !all(colnames(.Object@args) %in% RNAMODR_PARAM_COL)){
+      stop("Parameter file contains invalid columns. Allowed colums: '",
+           paste(RNAMODR_PARAM_COL, collapse = "','"),
+           "'.")
+    }
+    modifications <- unique(.Object@args$Identifier)
+    for(i in seq_along(modifications)){
+      mod <- modifications[i]
+      assertive::assert_is_a_string(getParam(.Object,
+                                             mod,
+                                             "nucleotide"))
+      assertive::assert_is_a_string(getParam(.Object,
+                                             mod,
+                                             "data_type"))
+      assertive::assert_all_are_numeric_strings(getParam(.Object,
+                                                         mod,
+                                                         "map_quality"))
+    }
     #
     return(.Object)
   }

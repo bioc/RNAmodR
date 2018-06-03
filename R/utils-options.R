@@ -4,18 +4,18 @@ NULL
 # option retrieval -------------------------------------------------------------
 
 # whether to use a p value for detection or not
-.get_map_quality <- function(){
-  adviseText <- "Please set 'RNAmodR_map_quality' to a numeric value of >= 0."
-  mapQ <- getOption("RNAmodR_map_quality")
+.get_min_map_quality <- function(){
+  adviseText <- "Please set 'RNAmodR_min_mapquality' to a numeric value of >= 0."
+  mapQ <- getOption("RNAmodR_min_mapquality")
   if(!assertive::is_a_number(mapQ)){
-    mapQ <- RNAMODR_DEFAULT_MAPQ
-    warning("The option 'RNAmodR_map_quality' is not a single numeric value. ",
+    mapQ <- RNAMODR_MIN_MAPQUALITY
+    warning("The option 'RNAmodR_min_mapquality' is not a single numeric value. ",
             adviseText,
             call. = FALSE)
   }
   if(!(mapQ >= 0)){
-    mapQ <- RNAMODR_DEFAULT_MAPQ
-    warning("The option 'RNAmodR_map_quality' is not 0 or a positive value ",
+    mapQ <- RNAMODR_MIN_MAPQUALITY
+    warning("The option 'RNAmodR_min_mapquality' is not 0 or a positive value ",
             adviseText,
             call. = FALSE)
   }
@@ -47,30 +47,3 @@ NULL
   palette
 }
 
-# returns the width used for RiboMethScore calculate
-.get_ribometh_score_width <- function(){
-  width <- getOption("RNAmodR_RiboMethScore_width")
-  if(!assertive::is_a_number(width) || !assertive::is_positive(width)){
-    width <- RNAMODR_DEFAULT_RMS_WIDTH
-    warning("The option 'RNAmodR_RiboMethScore_width' is not a number. ",
-            "Please set 'RNAmodR_RiboMethScore_width' to a positive number. ",
-            call. = FALSE)
-  }
-  width
-}
-# returns the width used for RiboMethScore calculate
-.get_ribometh_score_weights <- function(){
-  weights <- getOption("RNAmodR_RiboMethScore_weights")
-  if(length(weights) != ( 2 * .get_ribometh_score_width() + 1 ) ){
-    stop("The option 'RNAmodR_RiboMethScore_weights' is not a compatible with ",
-         "the width of 'RNAmodR_RiboMethScore_width'. ",
-         "Please set 'RNAmodR_RiboMethScore_weights' to a named list of ",
-         "weights. ",
-         call. = FALSE)
-  }
-  if(weights["0"] != 0){
-    stop("Error in weighting list.")
-  }
-  ## more checks needed XXX
-  weights
-}
