@@ -6,6 +6,7 @@
 \alias{getInputFiles}
 \alias{getConditions}
 \alias{getParam}
+\alias{setParam}
 \alias{loadQuantifier}
 \alias{loadIdentifier}
 \alias{RNAmodR-args-class}
@@ -14,6 +15,7 @@
 \alias{getInputFiles,RNAmodRargs-method}
 \alias{getConditions,RNAmodRargs-method}
 \alias{getParam,RNAmodRargs-method}
+\alias{setParam,RNAmodRargs,character,character-method}
 \alias{loadQuantifier,RNAmodRargs-method}
 \alias{loadIdentifier,RNAmodRargs-method}
 \title{RNAmodR arguments class}
@@ -23,6 +25,8 @@ getInputFiles(x)
 getConditions(x)
 
 getParam(x, identifier, param)
+
+setParam(x, identifier, param, value)
 
 loadQuantifier(x)
 
@@ -36,6 +40,9 @@ RNAmodRargs(param, files, conditions)
 
 \S4method{getParam}{RNAmodRargs}(x, identifier, param)
 
+\S4method{setParam}{RNAmodRargs,character,character}(x, identifier, param,
+  value)
+
 \S4method{loadQuantifier}{RNAmodRargs}(x)
 
 \S4method{loadIdentifier}{RNAmodRargs}(x)
@@ -45,9 +52,17 @@ RNAmodRargs(param, files, conditions)
 
 \item{identifier}{an optional identifier for subsetting the arguments}
 
+\item{param}{an optional param for subsetting the arguments}
+
+\item{value}{a value for the chosen parameter of the given identifier}
+
 \item{x}{a RNAmodRargs class object}
 
 \item{x}{a RNAmodRargs class object}
+
+\item{x}{a RNAmodRargs class object}
+
+\item{identifier}{an optional identifier for subsetting the arguments}
 
 \item{x}{a RNAmodRargs class object}
 
@@ -59,6 +74,8 @@ a RNAmodRargs object
 a list of input files
 
 the conditions of each input file. Either "Control" or "Treated"
+
+a data.frame with the selected arguments
 
 a data.frame with the selected arguments
 

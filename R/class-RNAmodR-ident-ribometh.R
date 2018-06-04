@@ -1,6 +1,16 @@
 #' @include class-RNAmodR-ident.R
 NULL
 
+RNAMODR_RMS_REQUIRED_ARGS <- c("data_type",
+                               "map_quality",
+                               "score_A_cutoff",
+                               "score_B_cutoff",
+                               "RMS_cutoff",
+                               "score_mean_cutoff",
+                               "windows_size",
+                               "weights",
+                               "weights_rel_pos")
+
 #' @rdname RNAmodR-ident-class
 #'
 #' @description 
@@ -11,7 +21,8 @@ setClass("RNAmodRident_RiboMeth",
          contains = "RNAmodRident",
          prototype = list(dataType = "methends",
                           modType = "RiboMeth",
-                          param = list(nucleotide = "N")
+                          param = list(nucleotide = "N"),
+                          requiredParam = RNAMODR_RMS_REQUIRED_ARGS
                           )
 )
 
@@ -80,10 +91,12 @@ setMethod(
                                weights){
   min <- min(as.numeric(names(weights)))
   max <- max(as.numeric(names(weights)))
+  counts <- data$counts
+  names(counts) <- pos(data)
   # get data
-  locationData <- data[pos(data) %in% locations]$counts
-  area5 <- lapply(locations, function(l){data[pos(data) < l & pos(data) >= (l + min)]$counts})
-  area3 <- lapply(locations, function(l){data[pos(data) <= (l + max) & pos(data) > l]$counts})
+  locationData <- counts[as.numeric(names(counts)) %in% locations]
+  area5 <- lapply(locations, function(l){counts[as.numeric(names(counts)) < l & as.numeric(names(counts)) >= (l + min)]})
+  area3 <- lapply(locations, function(l){counts[as.numeric(names(counts)) <= (l + max) & as.numeric(names(counts)) > l]})
   # calculate means and sd
   mean5 <- lapply(area5, mean)
   mean3 <- lapply(area3, mean)
@@ -105,10 +118,12 @@ setMethod(
                                weights){
   min <- min(as.numeric(names(weights)))
   max <- max(as.numeric(names(weights)))
+  counts <- data$counts
+  names(counts) <- pos(data)
   # get data
-  locationData <- data[pos(data) %in% locations]$counts
-  area5 <- lapply(locations, function(l){data[pos(data) < l & pos(data) >= (l + min)]$counts})
-  area3 <- lapply(locations, function(l){data[pos(data) <= (l + max) & pos(data) > l]$counts})
+  locationData <- counts[as.numeric(names(counts)) %in% locations]
+  area5 <- lapply(locations, function(l){counts[as.numeric(names(counts)) < l & as.numeric(names(counts)) >= (l + min)]})
+  area3 <- lapply(locations, function(l){counts[as.numeric(names(counts)) <= (l + max) & as.numeric(names(counts)) > l]})
   # calc score per replicate
   scores <- mapply(FUN = .calculate_ribometh_score_B,
                    locationData,
@@ -124,10 +139,12 @@ setMethod(
                                   weights){
   min <- min(as.numeric(names(weights)))
   max <- max(as.numeric(names(weights)))
+  counts <- data$counts
+  names(counts) <- pos(data)
   # get data
-  locationData <- data[pos(data) %in% locations]$counts
-  area5 <- lapply(locations, function(l){data[pos(data) < l & pos(data) >= (l + min)]$counts})
-  area3 <- lapply(locations, function(l){data[pos(data) <= (l + max) & pos(data) > l]$counts})
+  locationData <- counts[as.numeric(names(counts)) %in% locations]
+  area5 <- lapply(locations, function(l){counts[as.numeric(names(counts)) < l & as.numeric(names(counts)) >= (l + min)]})
+  area3 <- lapply(locations, function(l){counts[as.numeric(names(counts)) <= (l + max) & as.numeric(names(counts)) > l]})
   # calc score per replicate
   scores <- mapply(FUN = .calculate_ribometh_score_meth,
                    locationData,
@@ -137,22 +154,25 @@ setMethod(
   return(scores)
 }
 
-# calculates score C according to Birkedal et al. 2014
+# calculates score mean according to Marchand et al. 2016
 .aggregate_score_mean <- function(data,
                                   locations,
                                   windowSize){
+  counts <- data$counts
+  names(counts) <- pos(data)
+  #
   locationData5 <- 
     lapply(locations, 
            function(l){
-             pos5 <- data[pos(data) == (l - 1)]$counts
-             pos <- data[pos(data) == (l)]$counts
+             pos5 <- counts[as.numeric(names(counts)) == (l - 1)]
+             pos <- counts[as.numeric(names(counts)) == (l)]
              return(1 - pos/pos5)
            })
   locationData3 <- 
     lapply(locations, 
            function(l){
-             pos3 <- data[pos(data) == (l + 1)]$counts
-             pos <- data[pos(data) == (l)]$counts
+             pos3 <- counts[as.numeric(names(counts)) == (l + 1)]
+             pos <- counts[as.numeric(names(counts)) == (l)]
              return(1 - pos/pos3)
            })
   area5 <- 
@@ -160,8 +180,8 @@ setMethod(
            function(l){
              locs <- (l - windowSize):(l + windowSize)
              locs <- locs[locs > 2 & locs != l & locs < max(locations)]
-             pos5 <- data[pos(data) %in% (locs - 1) ]$counts
-             pos <- data[pos(data) %in% locs]$counts
+             pos5 <- counts[as.numeric(names(counts)) %in% (locs - 1) ]
+             pos <- counts[as.numeric(names(counts)) %in% locs]
              return(1 - pos/pos5)
            })
   area3 <- 
@@ -169,8 +189,8 @@ setMethod(
            function(l){
              locs <- (l - windowSize):(l + windowSize)
              locs <- locs[locs > 2 & locs != l & locs < max(locations)]
-             pos3 <- data[pos(data) %in% (locs + 1) ]$counts
-             pos <- data[pos(data) %in% locs]$counts
+             pos3 <- counts[as.numeric(names(counts)) %in% (locs + 1) ]
+             pos <- counts[as.numeric(names(counts)) %in% locs]
              return(1 - pos/pos3)
            })
   mean5 <- lapply(area5, mean)
@@ -204,9 +224,10 @@ setMethod(
   definition = function(x,
                         data,
                         args) {
-    browser()
-    
-    
-    return(return(gpos))
+    data <- data[mcols(data)$scorea >= getParam(args,getModType(x),"score_A_cutoff")]
+    data <- data[mcols(data)$scoreb >= getParam(args,getModType(x),"score_B_cutoff")]
+    data <- data[mcols(data)$scoremeth  >= getParam(args,getModType(x),"RMS_cutoff")]
+    data <- data[mcols(data)$scoremean >= getParam(args,getModType(x),"score_mean_cutoff")]
+    return(data)
   }
 )

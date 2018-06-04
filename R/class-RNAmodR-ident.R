@@ -19,7 +19,8 @@ setClass("RNAmodRident",
          slots = c(dataType = "character",
                    modType = "character",
                    param = "list"),
-         prototype = list(param = list()
+         prototype = list(param = list(),
+                          requiredParam = list()
                           )
 )
 setMethod(
@@ -28,6 +29,13 @@ setMethod(
   definition = function(.Object, 
                         param) {
     param <- as.list(param)
+    if(!all(.Object@requiredParam %in% names(param))){
+      stop("The following parameters are required for the detection of '",
+           getModType(.Object),
+           "': ",
+           paste(.Object@requiredParam, collapse = ", "),
+           ".")
+    }
     # subset to valid params, which do not overlap with build in params
     param <- param[!(names(param) %in% names(.Object@param))]
     param <- c(.Object@param, param)
@@ -280,22 +288,16 @@ setMethod(
   definition = function(x,
                         data,
                         args) {
-    browser()
     # detect modification per transcript
     res <- mapply(
-      # res <- BiocParallel::bpmapply(
+    # res <- BiocParallel::bpmapply(
       FUN = .identify_mod_in_transcript,
       names(data),
       data,
       MoreArgs = list(ident = x,
                       args = args),
       SIMPLIFY = FALSE)
-    names(res) <- names(object@data)
-    res <- res[!vapply(res, is.null, logical(1))]
-    # If not results are present return NA instead of NULL
-    if(is.null(res)){
-      res <- NA
-    }
+    res <- res[vapply(res, function(z){as.logical(length(z) > 0)}, logical(1))]
     return(res)
   }
 )

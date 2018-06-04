@@ -59,11 +59,12 @@ setMethod(
                                          name = name,
                                          gff = gff,
                                          fasta = fasta)
+    browser()
     # save aggregated scores to file
     saveScores(x, number, res$scores)
     message("Saved scores as gff3 and csv file.")
     # Save found modifications as gff file
-    saveModifications(x, number, res$scores)
+    saveModifications(x, number, res$modifications)
     message("Saved detected modifications as gff3 and csv file.")
     return(invisible(TRUE))
   }
@@ -98,8 +99,8 @@ setMethod(
                                            .get_min_map_quality(),
                                            .get_acceptable_chrom_ident(x@files))
     # retrieve the quantifier and identifier needed
-    quantifier <- loadQuantifier(x)
     identifier <- loadIdentifier(x)
+    quantifier <- loadQuantifier(x)
     # get transcript quantification 
     data <- 
       sapply(quantifier,
@@ -118,7 +119,6 @@ setMethod(
                                              data),
                                   x)
     }, simplify = FALSE, USE.NAMES = TRUE)
-    browser()
     modifications <- 
       sapply(identifier,
              function(ident){

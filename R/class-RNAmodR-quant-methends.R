@@ -79,6 +79,9 @@ setMethod(
   # create result GRanges object
   respos <- .create_per_position_grange(gr,
                                         seq)
+  # apply map quality threshold and gather count data
+  # XXX
+  #
   respos <- .save_allends_counts_to_gpos(respos,
                                          data)
   respos <- .keep_non_intron_positions(respos,

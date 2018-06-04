@@ -1,7 +1,8 @@
 #' @include AllGenerics.R
 NULL
 
-# RNAmodR ================================================================
+# RNAmodR ----------------------------------------------------------------------
+
 #' @name RNAmodR-Accessors 
 #' 
 #' @title Accessors for RNAmodR Object
@@ -106,6 +107,15 @@ setGeneric(
 #' @rdname RNAmodR-args-class
 #' @export
 setGeneric(
+  name = "setParam",
+  def = function(x,
+                 identifier,
+                 param,
+                 value) standardGeneric("setParam")
+)
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
   name = "loadQuantifier",
   def = function(x) standardGeneric("loadQuantifier")
 )
@@ -132,7 +142,7 @@ setGeneric(
   name = "saveScores",
   def = function(x,
                  number,
-                 grl) standardGeneric("saveScores")
+                 scores) standardGeneric("saveScores")
 )
 #' @name saveScores
 #' @export
@@ -149,7 +159,7 @@ setGeneric(
   name = "saveModifications",
   def = function(x,
                  number,
-                 grl) standardGeneric("saveModifications")
+                 modifications) standardGeneric("saveModifications")
 )
 #' @name saveModifications
 #' @export

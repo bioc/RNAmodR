@@ -77,12 +77,6 @@ setMethod(
     modifications <- unique(.Object@args$Identifier)
     for(i in seq_along(modifications)){
       mod <- modifications[i]
-      assertive::assert_is_a_string(getParam(.Object,
-                                             mod,
-                                             "nucleotide"))
-      assertive::assert_is_a_string(getParam(.Object,
-                                             mod,
-                                             "data_type"))
       assertive::assert_all_are_numeric_strings(getParam(.Object,
                                                          mod,
                                                          "map_quality"))

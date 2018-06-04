@@ -135,10 +135,10 @@ setMethod(
   f = "saveScores",
   signature = signature(x = "RNAmodR",
                         number = "numeric",
-                        grl = "GRangesList"),
+                        scores = "list"),
   definition = function(x,
                         number,
-                        grl) {
+                        scores) {
     experiment <- getExperimentData(.Object, number)
     if( assertive::is_a_bool(experiment)) {
       if( assertive::is_false(experiment) ) {
@@ -158,19 +158,21 @@ setMethod(
                        "/",
                        experiment$ExperimentName,
                        "_scores.gff3")
+    
+    
     rtracklayer::export.gff3(unlist(grl), con = fileName)
-    for(i in seq_along(grl)){
+    for(i in seq_along(scores)){
       fileName <- paste0(folder,
                          "/",
                          experiment$ExperimentName,
                          "_scores_",
-                         names(grl[i]),
+                         names(scores[i]),
                          ".gff3")
-      rtracklayer::export.gff3(grl[[i]], con = fileName)
+      rtracklayer::export.gff3(scores[[i]], con = fileName)
       # export as csv
       
     }
-    return(invisible(grl))
+    return(invisible(scores))
   }
 )
 
@@ -239,10 +241,10 @@ setMethod(
   f = "saveModifications",
   signature = signature(x = "RNAmodR",
                         number = "numeric",
-                        grl = "GRangesList"),
+                        modifications = "list"),
   definition = function(x,
                         number,
-                        grl) {
+                        modifications) {
     experiment <- getExperimentData(.Object, number)
     if( assertive::is_a_bool(experiment)) {
       if( assertive::is_false(experiment) ) {
@@ -263,14 +265,14 @@ setMethod(
                        experiment$ExperimentName,
                        "_modifications.gff3")
     rtracklayer::export.gff3(unlist(grl), con = fileName)
-    for(i in seq_along(grl)){
+    for(i in seq_along(modifications)){
       fileName <- paste0(folder,
                          "/",
                          experiment$ExperimentName,
                          "_modifications_",
-                         names(grl[i]),
+                         names(modifications[i]),
                          ".gff3")
-      rtracklayer::export.gff3(grl[[i]], con = fileName)
+      rtracklayer::export.gff3(modifications[[i]], con = fileName)
       # export as csv
       
     }

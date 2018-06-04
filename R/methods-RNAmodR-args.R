@@ -33,6 +33,8 @@ setMethod(
 #'
 #' @param x a RNAmodRargs class object
 #' @param identifier an optional identifier for subsetting the arguments
+#' @param param an optional param for subsetting the arguments
+#' @param value a value for the chosen parameter of the given identifier
 #'
 #' @return a data.frame with the selected arguments
 #' @export
@@ -65,6 +67,38 @@ setMethod(
     }
     return(x@args[x@args$Identifier == identifier &
                     x@args$Param == param,"Value"])
+  }
+)
+#' @rdname RNAmodR-args-class
+#'
+#' @param x a RNAmodRargs class object
+#' @param identifier an optional identifier for subsetting the arguments
+#'
+#' @return a data.frame with the selected arguments
+#' @export
+setMethod(
+  f = "setParam",
+  signature = signature(x = "RNAmodRargs",
+                        identifier = "character",
+                        param = "character"),
+  definition = function(x,
+                        identifier,
+                        param,
+                        value){
+    # input check
+    assertive::assert_is_a_string(identifier)
+    assertive::assert_is_a_string(param)
+    .checkValueValidity(identifier,
+                        unique(x@args$Identifier))
+    .checkValueValidity(param,
+                        unique(x@args$Param))
+    if(!missing(value)){
+      stop("No value given.",
+           call. = FALSE)
+    }
+    x@args[x@args$Identifier == identifier &
+             x@args$Param == param,"Value"] <- value
+    return(invisible(value))
   }
 )
 

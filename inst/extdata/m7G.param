@@ -1,6 +1,5 @@
 Identifier Param	Value
-m7G	nucleotide	G
-m7G	data_type	Nplus1_5end
+m7G	data_type	5end
 m7G	map_quality	5
 m7G	cleavage_unit_cutoff	100 
 m7G	stop_ratio_cutoff	0.75	
