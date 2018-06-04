@@ -1,6 +1,6 @@
 Identifier	Param	Value
 RiboMeth	nucleotide	N
-RiboMeth	data_type	allends
+RiboMeth	data_type	methends
 RiboMeth	map_quality	5
 RiboMeth	A_score_cutoff	0.5
 RiboMeth	B_score_cutoff	3.2

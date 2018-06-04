@@ -14,9 +14,9 @@ NULL
 #'
 #' @examples
 #' \donttest{
-#' ad <- new("RNAmodRquant_allends")
+#' ad <- new("RNAmodRquant_methends")
 #' }
-setClass("RNAmodRquant_allends",
+setClass("RNAmodRquant_methends",
          contains = "RNAmodRquant",
          prototype = list(dataType = "allends",
                           dataLabel = "mean(relative arrest rate)",
@@ -27,7 +27,7 @@ setClass("RNAmodRquant_allends",
 #' @export
 setMethod(
   f = "quantifiyReadDataPerTranscript",
-  signature = signature(x = "RNAmodRquant_allends",
+  signature = signature(x = "RNAmodRquant_methends",
                         bamData = "GAlignmentsList",
                         args = "RNAmodRargs",
                         counts = "numeric",
@@ -60,7 +60,6 @@ setMethod(
                                                      counts,
                                                      gff,
                                                      fafile){
-  browser()
   # debug
   if( getOption("RNAmodR_debug") ){
     message(id)
@@ -92,12 +91,13 @@ setMethod(
                                          data){
   tstart <- as.data.frame(table(start(data)))
   colnames(tstart) <- c("pos","value")
-  # shift position -1 upstream to match the protected ends
-  tstart$pos <- as.numeric(tstart$pos) - 1
+  # move position -1 to align data for protected ends
+  tstart$pos <- as.numeric(as.character(tstart$pos)) - 1
   tstart <- tstart[tstart$pos > 0,]
   #
   tend <- as.data.frame(table(end(data)))
   colnames(tend) <- c("pos","value")
+  tend$pos <- as.numeric(as.character(tend$pos))
   t <- merge(tstart,
              tend,
              by = "pos",

@@ -123,8 +123,8 @@ setMethod(
       sapply(identifier,
              function(ident){
                identifyModifications(ident,
-                                     subsetData(ident,
-                                                scores),
+                                     subsetResults(ident,
+                                                   scores),
                                      x)
     }, simplify = FALSE, USE.NAMES = TRUE)
     return(list(scores = scores,

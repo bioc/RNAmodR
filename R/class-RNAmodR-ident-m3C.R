@@ -10,7 +10,9 @@ NULL
 setClass("RNAmodRident_m3C",
          contains = "RNAmodRident",
          prototype = list(dataType = "5end",
-                          modType = "m3C")
+                          modType = "m3C",
+                          param = list(nucleotide = "C")
+         )
 )
 
 #' @rdname identifyModificationPerTranscript
@@ -219,7 +221,7 @@ setMethod(
 setMethod(
   f = "identifyModificationsPerTranscript",
   signature = signature(x = "RNAmodRident_m3C",
-                        data = "GRangesList",
+                        data = "GPos",
                         args = "RNAmodRargs"),
   definition = function(x,
                         data,

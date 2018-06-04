@@ -19,7 +19,8 @@ setClass("RNAmodRident",
          slots = c(dataType = "character",
                    modType = "character",
                    param = "list"),
-         prototype = list(args = list())
+         prototype = list(param = list()
+                          )
 )
 setMethod(
   f = "initialize", 
@@ -27,6 +28,10 @@ setMethod(
   definition = function(.Object, 
                         param) {
     param <- as.list(param)
+    # subset to valid params, which do not overlap with build in params
+    param <- param[!(names(param) %in% names(.Object@param))]
+    param <- c(.Object@param, param)
+    # force numeric values
     param[vapply(param, assertive::is_numeric_string, logical(1))] <-
       as.numeric(param[vapply(param, assertive::is_numeric_string, logical(1))])
     .Object@param <- param
@@ -42,9 +47,9 @@ setMethod(
   f = "show", 
   signature = signature(object = "RNAmodRident"),
   definition = function(object) {
-    print(paste0("# Data type: ", object@dataType))
-    print(paste0("# Modification type: ", object@modType))
-    print(paste0("# Arguments: ", object@args))
+    cat(paste0("# Data type: ", object@dataType, "\n"))
+    cat(paste0("# Modification type: ", object@modType, "\n"))
+    cat(paste0("# Arguments: ", object@args, "\n"))
   }
 )
 
@@ -135,6 +140,33 @@ setMethod(
     data <- data[[getDataType(x)]]
     # subset to nucleotide needed
     
+    if(is.null(data)){
+      stop("Something went wrong.")
+    }
+    return(data)
+  }
+)
+
+#' @rdname RNAmodRident-accessors
+#' 
+#' @param data the data to be subset and is assumed to be a named list of
+#' GRangesList. The names have to be a valid data type of a quantifier.
+#'
+#' @return the subset GRangesList of scores or modifications per transcript 
+#' of a single type
+#' 
+#' @export
+setMethod(
+  f = "subsetResults", 
+  signature = signature(x = "RNAmodRident"),
+  definition = function(x,
+                        data) {
+    data <- data[[getModType(x)]]
+    # subset to nucleotide needed
+    
+    if(is.null(data)){
+      stop("Something went wrong.")
+    }
     return(data)
   }
 )
@@ -158,9 +190,7 @@ setMethod(
                         data,
                         args) {
     # Input check
-    nucleotide <- getParam(args,
-                           getModType(x),
-                           "nucleotide")
+    nucleotide <- x@param$nucleotide
     if(!(nucleotide %in% names(IUPAC_CODE_MAP))){
       stop("Invalid nucleotide '",nucleotide,"'. Valid codes are IUPAC ",
            "conform: ",
@@ -175,15 +205,12 @@ setMethod(
       names(data),
       data,
       MoreArgs = list(ident = x,
-                      args = args),
+                      args = args,
+                      nucleotide = nucleotide),
       SIMPLIFY = FALSE)
-    browser()
-    names(res) <- names(object@data)
-    res <- res[!vapply(res, is.null, logical(1))]
-    # If not results are present return NA instead of NULL
-    if(is.null(res)){
-      res <- NA
-    }
+    names(res) <- names(data)
+    res <- res[vapply(res, function(z){as.logical(length(z) > 0)}, logical(1))]
+    res <- GRangesList(res)
     return(res)
   }
 )
@@ -192,15 +219,13 @@ setMethod(
 .score_mod_in_transcript <- function(ID,
                                      data,
                                      ident,
-                                     args){
+                                     args,
+                                     nucleotide){
   # debug
   if( getOption("RNAmodR_debug") ){
     message(ID)
   }
   # get locations which match the nucleotide preference
-  nucleotide <- getParam(args,
-                         getModType(ident),
-                         "nucleotide")
   nucleotide <- IUPAC_CODE_MAP[names(IUPAC_CODE_MAP) == nucleotide]
   nucleotide <- substring(nucleotide, 1:nchar(nucleotide), 1:nchar(nucleotide))
   locations <- unique(unlist(lapply(data, 
@@ -218,10 +243,8 @@ setMethod(
                                             endLocation = endLocation)
   # name the locations based on sequence position
   mcols(scores)$ID <- ID 
-  mcols(scores)$ModID <- paste0(ID,
-                                "_",
-                                as.character(mcols(scores)$nucleotide),
-                                "_",
+  mcols(scores)$ModID <- paste0(as.character(mcols(scores)$nucleotide),
+                                "m_",
                                 pos(scores))
   return(scores)
 }
@@ -252,7 +275,7 @@ NULL
 setMethod(
   f = "identifyModifications",
   signature = signature(x = "RNAmodRident",
-                        data = "list",
+                        data = "GRangesList",
                         args = "RNAmodRargs"),
   definition = function(x,
                         data,

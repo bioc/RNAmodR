@@ -39,7 +39,6 @@ setMethod(
                         gff,
                         fafile) {
     transcriptPos <- mapply(
-    # transcriptPos <- BiocParallel::bpmapply(
       FUN = .get_position_data_of_transcript_5end,
       bamData,
       names(bamData),
@@ -95,54 +94,3 @@ setMethod(
   gpos[pos(gpos) %in% t$pos]$counts <- t$value
   return(gpos)
 }
-
-# .calc_relative_stop_data <- function(stopsData,
-#                                      coverage){
-#   # remove low coverage positions by setting pos data to zero
-#   toLowCoverage <- as.numeric(names(coverage[coverage < RNAMODR_5END_COVERAGE_MIN]))
-#   # avoid deviding by zero
-#   coverage[toLowCoverage] <- 1
-#   # calc relative stop data
-#   res <- stopsData / coverage
-#   # this quenches unsepecific results
-#   # offset to not cover the end of coverage
-#   res[c(1,toLowCoverage)] <- NA
-#   res
-# }
-# 
-# # converts global to local positions and modifies data accoringly
-# .convert_global_stops_to_local_stops <- function(gff,
-#                                                  gr,
-#                                                  data,
-#                                                  posToBeRemoved){
-#   # interest in read's 5' position
-#   # reset to relative positions to gene start
-#   if(.is_on_minus_strand(gr)){
-#     stops <- BiocGenerics::end(data)
-#   } else {
-#     stops <- BiocGenerics::start(data)
-#   }
-#   # offset stops based on how many stops the read has passed from
-#   # transcription start
-#   stops <- .move_positions(stops, 
-#                            posToBeRemoved, 
-#                            .get_unique_strand(gr))
-#   # reset to relative stops to gene start
-#   if(.is_on_minus_strand(gr)){
-#     stops <- BiocGenerics::end(gr) - stops + 1
-#   } else {
-#     stops <- stops - BiocGenerics::start(gr) + 1
-#   }
-#   # get stops per position
-#   stops <- table(stops)
-#   # get the transcript length
-#   length <- width(gr) - length(unlist(posToBeRemoved))
-#   # spread table with zero values to the length of transcript
-#   stops <- stats::setNames(as.double(unlist(
-#     lapply(1:length, 
-#            function(i){
-#              if(length(stops[names(stops) == i]) == 0) return(0)
-#              stops[names(stops) == i]
-#            }))),1:length)
-#   return(stops)
-# }

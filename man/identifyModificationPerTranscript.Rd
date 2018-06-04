@@ -13,7 +13,7 @@
 \usage{
 scoreModificationsPerTranscript(x, locations, data, args, endLocation)
 
-identifyModificationsPerTranscript(x, location, data, args, endLocation)
+identifyModificationsPerTranscript(x, data, args)
 
 
   \S4method{scoreModificationsPerTranscript}{RNAmodRident_D,numeric,GRangesList,RNAmodRargs,numeric}(x,

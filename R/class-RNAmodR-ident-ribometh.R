@@ -9,8 +9,10 @@ NULL
 #' @export
 setClass("RNAmodRident_RiboMeth",
          contains = "RNAmodRident",
-         prototype = list(dataType = "allends",
-                          modType = "RiboMeth")
+         prototype = list(dataType = "methends",
+                          modType = "RiboMeth",
+                          param = list(nucleotide = "N")
+                          )
 )
 
 #' @rdname scoreModificationsPerTranscript
@@ -55,7 +57,8 @@ setMethod(
                         as.numeric(getParam(args, "RiboMeth", "windows_size")))
     # return GPos vor valid RiboMeth positions
     gpos <- data[[1]][pos(data[[1]]) %in% locations]
-    mcols(gpos)$counts <- NULL
+    mcols(gpos)$counts <- rowMeans(data.frame(lapply(data, function(d){d[pos(d) %in% locations]$counts})))
+    mcols(gpos)$Mod <- "RiboMeth"
     mcols(gpos)$n <- n
     mcols(gpos)$scorea <- rowMeans(data.frame(scorea))
     mcols(gpos)$scorea.sd <- matrixStats::rowSds(as.matrix(data.frame(scorea)))
@@ -84,8 +87,8 @@ setMethod(
   # calculate means and sd
   mean5 <- lapply(area5, mean)
   mean3 <- lapply(area3, mean)
-  sd5 <- lapply(area5, mean)
-  sd3 <- lapply(area3, mean)
+  sd5 <- lapply(area5, stats::sd)
+  sd3 <- lapply(area3, stats::sd)
   # calc score per replicate
   scores <- mapply(FUN = .calculate_ribometh_score_A,
                    locationData,
@@ -196,7 +199,7 @@ setMethod(
 setMethod(
   f = "identifyModificationsPerTranscript",
   signature = signature(x = "RNAmodRident_RiboMeth",
-                        data = "GRangesList",
+                        data = "GPos",
                         args = "RNAmodRargs"),
   definition = function(x,
                         data,

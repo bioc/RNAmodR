@@ -11,7 +11,7 @@ Description:
   Based on known pattern of read positions RNAmodR detects post-transcriptional
   RNA modifications in HTS data. RNAmodR is designed to be extendable, so that
   detection and analysis of new patterns in HTS data can be added easily. 
-License: GPL-3
+License: Artistic-2.0 + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
 Collate: 
@@ -28,6 +28,7 @@ Collate:
     'class-RNAmodR-quant.R'
     'class-RNAmodR-quant-5end.R'
     'class-RNAmodR-quant-allends.R'
+    'class-RNAmodR-quant-methends.R'
     'datasets.R'
     'methods-RNAmodR-analysis.R'
     'methods-RNAmodR-args.R'

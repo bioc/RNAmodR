@@ -280,12 +280,19 @@ setGeneric(
   name = "getDataType",
   def = function(x) standardGeneric("getDataType")
 ) 
-#' @rdname mod-accessors
+#' @rdname RNAmodRident-accessors
 #' @export
 setGeneric( 
   name = "subsetData",
   def = function(x,
                  data) standardGeneric("subsetData")
+) 
+#' @rdname RNAmodRident-accessors
+#' @export
+setGeneric( 
+  name = "subsetResults",
+  def = function(x,
+                 data) standardGeneric("subsetResults")
 ) 
 
 # identifier -------------------------------------------------------------------

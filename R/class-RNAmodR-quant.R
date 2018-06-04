@@ -42,9 +42,9 @@ setMethod(
   signature = signature(object = "RNAmodRquant"),
   definition = function(object) {
     cat(paste0(class(object), " object:"))
-    cat(paste0("# Data type: ", object@dataType))
-    cat(paste0("# Data label: ", object@dataLabel))
-    cat(paste0("# Data format: ", structure(object@dataFormat)))
+    cat(paste0("# Data type: ", object@dataType,"\n"))
+    cat(paste0("# Data label: ", object@dataLabel,"\n"))
+    cat(paste0("# Data format: ", structure(object@dataFormat),"\n"))
   }
 )
 
@@ -182,12 +182,13 @@ setMethod(
                         param) {
     # detect modifications in each file
     data <- lapply(getInputFiles(args),
-                   FUN = .quantify_read_data_per_file,
-                   x,
-                   args,
-                   gff,
-                   fafile,
-                   param)
+    # data <- BiocParallel::bplapply(getInputFiles(args),
+                                   FUN = .quantify_read_data_per_file,
+                                   x,
+                                   args,
+                                   gff,
+                                   fafile,
+                                   param)
     data <- data[!is.null(data)]
     if(length(data) == 0){
       stop("No reads detected in any bam file :\n",
@@ -241,7 +242,8 @@ setMethod(
     return(NULL)
   }
   
-  # bamData <- bamData[names(bamData) %in% c("tY(GTA)A")]
+  bamData <- bamData[names(bamData) %in% c("gene53983")]
+  # bamData <- bamData[names(bamData) %in% c("gene53984","gene53983","gene53985")]
   
   # get data for transcript. this is analysis specific. each list entry must 
   # have aggregated read end position data and coverage data: 
