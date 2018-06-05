@@ -4,23 +4,23 @@
 \name{saveModifications}
 \alias{saveModifications}
 \alias{saveModifications}
-\alias{saveModifications,RNAmodR,numeric,GRangesList-method}
+\alias{saveModifications,RNAmodR,numeric,list-method}
 \alias{loadModifications}
 \alias{saveModifications}
 \title{Saves and loads identified modifications}
 \usage{
-saveModifications(x, number, grl)
+saveModifications(x, number, modifications)
 
-loadModifications(x, number, geneNames = NULL)
+loadModifications(x, number, modification = NULL, geneNames = NULL)
 
-\S4method{saveModifications}{RNAmodR,numeric,GRangesList}(x, number, grl)
+\S4method{saveModifications}{RNAmodR,numeric,list}(x, number, modifications)
 }
 \arguments{
 \item{x}{RNAmodR}
 
-\item{grl}{GRangesList with modifications found per gene}
-
 \item{geneNames}{optional: gene names for which modifications should be loaded}
+
+\item{grl}{GRangesList with modifications found per gene}
 }
 \value{
 GRangesList

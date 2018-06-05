@@ -4,29 +4,33 @@
 \name{saveScores}
 \alias{saveScores}
 \alias{saveScores}
-\alias{saveScores,RNAmodR,numeric,GRangesList-method}
+\alias{saveScores,RNAmodR,numeric,list-method}
 \alias{loadScores}
 \alias{saveScores}
 \alias{loadScores,RNAmodR,numeric-method}
 \alias{loadModifications,RNAmodR,numeric-method}
 \title{Saves and loads scores}
 \usage{
-saveScores(x, number, grl)
+saveScores(x, number, scores)
 
-loadScores(x, number, geneNames = NULL)
+loadScores(x, number, modification = NULL, geneNames = NULL)
 
-\S4method{saveScores}{RNAmodR,numeric,GRangesList}(x, number, grl)
+\S4method{saveScores}{RNAmodR,numeric,list}(x, number, scores)
 
-\S4method{loadScores}{RNAmodR,numeric}(x, number, geneNames = NULL)
+\S4method{loadScores}{RNAmodR,numeric}(x, number, modification = NULL,
+  geneNames = NULL)
 
-\S4method{loadModifications}{RNAmodR,numeric}(x, number, geneNames = NULL)
+\S4method{loadModifications}{RNAmodR,numeric}(x, number, modification = NULL,
+  geneNames = NULL)
 }
 \arguments{
 \item{x}{RNAmodR}
 
-\item{grl}{GRangesList with scores per gene}
+\item{modification}{optional: modifications for which scores should be loaded}
 
 \item{geneNames}{optional: gene names for which scores should be loaded}
+
+\item{grl}{GRangesList with scores per gene}
 }
 \value{
 GRangesList

@@ -2,6 +2,7 @@
 #' @include class-RNAmodR-args.R
 NULL
 
+RNAMODR_GFF_FIXED_COLS <- c("type","nucleotide","ID","ModID")
 
 # getters and setters ----------------------------------------------------------
 
@@ -118,6 +119,7 @@ setMethod(
 #'
 #' @param x RNAmodR
 #' @param grl GRangesList with scores per gene
+#' @param modification optional: modifications for which scores should be loaded
 #' @param geneNames optional: gene names for which scores should be loaded
 #'
 #' @return GRangesList
@@ -139,7 +141,8 @@ setMethod(
   definition = function(x,
                         number,
                         scores) {
-    experiment <- getExperimentData(.Object, number)
+    browser()
+    experiment <- getExperimentData(x, number)
     if( assertive::is_a_bool(experiment)) {
       if( assertive::is_false(experiment) ) {
         stop("Incorrect experiment identifier given: ",
@@ -149,32 +152,80 @@ setMethod(
     }
     folder <- paste0(getOutputFolder(x),
                      "Scores/",
-                     experiment$ExperimentName,
+                     experiment$SampleName,
                      "/")
     if(!assertive::is_dir(folder)){
       dir.create(folder, recursive = TRUE)
     }
-    fileName <- paste0(folder,
-                       "/",
-                       experiment$ExperimentName,
-                       "_scores.gff3")
-    
-    
-    rtracklayer::export.gff3(unlist(grl), con = fileName)
     for(i in seq_along(scores)){
       fileName <- paste0(folder,
                          "/",
-                         experiment$ExperimentName,
+                         experiment$SampleName,
                          "_scores_",
-                         names(scores[i]),
+                         names(scores),
                          ".gff3")
-      rtracklayer::export.gff3(scores[[i]], con = fileName)
-      # export as csv
-      
+      gr <- unlist(GRangesList(lapply(scores[[i]], 
+                                      as, 
+                                      "GRanges")))
+      # only continue if result is present
+      if(length(gr) > 0){
+        # split again
+        gr <- .fix_gpos_for_saving(gr)
+        grl <- split(gr, mcols(gr)$ID)
+        .save_gff_and_csv(unlist(grl),
+                          fileName)
+        # save single files per gene
+        mapply(FUN = .save_single_gff_per_gene,
+               grl,
+               names(grl),
+               fileName)
+      }
     }
     return(invisible(scores))
   }
 )
+
+.fix_gpos_for_saving <- function(gpos){
+  # DNAStringSet cannot be saved by export.gff3 if in mcols
+  mcols(gpos)$nucleotide <- as.character(mcols(gpos)$nucleotide)
+  mcols(gpos)$nucleotide[mcols(gpos)$nucleotide == "T"] <- "U"
+  #
+  remainingCols <- names(mcols(gpos))[!(names(mcols(gpos)) %in% RNAMODR_GFF_FIXED_COLS)]
+  mcols(gpos) <- mcols(gpos)[,c(RNAMODR_GFF_FIXED_COLS,
+                                remainingCols)]
+  return(gpos)
+}
+
+.save_single_gff_per_gene <- function(gr,
+                                      id,
+                                      fileName){
+  fileName <- gsub(".gff3",
+                   paste0("_",id,".gff3"),
+                   fileName)
+  .save_gff_and_csv(gr,
+                    fileName)
+  return()
+}
+
+.convert_gr_to_dataframe <- function(gr){
+  pos <- start(gr)
+  df <- as(gr,"DataFrame")
+  df$pos <- start(gr)
+  df <- df[,c(1:3,ncol(df),4:(ncol(df)-1))]
+  df[,1] <- as.character(df[,1])
+  return(as.data.frame(df))
+}
+
+.save_gff_and_csv <- function(gr,
+                              fileName){
+  rtracklayer::export.gff3(gr, 
+                           con = fileName, 
+                           source = "RNAmodR")
+  write.csv2(.convert_gr_to_dataframe(gr), 
+             file = gsub(".gff",
+                         ".csv",
+                         fileName))
+}
 
 #' @rdname saveScores
 #' @importFrom rtracklayer import.gff3
@@ -185,8 +236,9 @@ setMethod(
                         number = "numeric"),
   definition = function(x,
                         number,
+                        modification,
                         geneNames) {
-    experiment <- getExperimentData(.Object, number)
+    experiment <- getExperimentData(x, number)
     if( assertive::is_a_bool(experiment)) {
       if( assertive::is_false(experiment) ) {
         stop("Incorrect experiment identifier given: ",
@@ -196,11 +248,11 @@ setMethod(
     }
     folder <- paste0(getOutputFolder(x),
                      "Scores/",
-                     experiment$ExperimentName,
+                     experiment$SampleName,
                      "/")
     fileName <- paste0(folder,
                        "/",
-                       experiment$ExperimentName,
+                       experiment$SampleName,
                        "_scores.gff3")
     gr <- rtracklayer::import.gff3(con = fileName)
     grl <- split(gr,mcols(gr$ID))
@@ -215,6 +267,12 @@ setMethod(
     return(grl)
   }
 )
+
+.get_file_names <- function(fileName,
+                            modification){
+  
+}
+
 
 
 #' @rdname saveModifications
@@ -245,7 +303,8 @@ setMethod(
   definition = function(x,
                         number,
                         modifications) {
-    experiment <- getExperimentData(.Object, number)
+    browser()
+    experiment <- getExperimentData(x, number)
     if( assertive::is_a_bool(experiment)) {
       if( assertive::is_false(experiment) ) {
         stop("Incorrect experiment identifier given: ",
@@ -255,28 +314,38 @@ setMethod(
     }
     folder <- paste0(getOutputFolder(x),
                      "Modifications/",
-                     experiment$ExperimentName,
+                     experiment$SampleName,
                      "/")
     if(!assertive::is_dir(folder)){
       dir.create(folder, recursive = TRUE)
     }
-    fileName <- paste0(folder,
-                       "/",
-                       experiment$ExperimentName,
-                       "_modifications.gff3")
-    rtracklayer::export.gff3(unlist(grl), con = fileName)
     for(i in seq_along(modifications)){
       fileName <- paste0(folder,
                          "/",
-                         experiment$ExperimentName,
-                         "_modifications_",
-                         names(modifications[i]),
+                         experiment$SampleName,
+                         "_scores_",
+                         names(modifications),
                          ".gff3")
-      rtracklayer::export.gff3(modifications[[i]], con = fileName)
-      # export as csv
-      
+      gr <- unlist(GRangesList(lapply(scores[[i]], 
+                                      as, 
+                                      "GRanges")))
+      # only continue if result is present
+      if(length(gr) > 0){
+        # split again
+        gr <- .fix_gpos_for_saving(gr)
+        grl <- split(gr, mcols(gr)$ID)
+        .save_gff_and_csv(unlist(grl),
+                          fileName)
+        # save single files per gene
+        mapply(FUN = .save_single_gff_per_gene,
+               grl,
+               names(grl),
+               fileName)
+      } else {
+        message("No modifications found.")
+      }
     }
-    return(invisible(grl))
+    return(invisible(modifications))
   }
 )
 
@@ -289,8 +358,9 @@ setMethod(
                         number = "numeric"),
   definition = function(x,
                         number,
+                        modification,
                         geneNames) {
-    experiment <- getExperimentData(.Object, number)
+    experiment <- getExperimentData(x, number)
     if( assertive::is_a_bool(experiment)) {
       if( assertive::is_false(experiment) ) {
         stop("Incorrect experiment identifier given: ",

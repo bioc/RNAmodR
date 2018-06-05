@@ -150,6 +150,7 @@ setGeneric(
   name = "loadScores",
   def = function(x,
                  number,
+                 modification = NULL,
                  geneNames = NULL) standardGeneric("loadScores")
 ) 
 
@@ -167,6 +168,7 @@ setGeneric(
   name = "loadModifications",
   def = function(x,
                  number,
+                 modification = NULL,
                  geneNames = NULL) standardGeneric("loadModifications")
 ) 
 

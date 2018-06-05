@@ -71,7 +71,6 @@ setMethod(
 )
 
 #' @rdname parseForModifications
-#' 
 #' @export
 setMethod(
   f = "parseForModificationsWithArgs", 
@@ -83,7 +82,6 @@ setMethod(
                         name,
                         gff,
                         fasta){
-    browser()
     # Input checks
     assertive::assert_is_a_non_missing_nor_empty_string(name)
     # a little startup message
@@ -111,6 +109,7 @@ setMethod(
                                 fasta,
                                 scanBamParam)
     }, simplify = FALSE, USE.NAMES = TRUE)
+    # get scores
     scores <- 
       sapply(identifier, 
              function(ident){
@@ -119,6 +118,7 @@ setMethod(
                                              data),
                                   x)
     }, simplify = FALSE, USE.NAMES = TRUE)
+    # subset to valid modifications
     modifications <- 
       sapply(identifier,
              function(ident){

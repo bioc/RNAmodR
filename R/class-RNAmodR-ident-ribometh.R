@@ -68,8 +68,8 @@ setMethod(
                         as.numeric(getParam(args, "RiboMeth", "windows_size")))
     # return GPos vor valid RiboMeth positions
     gpos <- data[[1]][pos(data[[1]]) %in% locations]
+    mcols(gpos)$type <- "RiboMeth"
     mcols(gpos)$counts <- rowMeans(data.frame(lapply(data, function(d){d[pos(d) %in% locations]$counts})))
-    mcols(gpos)$Mod <- "RiboMeth"
     mcols(gpos)$n <- n
     mcols(gpos)$scorea <- rowMeans(data.frame(scorea))
     mcols(gpos)$scorea.sd <- matrixStats::rowSds(as.matrix(data.frame(scorea)))
