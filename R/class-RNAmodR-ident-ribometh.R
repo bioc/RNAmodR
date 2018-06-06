@@ -92,7 +92,8 @@ setMethod(
   min <- min(as.numeric(names(weights)))
   max <- max(as.numeric(names(weights)))
   counts <- data$counts
-  names(counts) <- pos(data)
+  # names(counts) <- pos(data)
+  names(counts) <- data$position
   # get data
   locationData <- counts[as.numeric(names(counts)) %in% locations]
   area5 <- lapply(locations, function(l){counts[as.numeric(names(counts)) < l & as.numeric(names(counts)) >= (l + min)]})
@@ -119,7 +120,8 @@ setMethod(
   min <- min(as.numeric(names(weights)))
   max <- max(as.numeric(names(weights)))
   counts <- data$counts
-  names(counts) <- pos(data)
+  # names(counts) <- pos(data)
+  names(counts) <- data$position
   # get data
   locationData <- counts[as.numeric(names(counts)) %in% locations]
   area5 <- lapply(locations, function(l){counts[as.numeric(names(counts)) < l & as.numeric(names(counts)) >= (l + min)]})
@@ -140,7 +142,8 @@ setMethod(
   min <- min(as.numeric(names(weights)))
   max <- max(as.numeric(names(weights)))
   counts <- data$counts
-  names(counts) <- pos(data)
+  # names(counts) <- pos(data)
+  names(counts) <- data$position
   # get data
   locationData <- counts[as.numeric(names(counts)) %in% locations]
   area5 <- lapply(locations, function(l){counts[as.numeric(names(counts)) < l & as.numeric(names(counts)) >= (l + min)]})
@@ -159,53 +162,53 @@ setMethod(
                                   locations,
                                   windowSize){
   counts <- data$counts
-  names(counts) <- pos(data)
+  # names(counts) <- pos(data)
+  names(counts) <- data$position
   #
   locationData5 <- 
     lapply(locations, 
            function(l){
-             pos5 <- counts[as.numeric(names(counts)) == (l - 1)]
-             pos <- counts[as.numeric(names(counts)) == (l)]
-             return(1 - pos/pos5)
+             pos5 <- counts[as.numeric(names(counts)) == l]
+             pos <- counts[as.numeric(names(counts)) == (l + 1)]
+             return(pos/pos5)
            })
   locationData3 <- 
     lapply(locations, 
            function(l){
-             pos3 <- counts[as.numeric(names(counts)) == (l + 1)]
-             pos <- counts[as.numeric(names(counts)) == (l)]
-             return(1 - pos/pos3)
+             pos3 <- counts[as.numeric(names(counts)) == l]
+             pos <- counts[as.numeric(names(counts)) == (l - 1)]
+             return(pos/pos3)
            })
   area5 <- 
     lapply(locations, 
            function(l){
              locs <- (l - windowSize):(l + windowSize)
-             locs <- locs[locs > 2 & locs != l & locs < max(locations)]
-             pos5 <- counts[as.numeric(names(counts)) %in% (locs - 1) ]
-             pos <- counts[as.numeric(names(counts)) %in% locs]
-             return(1 - pos/pos5)
+             locs <- locs[locs > 3 & locs != l & locs < max(locations)]
+             pos5 <- counts[as.numeric(names(counts)) %in% (locs - 2)]
+             pos <- counts[as.numeric(names(counts)) %in% (locs - 1)]
+             return(pos/pos5)
            })
   area3 <- 
     lapply(locations, 
            function(l){
              locs <- (l - windowSize):(l + windowSize)
-             locs <- locs[locs > 2 & locs != l & locs < max(locations)]
-             pos3 <- counts[as.numeric(names(counts)) %in% (locs + 1) ]
-             pos <- counts[as.numeric(names(counts)) %in% locs]
-             return(1 - pos/pos3)
+             locs <- locs[locs > 1 & locs != l & locs < max(locations)]
+             pos3 <- counts[as.numeric(names(counts)) %in% locs]
+             pos <- counts[as.numeric(names(counts)) %in% (locs - 1)]
+             return(pos/pos3)
            })
   mean5 <- lapply(area5, mean)
   mean3 <- lapply(area3, mean)
-  #
-  locationData5[is.nan(unlist(locationData5)) | is.infinite(unlist(locationData5))] <- c(0)
-  locationData3[is.nan(unlist(locationData3)) | is.infinite(unlist(locationData3))] <- c(0)
-  mean5[is.nan(unlist(mean5)) | is.infinite(unlist(mean5))] <- c(1)
-  mean3[is.nan(unlist(mean3)) | is.infinite(unlist(mean3))] <- c(1)
+  sd5 <- lapply(area5, stats::sd)
+  sd3 <- lapply(area3, stats::sd)
   # calc score per replicate
   scores <- mapply(FUN = .calculate_ribometh_score_mean,
                    locationData5,
                    locationData3,
                    mean5,
-                   mean3)
+                   mean3,
+                   sd5,
+                   sd3)
   return(scores)
 }
 

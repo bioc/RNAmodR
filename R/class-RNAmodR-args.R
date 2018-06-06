@@ -27,12 +27,16 @@ setClass("RNAmodRargs",
            conditions = "character",
            args = "data.frame"),
          prototype = list(
-           args = data.frame()
+           args = data.frame(),
+           files = NULL,
+           conditions = NULL
          )
 )
 
 #' @rdname RNAmodR-args-class
-#'
+#' 
+#' @param param parameter file(s) to be loaded
+#' 
 #' @importFrom utils read.delim
 #'
 #' @export
@@ -41,12 +45,14 @@ RNAmodRargs <- function(param,
                         conditions){
   # input check
   assertive::assert_all_are_existing_files(param)
-  assertive::assert_all_are_existing_files(files)
-  if(length(files) != length(conditions)){
-    stop("Number of files and conditions do not match",
-         call. = FALSE)
+  if(!missing(files) && !missing(conditions)){
+    if(length(files) != length(conditions)){
+      stop("Number of files and conditions do not match",
+           call. = FALSE)
+    }
+    assertive::assert_all_are_existing_files(files)
+    .check_sample_conditions(conditions)
   }
-  .check_sample_conditions(conditions)
   # create class
   return(new("RNAmodRargs",
              param,
@@ -65,8 +71,13 @@ setMethod(
                                          read.delim, 
                                          comment.char = "#",
                                          stringsAsFactors = FALSE))
-    .Object@files <- files
-    .Object@conditions <- conditions
+    if(!missing(files) && 
+       !missing(conditions) && 
+       length(files) > 0 && 
+       length(conditions) > 0){
+      .Object@files <- files
+      .Object@conditions <- conditions
+    }
     # validation step
     if(length(RNAMODR_PARAM_COL) != length(colnames(.Object@args)) |
       !all(colnames(.Object@args) %in% RNAMODR_PARAM_COL)){

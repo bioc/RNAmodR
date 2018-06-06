@@ -59,13 +59,14 @@ setMethod(
                                          name = name,
                                          gff = gff,
                                          fasta = fasta)
-    browser()
     # save aggregated scores to file
     saveScores(x, number, res$scores)
     message("Saved scores as gff3 and csv file.")
     # Save found modifications as gff file
-    saveModifications(x, number, res$modifications)
-    message("Saved detected modifications as gff3 and csv file.")
+    success <- saveModifications(x, number, res$modifications)
+    if(length(success) == 1 && assertive::is_not_false(success)){
+      message("Saved detected modifications as gff3 and csv file.")
+    }
     return(invisible(TRUE))
   }
 )
@@ -88,6 +89,11 @@ setMethod(
     message("Searching for modifications in sample '",
             name,
             "'...")
+    if(length(getInputFiles(args)) == 0 || 
+       assertive::is_false(getInputFiles(args))){
+      stop("No input files given.",
+           call. = FALSE)
+    }
     # subset to relevant annotations 
     gff_subset <- .get_parent_annotations(
       .subset_rnamod_containing_features(gff)

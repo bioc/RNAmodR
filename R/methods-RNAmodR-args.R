@@ -12,6 +12,7 @@ setMethod(
   f = "getInputFiles",
   signature = signature(x = "RNAmodRargs"),
   definition = function(x){
+    if(is.null(x@files)) return(FALSE)
     return(x@files)
   }
 )
@@ -25,6 +26,7 @@ setMethod(
   f = "getConditions",
   signature = signature(x = "RNAmodRargs"),
   definition = function(x){
+    if(is.null(x@conditions)) return(FALSE)
     return(x@conditions)
   }
 )

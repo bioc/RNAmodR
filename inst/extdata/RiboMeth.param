@@ -5,6 +5,8 @@ RiboMeth	score_A_cutoff	0.5
 RiboMeth	score_B_cutoff	3.2
 RiboMeth	RMS_cutoff	0.5
 RiboMeth	score_mean_cutoff	0.5
-RiboMeth	windows_size	6
-RiboMeth	weights	0.5;0.6;0.7;0.8;0.9;1.0;0;1.0;0.9;0.8;0.7;0.6;0.5;
-RiboMeth	weights_rel_pos	-6;-5;-4;-3;-2;-1;0;1;2;3;4;5;6;
+RiboMeth	windows_size	2
+RiboMeth	weights	0.9;1.0;0;1.0;0.9;
+RiboMeth	weights_rel_pos	-2;-1;0;1;2;
+# RiboMeth	weights	0.5;0.6;0.7;0.8;0.9;1.0;0;1.0;0.9;0.8;0.7;0.6;0.5;
+# RiboMeth	weights_rel_pos	-6;-5;-4;-3;-2;-1;0;1;2;3;4;5;6;

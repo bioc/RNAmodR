@@ -141,7 +141,6 @@ setMethod(
   definition = function(x,
                         number,
                         scores) {
-    browser()
     experiment <- getExperimentData(x, number)
     if( assertive::is_a_bool(experiment)) {
       if( assertive::is_false(experiment) ) {
@@ -211,7 +210,7 @@ setMethod(
   pos <- start(gr)
   df <- as(gr,"DataFrame")
   df$pos <- start(gr)
-  df <- df[,c(1:3,ncol(df),4:(ncol(df)-1))]
+  df <- df[,c(1:4,ncol(df),5:(ncol(df)-1))]
   df[,1] <- as.character(df[,1])
   return(as.data.frame(df))
 }
@@ -222,9 +221,10 @@ setMethod(
                            con = fileName, 
                            source = "RNAmodR")
   write.csv2(.convert_gr_to_dataframe(gr), 
-             file = gsub(".gff",
+             file = gsub(".gff3",
                          ".csv",
-                         fileName))
+                         fileName),
+             row.names = FALSE)
 }
 
 #' @rdname saveScores
@@ -246,6 +246,7 @@ setMethod(
              call. = FALSE)
       }
     }
+    browser()
     folder <- paste0(getOutputFolder(x),
                      "Scores/",
                      experiment$SampleName,
@@ -326,7 +327,7 @@ setMethod(
                          "_scores_",
                          names(modifications),
                          ".gff3")
-      gr <- unlist(GRangesList(lapply(scores[[i]], 
+      gr <- unlist(GRangesList(lapply(modifications[[i]], 
                                       as, 
                                       "GRanges")))
       # only continue if result is present
@@ -343,6 +344,7 @@ setMethod(
                fileName)
       } else {
         message("No modifications found.")
+        return(invisible(FALSE))
       }
     }
     return(invisible(modifications))
