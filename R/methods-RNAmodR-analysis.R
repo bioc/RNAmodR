@@ -1,4 +1,0 @@
-#' @include RNAmodR.R
-NULL
-
-

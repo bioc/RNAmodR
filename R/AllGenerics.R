@@ -1,45 +1,48 @@
 #' @include RNAmodR.R
 NULL
 
-
-# experiment data---------------------------------------------------------------
-
-#' @title .saveGffResult
-#' 
-#' @description
-#' Saves GRanges object as gff3 file
-setGeneric ( 
-  name= ".saveGffResult", 
-  def=function(.Object, 
-               gff, 
-               experiment, 
-               modification ) standardGeneric(".saveGffResult")
-) 
-
-# analysis type functions - modifications parsing ------------------------------
-
-#' @name parseMod
-#' 
-#' @title parseMod
-#' 
-#' @param object mod object 
-#' @param gff a GRanges object for the genome
-#' @param fafile a FaFile object for the genome
-#' @param modClasses list of modification classes used for parsing
-#' 
-#' @export
 setGeneric( 
-  name = "parseMod",
-  def = function(object,
-                 gff,
-                 fafile,
-                 modClasses) standardGeneric("parseMod")
+  name = "getMod",
+  def = function(x,
+                 ...) standardGeneric("getMod")
 ) 
 
-#' @name mergeDataOfReplicates
+# ModExperiment ----------------------------------------------------------------
+
 setGeneric( 
-  name = "mergeDataOfReplicates",
-  def = function(x) standardGeneric("mergeDataOfReplicates")
+  name = "match.genome",
+  def = function(x,
+                 ...) standardGeneric("match.genome")
+)
+setGeneric( 
+  name = "match.annotation",
+  def = function(x,
+                 ...) standardGeneric("match.annotation")
 ) 
 
+# ModExperiment accessors ------------------------------------------------------
+setGeneric( 
+  name = "gff",
+  def = function(x) standardGeneric("gff")
+)
+setGeneric( 
+  name = "fasta",
+  def = function(x) standardGeneric("fasta")
+)
+setGeneric( 
+  name = "getSeq",
+  def = function(x) standardGeneric("getSeq")
+)
+setGeneric( 
+  name = "bamfiles",
+  def = function(x) standardGeneric("bamfiles")
+)
 
+# PosData ----------------------------------------------------------------------
+
+
+
+
+
+
+# Functions --------------------------------------------------------------------

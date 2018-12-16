@@ -31,41 +31,31 @@ NULL
 }
 
 
-#' return parameters to be used by scanBam
-#' gRangeInput a GRanges object containing the ranges for search in the BAM file
-#' quality quality argument used for scanBamParam
-#' 
+# return parameters to be used by scanBam
+# ranges a GRanges object containing the ranges for search in the BAM file
+# quality quality argument used for scanBamParam
 #' @importFrom GenomeInfoDb seqnames
-#' @importFrom Rsamtools ScanBamParam
-.assemble_scanBamParam <- function(gRangeInput,
+.assemble_scanBamParam <- function(ranges,
                                    quality,
-                                   acceptableChromIdent){
-  # ScanBamParam expects GRangesList each members matching a chromosome
-  gRangeList <- GenomicRanges::GRangesList()
-  listNames <- rep("",length(unique(GenomeInfoDb::seqnames(gRangeInput))))
-  for(i in seq_along(unique(GenomeInfoDb::seqnames(gRangeInput)))){
-    ident <- as.character(unique(GenomeInfoDb::seqnames(gRangeInput))[i])
-    if( ident %in% acceptableChromIdent ){
-      gRangeList <- append(gRangeList, 
-                           GenomicRanges::GRangesList(
-                             gRangeInput[GenomeInfoDb::seqnames(gRangeInput) 
-                                         == ident,]) )
-      listNames[[i]] <- ident
-    } else {
-      warning("Not matching chromosome identifier in gff and bam file. ",
-              "Skipping data for chromosome '",ident,"'",
-              call. = FALSE)
-    }
+                                   chromosomes){
+  # "subset" to parent ranges aka the transcripts
+  ranges <- .get_parent_annotations(ranges)
+  seqnames <- unique(as.character(GenomeInfoDb::seqnames(ranges)))
+  f <- seqnames %in% chromosomes
+  if(length(seqnames[!f]) > 0){
+    warning("Not matching chromosome identifier in gff and bam file. ",
+            "Skipping data for chromosome '",
+            paste(length(seqnames[!f]), collapse = "', '"),
+            "'.",
+            call. = FALSE)
   }
-  names(gRangeList) <- listNames[listNames != ""]
-  
-  which <- gRangeList
-  # what <- c("rname", "strand", "pos", "qwidth", "seq", "mapq")
-  what <- c("seq", "mapq")
+  # keep only ranges for which sequences are available
+  ranges <- ranges[as.character(GenomeInfoDb::seqnames(ranges)) %in% seqnames[f],]
+  rangesList <- split(ranges,
+                      GenomeInfoDb::seqnames(ranges))
   flags <- scanBamFlag(isSecondaryAlignment = FALSE)
   param <- Rsamtools::ScanBamParam(flag = flags,
-                                   which = which, 
-                                   what = what,
+                                   which = rangesList,
                                    mapqFilter = quality)
   return(param)
 }

@@ -1,74 +1,47 @@
 Package: RNAmodR
-Type: Package
-Title: RNAmodR: detecting post-transcriptional RNA modification
-Version: 0.3
-Date: 2018-02-01
-Authors@R: person("Felix G.M.", 
-                  "Ernst", 
-                  email = "felix.g.m.ernst@outlook.com", 
+Title: Detection of post-transcriptional modifications
+Version: 0.0.0.9000
+Authors@R: person("Felix G.M.",
+                  "Ernst",
+                  email = "felix.gm.ernst@outlook.com",
                   role = c("aut", "cre"))
-Description:
-  Based on known pattern of read positions RNAmodR detects post-transcriptional
-  RNA modifications in HTS data. RNAmodR is designed to be extendable, so that
-  detection and analysis of new patterns in HTS data can be added easily. 
-License: Artistic-2.0 + file LICENSE
+Description: What the package does (one paragraph).
+Depends:
+    R (>= 3.5.1),
+    IRanges,
+    GenomicRanges
+License: Artistic-2.0
 Encoding: UTF-8
-Depends: R (>= 3.4.2)
-Collate: 
+LazyData: true
+Imports:
+    methods,
+    assertive,
+    S4Vectors,
+    GenomicAlignments,
+    GenomicRanges,
+    Rsamtools,
+    rtracklayer
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Collate:
     'RNAmodR.R'
     'AllGenerics.R'
-    'AllGenerics-export.R'
-    'class-RNAmodR-args.R'
-    'class-RNAmodR.R'
-    'class-RNAmodR-ident.R'
-    'class-RNAmodR-ident-D.R'
-    'class-RNAmodR-ident-m3C.R'
-    'class-RNAmodR-ident-m7G.R'
-    'class-RNAmodR-ident-ribometh.R'
-    'class-RNAmodR-quant.R'
-    'class-RNAmodR-quant-5end.R'
-    'class-RNAmodR-quant-allends.R'
-    'class-RNAmodR-quant-methends.R'
-    'datasets.R'
-    'methods-RNAmodR-analysis.R'
-    'methods-RNAmodR-args.R'
-    'methods-RNAmodR-compare.R'
-    'methods-RNAmodR-parse.R'
-    'methods-RNAmodR-plot.R'
-    'methods-RNAmodR.R'
-    'utils-assertions.R'
+    'PosDataFrame-class.R'
+    'PosData-class.R'
+    'ModExperiment-class.R'
+    'ModExperiment-I.R'
+    'ModExperiment-analysis.R'
+    'ModExperiment-check.R'
+    'ModExperiment-utils.R'
+    'PosData-End3PosData.R'
+    'PosData-End5PosData.R'
+    'PosData-EndPosData.R'
+    'PosData-ProtectedEndPosData.R'
+    'PosData-coverage.R'
+    'PosData-pileup.R'
+    'PosData-statistics.R'
     'utils-bam.R'
-    'utils-misc.R'
-    'utils-modifications.R'
-    'utils-options.R'
-    'utils-plot.R'
-    'utils-quant.R'
-    'utils-ranges.R'
-    'utils-sequences.R'
-    'utils-statistics.R'
-Imports:
-  methods,
-  assertive,
-  stats,
-  stringr,
-  ggplot2,
-  ggrepel,
-  scales,
-  gridExtra,
-  BiocGenerics,
-  S4Vectors,
-  Biostrings,
-  BiocParallel,
-  GenomicRanges,
-  GenomicFeatures,
-  GenomicAlignments,
-  IRanges,
-  SummarizedExperiment,
-  GenomeInfoDb,
-  Rsamtools,
-  rtracklayer
-Suggests: testthat,
-  knitr,
-  rmarkdown
-VignetteBuilder: knitr
-RoxygenNote: 6.0.1
+    'utils.R'
+RoxygenNote: 6.1.1
