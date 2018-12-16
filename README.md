@@ -1,2 +1,2 @@
-# modRNA
+# RNAmodR
 Detection of postranscriptional modifications
