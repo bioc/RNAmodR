@@ -1,51 +1,47 @@
-#' @include class-RNAmodR-mod-type.R
+#' @include class-RNAmodR-ident.R
 NULL
 
-RNAMODR_M3C_NUCLEOTIDE <- "C"
-RNAMODR_M3C_ARREST_RATE <- 0.65
-RNAMODR_M3C_ARREST_RATE_INV <- 1 - RNAMODR_M3C_ARREST_RATE
-RNAMODR_M3C_Z_THRESHOLD <- 3
-RNAMODR_M3C_SIG_THRESHOLD <- 5
-
-
-#' @rdname RNAmodR-mod-class
+#' @rdname RNAmodR-ident-class
 #'
 #' @description 
-#' \code{mod_m3C}:
+#' \code{RNAmodRident_D}:
 #' 
 #' @export
-setClass("mod_m3C",
-         contains = "mod",
+setClass("RNAmodRident_D",
+         contains = "RNAmodRident",
          prototype = list(dataType = "5end",
-                          modType = "m3C",
-                          positionOffset = 1)
+                          modType = "D",
+                          param = list(nucleotide = "T")
+                          )
 )
 
-#' @rdname checkForModification
+#' @rdname identifyModificationPerTranscript
 #' 
 #' @description 
-#' \code{mod_m3C}
+#' \code{RNAmodRident_D}
 setMethod(
-  f = "checkForModification",
-  signature = signature(x = "mod_m3C",
-                        location = "numeric",
+  f = "scoreModificationsPerTranscript",
+  signature = signature(x = "RNAmodRident_D",
                         locations = "numeric",
-                        data = "list"),
+                        data = "GRangesList",
+                        args = "RNAmodRargs",
+                        endLocation = "numeric"),
   definition = function(x,
-                        location,
                         locations,
-                        data) {
+                        data,
+                        args,
+                        endLocation) {
     # get test result for the current location
-    locTest <- .calc_M3C_test_values(location,
-                                     locations,
-                                     data)
+    locTest <- .calc_D_test_values(location,
+                                   locations,
+                                   data)
     # If insufficient data is present
     if(is.null(locTest)) return(NULL)
     # dynamic threshold based on the noise of the signal (high sd)
-    if(!.validate_M3C_pos(RNAMODR_M3C_SIG_THRESHOLD, 
-                          RNAMODR_M3C_Z_THRESHOLD, 
-                          locTest$sig.mean, 
-                          locTest$z) ) {
+    if(!.validate_D_pos(RNAMODR_D_SIG_THRESHOLD, 
+                        RNAMODR_D_Z_THRESHOLD, 
+                        locTest$sig.mean, 
+                        locTest$z) ) {
       return(NULL)
     }
     # Return data
@@ -58,10 +54,10 @@ setMethod(
   }
 )
 
-# test for m3C at current location
-.calc_M3C_test_values <- function(location,
-                                  locations,
-                                  data){
+# test for D at current location
+.calc_D_test_values <- function(location,
+                                locations,
+                                data){
   # split data
   conditions <- names(data)
   coverage <- lapply(data,"[[","coverage")
@@ -69,12 +65,12 @@ setMethod(
   data <- lapply(data,"[[","data")
   names(data) <- conditions
   
-  # if(location == 32) browser()
+  # if(location == 20) browser()
   # short cut if amount of data is not sufficient
-  pretestData <- .do_M3C_pretest(location,
-                                 locations,
-                                 data,
-                                 coverage)
+  pretestData <- .do_D_pretest(location,
+                               locations,
+                               data,
+                               coverage)
   if(is.null(pretestData)) return(NULL)
   # If Control sample is available
   if(!is.null(pretestData$Control)){
@@ -89,11 +85,11 @@ setMethod(
     testDataControl <- mean(unlist(testDataC))
     testDataCorrected <- unlist(testData) - testDataControl
     # if stop coverage is to low
-    if(any(testDataCorrected < (RNAMODR_M3C_ARREST_RATE - testDataControl))) return(NULL)
+    if(any(testDataCorrected < (RNAMODR_D_ARREST_RATE - testDataControl))) return(NULL)
     # difference to threshold by relative percent
     # minimal value of 1 since y is one percent lower than arrest rate threshold
-    sig <- floor((testDataCorrected - (RNAMODR_M3C_ARREST_RATE - testDataControl)) / 
-                   (1 - (RNAMODR_M3C_ARREST_RATE - testDataControl)) * 100)
+    sig <- floor((testDataCorrected - (RNAMODR_D_ARREST_RATE - testDataControl)) / 
+                   (1 - (RNAMODR_D_ARREST_RATE - testDataControl)) * 100)
     sig.mean <- mean(sig)
     # approx. sd since covariance of testData and testDataC cannot not be 
     # assumed in case of unequal number of  observations
@@ -112,11 +108,11 @@ setMethod(
     baseData <- unlist(pretestData$Treated$baseData)
     n <- pretestData$Treated$n
     # if stop coverage is to low
-    if(any(testData < RNAMODR_M3C_ARREST_RATE)) return(NULL)
+    if(any(testData < RNAMODR_D_ARREST_RATE)) return(NULL)
     # difference to threshold by relative percent
     # minimal value of 1 since y is one percent lower than arrest rate threshold
-    sig <- floor((testData - RNAMODR_M3C_ARREST_RATE) / 
-                   (1 - RNAMODR_M3C_ARREST_RATE) * 100)
+    sig <- floor((testData - RNAMODR_D_ARREST_RATE) / 
+                   (1 - RNAMODR_D_ARREST_RATE) * 100)
     sig.mean <- mean(sig)
     sig.sd <- stats::sd(sig)
     # generate z score
@@ -133,48 +129,48 @@ setMethod(
 
 # check if any data is available to proceed with test
 # this is in a seperate function since it is also called by checkForModification
-.do_M3C_pretest <- function(location,
-                            locations,
-                            data,
-                            coverage){
-  # if non C position skip position
-  if( names(locations[locations == location]) != RNAMODR_M3C_NUCLEOTIDE){
+.do_D_pretest <- function(location,
+                          locations,
+                          data,
+                          coverage){
+  # if non D position skip position
+  if( names(locations[locations == location]) != RNAMODR_D_NUCLEOTIDE){
     return(NULL)
   }
   # do not take into account position 1 or the other end
   if(location == 1 || location > (max(locations) - 5) ) return(NULL)
   # split into conditions
-  res <- mapply(FUN = .get_data_per_condition_M3C,
+  res <- mapply(FUN = .get_data_per_condition_D,
                 split(data,names(data)),
                 split(coverage,names(coverage)),
                 MoreArgs = list(location = location),
                 SIMPLIFY = FALSE)
   res <- res[!vapply(res,is.null,logical(1))]
   # check if Treated condition has valid data. Otherwise return NULL (Abort)
-  if(is.null(res$Treated) || 
-     any(is.na(res$Treated$testData))){
+  # check if treated data ends at N+1 
+  if(is.null(res$Treated) || any(is.na(res$Treated$posData))){
     return(NULL)
   }
   return(res)
 }
 
-.get_data_per_condition_M3C <- function(data, 
-                                        coverage,
-                                        location){
+.get_data_per_condition_D <- function(data, 
+                                      coverage,
+                                      location){
   # number of replicates
   n <- length(data)
   # data on the N location
   posData <- .aggregate_location_data(data,
                                       location)
   # data on the N+1 location
-  testData <- .aggregate_location_data(data, 
+  testData <- .aggregate_location_data(data,
                                        (location + 1))
   # if number of data points is not high enough or their are empty
   if(any(is.na(testData)) || length(unlist(testData)) == 0 ) return(NULL)
   # if minimal arrest rate requires to low coverage
   testCoverage <- .aggregate_location_data(coverage, 
                                            (location + 1))
-  if(any( (unlist(testCoverage) * RNAMODR_M3C_ARREST_RATE_INV) < RNAMODR_5END_COVERAGE_MIN )) return(NULL)
+  if(any( (unlist(testCoverage) * RNAMODR_D_ARREST_RATE_INV) < RNAMODR_5END_COVERAGE_MIN )) return(NULL)
   # base data to compare against
   baseData <- .aggregate_area_data(data, 
                                    (location + 1), 
@@ -193,7 +189,7 @@ setMethod(
 }
 
 # iterates on every position and calculates the difference of the means
-.merge_base_data_M3C <- function(treated,
+.merge_base_data_D <- function(treated,
                                  control){
   df <- data.frame(append(treated,control))
   colnames(df) <- c(names(treated),names(control))
@@ -206,12 +202,36 @@ setMethod(
 }
 
 # call yes or nor position
-.validate_M3C_pos <- function(sig.threshold, 
-                              p.threshold, 
-                              sig, 
-                              z){
+.validate_D_pos <- function(sig.threshold,
+                            p.threshold,
+                            sig,
+                            z){
   ((sig > sig.threshold &&
       z >= p.threshold) ||
      (sig > sig.threshold &&
         !.get_use_p()))
 }
+
+
+
+
+#' @rdname identifyModificationsPerTranscript
+#' 
+#' @description 
+#' \code{RNAmodRident_D}
+#' 
+#' @export
+setMethod(
+  f = "identifyModificationsPerTranscript",
+  signature = signature(x = "RNAmodRident_D",
+                        data = "GPos",
+                        args = "RNAmodRargs"),
+  definition = function(x,
+                        data,
+                        args) {
+    browser()
+    
+    
+    return(return(gpos))
+  }
+)

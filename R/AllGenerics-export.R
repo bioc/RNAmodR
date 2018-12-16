@@ -1,7 +1,8 @@
 #' @include AllGenerics.R
 NULL
 
-# RNAmodR ================================================================
+# RNAmodR ----------------------------------------------------------------------
+
 #' @name RNAmodR-Accessors 
 #' 
 #' @title Accessors for RNAmodR Object
@@ -81,6 +82,49 @@ setGeneric(
   def = function(experimentName) standardGeneric("setupWorkEnvir")
 ) 
 
+# RNAModRargs ------------------------------------------------------------------
+
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
+  name = "getInputFiles",
+  def = function(x) standardGeneric("getInputFiles")
+)
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
+  name = "getConditions",
+  def = function(x) standardGeneric("getConditions")
+)
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
+  name = "getParam",
+  def = function(x,
+                 identifier,
+                 param) standardGeneric("getParam")
+)
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
+  name = "setParam",
+  def = function(x,
+                 identifier,
+                 param,
+                 value) standardGeneric("setParam")
+)
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
+  name = "loadQuantifier",
+  def = function(x) standardGeneric("loadQuantifier")
+)
+#' @rdname RNAmodR-args-class
+#' @export
+setGeneric(
+  name = "loadIdentifier",
+  def = function(x) standardGeneric("loadIdentifier")
+)
 
 # experiment data---------------------------------------------------------------
 
@@ -88,56 +132,69 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "getExperimentData",
-  def = function(.Object,
-                 number) standardGeneric("getExperimentData")
+  def = function(x,
+                 number = FALSE) standardGeneric("getExperimentData")
 ) 
 
-
-#' @name getSummarizedExperiment
+#' @name saveScores
 #' @export
 setGeneric( 
-  name = "getSummarizedExperiment",
-  def = function(.Object,
-                 number) standardGeneric("getSummarizedExperiment")
-) 
-
-#' @rdname  getSummarizedExperiment
+  name = "saveScores",
+  def = function(x,
+                 number,
+                 scores) standardGeneric("saveScores")
+)
+#' @name saveScores
 #' @export
 setGeneric( 
-  name = "getSummarizedExperiments",
-  def = function(.Object,
-                 number) standardGeneric("getSummarizedExperiments")
+  name = "loadScores",
+  def = function(x,
+                 number,
+                 modification = NULL,
+                 geneNames = NULL) standardGeneric("loadScores")
 ) 
 
-#' @name setSummarizedExperiment
+#' @name saveModifications
 #' @export
 setGeneric( 
-  name = "setSummarizedExperiment",
-  def = function(.Object,
-                 se,
-                 number) standardGeneric("setSummarizedExperiment")
+  name = "saveModifications",
+  def = function(x,
+                 number,
+                 modifications) standardGeneric("saveModifications")
+)
+#' @name saveModifications
+#' @export
+setGeneric( 
+  name = "loadModifications",
+  def = function(x,
+                 number,
+                 modification = NULL,
+                 geneNames = NULL) standardGeneric("loadModifications")
 ) 
 
-#' @name getGffResult
-#' @export
-setGeneric( 
-  name = "getGffResult",
-  def = function(.Object,
-                 number, 
-                 genomicCoordinates = FALSE) standardGeneric("getGffResult")
-) 
 
-#' @name setGffResult
-#' 
-#' @description setGff
-#' 
-#' @export
-setGeneric( 
-  name = "setGffResult",
-  def = function(.Object,
-                 gff,
-                 number) standardGeneric("setGffResult")
-) 
+#' #' @name getGffResult
+#' #' @export
+#' setGeneric( 
+#'   name = "getGffResult",
+#'   def = function(.Object,
+#'                  number, 
+#'                  genomicCoordinates = FALSE) standardGeneric("getGffResult")
+#' )
+#' #' @name setGffResult
+#' #' 
+#' #' @description setGff
+#' #' 
+#' #' @export
+#' setGeneric( 
+#'   name = "setGffResult",
+#'   def = function(.Object,
+#'                  gff,
+#'                  number) standardGeneric("setGffResult")
+#' ) 
+
+
+
 
 # parsing ----------------------------------------------------------------------
 
@@ -145,80 +202,146 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "parseForModifications",
-  def = function(.Object,
+  def = function(x,
                  number,
+                 param) standardGeneric("parseForModifications")
+) 
+#' @name parseForModifications
+#' @export
+setGeneric( 
+  name = "parseForModificationsWithArgs",
+  def = function(x,
                  name,
                  gff,
-                 fasta,
-                 files,
-                 conditions,
-                 mapQuality,
-                 modifications) standardGeneric("parseForModifications")
-) 
+                 fasta) standardGeneric("parseForModificationsWithArgs")
+)
 
-# analysis type accessors ------------------------------------------------------------
+# quantifier class accessors ---------------------------------------------------
 
-#' @name data-accessors
+#' @name RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getPlotType",
-  def = function(object) standardGeneric("getPlotType")
+  def = function(x) standardGeneric("getPlotType")
 ) 
 
-#' @rdname data-accessors
+#' @rdname RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getPositions",
-  def = function(object) standardGeneric("getPositions")
+  def = function(x) standardGeneric("getPositions")
 ) 
 
-#' @rdname data-accessors
+#' @rdname RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getModifications",
-  def = function(object) standardGeneric("getModifications")
+  def = function(x) standardGeneric("getModifications")
 ) 
 
-#' @rdname data-accessors
+#' @rdname RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getDataLabel",
-  def = function(object) standardGeneric("getDataLabel")
+  def = function(x) standardGeneric("getDataLabel")
 ) 
 
-#' @rdname data-accessors
+#' @rdname RNAmodRquant-accessors
 #' @export
 setGeneric( 
   name = "getDataFormat",
-  def = function(object) standardGeneric("getDataFormat")
+  def = function(x) standardGeneric("getDataFormat")
 ) 
 
-# mod type accessors -----------------------------------------------------------
+# quantifier -------------------------------------------------------------------
 
-#' @name mod-accessors
-#' @aliases getDataType getModType
-#' 
-#' @title accessors for \code{mod} class objects
-#' 
-#' @description 
-#' title 
-#' 
+#' @name quantifyReadData
+#' @export
+setGeneric( 
+  name = "quantifyReadData",
+  def = function(x,
+                 args,
+                 gff,
+                 fafile,
+                 param) standardGeneric("quantifyReadData")
+)
+#' @name quantifiyReadDataPerTranscript
+#' @title Returns the data for each transcript
+setGeneric ( 
+  name = "quantifiyReadDataPerTranscript", 
+  def = function(x,
+                 bamData,
+                 args,
+                 counts,
+                 gff,
+                 fafile) standardGeneric("quantifiyReadDataPerTranscript")
+) 
+
+
+# ident class accessors --------------------------------------------------------
+
+#' @name RNAmodRident-accessors
 #' @export
 setGeneric( 
   name = "getModType",
-  def = function(object) standardGeneric("getModType")
+  def = function(x) standardGeneric("getModType")
 ) 
 #' @rdname mod-accessors
 #' @export
 setGeneric( 
   name = "getDataType",
-  def = function(object) standardGeneric("getDataType")
+  def = function(x) standardGeneric("getDataType")
 ) 
-#' @rdname mod-accessors
+#' @rdname RNAmodRident-accessors
 #' @export
 setGeneric( 
-  name = "getPositionOffset",
-  def = function(object) standardGeneric("getPositionOffset")
+  name = "subsetData",
+  def = function(x,
+                 data) standardGeneric("subsetData")
+) 
+#' @rdname RNAmodRident-accessors
+#' @export
+setGeneric( 
+  name = "subsetResults",
+  def = function(x,
+                 data) standardGeneric("subsetResults")
+) 
+
+# identifier -------------------------------------------------------------------
+
+#' @name identifyModification
+#' @export
+setGeneric( 
+  name = "scoreModifications",
+  def = function(x,
+                 data,
+                 args) standardGeneric("scoreModifications")
+) 
+#' @name identifyModificationPerTranscript
+#' @title Returns the data for each transcript
+setGeneric ( 
+  name = "scoreModificationsPerTranscript", 
+  def = function(x,
+                 locations,
+                 data,
+                 args,
+                 endLocation) standardGeneric("scoreModificationsPerTranscript")
+) 
+#' @name identifyModification
+#' @export
+setGeneric( 
+  name = "identifyModifications",
+  def = function(x,
+                 data,
+                 args) standardGeneric("identifyModifications")
+) 
+#' @name identifyModificationPerTranscript
+#' @title Returns the data for each transcript
+setGeneric ( 
+  name = "identifyModificationsPerTranscript", 
+  def = function(x,
+                 data,
+                 args) standardGeneric("identifyModificationsPerTranscript")
 ) 
 
 

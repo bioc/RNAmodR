@@ -1,7 +1,7 @@
 Package: RNAmodR
 Type: Package
 Title: RNAmodR: detecting post-transcriptional RNA modification
-Version: 0.2
+Version: 0.3
 Date: 2018-02-01
 Authors@R: person("Felix G.M.", 
                   "Ernst", 
@@ -11,24 +11,27 @@ Description:
   Based on known pattern of read positions RNAmodR detects post-transcriptional
   RNA modifications in HTS data. RNAmodR is designed to be extendable, so that
   detection and analysis of new patterns in HTS data can be added easily. 
-License: GPL-3
+License: Artistic-2.0 + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 3.4.2)
 Collate: 
     'RNAmodR.R'
     'AllGenerics.R'
     'AllGenerics-export.R'
+    'class-RNAmodR-args.R'
     'class-RNAmodR.R'
-    'class-RNAmodR-data-type.R'
-    'class-RNAmodR-mod-type.R'
-    'class-RNAmodR-data-5end.R'
-    'class-RNAmodR-data-allends.R'
-    'class-RNAmodR-mod-D.R'
-    'class-RNAmodR-mod-m3C.R'
-    'class-RNAmodR-mod-m7G.R'
-    'class-RNAmodR-mod-ribometh.R'
+    'class-RNAmodR-ident.R'
+    'class-RNAmodR-ident-D.R'
+    'class-RNAmodR-ident-m3C.R'
+    'class-RNAmodR-ident-m7G.R'
+    'class-RNAmodR-ident-ribometh.R'
+    'class-RNAmodR-quant.R'
+    'class-RNAmodR-quant-5end.R'
+    'class-RNAmodR-quant-allends.R'
+    'class-RNAmodR-quant-methends.R'
     'datasets.R'
     'methods-RNAmodR-analysis.R'
+    'methods-RNAmodR-args.R'
     'methods-RNAmodR-compare.R'
     'methods-RNAmodR-parse.R'
     'methods-RNAmodR-plot.R'
@@ -39,6 +42,7 @@ Collate:
     'utils-modifications.R'
     'utils-options.R'
     'utils-plot.R'
+    'utils-quant.R'
     'utils-ranges.R'
     'utils-sequences.R'
     'utils-statistics.R'

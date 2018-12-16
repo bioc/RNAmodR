@@ -80,6 +80,10 @@ RNAMODR_MOD_TRANSCRIPT_FEATURES <- c("gene",
                                      "three_prime_UTR_intron")
 
 # Import constants -------------------------------------------------------------
+RNAMODR_MIN_MAPQUALITY <- 5
+RNAMODR_PARAM_COL <- c("Identifier",
+                       "Param",
+                       "Value")
 RNAMODR_SAMPLE_TYPES <- c("Treated",
                           "Control")
 RNAMODR_DEFAULT_COLNAMES <- c("ExperimentNo",
@@ -87,42 +91,16 @@ RNAMODR_DEFAULT_COLNAMES <- c("ExperimentNo",
                               "ShortName",
                               "Replicate",
                               "Conditions",
-                              "Modifications",
-                              "BamFile",
-                              "MapQuality")
-
-# parsing settings -------------------------------------------------------------
-RNAMODR_DEFAULT_MAPQ <- 5
-RNAMODR_DEFAULT_RMS_WIDTH <- 6
-RNAMODR_DEFAULT_RMS_B_WEIGHTS <- c("-6" = 0.5,
-                                   "-5" = 0.6,
-                                   "-4" = 0.7,
-                                   "-3" = 0.8,
-                                   "-2" = 0.9,
-                                   "-1" = 1,
-                                   "0" = 0,
-                                   "1" = 1,
-                                   "2" = 0.9,
-                                   "3" = 0.8,
-                                   "4" = 0.7,
-                                   "5" = 0.6,
-                                   "6" = 0.5)
+                              "BamFile")
 
 # Visualization settings -------------------------------------------------------
 RNAMODR_DEFAULT_PALETTE <- "Set1"
 
 # Settings ---------------------------------------------------------------------
 .onLoad <- function(libname,pkgname){
-  options("RNAmodR_map_quality" = RNAMODR_DEFAULT_MAPQ)
-  options("RNAmodR_use_p" = TRUE)
-  options("RNAmodR_RiboMethScore_width" = RNAMODR_DEFAULT_RMS_WIDTH)
-  options("RNAmodR_RiboMethScore_weights" = RNAMODR_DEFAULT_RMS_B_WEIGHTS)
   options("RNAmodR_palette" = RNAMODR_DEFAULT_PALETTE)
   options("RNAmodR_dpi" = 600)
-  options("RNAmodR_use_cairo" = FALSE)
   options("RNAmodR_debug" = FALSE)
+  options("RNAmodR_min_mapquality" = RNAMODR_MIN_MAPQUALITY)
 }
 
-# # class unions for S4 functions
-# setClassUnion("missingORcharacter", 
-#               members = c("missing","character"))

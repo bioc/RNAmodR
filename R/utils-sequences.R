@@ -3,15 +3,18 @@
 
 # sequence handling ------------------------------------------------------------
 
-# retrieve concats DNAStrings based on the strand
-.get_seq_for_unique_transcript <- function(gff,fafile,ID){
-  if(length(unique(as.character(BiocGenerics::strand(gff)))) != 1) {
-    stop("Ambigeous type of GRanges given. Expects only one strand.",
+# get transcript sequence of multiple annotations
+.get_seq_for_transcripts <- function(gff,fafile){
+  seq <- getSeq(fafile,gff)
+  seq[.is_on_minus_strand(gff)] <- rev(seq[.is_on_minus_strand(gff)])
+  return(seq)
+}
+
+# get transcript sequence of one annotations
+.get_seq_for_unique_transcript <- function(gr,fafile){
+  if(length(gr) > 1){
+    stop("Not a GRanges object of length = 1.",
          call. = FALSE)
   }
-  seq <- getSeq(fafile,gff)
-  if(as.character(BiocGenerics::strand(gff)) == "-"){
-    return(unlist(rev(seq)))
-  }
-  return(unlist(seq))
+  return(unlist(.get_seq_for_transcripts(gr,fafile)))
 }

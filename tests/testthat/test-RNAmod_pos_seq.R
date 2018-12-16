@@ -108,7 +108,7 @@ test_that("Transcript position functions:",
             
             # .get_transcript_sequence
             actual <- RNAmodR:::.get_transcript_sequence(gff,"RDN18-1",RDN18$seq)
-            expected <- .get_single_position_letters(RDN18$seq)
+            expected <- as.character(split(RDN18$seq, 1:length(RDN18$seq)))
             names(expected) <- as.character(1:1800)
             expect_length(actual, 1800)
             expect_equal(actual, expected)

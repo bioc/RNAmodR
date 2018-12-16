@@ -1,3 +1,6 @@
+#' @include RNAmodR.R
+NULL
+
 #' @name RNAmodR-class
 #' 
 #' @title RNAmodR Class
@@ -50,7 +53,7 @@ setClass("RNAmodR",
            .outputFolder = "character",
            .mapQuality = "numeric"
          ),
-         prototype=list(
+         prototype = list(
            .dataSamples = S4Vectors::DataFrame(),
            .dataGFF = GenomicRanges::GRanges(),
            .wd = "",
@@ -111,7 +114,8 @@ setMethod(
     requireNamespace("rtracklayer", quietly = TRUE)
     # Save data to slots
     .Object@experimentName <- experimentName
-    .Object@.wd <- paste0("./", .Object@experimentName, "/")
+    # .Object@.wd <- paste0("./", .Object@experimentName, "/")
+    .Object@.wd <- paste0("./")
     
     .Object@inputFile <- paste0(.Object@.wd, 
                                 .Object@.inputFolder, 
@@ -181,30 +185,9 @@ setMethod(
   assertive::assert_all_are_positive(samples$Replicate)
   assertive::assert_all_are_whole_numbers(samples$Replicate)
   assertive::assert_all_are_existing_files(paste0(inputFolder,samples$BamFile))
-  assertive::assert_all_are_whole_numbers(samples$MapQuality)
-  # check modifications
-  samples$Modifications <- lapply(samples$Modifications,
-                                  function(str){str_split(str, ",")})
-  modifications <- unique(unlist(samples$Modifications))
-  .check_for_mod_classes(modifications)
   # check for valid condition types
   .check_sample_conditions(unique(samples$Conditions))
   return(samples)
-}
-
-.check_sample_conditions <- function(conditions){
-  if(!all(conditions %in% RNAMODR_SAMPLE_TYPES)){
-    stop("Not all condition types are valid. Valid types are:\n",
-         paste(RNAMODR_SAMPLE_TYPES, collapse = ","),
-         call. = FALSE)
-  }
-}
-.check_for_mod_classes <- function(modifications){
-  modClasses <- .load_mod_classes(modifications)
-  if(!all(modifications %in% names(modClasses))){
-    stop("Not all modification types are valid. Valid types are.",
-         call. = FALSE)
-  }
 }
 
 # matches the names in fasta file to the chromosome identifier in the GFF file
@@ -251,6 +234,23 @@ setMethod(
   f = "show",
   signature = signature(object = "RNAmodR"),
   definition = function(object) {
-    print("test")
+    
+    printLine <- function(...){
+      lines <- list(...)
+      lapply(lines, function(line){cat(paste0("# ",line, "\n"))})
+    }
+    
+    printLine(paste0("Experiment name: ",object@experimentName))
+    printLine(paste0("Experiment layout file: ",object@inputFile))
+    printLine(paste0("GFF annotation file: ",object@inputGFF))
+    printLine(paste0("Fasta genome sequence file: ",object@inputFasta))
+    
+    printLine(paste0("Number of samples: ",length(getExperimentData(object)$ExperimentNo) ))
+    apply(getExperimentData(object), 1, function(exp){
+      printLine(paste0("Sample name ",
+                       exp["ExperimentNo"],": ",
+                       exp["SampleName"]))
+    })
+    printLine("Replicates are not listed individually.")
   }
 )

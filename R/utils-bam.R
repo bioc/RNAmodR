@@ -66,7 +66,7 @@ NULL
   param <- Rsamtools::ScanBamParam(flag = flags,
                                    which = which, 
                                    what = what,
-                                   mapqFilter = .get_map_quality())
+                                   mapqFilter = quality)
   return(param)
 }
 

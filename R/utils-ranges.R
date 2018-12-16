@@ -1,4 +1,4 @@
-#' @include class-RNAmodR-data-type.R
+#' @include class-RNAmodR-quant.R
 NULL
 
 # BiocGeneric helper functions -------------------------------------------------
@@ -29,7 +29,7 @@ NULL
 # get aggregated identifiers
 .get_gr_ids <- function(gr,
                         na.rm = TRUE){
-  IDs <- unique(c(gr$ID,gr$Name))
+  IDs <- unique(c(gr$ID,gr$Name,gr$gene))
   if(na.rm){
     IDs <- IDs[!is.na(IDs)]
   }
@@ -53,6 +53,41 @@ NULL
 # subset to types present in RNAMODR_MOD_SEQ_FEATURES
 .subset_rnamod_containing_features <- function(gr){
   gr[S4Vectors::mcols(gr)$type %in% RNAMODR_MOD_CONTAINING_FEATURES,]
+}
+
+# returns an order based on the named of the chromosome and start and end 
+# coordinates
+.order_GRanges <- function(gr){
+  gr[order(GenomeInfoDb::seqnames(gr),
+           BiocGenerics::start(gr),
+           BiocGenerics::end(gr))]
+}
+
+# subset GRanges for highest ranking parent
+.get_parent_annotations <- function(gr,
+                                    forceSingle = FALSE,
+                                    doRecursiveSearch = FALSE,
+                                    IDs){
+  if(!doRecursiveSearch){
+    res <- gr[is.na(as.character(gr$Parent)),]
+    if(length(res) > 1 && forceSingle) 
+      stop("No distinct single parent annotation detectable.")
+    return(res)
+  }
+  if(missing(IDs)) IDs <- .get_gr_ids(gr)
+  l <- lapply(IDs, .get_parent, gr = gr)
+  l <- unique(unlist(l[!vapply(l,is.null,logical(1))]))
+  .order_GRanges(gr[(!is.na(gr$ID) & gr$ID %in% l) |
+                      (!is.na(gr$Name) & gr$Name %in% l),])
+}
+# quasi recursive search for all possible parents
+.get_parent <- function(ID,
+                        gr){
+  parent <- as.character(gr[(!is.na(gr$ID) & gr$ID == ID) |
+                              (!is.na(gr$Name) & gr$Name == ID),]$Parent)
+  parent <- parent[!is.na(parent)]
+  if(length(parent) == 0) return(ID)
+  return(unlist(lapply(parent, .get_parent, gr)))
 }
 
 # subsets a gRanges object for entries concerning a single ID
@@ -89,128 +124,7 @@ NULL
   return(unlist(GRangesList(grl)))
 }
 
-# subset GRanges for highest ranking parent
-.get_parent_annotations <- function(gr,
-                                    forceSingle = FALSE,
-                                    doRecursiveSearch = FALSE,
-                                    IDs){
-  if(!doRecursiveSearch){
-    res <- gr[is.na(as.character(gr$Parent)),]
-    if(length(res) > 1 && forceSingle) 
-      stop("No distinct single parent annotation detectable.")
-    return(res)
-  }
-  if(missing(IDs)) IDs <- .get_gr_ids(gr)
-  l <- lapply(IDs, .get_parent, gr = gr)
-  l <- unique(unlist(l[!vapply(l,is.null,logical(1))]))
-  .order_GRanges(gr[(!is.na(gr$ID) & gr$ID %in% l) |
-                      (!is.na(gr$Name) & gr$Name %in% l),])
-}
-# quasi recursive search for all possible parents
-.get_parent <- function(ID,
-                        gr){
-  parent <- as.character(gr[(!is.na(gr$ID) & gr$ID == ID) |
-                              (!is.na(gr$Name) & gr$Name == ID),]$Parent)
-  parent <- parent[!is.na(parent)]
-  if(length(parent) == 0) return(ID)
-  return(unlist(lapply(parent, .get_parent, gr)))
-}
-
-# returns an order based on the named of the chromosome and start and end 
-# coordinates
-.order_GRanges <- function(gr){
-  gr[order(GenomeInfoDb::seqnames(gr),
-           BiocGenerics::start(gr),
-           BiocGenerics::end(gr))]
-}
-
-# common function handling positions -------------------------------------------
-
-# offset positions based on how many positions to be removed the read has passed 
-# from transcription start
-.move_positions <- function(positions,
-                            posToBeRemoved,
-                            strand){
-  x <- unlist(posToBeRemoved)
-  positions <- positions[!(positions %in% x)]
-  unlist(lapply(positions, function(position){
-    if(.is_minus_strand(strand)){
-      position <- position + length(x[x>position])
-    } else {
-      position <- position - length(x[x<position])
-    }
-    position
-  }))
-}
-
-# offset positions based on how many positions the read has passed from
-# transcription start. used the name for identification
-.move_positions_named <- function(positions,
-                                  posToBeRemoved,
-                                  strand){
-  x <- unlist(posToBeRemoved)
-  positions <- positions[!(as.numeric(names(positions)) %in% x)]
-  names(positions) <- .move_positions(as.numeric(names(positions)),
-                                      posToBeRemoved,
-                                      strand)
-  return(positions)
-}
-
-# sequences --------------------------------------------------------------------
-
-# get transcript sequence without removed
-.get_transcript_sequence <- function(gff,ID,seq){
-  # get gr
-  gr <- .subset_gff_for_unique_transcript(gff, ID)
-  # get a list of introns and the position which are void
-  posToBeRemoved <- .get_intron_positions(gff,
-                                          gr$ID)
-  # convert DNAString into character vector
-  seq <- .get_single_position_letters(seq)
-  # set positions as names
-  if(.is_on_minus_strand(gr)){
-    names(seq) <- BiocGenerics::end(gr):BiocGenerics::start(gr)
-  } else{
-    names(seq) <- BiocGenerics::start(gr):BiocGenerics::end(gr)
-  }
-  # remove intron sequence
-  seq <- seq[!(names(seq) %in% unlist(posToBeRemoved))]
-  # set local position
-  names(seq) <- 1:length(seq)
-  return(seq)
-}
-
-.get_single_position_letters <- function(x) {
-  x <- as.character(x)
-  substring(x, 1:nchar(x), 1:nchar(x))  
-}
-
-# Global to Local --------------------------------------------------------------
-
-# converts global to local positions and modifies data accoringly
-.convert_global_coverage_to_local_coverage <- function(gff,
-                                                       gr,
-                                                       data,
-                                                       posToBeRemoved){
-  # get coverage
-  coverage <- as.numeric(GenomicAlignments::coverage(data, 
-                                                     shift = -BiocGenerics::start(gr)+1,
-                                                     width = BiocGenerics::width(gr),
-                                                     method = "hash")[GenomeInfoDb::seqnames(gr)][[1]])
-  names(coverage) <- BiocGenerics::start(gr):BiocGenerics::end(gr)
-  # take care of intron positions
-  coverage <- .move_positions_named(coverage, 
-                                    posToBeRemoved, 
-                                    .get_unique_strand(gr))
-  # reset to relative positions to gene start
-  if(.is_on_minus_strand(gr)){
-    names(coverage) <- BiocGenerics::end(gr) - as.numeric(names(coverage)) + 1
-  } else {
-    names(coverage) <- as.numeric(names(coverage)) - BiocGenerics::start(gr) + 1
-  }
-  coverage <- coverage[order(as.numeric(names(coverage)))]
-  return(coverage)
-}
+# intron positions -------------------------------------------------------------
 
 # aggregate the positions occupied by introns
 .get_intron_positions <- function(gff, 
@@ -225,18 +139,26 @@ NULL
          })
 }
 
-# Local to Global --------------------------------------------------------------
+# sequences --------------------------------------------------------------------
 
-# converts the position on a transcript from start to end, to the correct
-# genomic position
-.convert_local_to_global_locations <- function(gff,
-                                               loc){
-  # Intron handling needs to be added
-  strand <- unique(as.character(strand(gff)))
-  if(strand == "-"){
-    locations <- (end(gff) - loc) + 1
-  } else {
-    locations <- (start(gff) + loc) - 1
+# get transcript sequence without removed
+.get_transcript_sequence <- function(gff,ID,seq){
+  # get gr
+  gr <- .subset_gff_for_unique_transcript(gff, ID)
+  # get a list of introns and the position which are void
+  posToBeRemoved <- .get_intron_positions(gff,
+                                          gr$ID)
+  # convert DNAString into character vector
+  seq <- as.character(split(seq, 1:length(seq)))
+  # set positions as names
+  if(.is_on_minus_strand(gr)){
+    names(seq) <- BiocGenerics::end(gr):BiocGenerics::start(gr)
+  } else{
+    names(seq) <- BiocGenerics::start(gr):BiocGenerics::end(gr)
   }
-  return(locations)
+  # remove intron sequence
+  seq <- seq[!(names(seq) %in% unlist(posToBeRemoved))]
+  # set local position
+  names(seq) <- 1:length(seq)
+  return(seq)
 }

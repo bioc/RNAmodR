@@ -6,12 +6,12 @@
 \alias{getExperimentData,RNAmodR-method}
 \title{getExperimentData}
 \usage{
-getExperimentData(.Object, number)
+getExperimentData(x, number = FALSE)
 
-\S4method{getExperimentData}{RNAmodR}(.Object, number)
+\S4method{getExperimentData}{RNAmodR}(x, number = FALSE)
 }
 \arguments{
-\item{.Object}{a RNAmod object}
+\item{x}{a RNAmodR object}
 
 \item{number}{optional number to return results for one experiment only}
 }
