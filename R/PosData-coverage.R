@@ -57,7 +57,6 @@ CoveragePosData <- function(bamfiles,
                             fasta,
                             gff,
                             ...){
-  browser()
   ans <- new("CoveragePosData",
              bamfiles,
              fasta,

@@ -84,3 +84,4 @@ setMethod(
   f = "ranges", 
   signature = signature(x = "PosDataFrame"),
   definition = function(x){x@ranges})
+

@@ -87,39 +87,45 @@ setClass(Class = "PileupPosData",
                        "left_bins", 
                        "query_bins", 
                        "cycle_bins")]
+  parentRanges <- .get_parent_annotations(ranges)
   pileupArgs <- pileupArgs[!vapply(pileupArgs,is.null,logical(1))]
-  #
-  pileupParam <- do.call(PileupParam,pileupArgs)
+  # get data per chromosome
+  pileupParam <- do.call("PileupParam",pileupArgs)
   pileup <- pileup(bamFile, scanBamParam = param, pileupParam = pileupParam)
   pileup <- DataFrame(pileup)
+  # reformat data
   pileup$seqnames <- as.character(pileup$seqnames)
-  pileup$pos <- as.integer(pileup$pos)
   pileup$nucleotide <- as.character(pileup$nucleotide)
-  pileupRanges <- split(pileup,
-                        pileup$which_label)
-  pileupRanges <- pileupRanges[match(names(pileupRanges),
-                                     paste0(seqnames(ranges),
-                                            ":",
-                                            as.character(ranges(ranges))))]
-  strands <- as.character(strand(ranges))
-  pileupRangesPos <- SplitDataFrameList(
+  # split into data per transcript which is defined by the which_label column
+  # format: chromosome:start-end
+  pileup <- split(pileup,
+                  pileup$which_label)
+  # sanitize pilup data
+  # - keep only data for correct strand
+  # - fillup empty positions with zero
+  strands <- as.character(strand(parentRanges))
+  pileup <- SplitDataFrameList(
     mapply(
       function(d,r,strand){
+        ans <- NULL
         d <- d[d$strand == strand,]
-        if(nrow(d) == 0) return(.fill_up_pileup_data(NULL,r))
-        ans <- reshape2::dcast(
-          as.data.frame(d),
-          pos ~ nucleotide,
-          sum,
-          value.var = "count")
+        if(nrow(d) > 0) {
+          ans <- reshape2::dcast(
+            as.data.frame(d),
+            pos ~ nucleotide,
+            sum,
+            value.var = "count")
+        }
         ans <- .fill_up_pileup_data(ans,r)
+        # remove pos column since we don't need this anymore. seq_along == pos
+        ans$pos <- NULL
         ans
       },
-      pileupRanges,
-      split(ranges,seq_along(ranges)),
+      pileup,
+      split(parentRanges,seq_along(parentRanges)),
       strands,
       SIMPLIFY = FALSE))
-  pileupRangesPos
+  pileup
 }
 
 #' @name PileupPosData
@@ -130,7 +136,6 @@ PileupPosData <- function(bamfiles,
                           fasta,
                           gff,
                           ...){
-  browser()
   ans <- new("PileupPosData",
              bamfiles,
              fasta,
@@ -146,11 +151,10 @@ PileupPosData <- function(bamfiles,
   message("Loading Pileup data from BAM files...")
   data <- lapply(ans@bamfiles,
                  FUN = .get_position_data_of_transcript_pileup,
-                 ranges = metadata(ranges)[["parents"]],
+                 ranges = ranges,
                  sequences = sequences,
                  param = param,
                  args = args)
-  browser()
   names(data) <- paste0("pileup.",
                         names(ans@bamfiles),
                         ".",

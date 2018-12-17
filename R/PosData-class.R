@@ -499,6 +499,9 @@ setMethod(
       GenomeInfoDb::seqnames(scanFaIndex(path(.Object@fasta)))))
     chromosomeNames <- unique(as.character(
       GenomeInfoDb::seqnames(import(.Object@gff))))
+    ### add bam seqnames check
+    
+    ###
     .Object@chromosomes <- intersect(sequenceNames,
                                      chromosomeNames)
     .Object@chromosomes <- .Object@chromosomes[order(.Object@chromosomes)]
@@ -559,7 +562,7 @@ setMethod(
   }
   # keep only features which can contain mmodifications
   ranges <- .subset_mod_containing_features(ranges)
-  # split per parent
+  # split GRanges per parent
   ranges <- split(ranges,.get_children_factor(ranges))
   # keep parent only data as metadata. this is basically the transcript to be
   # analyzed
@@ -597,41 +600,45 @@ setMethod(
                                    ranges,
                                    sequences){
   conditionsFmultiplier <- 1L
+  # work with the unlisted data and construct a CompressedSplitDataFrameList
+  # from this
   if(is(data[[1L]],"IntegerList")){
     data <- lapply(data,
                    function(d){
                      d[order(names(d))]
                    })
     data <- lapply(data, unlist)
-    df <- DataFrame(data)
+    data <- DataFrame(data)
     genes_ids <- unique(rownames(df))
   } else if(is(data[[1L]],"DataFrameList")) {
-    browser()
     data <- lapply(data, unlist, use.names = FALSE)
     ncols <- unique(unlist(lapply(data, ncol)))
     if(length(ncols) != 1L){
       stop("Something went wrong. Width of data should be constant.")
     }
     conditionsFmultiplier <- ncols
-    df <- do.call(cbind,data)
+    data <- do.call(cbind,data)
+  } else {
+    stop("Something went wrong.")
   }
+  # create partitioning object from ranges
   parentRanges <- .get_parent_annotations(ranges)
   partitioning <- PartitioningByEnd(parentRanges)
   f <- Rle(parentRanges$ID,width(parentRanges))
-  if(sum(width(partitioning)) != nrow(df) ||
-     length(f) != nrow(df)){
+  if(sum(width(partitioning)) != nrow(data) ||
+     length(f) != nrow(data)){
     stop("Something went wrong. Length of data and Ranges do not match.")
   }
-  # order data
-  dfl <- split(df,f)
-  dfl <- dfl[match(names(dfl),parentRanges$ID)]
-  df <- unlist(dfl, use.names = FALSE)
+  # order data so that is matched the PartitioningByEnd object
+  data <- split(data,f)
+  data <- data[match(names(data),parentRanges$ID)]
+  data <- unlist(data, use.names = FALSE)
   # order sequences
   sequences <- sequences[match(names(sequences),parentRanges$ID)]
   x@chromosomes <- x@chromosomes[match(x@chromosomes,
                                        GenomeInfoDb::seqnames(parentRanges))]
   # store data
-  x@unlistData <- df
+  x@unlistData <- data
   x@conditions <- rep(x@conditions, each = conditionsFmultiplier)
   x@replicate <- rep(x@replicate, each = conditionsFmultiplier)
   x@posDataType <- rep(x@posDataType, each = conditionsFmultiplier)

@@ -43,31 +43,30 @@ ProtectedEndPosData <- function(bamfiles,
                                 fasta,
                                 gff,
                                 ...){
-  .Object <- new("ProtectedEndPosData",
-                 bamfiles,
-                 fasta,
-                 gff,
-                 ...)
+  ans <- new("ProtectedEndPosData",
+             bamfiles,
+             fasta,
+             gff,
+             ...)
   args <- .get_mod_data_args(...)
-  ranges <- .load_annotation(.Object@gff)
-  sequences <- .load_transcript_sequences(.Object@fasta,
+  ranges <- .load_annotation(ans@gff)
+  sequences <- .load_transcript_sequences(ans@fasta,
                                           ranges)
   param <- .assemble_scanBamParam(ranges,
-                                  .Object@minQuality,
-                                  .Object@chromosomes)
-  message("Loading data from BAM files...")
-  data <- lapply(.Object@bamfiles,
+                                  ans@minQuality,
+                                  ans@chromosomes)
+  message("Loading protected end data from BAM files...")
+  data <- lapply(ans@bamfiles,
                  FUN = .get_position_data_of_transcript_protectedends,
                  ranges = ranges,
                  param = param,
                  args = args)
   names(data) <- paste0("protectedend.",
-                        names(.Object@bamfiles),
+                        names(ans@bamfiles),
                         ".",
-                        seq_along(.Object@bamfiles))
-  .Object <- .postprocess_read_data(.Object,
-                                    data,
-                                    ranges,
-                                    sequences)
-  return(.Object)
+                        seq_along(ans@bamfiles))
+  .postprocess_read_data(ans,
+                         data,
+                         ranges,
+                         sequences)
 }
