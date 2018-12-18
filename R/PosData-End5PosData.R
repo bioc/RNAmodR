@@ -23,17 +23,44 @@ setClass(Class = "End5PosData",
                                                    ranges,
                                                    param,
                                                    args = list()){
+  
   browser()
-  # skip if transcript does not have data
-  if(length(bamData) == 0) return(NULL)
-  # move position based on strand
-  bamData <- bamData[.is_on_correct_strand(bamData,.get_unique_strand(range))]
-  # discard reads out of boundaries
-  bamData <- bamData[BiocGenerics::end(bamData) <= BiocGenerics::start(range),]
-  bamData <- bamData[BiocGenerics::start(bamData) >= BiocGenerics::end(range),]
-  # create result GRanges object
-  browser()
-  return(respos)
+  parentRanges <- .get_parent_annotations(ranges)
+  bamWhat(param) <- c("flag","mapq")
+  data <- GenomicAlignments::readGAlignments(bamFile, param = param)
+  hits <- findOverlaps(data,parentRanges)
+  data <- split(subsetByOverlaps(data, parentRanges),
+                subjectHits(hits))
+  f <- as.integer(names(data))
+  names <- parentRanges$ID[f]
+  names(data) <- parentRanges$ID[f]
+  starts <- start(data)
+  ends <- end(data)
+  widths <- width(parentRanges[f])
+  strands <- as.character(strand(parentRanges)[f])
+  data <- IntegerList(lapply(seq_along(data),
+                             function(i){
+                               if(strands[i] == "+"){
+                                 starts[[i]]
+                               } else {
+                                 ends[[i]]
+                               }
+                             }))
+  data <- IntegerList(mapply(
+    function(d,w){
+      bg <- table(seq_len(w)) - 1
+      d <- table(d)
+      d <- acast(data.frame(pos = as.integer(c(names(bg),names(d))),
+                            count = as.integer(c(bg,d))),
+                 pos ~ .,
+                 value.var = "count",
+                 fun.aggregate = sum)
+      as.integer(d)
+    },
+    data,
+    widths,SIMPLIFY = FALSE))
+  names(data) <- names
+  data
 }
 
 

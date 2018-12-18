@@ -13,11 +13,12 @@ NULL
 #' @import assertive
 #' @import S4Vectors
 #' @import IRanges
+#' @import rtracklayer
 #' @import GenomicRanges
+#' @import Rsamtools
+#' @import GenomicAlignments
 #' @import Biostrings
 #' @import Modstrings
-#' @import Rsamtools
-#' @import rtracklayer
 NULL
 requireNamespace("IRanges")
 requireNamespace("GenomicRanges")
