@@ -6,9 +6,31 @@ NULL
 setClass("ModExperimentInosine",
          contains = c("ModExperiment"),
          prototype = list(mod = "I",
-                          data = "PileupModData"))
+                          dataClass = "PileupModData"))
 
-ModExperimentInosine <- function(){
-  new("ModExperimentInosine")
+setMethod(
+  f = "initialize", 
+  signature = signature(.Object = "ModExperiment"),
+  definition = function(.Object,
+                        bamfiles,
+                        genome,
+                        ranges) {
+    .Object <- callNextMethod(.Object,
+                              bamfiles,
+                              genome,
+                              ranges)
+    return(.Object)
+  }
+)
+
+ModExperimentInosine <- function(bamfiles,
+                                 genome,
+                                 ranges){
+  ans <- new("ModExperimentInosine",
+             bamfiles,
+             genome,
+             ranges)
+  
+  message("Starting to search for ")
 }
 

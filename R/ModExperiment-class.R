@@ -12,25 +12,36 @@ NULL
 #' @export
 setClass("ModExperiment",
          contains = c("VIRTUAL"),
-         slots = c(mod = "character",
-                   files = "BamFileList",
-                   conditions = "CharacterList",
-                   genome = "FaFile",
-                   genomeFeatures = "character",
-                   mods = "GRanges"))
+         slots = c(mod = "character", # this have to be populated by subclass
+                   dataClass = "character", # this have to be populated by subclass
+                   bamfiles = "BamFileList",
+                   conditions = "factor",
+                   fasta = "FaFile",
+                   gff = "GFFFile",
+                   data = "PosData",
+                   modifications = "GRanges"))
 
 setMethod(
   f = "initialize", 
   signature = signature(.Object = "ModExperiment"),
   definition = function(.Object,
-                        files,
+                        bamfiles,
                         genome,
-                        ranges,
-                        mods = NULL) {
-    .Object@files <- files
-    .Object@conditions <- names(files)
-    .Object@genome <- genome
-    .Object@genomeFeatures <- ranges
+                        ranges) {
+    # check bam files
+    bamfiles <- .norm_bamfiles(bamfiles,className)
+    # check genome sequences
+    fasta <- .norm_fasta(fasta,className)
+    # check genome annotation
+    gff <- .norm_gff(gff,className)
+    # check genome annotation
+    mod <- .norm_mod(.Object@mod,className)
+    # set clots
+    .Object@bamfiles <- bamfiles
+    .Object@conditions <- factor(names(bamfiles))
+    .Object@fasta <- fasta
+    .Object@gff <- gff
+    .Object@mod <- mod
     return(.Object)
   }
 )

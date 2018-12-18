@@ -434,6 +434,7 @@ setMethod(
                         fasta,
                         gff,
                         ...){
+    className <- class(.Object)
     # quality
     if(!is.integer(.Object@minQuality) | 
        is.null(.Object@minQuality) | 
@@ -442,51 +443,11 @@ setMethod(
            call. = FALSE)
     }
     # check bam files
-    if(!is(bamfiles,"BamFileList")){
-      bamfiles <- try(BamFileList(bamfiles))
-      if (is(bamfiles, "try-error")){
-        stop("To create a PosData object, 'bamfiles' must be a BamFileList object",
-             " or be coercible to one.",
-             call. = FALSE)
-      }
-    }
-    if(!all(file.exists(path(bamfiles)))){
-      stop("Some Bam files do not exists at the given locations.",
-           call. = FALSE)
-    }
-    names <- tolower(unique(names(bamfiles)))
-    if(!all(names %in% SAMPLE_TYPES)){
-      stop("Names of BamFileList must either be 'Treated' or 'Control'",
-           call. = FALSE)
-    }
-    names(bamfiles) <- tolower(names(bamfiles))
-    # genome sequences
-    if(!is(fasta,"FaFile")){
-      fasta <- try(FaFile(fasta))
-      if (is(fasta, "try-error")){
-        stop("To create a PosData object, 'fasta' must be a FaFile object or ",
-             "be coercible to one.",
-             call. = FALSE)
-      }
-    }
-    if(!all(file.exists(path(fasta)))){
-      stop("The fasta file does not exist at the given location.",
-           call. = FALSE)
-    }
-    indexFa(fasta)
-    # genome annotation
-    if(!is(gff,"GFFFile")){
-      gff <- try(GFF3File(gff))
-      if (is(gff, "try-error")){
-        stop("To create a PosData object, 'gff' must be a GFFFile ",
-             "object or be coercible to one.",
-             call. = FALSE)
-      }
-    }
-    if(!all(file.exists(path(gff)))){
-      stop("The gff3 file does not exist at the given location.",
-           call. = FALSE)
-    }
+    bamfiles <- .norm_bamfiles(bamfiles,className)
+    # check genome sequences
+    fasta <- .norm_fasta(fasta,className)
+    # check genome annotation
+    gff <- .norm_gff(gff,className)
     # set clots
     .Object@bamfiles <- bamfiles
     .Object@conditions <- factor(names(bamfiles))
