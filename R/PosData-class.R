@@ -480,34 +480,34 @@ setMethod(
 
 #' @name PosData
 #' @export
-setMethod(
-  f = "gff", 
-  signature = signature(x = "PosData"),
-  definition = function(x){x@gff})
+setMethod(f = "gff", 
+          signature = signature(x = "PosData"),
+          definition = function(x){x@gff})
+  
 #' @name PosData
 #' @export
-setMethod(
-  f = "fasta", 
-  signature = signature(x = "PosData"),
-  definition = function(x){x@fasta})
+setMethod(f = "fasta", 
+          signature = signature(x = "PosData"),
+          definition = function(x){x@fasta})
+  
 #' @name PosData
 #' @export
-setMethod(
-  f = "getSeq", 
-  signature = signature(x = "PosData"),
-  definition = function(x){x@sequences})
+setMethod(f = "sequences", 
+          signature = signature(x = "PosData"),
+          definition = function(x){x@sequences})
+  
 #' @name PosData
 #' @export
-setMethod(
-  f = "ranges", 
-  signature = signature(x = "PosData"),
-  definition = function(x){x@ranges})
+setMethod(f = "ranges", 
+          signature = signature(x = "PosData"),
+          definition = function(x){x@ranges})
+  
 #' @name PosData
 #' @export
-setMethod(
-  f = "bamfiles", 
-  signature = signature(x = "PosData"),
-  definition = function(x){x@bamfiles})
+setMethod(f = "bamfiles", 
+          signature = signature(x = "PosData"),
+          definition = function(x){x@bamfiles})
+  
 
 
 ################################################################################

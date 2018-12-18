@@ -2,9 +2,9 @@
 NULL
 
 setGeneric( 
-  name = "getMod",
+  name = "modifications",
   def = function(x,
-                 ...) standardGeneric("getMod")
+                 ...) standardGeneric("modifications")
 ) 
 
 # ModExperiment ----------------------------------------------------------------
@@ -30,14 +30,17 @@ setGeneric(
   def = function(x) standardGeneric("fasta")
 )
 setGeneric( 
-  name = "getSeq",
-  def = function(x) standardGeneric("getSeq")
+  name = "sequences",
+  def = function(x) standardGeneric("sequences")
 )
 setGeneric( 
   name = "bamfiles",
   def = function(x) standardGeneric("bamfiles")
 )
-
+setGeneric( 
+  name = "modifications",
+  def = function(x) standardGeneric("modifications")
+) 
 # PosData ----------------------------------------------------------------------
 
 

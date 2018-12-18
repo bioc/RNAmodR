@@ -17,7 +17,7 @@
 
 \S4method{fasta}{PosData}(x)
 
-\S4method{getSeq}{PosData}(x)
+\S4method{sequences}{PosData}(x)
 
 \S4method{ranges}{PosData}(x)
 

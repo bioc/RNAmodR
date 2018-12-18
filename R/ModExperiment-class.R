@@ -26,15 +26,16 @@ setMethod(
   signature = signature(.Object = "ModExperiment"),
   definition = function(.Object,
                         bamfiles,
-                        genome,
-                        ranges) {
+                        fasta,
+                        gff) {
+    className <- class(.Object)
     # check bam files
     bamfiles <- .norm_bamfiles(bamfiles,className)
     # check genome sequences
     fasta <- .norm_fasta(fasta,className)
     # check genome annotation
     gff <- .norm_gff(gff,className)
-    # check genome annotation
+    # check modification ident
     mod <- .norm_mod(.Object@mod,className)
     # set clots
     .Object@bamfiles <- bamfiles
@@ -55,3 +56,42 @@ setMethod(
     cat("test")
   }
 )
+
+# accessors --------------------------------------------------------------------
+
+#' @name ModExperiment
+#' @export
+setMethod(f = "gff", 
+          signature = signature(x = "ModExperiment"),
+          definition = function(x){x@gff})
+  
+#' @name ModExperiment
+#' @export
+setMethod(f = "fasta", 
+          signature = signature(x = "ModExperiment"),
+          definition = function(x){x@fasta})
+ 
+#' @name ModExperiment
+#' @export
+setMethod(f = "sequences", 
+          signature = signature(x = "ModExperiment"),
+          definition = function(x){x@data@sequences})
+  
+#' @name ModExperiment
+#' @export
+setMethod(f = "ranges", 
+          signature = signature(x = "ModExperiment"),
+          definition = function(x){x@data@ranges})
+  
+#' @name ModExperiment
+#' @export
+setMethod(f = "bamfiles", 
+          signature = signature(x = "ModExperiment"),
+          definition = function(x){x@bamfiles})
+  
+#' @name ModExperiment
+#' @export
+setMethod(f = "modifications", 
+          signature = signature(x = "ModExperiment"),
+          definition = function(x){x@modifications})
+  
