@@ -1,10 +1,19 @@
 #' @include RNAmodR.R
 NULL
 
+#' @name PosDataFrame
+#' 
+#' @title PosDataFrame
+#' 
+#' @description 
+#' title
+#' 
+#' 
+NULL
 
 # PosDataFrame -----------------------------------------------------------------
 
-#' @name PosData
+#' @rdname PosDataFrame
 #' @export
 setClass(Class = "PosDataFrame",
          contains = c("DataFrame"),
@@ -38,7 +47,7 @@ setMethod(
   }
 )
 
-#' @name PosData
+#' @rdname PosDataFrame
 #' @export
 PosDataFrame <- function(df,ranges,sequence){
   new("PosDataFrame",
@@ -72,13 +81,13 @@ setMethod("show", "PosDataFrame",
 
 # accessors --------------------------------------------------------------------
 
-#' @name PosDataFrame
+#' @rdname PosDataFrame
 #' @export
 setMethod(
   f = "getSeq", 
   signature = signature(x = "PosDataFrame"),
   definition = function(x){x@sequence})
-#' @name PosDataFrame
+#' @rdname PosDataFrame
 #' @export
 setMethod(
   f = "ranges", 

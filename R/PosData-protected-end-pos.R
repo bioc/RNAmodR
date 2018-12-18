@@ -19,24 +19,6 @@ setClass(Class = "ProtectedEndPosData",
 
 # ProtectedEndPosData ------------------------------------------------------------------
 
-.get_position_data_of_transcript_protectedends <- function(bamFile,
-                                                           ranges,
-                                                           param,
-                                                           args = list()){
-  browser()
-  # skip if transcript does not have data
-  if(length(bamData) == 0) return(NULL)
-  # move position based on strand
-  bamData <- bamData[.is_on_correct_strand(bamData,.get_unique_strand(range))]
-  # discard reads out of boundaries
-  bamData <- bamData[BiocGenerics::end(bamData) <= BiocGenerics::start(range),]
-  bamData <- bamData[BiocGenerics::start(bamData) >= BiocGenerics::end(range),]
-  # create result GRanges object
-  browser()
-  return(respos)
-}
-
-
 #' @rdname ProtectedEndPosData
 #' @export
 ProtectedEndPosData <- function(bamfiles,
@@ -56,11 +38,21 @@ ProtectedEndPosData <- function(bamfiles,
                                   ans@minQuality,
                                   ans@chromosomes)
   message("Loading protected end data from BAM files...")
-  data <- lapply(ans@bamfiles,
-                 FUN = .get_position_data_of_transcript_protectedends,
-                 ranges = ranges,
-                 param = param,
-                 args = args)
+  enddata <- lapply(ans@bamfiles,
+                    FUN = .get_position_data_of_transcript_ends,
+                    ranges = ranges,
+                    param = param,
+                    type = "all",
+                    args = args)
+  coverage <- lapply(ans@bamfiles,
+                     FUN = .get_position_data_of_transcript_coverage,
+                     ranges = ranges,
+                     param = param,
+                     args = args)
+  data <- lapply(seq_along(ans@bamfiles),
+                 function(i){
+                   coverage[[i]] - enddata[[i]]
+                 })
   names(data) <- paste0("protectedend.",
                         names(ans@bamfiles),
                         ".",
