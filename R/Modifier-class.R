@@ -1,16 +1,17 @@
 #' @include RNAmodR.R
 #' @include PosData-class.R
+#' @include Modifier-utils.R
 NULL
 
-#' @name ModExperiment
-#' @title ModExperiment
+#' @name Modifier
+#' @title Modifier
 #' @description 
 #' title
 NULL
 
-#' @rdname ModExperiment
+#' @rdname Modifier
 #' @export
-setClass("ModExperiment",
+setClass("Modifier",
          contains = c("VIRTUAL"),
          slots = c(mod = "character", # this have to be populated by subclass
                    dataClass = "character", # this have to be populated by subclass
@@ -23,7 +24,7 @@ setClass("ModExperiment",
 
 setMethod(
   f = "initialize", 
-  signature = signature(.Object = "ModExperiment"),
+  signature = signature(.Object = "Modifier"),
   definition = function(.Object,
                         bamfiles,
                         fasta,
@@ -47,11 +48,11 @@ setMethod(
   }
 )
 
-#' @rdname ModExperiment
+#' @rdname Modifier
 #' @export
 setMethod(
   f = "show", 
-  signature = signature(object = "ModExperiment"),
+  signature = signature(object = "Modifier"),
   definition = function(object) {
     cat("test")
   }
@@ -59,39 +60,39 @@ setMethod(
 
 # accessors --------------------------------------------------------------------
 
-#' @name ModExperiment
+#' @name Modifier
 #' @export
 setMethod(f = "gff", 
-          signature = signature(x = "ModExperiment"),
+          signature = signature(x = "Modifier"),
           definition = function(x){x@gff})
   
-#' @name ModExperiment
+#' @name Modifier
 #' @export
 setMethod(f = "fasta", 
-          signature = signature(x = "ModExperiment"),
+          signature = signature(x = "Modifier"),
           definition = function(x){x@fasta})
  
-#' @name ModExperiment
+#' @name Modifier
 #' @export
 setMethod(f = "sequences", 
-          signature = signature(x = "ModExperiment"),
+          signature = signature(x = "Modifier"),
           definition = function(x){x@data@sequences})
   
-#' @name ModExperiment
+#' @name Modifier
 #' @export
 setMethod(f = "ranges", 
-          signature = signature(x = "ModExperiment"),
+          signature = signature(x = "Modifier"),
           definition = function(x){x@data@ranges})
   
-#' @name ModExperiment
+#' @name Modifier
 #' @export
 setMethod(f = "bamfiles", 
-          signature = signature(x = "ModExperiment"),
+          signature = signature(x = "Modifier"),
           definition = function(x){x@bamfiles})
   
-#' @name ModExperiment
+#' @name Modifier
 #' @export
 setMethod(f = "modifications", 
-          signature = signature(x = "ModExperiment"),
+          signature = signature(x = "Modifier"),
           definition = function(x){x@modifications})
   

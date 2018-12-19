@@ -20,7 +20,7 @@ setGeneric(
                  ...) standardGeneric("match.annotation")
 ) 
 
-# ModExperiment accessors ------------------------------------------------------
+# Modifier accessors ------------------------------------------------------
 setGeneric( 
   name = "gff",
   def = function(x) standardGeneric("gff")

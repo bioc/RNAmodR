@@ -1,4 +1,5 @@
 #' @include RNAmodR.R
+#' @include Modifier-class.R
 NULL
 
 

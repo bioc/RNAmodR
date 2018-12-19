@@ -1,15 +1,16 @@
 #' @include RNAmodR.R
+#' @include Modifier-class.R
 NULL
 
 
 setMethod(
   f = "match.genome", 
-  signature = signature(x = "ModExperiment"),
+  signature = signature(x = "Modifier"),
   definition = function(x,
                         ...){
-    ModExperiments <- .get_ModExperiment_objects(...)
+    Modifiers <- .get_Modifier_objects(...)
     genomes <- lapply(c(list(x),
-                        ModExperiments),
+                        Modifiers),
                       genome)
     paths <- unique(unlist(lapply(genomes,path)))
     if(length(paths) != 1){
@@ -21,12 +22,12 @@ setMethod(
 
 setMethod(
   f = "match.annotation", 
-  signature = signature(x = "ModExperiment"),
+  signature = signature(x = "Modifier"),
   definition = function(x,
                         ...){
-    ModExperiments <- .get_ModExperiment_objects(...)
+    Modifiers <- .get_Modifier_objects(...)
     genomeFeatureFiles <- lapply(c(list(x),
-                                   ModExperiments),
+                                   Modifiers),
                                  genomeFeatures)
     genomeFeatureFiles <- unique(unlist(genomeFeatureFiles))
     if(length(genomeFeatureFiles) != 1){

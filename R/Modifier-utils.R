@@ -74,16 +74,20 @@ NULL
   mod
 }
 
-
-.norm_data_type <- function(dataType,
-                            className){
-  browser()
-  if(!exists(dataType)){
-    stop("Data type '",dataType,"' as used by ",className," is not available.",
+.norm_data_type <- function(ans,pd){
+  if(!is(pd,ans@dataClass)){
+    stop("Data class '",ans@dataClass,"' is required by '",class(.Object),"'.",
+         "\n'",class(pd),"' was provided. Aborting...",
          call. = FALSE)
   }
-  return(invisible(dataType))
+  pd
 }
+
+.norm_modifications <- function(ans,modifications){
+  # ToDo: implement sanity check for given modifications
+  modifications
+}
+
 
 .get_ModExperiment_objects <- function(...){
   args <- list(...)
