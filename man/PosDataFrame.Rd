@@ -4,13 +4,13 @@
 \name{PosDataFrame}
 \alias{PosDataFrame}
 \alias{PosDataFrame-class}
-\alias{getSeq,PosDataFrame-method}
+\alias{sequences,PosDataFrame-method}
 \alias{ranges,PosDataFrame-method}
 \title{PosDataFrame}
 \usage{
-PosDataFrame(df, ranges, sequence)
+PosDataFrame(df, ranges, sequence, replicate, conditions)
 
-\S4method{getSeq}{PosDataFrame}(x)
+\S4method{sequences}{PosDataFrame}(x)
 
 \S4method{ranges}{PosDataFrame}(x)
 }

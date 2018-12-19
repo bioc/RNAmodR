@@ -11,11 +11,13 @@
 \alias{ModInosine,PosData-method}
 \title{ModInosine}
 \usage{
-\S4method{ModInosine}{character}(x, fasta, gff, modifications = NULL)
+\S4method{ModInosine}{character}(x, fasta, gff, modifications = NULL,
+  ...)
 
-\S4method{ModInosine}{BamFileList}(x, fasta, gff, modifications = NULL)
+\S4method{ModInosine}{BamFileList}(x, fasta, gff, modifications = NULL,
+  ...)
 
-\S4method{ModInosine}{PosData}(x, modifications = NULL)
+\S4method{ModInosine}{PosData}(x, modifications = NULL, ...)
 }
 \description{
 title

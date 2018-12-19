@@ -99,7 +99,11 @@ NULL
 
 #' @importFrom matrixStats rowSds
 .aggregate_pile_up <- function(data){
-  df <- data@unlistData
+  if(is(data,"CompressedSplitDataFrameList")){
+    df <- data@unlistData
+  } else {
+    df <- data
+  }
   replicates <- unique(data@replicate)
   for(i in seq_along(replicates)){
     df[,data@replicate == i] <- 
@@ -125,7 +129,53 @@ NULL
   names(sds) <- paste0("sds.",colNames)
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
-  ans <- SplitDataFrameList(ans)
-  ans@partitioning <- data@partitioning
+  if(is(data,"CompressedSplitDataFrameList")){
+    ans <- SplitDataFrameList(ans)
+    ans@partitioning <- data@partitioning
+  }
   ans
+}
+
+#' @importFrom matrixStats rowSds
+.aggregate_pile_up_to_coverage <- function(data){
+  if(is(data,"CompressedSplitDataFrameList")){
+    df <- data@unlistData
+  } else {
+    df <- data
+  }
+  replicates <- unique(data@replicate)
+  ans  <- IntegerList(lapply(seq_along(replicates),
+                             function(i){
+                               rowSums(as.data.frame(df[,data@replicate == i]))
+                             }))
+  names(ans) <- paste0("replicate.",replicates)
+  ans <- do.call("DataFrame",ans)
+  if(is(data,"CompressedSplitDataFrameList")){
+    ans <- SplitDataFrameList(ans)
+    ans@partitioning <- data@partitioning
+  }
+  ans
+}
+
+.construct_mod_ranges <- function(range,
+                                  data,
+                                  modType){
+  positions <- as.integer(rownames(data))
+  if(as.character(strand(range)) == "-"){
+    positions <- end(range) - positions + 1L
+  } else {
+    positions <- start(range) + positions - 1L
+  }
+  mranges <- GRanges(seqnames = rep(as.character(seqnames(range)),
+                                    nrow(data)),
+                     ranges = IRanges::IRanges(start = positions,
+                                               width = 1L),
+                     strand = strand(range),
+                     modType = rep(modType,nrow(data)),
+                     score = .get_inosine_score(data))
+  mranges
+}
+
+.get_inosine_score <- function(data){
+  data$means.G / data$means.A
 }

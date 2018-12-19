@@ -20,8 +20,8 @@ setClass("PosData",
                    chromosomes = "character",
                    unlistType = "character",
                    posDataType = "factor",
-                   conditions = "factor",
-                   replicate = "factor"),
+                   replicate = "factor",
+                   conditions = "factor"),
          prototype = list(ranges = GRangesList(),
                           sequences = DNAStringSet(),
                           unlistType = "PosDataFrame"))
@@ -104,7 +104,9 @@ extractElement <- function(x, i){
   new(x@unlistType,
       df,
       x@ranges[[i]],
-      x@sequences[[i]])
+      x@sequences[[i]],
+      x@replicate,
+      x@conditions)
 }
 
 # subsetting
@@ -286,7 +288,9 @@ lapply_PosData <- function(X, FUN, ...){
                        extractROWS(unlisted_X,
                                    IRanges(X_elt_start[i], X_elt_end[i])),
                        X@ranges[[i]],
-                       X@sequences[[i]])
+                       X@sequences[[i]],
+                       x@replicate,
+                       x@conditions)
              FUN(df,
                  ...)
            })
@@ -450,8 +454,8 @@ setMethod(
     gff <- .norm_gff(gff,className)
     # set clots
     .Object@bamfiles <- bamfiles
-    .Object@conditions <- factor(names(bamfiles))
     .Object@replicate <- factor(seq_along(bamfiles))
+    .Object@conditions <- factor(names(bamfiles))
     .Object@posDataType <- factor(rep(class(.Object)[1L],length(bamfiles)))
     .Object@fasta <- fasta
     .Object@gff <- gff
@@ -600,8 +604,8 @@ setMethod(f = "bamfiles",
                                        GenomeInfoDb::seqnames(parentRanges))]
   # store data
   x@unlistData <- data
-  x@conditions <- rep(x@conditions, each = conditionsFmultiplier)
   x@replicate <- rep(x@replicate, each = conditionsFmultiplier)
+  x@conditions <- rep(x@conditions, each = conditionsFmultiplier)
   x@posDataType <- rep(x@posDataType, each = conditionsFmultiplier)
   x@partitioning <- partitioning
   x@ranges <- ranges

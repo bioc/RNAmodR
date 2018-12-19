@@ -60,6 +60,15 @@ setMethod(
 
 # accessors --------------------------------------------------------------------
 
+
+# converts the genomic coordinates to transcript based coordinates
+.get_modifications_per_transcript <- function(x){
+  
+}
+
+
+
+
 #' @name Modifier
 #' @export
 setMethod(f = "gff", 
@@ -76,7 +85,23 @@ setMethod(f = "fasta",
 #' @export
 setMethod(f = "sequences", 
           signature = signature(x = "Modifier"),
-          definition = function(x){x@data@sequences})
+          definition = 
+            function(x,
+                     modified = FALSE){
+              if(!assertive::is_a_bool(modified)){
+                stop("'modified' has to be a single logical value.")
+              }
+              if(modified == FALSE){
+                ans <- x@data@sequences
+              }
+              if(modified == TRUE){
+                ans <- combineIntoModstrings(
+                  x@sequences,
+                  .get_modifications_per_transcript(x))
+              }
+              ans
+            }
+)
   
 #' @name Modifier
 #' @export
@@ -94,5 +119,16 @@ setMethod(f = "bamfiles",
 #' @export
 setMethod(f = "modifications", 
           signature = signature(x = "Modifier"),
-          definition = function(x){x@modifications})
+          definition = 
+            function(x,
+                     perTranscript = FALSE){
+              if(!assertive::is_a_bool(perTranscript)){
+                stop("'perTranscript' has to be a single logical value.")
+              }
+              if(perTranscript){
+                return(.get_modifications_per_transcript(x))
+              }
+              x@modifications
+            }
+)
   

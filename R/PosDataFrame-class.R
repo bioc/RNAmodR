@@ -18,7 +18,9 @@ NULL
 setClass(Class = "PosDataFrame",
          contains = c("DataFrame"),
          slots = c(ranges = "GRanges",
-                   sequence = "XString"))
+                   sequence = "XString",
+                   conditions = "factor",
+                   replicate = "factor"))
 
 setMethod(
   f = "initialize", 
@@ -26,9 +28,16 @@ setMethod(
   definition = function(.Object,
                         df,
                         ranges,
-                        sequence){
+                        sequence,
+                        replicate,
+                        conditions){
     if(!is(df,"DataFrame")){
       stop("Invalid data object: ", class(df), " found, DataFrame expected.")
+    }
+    if(ncol(df) != length(replicate) ||
+       ncol(df) != length(conditions)){
+      stop("Replicate and Conditions information must match the DataFrame ",
+           "dimensions.")
     }
     if(!is(ranges,"GRanges")){
       stop("Invalid data object: ", class(ranges), " found, GRanges expected.")
@@ -36,6 +45,8 @@ setMethod(
     if(!is(sequence,"XString")){
       stop("Invalid data object: ", class(sequence), " found, XString expected.")
     }
+    .Object@replicate <- replicate
+    .Object@conditions <- conditions
     .Object@rownames <- df@rownames
     .Object@listData <- df@listData
     .Object@nrows <- df@nrows
@@ -49,11 +60,13 @@ setMethod(
 
 #' @rdname PosDataFrame
 #' @export
-PosDataFrame <- function(df,ranges,sequence){
+PosDataFrame <- function(df,ranges,sequence,replicate,conditions){
   new("PosDataFrame",
       df,
       ranges,
-      sequence)
+      sequence,
+      replicate,
+      conditions)
 }
 
 .valid_PosDataFrame <-  function(x){
@@ -84,7 +97,7 @@ setMethod("show", "PosDataFrame",
 #' @rdname PosDataFrame
 #' @export
 setMethod(
-  f = "getSeq", 
+  f = "sequences", 
   signature = signature(x = "PosDataFrame"),
   definition = function(x){x@sequence})
 #' @rdname PosDataFrame
@@ -94,3 +107,61 @@ setMethod(
   signature = signature(x = "PosDataFrame"),
   definition = function(x){x@ranges})
 
+setMethod("[", "PosDataFrame",
+          function(x, i, j, ..., drop = TRUE){
+            if (!isTRUEorFALSE(drop)){
+              stop("'drop' must be TRUE or FALSE")
+            }
+            if (length(list(...)) > 0L){
+              warning("parameters in '...' not supported")
+            }
+            
+            ## We do list-style subsetting when [ was called with no ','.
+            ## NOTE: matrix-style subsetting by logical matrix not supported.
+            list_style_subsetting <- (nargs() - !missing(drop)) < 3L
+            if (list_style_subsetting || !missing(j)) {
+              if (list_style_subsetting) {
+                if (!missing(drop))
+                  warning("'drop' argument ignored by list-style subsetting")
+                if (missing(i))
+                  return(x)
+                j <- i
+              }
+              if (!is(j, "IntegerRanges")) {
+                xstub <- setNames(seq_along(x), names(x))
+                j <- normalizeSingleBracketSubscript(j, xstub)
+              }
+              new_listData <- extractROWS(x@listData, j)
+              new_mcols <- extractROWS(mcols(x), j)
+              x <- initialize(x,
+                              df = as(new_listData,"DataFrame"),
+                              ranges = x@ranges,
+                              sequence = x@sequence,
+                              replicate = x@replicate[j],
+                              conditions = x@conditions[j])
+              if (anyDuplicated(names(x))){
+                names(x) <- make.unique(names(x))
+              }
+              if (list_style_subsetting){
+                return(x)
+              }
+            }
+            if (!missing(i)){
+              x <- extractROWS(x, i)
+            }
+            if (missing(drop)){ # drop by default if only one column left
+              drop <- ncol(x) == 1L
+            }  
+            if (drop) {
+              ## one column left
+              if (ncol(x) == 1L){
+                return(x[[1L]])
+              }
+              ## one row left
+              if (nrow(x) == 1L){
+                return(as(x, "list"))
+              }
+            }
+            x
+          }
+)

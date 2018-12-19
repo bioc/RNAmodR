@@ -35,33 +35,45 @@ setMethod(
 )
 
 .find_inosine <- function(mod,
-                          data){
+                          data,
+                          args){
   browser()
   letters <- CharacterList(strsplit(as.character(sequences(data)),""))
+  ranges <- split(.get_parent_annotations(ranges(data)),
+                  seq_along(ranges(data)))
+  coverage <- .aggregate_pile_up_to_coverage(data)
+  minCoverage <- args[["minCoverage"]]
+  minReplicate <- args[["minReplicate"]]
+  coverage <- apply(as.matrix(unlist(coverage)),1,
+                    function(row){
+                      sum(row > minCoverage) >= minReplicate
+                    })
+  coverage <- split(unname(coverage),data@partitioning)
   modifications <- mapply(
-    function(m,d,l,r){
-      browser()
+    function(m,c,l,r){
       rownames(m) <- seq_len(width(r))
-      rownames(d) <- seq_len(width(r))
       # m <- m[l == "A",]
       m <- m[l == "A" &
                m$means.G > m$means.A &
                !is.na(m$means.G) &
-               !is.na(m$means.A),]
+               !is.na(m$means.A) & c,]
       if(nrow(m) == 0L) return(NULL)
-      m
+      .construct_mod_ranges(r,m,modType = "I")
     },
     mod,
-    data,
+    coverage,
     letters,
-    split(.get_parent_annotations(ranges(data)),
-          seq_along(ranges(data))))
-  modifications
+    ranges)
+  modifications <- GRangesList(modifications[!vapply(modifications,
+                                                     is.null,
+                                                     logical(1))])
+  unlist(modifications)
 }
 
 .ModInosineFromCharacter <- function(bamfiles,
                                      fasta,
-                                     gff){
+                                     gff,
+                                     args){
   browser()
   ans <- new("ModInosine",
              bamfiles,
@@ -78,9 +90,12 @@ setMethod(
                            gff = ans@gff))
   ans@data@sequences <- RNAStringSet(ans@data@sequences)
   mod <- .aggregate_pile_up(ans@data)
-  mod <- .find_inosine(mod,
-                       ans@data)
-  ans@modifications <- mod
+  if(args[["findInosine"]]){
+    mod <- .find_inosine(mod,
+                         ans@data,
+                         args)
+    ans@modifications <- mod
+  }
   ans
 }
 
@@ -91,7 +106,45 @@ setMethod(
              x@gff)
   # check data type
   ans@data <- .norm_data_type(ans,x)
+  if(args[["findInosine"]]){
+    mod <- .find_inosine(mod,
+                         ans@data,
+                         args)
+    ans@modifications <- mod
+  }
   ans
+}
+
+.norm_inosine_args <- function(input){
+  minCoverage <- 10L
+  minReplicate <- 1L
+  findInosine <- TRUE
+  if(!is.null(input[["minCoverage"]])){
+    minCoverage <- input[["minCoverage"]]
+    if(!is.integer(minCoverage) || 
+       minCoverage < 0L||
+       length(minCoverage) != 1){
+      stop("'minCoverage' must be a single positive integer value.")
+    }
+  }
+  if(!is.null(input[["minReplicate"]])){
+    minReplicate <- input[["minReplicate"]]
+    if(!is.integer(minReplicate) || 
+       minReplicate < 0L ||
+       length(minReplicate) != 1){
+      stop("'minReplicate' must be a single positive integer value.")
+    }
+  }
+  if(!is.null(input[["findInosine"]])){
+    findInosine <- input[["findInosine"]]
+    if(assertive::is_a_bool(findInosine)){
+      stop("'findInosine' must be a single logical value.")
+    }
+  }
+  args <- list(minCoverage = minCoverage,
+               minReplicate = minReplicate,
+               findInosine = findInosine)
+  args
 }
 
 setGeneric( 
@@ -107,11 +160,16 @@ setMethod("ModInosine",
           function(x,
                    fasta,
                    gff,
-                   modifications = NULL){
+                   modifications = NULL,
+                   ...){
+            args <- .norm_inosine_args(list(...))
             ans <- .ModInosineFromCharacter(x,
                                             fasta,
-                                            gff)
-            ans@modifications <- .norm_modifications(ans,modifications)
+                                            gff,
+                                            args)
+            ans@modifications <- .norm_modifications(ans,
+                                                     modifications,
+                                                     args)
             ans
           }
 )
@@ -124,11 +182,16 @@ setMethod("ModInosine",
           function(x,
                    fasta,
                    gff,
-                   modifications = NULL){
+                   modifications = NULL,
+                   ...){
+            args <- .norm_inosine_args(list(...))
             ans <- .ModInosineFromCharacter(x,
                                             fasta,
-                                            gff)
-            ans@modifications <- .norm_modifications(ans,modifications)
+                                            gff,
+                                            args)
+            ans@modifications <- .norm_modifications(ans,
+                                                     modifications,
+                                                     args)
             ans
           }
 )
@@ -139,9 +202,13 @@ setMethod("ModInosine",
 setMethod("ModInosine",
           signature = c(x = "PosData"),
           function(x,
-                   modifications = NULL){
+                   modifications = NULL,
+                   ...){
+            args <- .norm_inosine_args(list(...))
             ans <- .ModInosineFromPosData(x)
-            ans@modifications <- .norm_modifications(ans,modifications)
+            ans@modifications <- .norm_modifications(ans,
+                                                     modifications,
+                                                     args)
             ans
           }
 )
