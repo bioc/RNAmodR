@@ -1,5 +1,5 @@
 #' @include RNAmodR.R
-#' @include PosData-class.R
+#' @include SequenceData-class.R
 #' @include Modifier-utils.R
 NULL
 
@@ -19,7 +19,7 @@ setClass("Modifier",
                    conditions = "factor",
                    fasta = "FaFile",
                    gff = "GFFFile",
-                   data = "PosData",
+                   data = "SequenceData",
                    modifications = "GRanges"))
 
 setMethod(
@@ -60,14 +60,29 @@ setMethod(
 
 # accessors --------------------------------------------------------------------
 
-
 # converts the genomic coordinates to transcript based coordinates
 .get_modifications_per_transcript <- function(x){
-  
+  ranges <- .get_parent_annotations(ranges(x))
+  modifications <- modifications(x)
+  modRanges <- ranges[as.character(ranges$ID) %in% as.character(modifications$Parent),]
+  modRanges <- modRanges[match(as.character(modRanges$ID),
+                               as.character(modifications$Parent))]
+  # modify modifcation positions from genome centric to transcript centric
+  start(modifications[strand(modifications) == "+"]) <- 
+    start(modifications[strand(modifications) == "+"]) - 
+    start(modRanges[strand(modRanges) == "+"]) + 1L
+  end(modifications[strand(modifications) == "+"]) <- 
+    end(modifications[strand(modifications) == "+"]) - 
+    start(modRanges[strand(modRanges) == "+"]) + 1L
+  end(modifications[strand(modifications) == "-"]) <- 
+    end(modRanges[strand(modRanges) == "-"]) - 
+    end(modifications[strand(modifications) == "-"]) + 1L
+  start(modifications[strand(modifications) == "-"]) <- 
+    end(modRanges[strand(modRanges) == "-"]) - 
+    start(modifications[strand(modifications) == "-"]) + 1L
+  names(modifications) <- as.character(modifications$Parent)
+  modifications
 }
-
-
-
 
 #' @name Modifier
 #' @export
@@ -87,17 +102,29 @@ setMethod(f = "sequences",
           signature = signature(x = "Modifier"),
           definition = 
             function(x,
-                     modified = FALSE){
+                     modified = FALSE,
+                     with.qualities = FALSE){
               if(!assertive::is_a_bool(modified)){
                 stop("'modified' has to be a single logical value.")
+              }
+              if(!assertive::is_a_bool(with.qualities)){
+                stop("'with.qualities' has to be a single logical value.")
               }
               if(modified == FALSE){
                 ans <- x@data@sequences
               }
               if(modified == TRUE){
-                ans <- combineIntoModstrings(
-                  x@sequences,
-                  .get_modifications_per_transcript(x))
+                mod <- .get_modifications_per_transcript(x)
+                mod <- split(mod,names(mod))
+                ans <- ModRNAStringSet(sequences(seqdata(x)))
+                modSeqList <- ans[names(ans) %in% names(mod)]
+                mod <- mod[match(names(mod),names(modSeqList))]
+                ans[names(ans) %in% names(mod)] <- 
+                  combineIntoModstrings(modSeqList,
+                                        mod)
+                if(with.qualities == TRUE){
+                  browser()
+                }
               }
               ans
             }
@@ -107,13 +134,19 @@ setMethod(f = "sequences",
 #' @export
 setMethod(f = "ranges", 
           signature = signature(x = "Modifier"),
-          definition = function(x){x@data@ranges})
-  
+          definition = function(x){ranges(seqdata(x))})
+
 #' @name Modifier
 #' @export
 setMethod(f = "bamfiles", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@bamfiles})
+
+#' @name Modifier
+#' @export
+setMethod(f = "seqdata", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){x@data})
   
 #' @name Modifier
 #' @export
@@ -132,3 +165,16 @@ setMethod(f = "modifications",
             }
 )
   
+# dummy functions --------------------------------------------------------------
+# these need to be implemented by each subclass
+
+#' @name Modifier
+#' @export
+setMethod(f = "modify", 
+          signature = signature(x = "Modifier"),
+          definition = 
+            function(x){
+              stop("This functions needs to be implemented by '",class(x),"'.",
+                   call. = FALSE)
+            }
+)

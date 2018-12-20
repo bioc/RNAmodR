@@ -1,12 +1,6 @@
 #' @include RNAmodR.R
 NULL
 
-setGeneric( 
-  name = "modifications",
-  def = function(x,
-                 ...) standardGeneric("modifications")
-) 
-
 # ModExperiment ----------------------------------------------------------------
 
 setGeneric( 
@@ -31,16 +25,32 @@ setGeneric(
 )
 setGeneric( 
   name = "sequences",
-  def = function(x) standardGeneric("sequences")
+  def = function(x,
+                 ...) standardGeneric("sequences")
 )
 setGeneric( 
   name = "bamfiles",
   def = function(x) standardGeneric("bamfiles")
 )
 setGeneric( 
-  name = "modifications",
-  def = function(x) standardGeneric("modifications")
+  name = "seqdata",
+  def = function(x) standardGeneric("seqdata")
 ) 
+setGeneric( 
+  name = "modifications",
+  def = function(x,
+                 ...) standardGeneric("modifications")
+) 
+
+# Modifier functions -----------------------------------------------------------
+
+setGeneric( 
+  name = "modify",
+  def = function(x,
+                 ...) standardGeneric("modify")
+) 
+
+
 # PosData ----------------------------------------------------------------------
 
 

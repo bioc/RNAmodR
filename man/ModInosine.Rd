@@ -8,7 +8,8 @@
 \alias{ModInosine-class}
 \alias{ModInosine,character-method}
 \alias{ModInosine,BamFileList-method}
-\alias{ModInosine,PosData-method}
+\alias{ModInosine,SequenceData-method}
+\alias{modify,ModInosine-method}
 \title{ModInosine}
 \usage{
 \S4method{ModInosine}{character}(x, fasta, gff, modifications = NULL,
@@ -17,8 +18,13 @@
 \S4method{ModInosine}{BamFileList}(x, fasta, gff, modifications = NULL,
   ...)
 
-\S4method{ModInosine}{PosData}(x, modifications = NULL, ...)
+\S4method{ModInosine}{SequenceData}(x, modifications = NULL, ...)
+
+\S4method{modify}{ModInosine}(x, ...)
 }
 \description{
 title
+
+\code{score}: the score for reported Inosine positions are between 1 and 100.
+It is calculated as \code{min(log2(percent(G)/percent(A)) * 10,100)}.
 }

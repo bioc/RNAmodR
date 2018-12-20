@@ -1,22 +1,22 @@
 #' @include RNAmodR.R
-#' @include PosData-class.R
+#' @include SequenceData-class.R
 NULL
 
-#' @name CoveragePosData
+#' @name CoverageSequenceData
 #' 
-#' @title CoveragePosData
+#' @title CoverageSequenceData
 #' 
 #' @description
 #' title
 NULL
 
-#' @rdname CoveragePosData
+#' @rdname CoverageSequenceData
 #' @export
-setClass(Class = "CoveragePosData",
-         contains = "PosData",
+setClass(Class = "CoverageSequenceData",
+         contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-# CoveragePosData --------------------------------------------------------------
+# CoverageSequenceData ---------------------------------------------------------
 .get_position_data_of_transcript_coverage <- function(bamFile,
                                                       ranges,
                                                       param,
@@ -51,13 +51,13 @@ setClass(Class = "CoveragePosData",
   as(do.call(c,unname(coverage)),"IntegerList")
 }
 
-#' @rdname CoveragePosData
+#' @rdname CoverageSequenceData
 #' @export
-CoveragePosData <- function(bamfiles,
+CoverageSequenceData <- function(bamfiles,
                             fasta,
                             gff,
                             ...){
-  ans <- new("CoveragePosData",
+  ans <- new("CoverageSequenceData",
              bamfiles,
              fasta,
              gff,

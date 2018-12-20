@@ -1,22 +1,22 @@
 #' @include RNAmodR.R
-#' @include PosData-class.R
+#' @include SequenceData-class.R
 NULL
 
-#' @name PileupPosData
+#' @name PileupSequenceData
 #' 
-#' @title PileupPosData
+#' @title PileupSequenceData
 #' 
 #' @description
 #' title
 NULL
 
-#' @rdname PileupPosData
+#' @rdname PileupSequenceData
 #' @export
-setClass(Class = "PileupPosData",
-         contains = "PosData",
+setClass(Class = "PileupSequenceData",
+         contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-# PileupPosData ----------------------------------------------------------------
+# PileupSequenceData ----------------------------------------------------------------
 
 .pileup_colnames <- c("pos","-","G","A","T","C")
 .pileup_measure_colnames <- c("-","G","A","T","C")
@@ -128,15 +128,15 @@ setClass(Class = "PileupPosData",
   pileup
 }
 
-#' @name PileupPosData
+#' @name PileupSequenceData
 #' @importFrom reshape2 dcast melt
 #' 
 #' @export
-PileupPosData <- function(bamfiles,
-                          fasta,
-                          gff,
-                          ...){
-  ans <- new("PileupPosData",
+PileupSequenceData <- function(bamfiles,
+                               fasta,
+                               gff,
+                               ...){
+  ans <- new("PileupSequenceData",
              bamfiles,
              fasta,
              gff,

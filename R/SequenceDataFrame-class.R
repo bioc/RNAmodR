@@ -1,9 +1,9 @@
 #' @include RNAmodR.R
 NULL
 
-#' @name PosDataFrame
+#' @name SequenceDataFrame
 #' 
-#' @title PosDataFrame
+#' @title SequenceDataFrame
 #' 
 #' @description 
 #' title
@@ -11,11 +11,11 @@ NULL
 #' 
 NULL
 
-# PosDataFrame -----------------------------------------------------------------
+# SequenceDataFrame -----------------------------------------------------------------
 
-#' @rdname PosDataFrame
+#' @rdname SequenceDataFrame
 #' @export
-setClass(Class = "PosDataFrame",
+setClass(Class = "SequenceDataFrame",
          contains = c("DataFrame"),
          slots = c(ranges = "GRanges",
                    sequence = "XString",
@@ -24,7 +24,7 @@ setClass(Class = "PosDataFrame",
 
 setMethod(
   f = "initialize", 
-  signature = signature(.Object = "PosDataFrame"),
+  signature = signature(.Object = "SequenceDataFrame"),
   definition = function(.Object,
                         df,
                         ranges,
@@ -58,10 +58,10 @@ setMethod(
   }
 )
 
-#' @rdname PosDataFrame
+#' @rdname SequenceDataFrame
 #' @export
-PosDataFrame <- function(df,ranges,sequence,replicate,conditions){
-  new("PosDataFrame",
+SequenceDataFrame <- function(df,ranges,sequence,replicate,conditions){
+  new("SequenceDataFrame",
       df,
       ranges,
       sequence,
@@ -69,7 +69,7 @@ PosDataFrame <- function(df,ranges,sequence,replicate,conditions){
       conditions)
 }
 
-.valid_PosDataFrame <-  function(x){
+.valid_SequenceDataFrame <-  function(x){
   if(nrow(x) != width(ranges(x))){
     return("data length and ranges width do not match.")
   }
@@ -80,10 +80,10 @@ PosDataFrame <- function(df,ranges,sequence,replicate,conditions){
   NULL
 }
 
-S4Vectors::setValidity2(Class = "PosDataFrame", .valid_PosDataFrame)
+S4Vectors::setValidity2(Class = "SequenceDataFrame", .valid_SequenceDataFrame)
 
 # show -------------------------------------------------------------------------
-setMethod("show", "PosDataFrame",
+setMethod("show", "SequenceDataFrame",
           function(object){
             callNextMethod(object)
             cat("\ncontaining a ")
@@ -94,20 +94,20 @@ setMethod("show", "PosDataFrame",
 
 # accessors --------------------------------------------------------------------
 
-#' @rdname PosDataFrame
+#' @rdname SequenceDataFrame
 #' @export
 setMethod(
   f = "sequences", 
-  signature = signature(x = "PosDataFrame"),
+  signature = signature(x = "SequenceDataFrame"),
   definition = function(x){x@sequence})
-#' @rdname PosDataFrame
+#' @rdname SequenceDataFrame
 #' @export
 setMethod(
   f = "ranges", 
-  signature = signature(x = "PosDataFrame"),
+  signature = signature(x = "SequenceDataFrame"),
   definition = function(x){x@ranges})
 
-setMethod("[", "PosDataFrame",
+setMethod("[", "SequenceDataFrame",
           function(x, i, j, ..., drop = TRUE){
             if (!isTRUEorFALSE(drop)){
               stop("'drop' must be TRUE or FALSE")

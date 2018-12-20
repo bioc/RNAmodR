@@ -1,15 +1,16 @@
 Package: RNAmodR
 Title: Detection of post-transcriptional modifications
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: person("Felix G.M.",
                   "Ernst",
                   email = "felix.gm.ernst@outlook.com",
                   role = c("aut", "cre"))
 Description: What the package does (one paragraph).
 Depends:
-    R (>= 3.5.1),
+    R (>= 3.5),
     IRanges,
-    GenomicRanges
+    GenomicRanges,
+    Modstrings
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
@@ -20,8 +21,11 @@ Imports:
     GenomicAlignments,
     GenomicRanges,
     Rsamtools,
-    rtracklayer
+    rtracklayer,
+    dplyr,
+    stats
 Suggests:
+    BiocStyle,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
@@ -29,17 +33,17 @@ Collate:
     'RNAmodR.R'
     'AllGenerics.R'
     'Modifier-utils.R'
-    'PosDataFrame-class.R'
-    'PosData-class.R'
+    'SequenceDataFrame-class.R'
+    'SequenceData-class.R'
     'Modifier-class.R'
     'Modifier-Inosine-class.R'
     'Modifier-analysis.R'
     'Modifier-check.R'
-    'PosData-coverage.R'
-    'PosData-end-pos.R'
-    'PosData-pileup.R'
-    'PosData-protected-end-pos.R'
-    'PosData-statistics.R'
+    'SequenceData-coverage.R'
+    'SequenceData-end-pos.R'
+    'SequenceData-pileup.R'
+    'SequenceData-protected-end-pos.R'
+    'SequenceData-statistics.R'
     'utils-bam.R'
     'utils.R'
 RoxygenNote: 6.1.1

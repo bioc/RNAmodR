@@ -1,15 +1,15 @@
 #' @include RNAmodR.R
-#' @include PosDataFrame-class.R
+#' @include SequenceDataFrame-class.R
 NULL
 
-#' @name PosData
-#' @title PosData
+#' @name SequenceData
+#' @title SequenceData
 #' @description 
 #' title
 #' 
 NULL
 
-setClass("PosData",
+setClass("SequenceData",
          contains = c("VIRTUAL","CompressedSplitDataFrameList"),
          slots = c(ranges = "GRangesList",
                    sequences = "XStringSet",
@@ -19,21 +19,21 @@ setClass("PosData",
                    minQuality = "integer",
                    chromosomes = "character",
                    unlistType = "character",
-                   posDataType = "factor",
+                   sequenceDataType = "factor",
                    replicate = "factor",
                    conditions = "factor"),
          prototype = list(ranges = GRangesList(),
                           sequences = DNAStringSet(),
-                          unlistType = "PosDataFrame"))
+                          unlistType = "SequenceDataFrame"))
 
 # for concat
-#' @name PosData
+#' @name SequenceData
 #' @export
-setMethod("parallelSlotNames", "PosData",
+setMethod("parallelSlotNames", "SequenceData",
           function(x) c("ranges","sequences", callNextMethod())
 )
 
-setMethod("show", "PosData",
+setMethod("show", "SequenceData",
           function(object){
             k <- length(object)
             data_nc <- ncol(object@unlistData)
@@ -85,10 +85,10 @@ setMethod("show", "PosData",
 )
 # validity ---------------------------------------------------------------------
 
-.valid.PosData <- function(x){
+.valid.SequenceData <- function(x){
   NULL
 }
-S4Vectors::setValidity2(Class = "PosData",.valid.PosData)
+S4Vectors::setValidity2(Class = "SequenceData",.valid.SequenceData)
 
 ################################################################################
 # list methods -----------------------------------------------------------------
@@ -110,9 +110,9 @@ extractElement <- function(x, i){
 }
 
 # subsetting
-#' @name PosData
+#' @name SequenceData
 #' @export
-setMethod("getListElement", "PosData",
+setMethod("getListElement", "SequenceData",
           function(x, i, exact=TRUE){
             i2 <- normalizeDoubleBracketSubscript(i, x, exact=exact,
                                                   allow.NA=TRUE,
@@ -160,13 +160,13 @@ setMethod("getListElement", "PosData",
 }
 
 
-#' @name PosData
+#' @name SequenceData
 #' @export
-setMethod("setListElement", "PosData",
+setMethod("setListElement", "SequenceData",
           function(x, i, value){
             browser()
-            if(!is(value,"PosDataFrame")){
-              stop("invalid value. must be 'PosDataFrame'.")
+            if(!is(value,"SequenceDataFrame")){
+              stop("invalid value. must be 'SequenceDataFrame'.")
             }
             i2 <- normalizeDoubleBracketSubscript(i, x,
                                                   allow.append=TRUE,
@@ -244,12 +244,12 @@ lsubset_List_by_List <- function(x, i, value){
 }
 
 
-#' @name PosData
+#' @name SequenceData
 #' @export
-setReplaceMethod("[", "PosData",
+setReplaceMethod("[", "SequenceData",
                  function(x, i, j,..., value){
-                   if(!is(value,"PosData")){
-                     stop("invalid value. must be 'PosData'.")
+                   if(!is(value,"SequenceData")){
+                     stop("invalid value. must be 'SequenceData'.")
                    }
                    browser()
                    if (!missing(j) || length(list(...)) > 0L){
@@ -266,7 +266,7 @@ setReplaceMethod("[", "PosData",
 # looping
 
 
-lapply_PosData <- function(X, FUN, ...){
+lapply_SequenceData <- function(X, FUN, ...){
   FUN <- match.fun(FUN)
   ans <- vector(mode="list", length=length(X))
   unlisted_X <- unlist(X, use.names=FALSE)
@@ -297,16 +297,16 @@ lapply_PosData <- function(X, FUN, ...){
   ans
 }
 
-setMethod("lapply", "PosData",
+setMethod("lapply", "SequenceData",
           function(X, FUN, ...)
           {
-            ans <- lapply_PosData(X, FUN, ...)
+            ans <- lapply_SequenceData(X, FUN, ...)
             names(ans) <- names(X)
             ans
           }
 )
 
-setMethod("extractROWS", "PosData",
+setMethod("extractROWS", "SequenceData",
           function(x, i){
             i <- normalizeSingleBracketSubscript(i, x, as.NSBS=TRUE)
             ans_eltNROWS <- extractROWS(width(x@partitioning), i)
@@ -350,13 +350,13 @@ setMethod("extractROWS", "PosData",
   concatenateObjects(args[[1L]], args[-1L])
 }
 
-.cbind_PosData_objects <- function(objects){
+.cbind_SequenceData_objects <- function(objects){
   browser()
   
   
 }
   
-# .cbind_PosData_objects <-
+# .cbind_SequenceData_objects <-
 #   function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE)
 #   {
 #     browser()
@@ -398,7 +398,7 @@ setMethod("extractROWS", "PosData",
                        },
                        logical(1))
   if(!all(chk_length)){
-    stop("Lengths of PosData elements do not match.",
+    stop("Lengths of SequenceData elements do not match.",
          call. = FALSE)
   }
   chk_names <- vapply(objects,
@@ -407,21 +407,21 @@ setMethod("extractROWS", "PosData",
                       },
                       logical(1))
   if(!all(chk_names)){
-    stop("Names of PosData elements do not match.",
+    stop("Names of SequenceData elements do not match.",
          call. = FALSE)
   }
   NULL
 }
 
-setMethod("cbind", "PosData",
+setMethod("cbind", "SequenceData",
           function(...){
             objects <- list(...)
             .check_able_to_cbind(objects)
-            .cbind_PosData_objects(objects)
+            .cbind_SequenceData_objects(objects)
           }
 )
 
-setMethod("rbind", "PosData",
+setMethod("rbind", "SequenceData",
           function(...){
             arg1 <- list(...)[[1L]]
             stop("'rbind' not supported for ",class(arg1),".")
@@ -432,7 +432,7 @@ setMethod("rbind", "PosData",
 # object creation --------------------------------------------------------------
 setMethod(
   f = "initialize", 
-  signature = signature(.Object = "PosData"),
+  signature = signature(.Object = "SequenceData"),
   definition = function(.Object,
                         bamfiles,
                         fasta,
@@ -456,7 +456,7 @@ setMethod(
     .Object@bamfiles <- bamfiles
     .Object@replicate <- factor(seq_along(bamfiles))
     .Object@conditions <- factor(names(bamfiles))
-    .Object@posDataType <- factor(rep(class(.Object)[1L],length(bamfiles)))
+    .Object@sequenceDataType <- factor(rep(class(.Object)[1L],length(bamfiles)))
     .Object@fasta <- fasta
     .Object@gff <- gff
     # additional sanity checks
@@ -479,40 +479,6 @@ setMethod(
     .Object
   }
 )
-
-# accessors --------------------------------------------------------------------
-
-#' @name PosData
-#' @export
-setMethod(f = "gff", 
-          signature = signature(x = "PosData"),
-          definition = function(x){x@gff})
-  
-#' @name PosData
-#' @export
-setMethod(f = "fasta", 
-          signature = signature(x = "PosData"),
-          definition = function(x){x@fasta})
-  
-#' @name PosData
-#' @export
-setMethod(f = "sequences", 
-          signature = signature(x = "PosData"),
-          definition = function(x){x@sequences})
-  
-#' @name PosData
-#' @export
-setMethod(f = "ranges", 
-          signature = signature(x = "PosData"),
-          definition = function(x){x@ranges})
-  
-#' @name PosData
-#' @export
-setMethod(f = "bamfiles", 
-          signature = signature(x = "PosData"),
-          definition = function(x){x@bamfiles})
-  
-
 
 ################################################################################
 # common utility functions -----------------------------------------------------
@@ -606,7 +572,7 @@ setMethod(f = "bamfiles",
   x@unlistData <- data
   x@replicate <- rep(x@replicate, each = conditionsFmultiplier)
   x@conditions <- rep(x@conditions, each = conditionsFmultiplier)
-  x@posDataType <- rep(x@posDataType, each = conditionsFmultiplier)
+  x@sequenceDataType <- rep(x@sequenceDataType, each = conditionsFmultiplier)
   x@partitioning <- partitioning
   x@ranges <- ranges
   x@sequences <- sequences
@@ -677,3 +643,38 @@ setMethod(f = "bamfiles",
   if(length(data) == 0) return(NULL)
   return(data)
 }
+
+
+
+# accessors --------------------------------------------------------------------
+
+#' @name SequenceData
+#' @export
+setMethod(f = "gff", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@gff})
+
+#' @name SequenceData
+#' @export
+setMethod(f = "fasta", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@fasta})
+
+#' @name SequenceData
+#' @export
+setMethod(f = "sequences", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@sequences})
+
+#' @name SequenceData
+#' @export
+setMethod(f = "ranges", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@ranges})
+
+#' @name SequenceData
+#' @export
+setMethod(f = "bamfiles", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@bamfiles})
+

@@ -1,44 +1,44 @@
 #' @include RNAmodR.R
-#' @include PosData-class.R
+#' @include SequenceData-class.R
 NULL
 
-#' @name EndPosData
+#' @name EndSequenceData
 #' 
-#' @title EndPosData
+#' @title EndSequenceData
 #' 
 #' @description
 #' title
 NULL
 
 
-#' @rdname EndPosData
+#' @rdname EndSequenceData
 #' @export
-setClass(Class = "End5PosData",
-         contains = "PosData",
+setClass(Class = "End5SequenceData",
+         contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname EndPosData
+#' @rdname EndSequenceData
 #' @export
-setClass(Class = "End3PosData",
-         contains = "PosData",
+setClass(Class = "End3SequenceData",
+         contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname EndPosData
+#' @rdname EndSequenceData
 #' @export
-setClass(Class = "EndPosData",
-         contains = "PosData",
+setClass(Class = "EndSequenceData",
+         contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
 
 
-# End5PosData ------------------------------------------------------------------
+# End5SequenceData ------------------------------------------------------------------
 
 #'@importFrom reshape2 acast
 .get_position_data_of_transcript_ends <- function(bamFile,
-                                                   ranges,
-                                                   param,
-                                                   type = "5prime",
-                                                   args = list()){
+                                                  ranges,
+                                                  param,
+                                                  type = "5prime",
+                                                  args = list()){
   parentRanges <- .get_parent_annotations(ranges)
   # add some flags
   # bamWhat(param) <- c("flag","mapq")
@@ -90,10 +90,10 @@ setClass(Class = "EndPosData",
       bg <- table(seq_len(w)) - 1
       d <- table(d)
       d <- reshape2::acast(data.frame(pos = as.integer(c(names(bg),names(d))),
-                                     count = as.integer(c(bg,d))),
-                 pos ~ .,
-                 value.var = "count",
-                 fun.aggregate = sum)
+                                      count = as.integer(c(bg,d))),
+                           pos ~ .,
+                           value.var = "count",
+                           fun.aggregate = sum)
       as.integer(d)
     },
     data,
@@ -115,13 +115,13 @@ setClass(Class = "EndPosData",
   data
 }
 
-#' @rdname EndPosData
+#' @rdname EndSequenceData
 #' @export
-End5PosData <- function(bamfiles,
-                        fasta,
-                        gff,
-                        ...){
-  ans <- new("End5PosData",
+End5SequenceData <- function(bamfiles,
+                             fasta,
+                             gff,
+                             ...){
+  ans <- new("End5SequenceData",
              bamfiles,
              fasta,
              gff,
@@ -150,13 +150,13 @@ End5PosData <- function(bamfiles,
                          sequences)
 }
 
-#' @rdname EndPosData
+#' @rdname EndSequenceData
 #' @export
-End3PosData <- function(bamfiles,
-                        fasta,
-                        gff,
-                        ...){
-  ans <- new("End3PosData",
+End3SequenceData <- function(bamfiles,
+                             fasta,
+                             gff,
+                             ...){
+  ans <- new("End3SequenceData",
              bamfiles,
              fasta,
              gff,
@@ -185,13 +185,13 @@ End3PosData <- function(bamfiles,
                          sequences)
 }
 
-#' @rdname EndPosData
+#' @rdname EndSequenceData
 #' @export
-EndPosData <- function(bamfiles,
-                       fasta,
-                       gff,
-                       ...){
-  ans <- new("EndPosData",
+EndSequenceData <- function(bamfiles,
+                            fasta,
+                            gff,
+                            ...){
+  ans <- new("EndSequenceData",
              bamfiles,
              fasta,
              gff,
