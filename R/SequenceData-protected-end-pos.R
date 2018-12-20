@@ -1,31 +1,31 @@
 #' @include RNAmodR.R
-#' @include PosData-class.R
+#' @include SequenceData-class.R
 NULL
 
-#' @name ProtectedEndPosData
+#' @name ProtectedEndSequenceData
 #' 
-#' @title ProtectedEndPosData
+#' @title ProtectedEndSequenceData
 #' 
 #' @description
 #' title
 NULL
 
-#' @rdname ProtectedEndPosData
+#' @rdname ProtectedEndSequenceData
 #' @export
-setClass(Class = "ProtectedEndPosData",
-         contains = "PosData",
+setClass(Class = "ProtectedEndSequenceData",
+         contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
 
-# ProtectedEndPosData ------------------------------------------------------------------
+# ProtectedEndSequenceData -----------------------------------------------------
 
-#' @rdname ProtectedEndPosData
+#' @rdname ProtectedEndSequenceData
 #' @export
-ProtectedEndPosData <- function(bamfiles,
-                                fasta,
-                                gff,
-                                ...){
-  ans <- new("ProtectedEndPosData",
+ProtectedEndSequenceData <- function(bamfiles,
+                                     fasta,
+                                     gff,
+                                     ...){
+  ans <- new("ProtectedEndSequenceData",
              bamfiles,
              fasta,
              gff,

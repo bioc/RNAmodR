@@ -2,3 +2,7 @@
 .Rhistory
 .RData
 inst/doc
+GenomicRanges
+IRanges
+S4Vectors
+XVector

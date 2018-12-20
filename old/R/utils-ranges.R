@@ -68,6 +68,7 @@ NULL
                                     forceSingle = FALSE,
                                     doRecursiveSearch = FALSE,
                                     IDs){
+  browser()
   if(!doRecursiveSearch){
     res <- gr[is.na(as.character(gr$Parent)),]
     if(length(res) > 1 && forceSingle) 

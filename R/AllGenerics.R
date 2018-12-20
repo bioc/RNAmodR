@@ -1,12 +1,6 @@
 #' @include RNAmodR.R
 NULL
 
-setGeneric( 
-  name = "getMod",
-  def = function(x,
-                 ...) standardGeneric("getMod")
-) 
-
 # ModExperiment ----------------------------------------------------------------
 
 setGeneric( 
@@ -20,7 +14,7 @@ setGeneric(
                  ...) standardGeneric("match.annotation")
 ) 
 
-# ModExperiment accessors ------------------------------------------------------
+# Modifier accessors ------------------------------------------------------
 setGeneric( 
   name = "gff",
   def = function(x) standardGeneric("gff")
@@ -30,13 +24,32 @@ setGeneric(
   def = function(x) standardGeneric("fasta")
 )
 setGeneric( 
-  name = "getSeq",
-  def = function(x) standardGeneric("getSeq")
+  name = "sequences",
+  def = function(x,
+                 ...) standardGeneric("sequences")
 )
 setGeneric( 
   name = "bamfiles",
   def = function(x) standardGeneric("bamfiles")
 )
+setGeneric( 
+  name = "seqdata",
+  def = function(x) standardGeneric("seqdata")
+) 
+setGeneric( 
+  name = "modifications",
+  def = function(x,
+                 ...) standardGeneric("modifications")
+) 
+
+# Modifier functions -----------------------------------------------------------
+
+setGeneric( 
+  name = "modify",
+  def = function(x,
+                 ...) standardGeneric("modify")
+) 
+
 
 # PosData ----------------------------------------------------------------------
 
