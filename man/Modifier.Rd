@@ -3,6 +3,7 @@
 \docType{class}
 \name{Modifier}
 \alias{Modifier}
+\alias{modify}
 \alias{Modifier-class}
 \alias{show,Modifier-method}
 \title{Modifier}

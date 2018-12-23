@@ -7,6 +7,9 @@
 \title{PileupSequenceData}
 \usage{
 PileupSequenceData(bamfiles, fasta, gff, ...)
+
+\S4method{aggregate}{PileupSequenceData}(x, condition = c("Both",
+  "Treated", "Control"))
 }
 \description{
 title

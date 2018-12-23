@@ -164,3 +164,78 @@ PileupSequenceData <- function(bamfiles,
                          ranges,
                          sequences)
 }
+
+# aggregation ------------------------------------------------------------------
+
+#' @name PileupSequenceData
+#' @importFrom matrixStats rowSds
+#' 
+#' @export
+setMethod("aggregate",
+          signature = c(x = "PileupSequenceData"),
+          function(x,
+                   condition = c("Both","Treated","Control")){
+            if(is(x,"CompressedSplitDataFrameList")){
+              df <- x@unlistData
+            } else {
+              df <- x
+            }
+            if(condition != "Both"){
+              df <- df[,x@conditions == condition, drop = FALSE]
+              if(ncol(df) == 0L){
+                stop("No data for condition '",condition,"' found.")
+              }
+            }
+            replicates <- unique(x@replicate)
+            for(i in seq_along(replicates)){
+              df[,x@replicate == i] <- 
+                as.data.frame(df[,x@replicate == i]) / 
+                rowSums(as.data.frame(df[,x@replicate == i]))
+            }
+            ncol <- ncol(df[,x@replicate == 1L,drop = FALSE])
+            seqAdd <- seq.int(from = 0, to = ncol(df) - 1, by = ncol)
+            colNames <- data.frame(strsplit(colnames(df)[seq_len(ncol)],"\\."),
+                                   stringsAsFactors = FALSE)
+            colNames <- as.character(colNames[nrow(colNames),])
+            means <- NumericList(lapply(seq_len(ncol),
+                                        function(i){
+                                          rowMeans(as.data.frame(df[,i + seqAdd]),
+                                                   na.rm = TRUE)
+                                        }))
+            names(means) <- paste0("means.",colNames)
+            sds <- NumericList(lapply(seq_len(ncol),
+                                      function(i){
+                                        matrixStats::rowSds(as.matrix(df[,i + seqAdd]),
+                                                            na.rm = TRUE)
+                                      }))
+            names(sds) <- paste0("sds.",colNames)
+            ans <- cbind(do.call(DataFrame, means),
+                         do.call(DataFrame, sds))
+            if(is(x,"CompressedSplitDataFrameList")){
+              ans <- SplitDataFrameList(ans)
+              ans@partitioning <- x@partitioning
+            }
+            ans
+          }
+)
+
+#' @importFrom matrixStats rowSds
+.aggregate_pile_up_to_coverage <- function(data){
+  if(is(data,"CompressedSplitDataFrameList")){
+    df <- data@unlistData
+  } else {
+    df <- data
+  }
+  replicates <- unique(data@replicate)
+  ans  <- IntegerList(lapply(seq_along(replicates),
+                             function(i){
+                               rowSums(as.data.frame(df[,data@replicate == i]))
+                             }))
+  names(ans) <- paste0("replicate.",replicates)
+  ans <- do.call("DataFrame",ans)
+  if(is(data,"CompressedSplitDataFrameList")){
+    ans <- SplitDataFrameList(ans)
+    ans@partitioning <- data@partitioning
+  }
+  ans
+}

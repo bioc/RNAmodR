@@ -203,7 +203,6 @@ EndSequenceData <- function(bamfiles,
   param <- .assemble_scanBamParam(ranges,
                                   ans@minQuality,
                                   ans@chromosomes)
-  browser()
   message("Loading read end position data (5' and 3') from BAM files...")
   data <- lapply(ans@bamfiles,
                  FUN = .get_position_data_of_transcript_ends,
@@ -220,3 +219,46 @@ EndSequenceData <- function(bamfiles,
                          ranges,
                          sequences)
 }
+
+# aggregation ------------------------------------------------------------------
+
+#' @name EndSequenceData
+#' @export
+setMethod("aggregate",
+          signature = c(x = "EndSequenceData"),
+          function(x,
+                   condition = c("Both","Treated","Control")){
+            condition <- match.arg(condition)
+            if(is(x,"CompressedSplitDataFrameList")){
+              df <- x@unlistData
+            } else {
+              df <- x
+            }
+            if(condition != "Both"){
+              df <- df[,x@conditions == condition, drop = FALSE]
+              if(ncol(df) == 0L){
+                stop("No data for condition '",condition,"' found.")
+              }
+            }
+            replicates <- unique(x@replicate)
+            means <- NumericList(lapply(replicates,
+                                        function(rep){
+                                          rowMeans(as.data.frame(df[,x@replicate == rep]),
+                                                   na.rm = TRUE)
+                                        }))
+            names(means) <- paste0("means.",replicates)
+            sds <- NumericList(lapply(replicates,
+                                      function(rep){
+                                        matrixStats::rowSds(as.matrix(df[,x@replicate == rep]),
+                                                            na.rm = TRUE)
+                                      }))
+            names(sds) <- paste0("sds.",replicates)
+            ans <- cbind(do.call(DataFrame, means),
+                         do.call(DataFrame, sds))
+            if(is(x,"CompressedSplitDataFrameList")){
+              ans <- SplitDataFrameList(ans)
+              ans@partitioning <- x@partitioning
+            }
+            ans
+          }
+)

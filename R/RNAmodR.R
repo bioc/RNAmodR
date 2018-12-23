@@ -20,13 +20,13 @@ NULL
 #' @import Biostrings
 #' @import Modstrings
 NULL
+requireNamespace("S4Vectors")
+requireNamespace("Rsamtools")
 requireNamespace("IRanges")
 requireNamespace("GenomicRanges")
 requireNamespace("GenomicAlignments")
 requireNamespace("Biostrings")
 requireNamespace("Modstrings")
-requireNamespace("S4Vectors")
-requireNamespace("Rsamtools")
 requireNamespace("rtracklayer")
 
 

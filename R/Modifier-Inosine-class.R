@@ -41,72 +41,8 @@ setMethod(
 
 # constructors -----------------------------------------------------------------
 
-.ModInosineFromCharacter <- function(bamfiles,
-                                     fasta,
-                                     gff,
-                                     args){
-  ans <- new("ModInosine",
-             bamfiles,
-             fasta,
-             gff)
-  modName <- fullName(ModRNAString())[
-    which(ans@mod == shortName(ModRNAString()))]
-  message("Starting to search for '",
-          tools::toTitleCase(modName),
-          "'...")
-  ans@data <- do.call(ans@dataType,
-                      list(bamfiles = ans@bamfiles,
-                           fasta = ans@fasta,
-                           gff = ans@gff))
-  ans@data@sequences <- RNAStringSet(ans@data@sequences)
-  if(args[["findInosine"]]){
-    ans <- modify(ans,args)
-  }
-  ans
-}
-
-.ModInosineFromSequenceData <- function(x){
-  ans <- new("ModInosine",
-             x@bamfiles,
-             x@fasta,
-             x@gff)
-  # check data type
-  ans@data <- .norm_data_type(ans,x)
-  if(args[["findInosine"]]){
-    ans <- modify(ans,args)
-  }
-  ans
-}
-
 .norm_inosine_args <- function(input){
-  minCoverage <- 10L
-  minReplicate <- 1L
-  findInosine <- TRUE
-  if(!is.null(input[["minCoverage"]])){
-    minCoverage <- input[["minCoverage"]]
-    if(!is.integer(minCoverage) || 
-       minCoverage < 0L ||
-       length(minCoverage) != 1){
-      stop("'minCoverage' must be a single positive integer value.")
-    }
-  }
-  if(!is.null(input[["minReplicate"]])){
-    minReplicate <- input[["minReplicate"]]
-    if(!is.integer(minReplicate) || 
-       minReplicate < 0L ||
-       length(minReplicate) != 1){
-      stop("'minReplicate' must be a single positive integer value.")
-    }
-  }
-  if(!is.null(input[["findInosine"]])){
-    findInosine <- input[["findInosine"]]
-    if(assertive::is_a_bool(findInosine)){
-      stop("'findInosine' must be a single logical value.")
-    }
-  }
-  args <- list(minCoverage = minCoverage,
-               minReplicate = minReplicate,
-               findInosine = findInosine)
+  args <- .norm_args(input)
   args
 }
 
@@ -126,13 +62,13 @@ setMethod("ModInosine",
                    modifications = NULL,
                    ...){
             args <- .norm_inosine_args(list(...))
-            ans <- .ModInosineFromCharacter(x,
-                                            fasta,
-                                            gff,
-                                            args)
-            ans@modifications <- .norm_modifications(ans,
-                                                     modifications,
-                                                     args)
+            ans <- .ModFromCharacter("ModInosine",
+                                     x,
+                                     fasta,
+                                     gff,
+                                     args)
+            ans <- .norm_modifications(ans,
+                                       args)
             ans
           }
 )
@@ -148,10 +84,11 @@ setMethod("ModInosine",
                    modifications = NULL,
                    ...){
             args <- .norm_inosine_args(list(...))
-            ans <- .ModInosineFromCharacter(x,
-                                            fasta,
-                                            gff,
-                                            args)
+            ans <- .ModFromCharacter("ModInosine",
+                                     x,
+                                     fasta,
+                                     gff,
+                                     args)
             ans <- .norm_modifications(ans,
                                        args)
             ans
@@ -167,7 +104,9 @@ setMethod("ModInosine",
                    modifications = NULL,
                    ...){
             args <- .norm_inosine_args(list(...))
-            ans <- .ModInosineFromSequenceData(x)
+            ans <- .ModFromSequenceData("ModInosine",
+                                        x,
+                                        args)
             ans <- .norm_modifications(ans,
                                        args)
             ans
@@ -187,9 +126,10 @@ setMethod("ModInosine",
        sd = scores$dz)
 }
 
-.find_inosine <- function(mod,
-                          data,
+.find_inosine <- function(x,
                           args){
+  data <- seqdata(x)
+  mod <- aggregate(data)
   message("Searching for Inosine...")
   letters <- CharacterList(strsplit(as.character(sequences(data)),""))
   ranges <- split(.get_parent_annotations(ranges(data)),
@@ -230,13 +170,9 @@ setMethod("modify",
           signature = c(x = "ModInosine"),
           function(x,
                    ...){
-            x@modifications <- .find_inosine(.aggregate_pile_up(x@data),
-                                             seqdata(x),
+            x@modifications <- .find_inosine(x,
                                              .norm_inosine_args(list(...)))
             message("done.")
             x
           }
 )
-
-
-

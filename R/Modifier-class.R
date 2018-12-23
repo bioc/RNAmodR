@@ -4,6 +4,8 @@
 NULL
 
 #' @name Modifier
+#' @aliases modify
+#' 
 #' @title Modifier
 #' @description 
 #' title
@@ -164,7 +166,81 @@ setMethod(f = "modifications",
               x@modifications
             }
 )
-  
+
+# constructors -----------------------------------------------------------------
+
+.ModFromCharacter <- function(class,
+                              bamfiles,
+                              fasta,
+                              gff,
+                              args){
+  ans <- new(class,
+             bamfiles,
+             fasta,
+             gff)
+  modName <- fullName(ModRNAString())[
+    which(ans@mod == shortName(ModRNAString()))]
+  message("Starting to search for '",
+          tools::toTitleCase(modName),
+          "'...")
+  ans@data <- do.call(ans@dataType,
+                      list(bamfiles = ans@bamfiles,
+                           fasta = ans@fasta,
+                           gff = ans@gff))
+  ans@data@sequences <- RNAStringSet(ans@data@sequences)
+  if(args[["findMod"]]){
+    ans <- do.call(modify,c(list(ans),args))
+  }
+  ans
+}
+
+.ModFromSequenceData <- function(class,
+                                 x,
+                                 args){
+  ans <- new(class,
+             x@bamfiles,
+             x@fasta,
+             x@gff)
+  # check data type
+  ans@data <- .norm_data_type(ans,x)
+  if(args[["findMod"]]){
+    ans <- do.call(modify,c(list(ans),args))
+  }
+  ans
+}
+
+.norm_args <- function(input){
+  minCoverage <- 10L
+  minReplicate <- 1L
+  findMod <- TRUE
+  if(!is.null(input[["minCoverage"]])){
+    minCoverage <- input[["minCoverage"]]
+    if(!is.integer(minCoverage) || 
+       minCoverage < 0L ||
+       length(minCoverage) != 1){
+      stop("'minCoverage' must be a single positive integer value.")
+    }
+  }
+  if(!is.null(input[["minReplicate"]])){
+    minReplicate <- input[["minReplicate"]]
+    if(!is.integer(minReplicate) || 
+       minReplicate < 0L ||
+       length(minReplicate) != 1){
+      stop("'minReplicate' must be a single positive integer value.")
+    }
+  }
+  if(!is.null(input[["findMod"]])){
+    findMod <- input[["findMod"]]
+    if(!assertive::is_a_bool(findMod)){
+      stop("'findMod' must be a single logical value.")
+    }
+  }
+  args <- list(minCoverage = minCoverage,
+               minReplicate = minReplicate,
+               findMod = findMod)
+  args
+}
+
 # dummy functions --------------------------------------------------------------
 # these need to be implemented by each subclass
 

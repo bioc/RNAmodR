@@ -51,11 +51,11 @@ setGeneric(
 ) 
 
 
-# PosData ----------------------------------------------------------------------
+# SequenceData -----------------------------------------------------------------
 
-
-
-
-
-
-# Functions --------------------------------------------------------------------
+setGeneric( 
+  name = "aggregate",
+  def = function(x,
+                 condition =  c("Both","Treated","Control"))
+    standardGeneric("aggregate")
+) 

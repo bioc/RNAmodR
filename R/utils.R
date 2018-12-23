@@ -53,8 +53,7 @@ NULL
     ids <- ranges$ID
     return(factor(ids))
   }
-  browser()
-  parentPos <- which(is.na(ranges$Parent))
+  parentPos <- which(is.na(as.character(ranges$Parent)))
   parents <- ranges[parentPos]$ID
   childrenPos <- lapply(parents, function(x){.get_children(ranges,
                                                            x,
@@ -66,9 +65,9 @@ NULL
 }
 
 .get_children <- function(ranges,
-                           Parent,
-                           ID){
-  childPos <- which(!is.na(ranges$Parent) &
+                          Parent,
+                          ID){
+  childPos <- which(!is.na(as.character(ranges$Parent)) &
                       as.character(ranges$Parent) == ID)
   children <- ranges[childPos]$ID
   if(length(children) == 0L) return(NULL)
@@ -88,7 +87,7 @@ NULL
   }
   if(is(grl,"CompressedList")){
     if(!is.null(grl@unlistData$Parent)){
-      ans <- grl@unlistData[is.na(grl@unlistData$Parent)]
+      ans <- grl@unlistData[is.na(as.character(grl@unlistData$Parent))]
     } else {
       ans <- grl@unlistData
     }

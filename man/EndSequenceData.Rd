@@ -15,6 +15,9 @@ End5SequenceData(bamfiles, fasta, gff, ...)
 End3SequenceData(bamfiles, fasta, gff, ...)
 
 EndSequenceData(bamfiles, fasta, gff, ...)
+
+\S4method{aggregate}{EndSequenceData}(x, condition = c("Both", "Treated",
+  "Control"))
 }
 \description{
 title

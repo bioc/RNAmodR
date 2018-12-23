@@ -37,6 +37,7 @@ Collate:
     'SequenceData-class.R'
     'Modifier-class.R'
     'Modifier-Inosine-class.R'
+    'Modifier-RiboMethSeq-class.R'
     'Modifier-analysis.R'
     'Modifier-check.R'
     'SequenceData-coverage.R'
