@@ -21,12 +21,12 @@ bibliography: references.bib
 BiocStyle::markdown(css.files = c('custom.css'))
 ```
 
-```{r style, echo = FALSE, results = 'asis'}
+```{r, echo = FALSE, results = 'asis'}
 library(RNAmodR)
 library(Rsamtools)
 ```
 
-```{r style, echo = FALSE, results = 'asis'}
+```{r, echo = FALSE, results = 'asis'}
 genome <- system.file("extdata","example.fasta" ,package = "RNAmodR")
 annotation <- system.file("extdata","example.gff3" ,package = "RNAmodR")
 files <-  BamFileList(c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR"),
@@ -34,3 +34,47 @@ files <-  BamFileList(c(Treated = system.file("extdata","example1.bam" ,package 
                       Treated = system.file("extdata","example3.bam" ,package = "RNAmodR")))
 ```
 
+```{r, echo = FALSE, results = 'asis'}
+mi <- ModInosine(files,genome,annotation)
+```
+
+```{r, echo = FALSE, results = 'asis'}
+files2 <- BamFileList(c(Treated = "KS01.bam"))
+genome2 <- "GRCh38_rRNA_tRNA.fasta"
+annotation2 <- "GRCh38_rRNA_tRNA.gff"
+```
+
+```{r, echo = FALSE, results = 'asis'}
+mrms <- ModRiboMethSeq(files2,genome2,annotation2)
+```
+
+
+```{r, echo = FALSE, results = 'asis'}
+Hsa_mod <- read.csv2("literature/Hsa_rRNA_modifications.csv", encoding = "UTF-8-BOM")
+colnames(Hsa_mod) <- c("molecule","pos","type","score1","score2")
+Hsa_mod <- split(Hsa_mod,Hsa_mod$molecule)
+
+Hsa18S <- GRanges(seqnames = "rRNA18S",
+                  ranges = IRanges::IRanges(start = Hsa_mod$`18S`$pos,
+                                            width = 1),
+                  mod = Hsa_mod$`18S`$type)
+Hsa28S <- GRanges(seqnames = "rRNA28S",
+                  ranges = IRanges::IRanges(start = Hsa_mod$`28S`$pos,
+                                            width = 1),
+                  mod = Hsa_mod$`28S`$type)
+Hsa58S <- GRanges(seqnames = "rRNA58S",
+                  ranges = IRanges::IRanges(start = Hsa_mod$`5.8S`$pos,
+                                            width = 1),
+                  mod = Hsa_mod$`5.8S`$type)
+```
+
+
+```{r, echo = FALSE, results = 'asis'}
+
+dt <- DataTrack(start = seq(1, 121), 
+          width = 1,
+          chromosome = "chrX",
+          genome = "hg19", 
+          name = "sinus", 
+          data = aggregateData(mrms)[[1]]$scoreA) 
+```

@@ -23,7 +23,9 @@ Imports:
     Rsamtools,
     rtracklayer,
     dplyr,
-    stats
+    stats,
+    biovizBase,
+    Gviz
 Suggests:
     BiocStyle,
     knitr,
@@ -37,14 +39,19 @@ Collate:
     'SequenceData-class.R'
     'Modifier-class.R'
     'Modifier-Inosine-class.R'
+    'Modifier-Inosine-viz.R'
     'Modifier-RiboMethSeq-class.R'
+    'Modifier-RiboMethSeq-viz.R'
     'Modifier-analysis.R'
     'Modifier-check.R'
+    'ModifierSet-class.R'
+    'ModifierSetList-class.R'
     'SequenceData-coverage.R'
     'SequenceData-end-pos.R'
     'SequenceData-pileup.R'
     'SequenceData-protected-end-pos.R'
     'SequenceData-statistics.R'
     'utils-bam.R'
+    'utils-visualize.R'
     'utils.R'
 RoxygenNote: 6.1.1

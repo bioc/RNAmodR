@@ -65,10 +65,10 @@ NULL
 
 .norm_mod <- function(mod,
                       className){
-  f <- which(mod == shortName(ModRNAString()))
-  if(length(f) != 1){
-    stop("Modification '",mod,"' as defined for ",className," does not exist ",
-         "in the Modstrings dictionary for modified RNA sequences.",
+  f <- mod %in% shortName(ModRNAString())
+  if(length(which(f)) != length(mod)){
+    stop("Modification '",mod[!f],"' as defined for ",className," does not ",
+         "exist in the Modstrings dictionary for modified RNA sequences.",
          call. = FALSE)
   }
   mod

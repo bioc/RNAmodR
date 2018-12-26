@@ -33,13 +33,25 @@ setGeneric(
   def = function(x) standardGeneric("bamfiles")
 )
 setGeneric( 
-  name = "seqdata",
-  def = function(x) standardGeneric("seqdata")
+  name = "seqData",
+  def = function(x) standardGeneric("seqData")
+) 
+setGeneric( 
+  name = "aggregateData",
+  def = function(x) standardGeneric("aggregateData")
 ) 
 setGeneric( 
   name = "modifications",
   def = function(x,
                  ...) standardGeneric("modifications")
+) 
+
+# check functions --------------------------------------------------------------
+
+setGeneric( 
+  name = "hasAggregateData",
+  def = function(x,
+                 ...) standardGeneric("hasAggregateData")
 ) 
 
 # Modifier functions -----------------------------------------------------------
@@ -48,14 +60,22 @@ setGeneric(
   name = "modify",
   def = function(x,
                  ...) standardGeneric("modify")
+)
+
+setGeneric( 
+  name = "visualizeData",
+  def = function(x,
+                 ...) standardGeneric("visualizeData")
 ) 
 
+# SequenceData functions -------------------------------------------------------
 
-# SequenceData -----------------------------------------------------------------
+
+# Modifier/SequenceData functions ----------------------------------------------
 
 setGeneric( 
   name = "aggregate",
   def = function(x,
-                 condition =  c("Both","Treated","Control"))
+                 ...)
     standardGeneric("aggregate")
 ) 

@@ -22,6 +22,7 @@ setClass("Modifier",
                    fasta = "FaFile",
                    gff = "GFFFile",
                    data = "SequenceData",
+                   aggregate = "DataFrameList",
                    modifications = "GRanges"))
 
 setMethod(
@@ -118,7 +119,7 @@ setMethod(f = "sequences",
               if(modified == TRUE){
                 mod <- .get_modifications_per_transcript(x)
                 mod <- split(mod,names(mod))
-                ans <- ModRNAStringSet(sequences(seqdata(x)))
+                ans <- ModRNAStringSet(sequences(seqData(x)))
                 modSeqList <- ans[names(ans) %in% names(mod)]
                 mod <- mod[match(names(mod),names(modSeqList))]
                 ans[names(ans) %in% names(mod)] <- 
@@ -136,7 +137,7 @@ setMethod(f = "sequences",
 #' @export
 setMethod(f = "ranges", 
           signature = signature(x = "Modifier"),
-          definition = function(x){ranges(seqdata(x))})
+          definition = function(x){ranges(seqData(x))})
 
 #' @name Modifier
 #' @export
@@ -146,9 +147,18 @@ setMethod(f = "bamfiles",
 
 #' @name Modifier
 #' @export
-setMethod(f = "seqdata", 
+setMethod(f = "seqData", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@data})
+
+#' @name Modifier
+#' @export
+setMethod(f = "aggregateData", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){
+            x <- aggregate(x)
+            x@aggregate
+          })
   
 #' @name Modifier
 #' @export
@@ -179,11 +189,11 @@ setMethod(f = "modifications",
              fasta,
              gff)
   modName <- fullName(ModRNAString())[
-    which(ans@mod == shortName(ModRNAString()))]
+    which(shortName(ModRNAString()) %in% ans@mod)]
   message("Starting to search for '",
-          tools::toTitleCase(modName),
+          paste(tools::toTitleCase(modName), collapse = "', '"),
           "'...")
-  ans@data <- do.call(ans@dataType,
+  ans@data <- do.call(ans@dataClass,
                       list(bamfiles = ans@bamfiles,
                            fasta = ans@fasta,
                            gff = ans@gff))
@@ -254,3 +264,31 @@ setMethod(f = "modify",
                    call. = FALSE)
             }
 )
+
+#' @name Modifier
+#' @export
+setMethod(f = "aggregate", 
+          signature = signature(x = "Modifier"),
+          definition = 
+            function(x){
+              stop("This functions needs to be implemented by '",class(x),"'.",
+                   call. = FALSE)
+            }
+)
+
+# check function ---------------------------------------------------------------
+
+
+#' @name Modifier
+#' @export
+setMethod(f = "hasAggregateData", 
+          signature = signature(x = "Modifier"),
+          definition = 
+            function(x){
+              if(is.null(nrow(x@aggregate))){
+                return(FALSE)
+              }
+              return(TRUE)
+            }
+)
+

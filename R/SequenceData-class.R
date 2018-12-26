@@ -10,7 +10,8 @@ NULL
 NULL
 
 setClass("SequenceData",
-         contains = c("VIRTUAL","CompressedSplitDataFrameList"),
+         contains = c("VIRTUAL",
+                      "CompressedSplitDataFrameList"),
          slots = c(ranges = "GRangesList",
                    sequences = "XStringSet",
                    bamfiles = "BamFileList",

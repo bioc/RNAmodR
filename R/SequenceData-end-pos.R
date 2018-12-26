@@ -228,13 +228,13 @@ setMethod("aggregate",
           signature = c(x = "EndSequenceData"),
           function(x,
                    condition = c("Both","Treated","Control")){
-            condition <- match.arg(condition)
+            condition <- tolower(match.arg(condition))
             if(is(x,"CompressedSplitDataFrameList")){
               df <- x@unlistData
             } else {
               df <- x
             }
-            if(condition != "Both"){
+            if(condition != "both"){
               df <- df[,x@conditions == condition, drop = FALSE]
               if(ncol(df) == 0L){
                 stop("No data for condition '",condition,"' found.")

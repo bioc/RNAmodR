@@ -53,6 +53,7 @@ NULL
   ranges <- ranges[as.character(GenomeInfoDb::seqnames(ranges)) %in% seqnames[f],]
   rangesList <- split(ranges,
                       GenomeInfoDb::seqnames(ranges))
+  # only retrieve primary alignments
   flags <- scanBamFlag(isSecondaryAlignment = FALSE)
   param <- Rsamtools::ScanBamParam(flag = flags,
                                    which = rangesList,
