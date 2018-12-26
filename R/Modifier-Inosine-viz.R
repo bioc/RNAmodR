@@ -22,14 +22,13 @@ setMethod(
     if(missing(i)){
       i <- 1L
     }
-    data <- aggregateData(x)[[i]]
-    # get coordinates
-    coord <- .norm_viz_coord(data,start,end)
     # get plotting data
     data <- aggregateData(x)[[i]]
     data <- data[,grepl("means",
                         colnames(data))]
     colnames(data) <- c(".","G","A","U","C")
+    # get coordinates
+    coord <- .norm_viz_coord(data,start,end)
     # get plotting sequence
     seq <- sequences(x)[[i]]
     #
@@ -42,7 +41,7 @@ setMethod(
                                               groups)]
     # create plot
     dataTrack <- DataTrack(start = seq_len(nrow(data)), 
-                           width = 0.5,
+                           end = seq_len(nrow(data)), 
                            genome = genome,
                            chromosome = rep(chromosome,nrow(data)),
                            name = "rel. nucleotide occurance",

@@ -24,7 +24,7 @@
 \S4method{modify}{ModRiboMethSeq}(x, ...)
 
 \S4method{visualizeData}{ModRiboMethSeq}(x, i, type = c("ends", "scoreA",
-  "scoreB", "scoreRMS"))
+  "scoreB", "scoreRMS"), start, end)
 }
 \description{
 title
