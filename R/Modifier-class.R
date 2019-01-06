@@ -259,7 +259,8 @@ setMethod(f = "modifications",
 setMethod(f = "modify", 
           signature = signature(x = "Modifier"),
           definition = 
-            function(x){
+            function(x,
+                     ...){
               stop("This functions needs to be implemented by '",class(x),"'.",
                    call. = FALSE)
             }
@@ -270,7 +271,8 @@ setMethod(f = "modify",
 setMethod(f = "aggregate", 
           signature = signature(x = "Modifier"),
           definition = 
-            function(x){
+            function(x,
+                     ...){
               stop("This functions needs to be implemented by '",class(x),"'.",
                    call. = FALSE)
             }

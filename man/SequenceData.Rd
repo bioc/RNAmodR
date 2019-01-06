@@ -22,6 +22,8 @@
 \S4method{ranges}{SequenceData}(x)
 
 \S4method{bamfiles}{SequenceData}(x)
+
+\S4method{aggregate}{SequenceData}(x, ...)
 }
 \description{
 title

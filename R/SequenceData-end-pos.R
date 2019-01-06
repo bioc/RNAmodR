@@ -81,6 +81,11 @@ setClass(Class = "EndSequenceData",
                                function(i){
                                  c(starts[[i]],ends[[i]])
                                }))
+  } else if(type == "protected_ends"){
+    data <- IntegerList(lapply(seq_along(data),
+                               function(i){
+                                 c(starts[[i]]-1,ends[[i]])
+                               }))
   } else {
     stop("Something went wrong. Invalid type '", type, "'.")
   }
@@ -89,6 +94,7 @@ setClass(Class = "EndSequenceData",
     function(d,w){
       bg <- table(seq_len(w)) - 1
       d <- table(d)
+      d <- d[as.integer(names(d)) > 0L]
       d <- reshape2::acast(data.frame(pos = as.integer(c(names(bg),names(d))),
                                       count = as.integer(c(bg,d))),
                            pos ~ .,
@@ -222,43 +228,70 @@ EndSequenceData <- function(bamfiles,
 
 # aggregation ------------------------------------------------------------------
 
+.aggregate_end_data_mean_sd <- function(x,
+                                        condition){
+  browser()
+  condition <- tolower(match.arg(condition))
+  if(is(x,"CompressedSplitDataFrameList")){
+    df <- x@unlistData
+  } else {
+    df <- x
+  }
+  if(condition != "both"){
+    df <- df[,x@conditions == condition, drop = FALSE]
+    if(ncol(df) == 0L){
+      stop("No data for condition '",condition,"' found.")
+    }
+  }
+  replicates <- unique(x@replicate)
+  means <- NumericList(lapply(replicates,
+                              function(rep){
+                                rowMeans(as.data.frame(df[,x@replicate == rep]),
+                                         na.rm = TRUE)
+                              }))
+  names(means) <- paste0("means.",replicates)
+  sds <- NumericList(lapply(replicates,
+                            function(rep){
+                              matrixStats::rowSds(as.matrix(df[,x@replicate == rep]),
+                                                  na.rm = TRUE)
+                            }))
+  names(sds) <- paste0("sds.",replicates)
+  ans <- cbind(do.call(DataFrame, means),
+               do.call(DataFrame, sds))
+  if(is(x,"CompressedSplitDataFrameList")){
+    ans <- SplitDataFrameList(ans)
+    ans@partitioning <- x@partitioning
+  }
+  ans
+}
+
 #' @name EndSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "EndSequenceData"),
           function(x,
                    condition = c("Both","Treated","Control")){
-            condition <- tolower(match.arg(condition))
-            if(is(x,"CompressedSplitDataFrameList")){
-              df <- x@unlistData
-            } else {
-              df <- x
-            }
-            if(condition != "both"){
-              df <- df[,x@conditions == condition, drop = FALSE]
-              if(ncol(df) == 0L){
-                stop("No data for condition '",condition,"' found.")
-              }
-            }
-            replicates <- unique(x@replicate)
-            means <- NumericList(lapply(replicates,
-                                        function(rep){
-                                          rowMeans(as.data.frame(df[,x@replicate == rep]),
-                                                   na.rm = TRUE)
-                                        }))
-            names(means) <- paste0("means.",replicates)
-            sds <- NumericList(lapply(replicates,
-                                      function(rep){
-                                        matrixStats::rowSds(as.matrix(df[,x@replicate == rep]),
-                                                            na.rm = TRUE)
-                                      }))
-            names(sds) <- paste0("sds.",replicates)
-            ans <- cbind(do.call(DataFrame, means),
-                         do.call(DataFrame, sds))
-            if(is(x,"CompressedSplitDataFrameList")){
-              ans <- SplitDataFrameList(ans)
-              ans@partitioning <- x@partitioning
-            }
-            ans
+            .aggregate_end_data_mean_sd(x,condition)
+          }
+)
+
+#' @name EndSequenceData
+#' @export
+setMethod("aggregate",
+          signature = c(x = "End5SequenceData"),
+          function(x,
+                   condition = c("Both","Treated","Control")){
+            .aggregate_end_data_mean_sd(x,condition)
+          }
+)
+
+
+#' @name EndSequenceData
+#' @export
+setMethod("aggregate",
+          signature = c(x = "End3SequenceData"),
+          function(x,
+                   condition = c("Both","Treated","Control")){
+            .aggregate_end_data_mean_sd(x,condition)
           }
 )

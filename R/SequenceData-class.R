@@ -679,3 +679,18 @@ setMethod(f = "bamfiles",
           signature = signature(x = "SequenceData"),
           definition = function(x){x@bamfiles})
 
+
+# dummy functions --------------------------------------------------------------
+# these need to be implemented by each subclass
+
+#' @name SequenceData
+#' @export
+setMethod(f = "aggregate", 
+          signature = signature(x = "SequenceData"),
+          definition = 
+            function(x,
+                     ...){
+              stop("This functions needs to be implemented by '",class(x),"'.",
+                   call. = FALSE)
+            }
+)

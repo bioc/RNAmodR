@@ -22,7 +22,7 @@ NULL
 setClass("ModRiboMethSeq",
          contains = c("Modifier"),
          prototype = list(mod = c("Am","Cm","Gm","Um"),
-                          dataClass = "EndSequenceData"))
+                          dataClass = "ProtectedEndSequenceData"))
 
 
 setMethod(
@@ -43,10 +43,11 @@ setMethod(
 # constructors -----------------------------------------------------------------
 
 .norm_rms_args <- function(input){
-  minSignal <- 50L
-  minScoreA <- 0.6
-  minScoreB <- 1
-  minScoreRMS <- 0.65
+  weights <- c(0.9,1,0,1,0.9)
+  minSignal <- 20L
+  minScoreA <- 0.5
+  minScoreB <- 2
+  minScoreRMS <- 0.75
   scoreOperator <- "&"
   if(!is.null(input[["minSignal"]])){
     minSignal <- input[["minSignal"]]
@@ -83,14 +84,41 @@ setMethod(
            call. = FALSE)
     }
   }
+  if(!is.null(input[["weights"]])){
+    weights <- input[["weights"]]
+    if(!.valid_rms_weights(weights)){
+      stop("'weights' must be a numeric vector of uneven length. The middle ",
+           "position will be used as the current position.",
+           call. = FALSE)
+    }
+  }
   args <- .norm_args(input)
   args <- c(args,
             list(minSignal = minSignal,
                  minScoreA = minScoreA,
                  minScoreB = minScoreB,
                  minScoreRMS = minScoreRMS,
-                 scoreOperator = scoreOperator))
+                 scoreOperator = scoreOperator,
+                 weights = weights))
   args
+}
+
+.valid_rms_weights <- function(weights){
+  if(!is.numeric(weights) | !is.atomic(weights)){
+    return(FALSE)
+  }
+  if((length(weights) %% 2) != 1){
+    return(FALSE)
+  }
+  TRUE
+}
+
+.norm_rms_weights <- function(args){
+  weights <- args[["weights"]]
+  if(is.null(names(weights))){
+    names(weights) <- seq_along(weights) - ((length(weights) / 2) + 0.5)
+  }
+  weights
 }
 
 
@@ -168,12 +196,16 @@ setMethod("ModRiboMethSeq",
 # it is simplified to use the mean/sd for the neighboring positions
 # and not the left and right mean/sd seperatly
 .calculate_ribometh_score_A_c <- function(n,
-                                          mean,
-                                          sd){
+                                          meanL,
+                                          sdL,
+                                          meanR,
+                                          sdR){
   dividend <- (2 * n  + 1)
-  divisor <- (abs(mean - sd) + n + 1)
+  divisor <- (0.5 * abs(meanL - sdL)) + n + (0.5 * abs(meanR - sdR)) + 1
   ans <- 1 - (dividend / divisor)
-  return(max(0, ans))
+  ans <- vapply(ans,max,numeric(1),0)
+  ans[is.na(ans)] <- 0
+  return(ans)
 }
 .calculate_ribometh_score_A <- compiler::cmpfun(.calculate_ribometh_score_A_c)
 
@@ -181,11 +213,17 @@ setMethod("ModRiboMethSeq",
 # it is simplified to use the weighted neighboring positions
 # and not the left and right area seperatly
 .calculate_ribometh_score_B_c <- function(n,
-                                          area,
-                                          weights){
-  dividend <- abs(n - (sum(area) / sum(weights) ) )
+                                          areaL,
+                                          weightsL,
+                                          areaR,
+                                          weightsR){
+  waL <- sum(weightsL * areaL) / sum(weightsL)
+  waR <- sum(weightsR * areaR) / sum(weightsR)
+  dividend <- abs(n - 0.5 * ( waL + waR ) )
   divisor <- (n + 1)
-  return(dividend / divisor)
+  ans <- dividend / divisor
+  ans[is.na(ans)] <- 0
+  return(ans)
 }
 .calculate_ribometh_score_B <- compiler::cmpfun(.calculate_ribometh_score_B_c)
 
@@ -193,12 +231,18 @@ setMethod("ModRiboMethSeq",
 # it is simplified to use the weighted neighboring positions
 # and not the left and right area seperatly
 .calculate_ribometh_score_meth_c <- function(n,
-                                             area,
-                                             weights){
+                                             areaL,
+                                             weightsL,
+                                             areaR,
+                                             weightsR){
+  waL <- sum(weightsL * areaL) / sum(weightsL)
+  waR <- sum(weightsR * areaR) / sum(weightsR)
   dividend <- n
-  divisor <- sum(area) / sum(weights)
+  divisor <- 0.5 * ( waL + waR )
   ans <- 1 - (dividend / divisor)
-  return(max(0, ans))
+  ans <- vapply(ans,max,numeric(1),0)
+  ans[is.na(ans)] <- 0
+  return(ans)
 }
 .calculate_ribometh_score_meth <- compiler::cmpfun(.calculate_ribometh_score_meth_c)
 
@@ -207,8 +251,102 @@ setMethod("ModRiboMethSeq",
 # .calculate_ribometh_score_max_c <- function(n,
 #                                              area,
 #                                              weights){
+#   browser()
 # }
 # .calculate_ribometh_score_max <- compiler::cmpfun(.calculate_ribometh_score_max_c)
+
+
+
+# RiboMeth scores --------------------------------------------------------------
+
+# calculates score A according to Birkedal et al. 2015
+.get_score_A <- function(data,
+                         countsL,
+                         countsR){
+  n <- seq_along(data)
+  countsMeanL <- NumericList(
+    lapply(n,
+           function(j){
+             unlist(lapply(countsL[[j]],
+                           mean,
+                           na.rm = TRUE))
+           }))
+  countsSdL <- NumericList(
+    lapply(n,
+           function(j){
+             unlist(lapply(countsL[[j]],
+                           sd,
+                           na.rm = TRUE))
+           }))
+  countsMeanR <- NumericList(
+    lapply(n,
+           function(j){
+             unlist(lapply(countsR[[j]],
+                           mean,
+                           na.rm = TRUE))
+           }))
+  countsSdR <- NumericList(
+    lapply(n,
+           function(j){
+             unlist(lapply(countsR[[j]],
+                           sd,
+                           na.rm = TRUE))
+           }))
+  # calc score per replicate
+  scoreA <- NumericList(mapply(FUN = .calculate_ribometh_score_A,
+                               data,
+                               countsMeanL,
+                               countsSdL,
+                               countsMeanR,
+                               countsSdR))
+  return(scoreA)
+}
+
+# calculates score B according to Birkedal et al. 2015
+.get_score_B <- function(data,
+                         countsL,
+                         weightsL,
+                         countsR,
+                         weightsR){
+  scoreB <- NumericList(mapply(FUN = .calculate_ribometh_score_B,
+                               data,
+                               countsL,
+                               weightsL,
+                               countsR,
+                               weightsR))
+  return(scoreB)
+}
+
+# calculates score C according to Birkedal et al. 2015
+.get_score_meth <- function(data,
+                            countsL,
+                            weightsL,
+                            countsR,
+                            weightsR){
+  scoreMeth <- NumericList(mapply(FUN = .calculate_ribometh_score_meth,
+                                  data,
+                                  countsL,
+                                  weightsL,
+                                  countsR,
+                                  weightsR))
+  return(scoreMeth)
+}
+
+# calculates score C according to Marchand et al. 
+# .get_score_max <- function(data,
+#                            countsL,
+#                            weightsL,
+#                            countsR,
+#                            weightsR){
+#   browser()
+#   scoreMAX <- NumericList(mapply(FUN = .calculate_ribometh_score_max,
+#                                  data,
+#                                  countsL,
+#                                  weightsL,
+#                                  countsR,
+#                                  weightsR))
+#   return(scoreMAX)
+# }
 
 
 #' @name Modifier
@@ -218,138 +356,92 @@ setMethod(
   signature = signature(x = "ModRiboMethSeq"),
   definition = 
     function(x,
-             args){
+             ...){
       if(!hasAggregateData(x)){
         message("Aggregating data and calculating scores...")
         # parameter data
-        weights <- c(0.5,0.6,0.7,0.8,0.9,1,0,1,0.9,0.8,0.7,0.6,0.5)
-        weightPositions <- c(-6L,-5L,-4L,-3L,-2L,-1L,0L,1L,2L,3L,4L,5L,6L)
+        args <- .norm_rms_args(list(...))
+        weights <- .norm_rms_weights(args)
+        weightPositions <- as.integer(names(weights))
         # ToOo check for continuity
         if(length(weights) != length(weightPositions)){
           stop("Something went wrong.")
         }
+        browser()
         # get the means. the sds arecurrently disregarded for this analysis
         mod <- aggregate(seqData(x), condition = "Treated")
         means <- IntegerList(mod@unlistData[,which(grepl("mean",
                                                    colnames(mod@unlistData)))])
         means@partitioning <- mod@partitioning
-        # browser()
         # set up variables
         n <- length(mod)
         nV <- seq_len(n)
         lengths <- lengths(mod)
         pos <- lapply(lengths,seq_len)
+        weightPositionsL <- weightPositions[weightPositions < 0]
+        weightPositionsR <- weightPositions[weightPositions > 0]
+        weightPositionsC <- which(weightPositions == 0)
         # subset to neightbouring positions and set position to zero
-        neighborCounts <- lapply(nV,
-                                function(j){
-                                  IntegerList(lapply(pos[[j]],
-                                                     function(k){
-                                                       f <- weightPositions + k
-                                                       ans <- means[[j]][f[f > 0]]
-                                                       ans[weightPositions[f > 0] == 0] <- 0
-                                                       ans <- ans[!is.na(ans)]
-                                                       ans
-                                                     }))
-                                })
+        neighborCountsL <- lapply(nV,
+                                  function(j){
+                                    IntegerList(lapply(pos[[j]],
+                                                       function(k){
+                                                         f <- weightPositionsL + k
+                                                         ans <- means[[j]][f[f > 0]]
+                                                         ans <- ans[!is.na(ans)]
+                                                         ans
+                                                       }))
+                                  })
+        neighborCountsR <- lapply(nV,
+                                  function(j){
+                                    IntegerList(lapply(pos[[j]],
+                                                       function(k){
+                                                         f <- weightPositionsR + k
+                                                         ans <- means[[j]][f[f > 0]]
+                                                         ans <- ans[!is.na(ans)]
+                                                         ans
+                                                       }))
+                                  })
         # create list of weights vector alongside the neighbor counts
-        weightsList <- lapply(nV,
+        weightsListL <- lapply(nV,
                               function(j){
                                 NumericList(mapply(
                                   function(k,l){
-                                    f <- weightPositions + k
-                                    ans <- weights[f > 0 & f <= l]
+                                    f <- weightPositionsL + k
+                                    ans <- weights[which(f > 0 & f <= l)]
                                     ans
                                   },
                                   pos[[j]],
                                   MoreArgs = list(l = lengths[j])))
                               })
-        # remove zero from neighborCounts
-        neighborCountsWoZero <- lapply(nV,
-                                 function(j){
-                                   IntegerList(lapply(neighborCounts[[j]],
-                                                      function(k){
-                                                        k[k > 0]
-                                                      }))
-                                 })
-        # calculate mean and sd for neighbouring position
-        neighborMean <- IntegerList(
-          lapply(nV,
-                 function(j){
-                   unlist(lapply(neighborCountsWoZero[[j]],
-                                 mean,
-                                 na.rm = TRUE))
-                 }))
-        neighborSd <- IntegerList(
-          lapply(nV,
-                 function(j){
-                   unlist(lapply(neighborCountsWoZero[[j]],
-                                 sd,
-                                 na.rm = TRUE))
-                 }))
-        # calculate weighted mean and sd for neighbouring position
-        # neighborWeightedMean <- IntegerList(
-        #   lapply(nV,
-        #          function(j){
-        #            unlist(lapply(neighborCounts[[j]] * weights[[j]],
-        #                          mean,
-        #                          na.rm = TRUE))
-        #          }))
-        # neighborWeightedSd <- IntegerList(
-        #   lapply(nV,
-        #          function(j){
-        #            unlist(lapply(neighborCounts[[j]] * weights[[j]],
-        #                          sd,
-        #                          na.rm = TRUE))
-        #          }))
-        # apply the weights to the counts
-        neighborWeightedArea <- lapply(nV,
-                                       function(j){
-                                         neighborCounts[[j]] * weightsList[[j]]
-                                       })
+        weightsListR <- lapply(nV,
+                               function(j){
+                                 NumericList(mapply(
+                                   function(k,l,of){
+                                     f <- weightPositionsR + k
+                                     f <- which(f > 0 & f <= l) + of
+                                     ans <- weights[f]
+                                     ans
+                                   },
+                                   pos[[j]],
+                                   MoreArgs = list(l = lengths[j],
+                                                   of = weightPositionsC)))
+                               })
         # calculate the actual scores
-        scoreA <- NumericList(mapply(
-          function(n,mean,sd){
-            unlist(mapply(.calculate_ribometh_score_A,
-                          n,
-                          mean,
-                          sd,
-                          SIMPLIFY = FALSE))
-          },
-          means,
-          neighborMean,
-          neighborSd))
-        scoreB <- NumericList(mapply(
-          function(n,area){
-            unlist(mapply(.calculate_ribometh_score_B,
-                          n,
-                          area,
-                          MoreArgs = list(weights = weights),
-                          SIMPLIFY = FALSE))
-          },
-          means,
-          neighborWeightedArea))
-        scoreRMS <- NumericList(mapply(
-          function(n,area){
-            unlist(mapply(.calculate_ribometh_score_meth,
-                          n,
-                          area,
-                          MoreArgs = list(weights = weights),
-                          SIMPLIFY = FALSE))
-          },
-          means,
-          neighborWeightedArea))
-        #
-        # scoreMax <- NumericList(mapply(
-        #   function(n,area){
-        #     unlist(mapply(.calculate_ribometh_score_max,
-        #                   n,
-        #                   area,
-        #                   MoreArgs = list(weights = weights),
-        #                   SIMPLIFY = FALSE))
-        #   },
-        #   means,
-        #   neighborWeightedArea))
-        # construct the result DataFrameList
+        scoreA <- .get_score_A(means,
+                               neighborCountsL,
+                               neighborCountsR)
+        scoreB <- .get_score_B(means,
+                               neighborCountsL,
+                               weightsListL,
+                               neighborCountsR,
+                               weightsListR)
+        scoreRMS <- .get_score_meth(means,
+                                    neighborCountsL,
+                                    weightsListL,
+                                    neighborCountsR,
+                                    weightsListR)
+        # scoreMAX <- .get_score_max()
         ans <- DataFrame(ends = unlist(means),
                          scoreA = unlist(scoreA),
                          scoreB = unlist(scoreB),
@@ -387,7 +479,8 @@ setMethod(
   # find modifications
   modifications <- mapply(
     function(m,l,r){
-      rownames(m) <- seq_len(width(r))
+      browser()
+      rownames(m) <- seq_len(width(r)) + 1
       m <- m[!is.na(m$scoreA) &
                !is.na(m$scoreB) &
                !is.na(m$scoreRMS),]
@@ -418,10 +511,10 @@ setMethod("modify",
           signature = c(x = "ModRiboMethSeq"),
           function(x,
                    ...){
-            args <- .norm_rms_args(list(...))
             # get the aggregate data
-            x <- aggregate(x, args)
-            x@modifications <- .find_rms(x, args)
+            x <- aggregate(x, ...)
+            x@modifications <- .find_rms(x,
+                                         .norm_rms_args(list(...)))
             message("done.")
             x
           }

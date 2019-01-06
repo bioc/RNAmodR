@@ -37,22 +37,14 @@ ProtectedEndSequenceData <- function(bamfiles,
   param <- .assemble_scanBamParam(ranges,
                                   ans@minQuality,
                                   ans@chromosomes)
+  
   message("Loading protected end data from BAM files...")
-  enddata <- lapply(ans@bamfiles,
-                    FUN = .get_position_data_of_transcript_ends,
-                    ranges = ranges,
-                    param = param,
-                    type = "all",
-                    args = args)
-  coverage <- lapply(ans@bamfiles,
-                     FUN = .get_position_data_of_transcript_coverage,
-                     ranges = ranges,
-                     param = param,
-                     args = args)
-  data <- lapply(seq_along(ans@bamfiles),
-                 function(i){
-                   coverage[[i]] - enddata[[i]]
-                 })
+  data <- lapply(ans@bamfiles,
+                 FUN = .get_position_data_of_transcript_ends,
+                 ranges = ranges,
+                 param = param,
+                 type = "protected_ends",
+                 args = args)
   names(data) <- paste0("protectedend.",
                         names(ans@bamfiles),
                         ".",
@@ -62,3 +54,13 @@ ProtectedEndSequenceData <- function(bamfiles,
                          ranges,
                          sequences)
 }
+
+#' @name EndSequenceData
+#' @export
+setMethod("aggregate",
+          signature = c(x = "ProtectedEndSequenceData"),
+          function(x,
+                   condition = c("Both","Treated","Control")){
+            .aggregate_end_data_mean_sd(x,condition)
+          }
+)

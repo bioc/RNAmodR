@@ -28,15 +28,15 @@
 
 \S4method{modifications}{Modifier}(x, perTranscript = FALSE)
 
-\S4method{modify}{Modifier}(x)
+\S4method{modify}{Modifier}(x, ...)
 
-\S4method{aggregate}{Modifier}(x)
+\S4method{aggregate}{Modifier}(x, ...)
 
 \S4method{hasAggregateData}{Modifier}(x)
 
 \S4method{aggregate}{ModInosine}(x)
 
-\S4method{aggregate}{ModRiboMethSeq}(x, args)
+\S4method{aggregate}{ModRiboMethSeq}(x, ...)
 }
 \description{
 title
