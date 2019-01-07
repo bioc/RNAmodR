@@ -73,14 +73,14 @@ setMethod(
 # constructors -----------------------------------------------------------------
 
 .norm_rms_args <- function(input){
-  maxLength <- 60L
-  weights <- c(0.9,1,0,1,0.9)
+  maxLength <- 50L
+  weights <- c(0.6,1,0,1,0.6)
   minSignal <- 25L
   flankingRegion <- 6L
-  minScoreA <- 0.5
-  minScoreB <- 3.0
+  minScoreA <- 0.8
+  minScoreB <- 4.0
   minScoreRMS <- 0.75
-  scoreOperator <- "&"
+  scoreOperator <- "|"
   if(!is.null(input[["weights"]])){
     weights <- input[["weights"]]
     if(!.valid_rms_weights(weights)){
