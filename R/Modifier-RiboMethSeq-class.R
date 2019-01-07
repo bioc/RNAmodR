@@ -77,10 +77,10 @@ setMethod(
   weights <- c(0.6,1,0,1,0.6)
   minSignal <- 25L
   flankingRegion <- 6L
-  minScoreA <- 0.8
+  minScoreA <- 0.6
   minScoreB <- 4.0
   minScoreRMS <- 0.75
-  scoreOperator <- "|"
+  scoreOperator <- "&"
   if(!is.null(input[["weights"]])){
     weights <- input[["weights"]]
     if(!.valid_rms_weights(weights)){
@@ -614,3 +614,8 @@ setMethod("modify",
             x
           }
 )
+
+# ModRiboMethSeqSet ------------------------------------------------------------
+
+
+
