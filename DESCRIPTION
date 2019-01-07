@@ -34,7 +34,9 @@ VignetteBuilder: knitr
 Collate:
     'RNAmodR.R'
     'AllGenerics.R'
+    'ModRanges-class.R'
     'Modifier-utils.R'
+    'SequenceData-utils.R'
     'SequenceDataFrame-class.R'
     'SequenceData-class.R'
     'Modifier-class.R'

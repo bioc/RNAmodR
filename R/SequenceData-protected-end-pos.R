@@ -25,19 +25,18 @@ ProtectedEndSequenceData <- function(bamfiles,
                                      fasta,
                                      gff,
                                      ...){
+  args <- .get_mod_data_args(...)
   ans <- new("ProtectedEndSequenceData",
              bamfiles,
              fasta,
              gff,
-             ...)
-  args <- .get_mod_data_args(...)
+             args)
   ranges <- .load_annotation(ans@gff)
   sequences <- .load_transcript_sequences(ans@fasta,
                                           ranges)
   param <- .assemble_scanBamParam(ranges,
                                   ans@minQuality,
                                   ans@chromosomes)
-  
   message("Loading protected end data from BAM files...")
   data <- lapply(ans@bamfiles,
                  FUN = .get_position_data_of_transcript_ends,
@@ -61,6 +60,7 @@ setMethod("aggregate",
           signature = c(x = "ProtectedEndSequenceData"),
           function(x,
                    condition = c("Both","Treated","Control")){
+            condition <- tolower(match.arg(condition))
             .aggregate_end_data_mean_sd(x,condition)
           }
 )

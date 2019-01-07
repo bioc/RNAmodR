@@ -25,6 +25,12 @@
 
 \S4method{aggregate}{SequenceData}(x, ...)
 }
+\arguments{
+\item{...}{Optional arguments overwriting default values, which are
+\itemize{
+\item{}
+}}
+}
 \description{
 title
 }

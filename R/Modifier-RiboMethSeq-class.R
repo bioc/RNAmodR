@@ -10,9 +10,39 @@ NULL
 #' @description 
 #' title
 #' 
-#' score MAX as described by publiccations from the motorin lab are not 
+#' score MAX as described by publiccations from the Motorin lab are not 
 #' implemented since an unambigeous description is not available from the 
 #' literature.
+#' 
+#' To disable minimal values for modification calling, set them to \code{Inf}
+#' 
+#' @param ... Optional arguments overwriting default values, which are
+#' \itemize{
+#' \item{weights:}{The weights used for calculating the scores B and RMS 
+#' (default: \code{weights = c(0.9,1,0,1,0.9)})}
+#' \item{flankingRegion:}{The size of the flanking region used for calculation 
+#' of score A as an integer value (default: \code{flankingRegion = 6L})}
+#' \item{minSignal:}{The minimal singal at the position as integer value 
+#' (default: \code{minSignal = 10L}). If the reaction is very specific a lower
+#' value and even 0L may need to be used}
+#' \item{minScoreA:}{minimum for score A to identify 2'-O methylated positions 
+#' de novo (default: \code{minScoreA = 0.6})}
+#' \item{minScoreB:}{minimum for score B to identify 2'-O methylated positions 
+#' de novo (default: \code{minScoreB = 3.0})}
+#' \item{minScoreRMS:}{minimum for score RMS to identify 2'-O methylated 
+#' positions de novo (default: \code{minScoreRMS = 0.75})}
+#' \item{scoreOperator:}{how the minimal score should be used as logical 
+#' operator. "&" requires all minimal values to be exceeded, whereas "|" detects
+#' positions, if at least one minimal values is exceeded (default: 
+#' \code{scoreOperator = "|"})}
+#' \item{maxLength:}{The default read length. Reads with this length or longer
+#' are discarded, since they represent non-fragemented reads. THis is argument
+#' is passed on to \code{\link{ProtectedEndSequenceData}} (default: 
+#' \code{maxLength = 50L})}
+#' \item{other arguments}{which are passed on to 
+#' \code{\link{ProtectedEndSequenceData}}}
+#' }
+#' 
 #' 
 
 NULL
@@ -43,15 +73,25 @@ setMethod(
 # constructors -----------------------------------------------------------------
 
 .norm_rms_args <- function(input){
+  maxLength <- 60L
   weights <- c(0.9,1,0,1,0.9)
-  minSignal <- 20L
+  minSignal <- 25L
+  flankingRegion <- 6L
   minScoreA <- 0.5
-  minScoreB <- 2
+  minScoreB <- 3.0
   minScoreRMS <- 0.75
   scoreOperator <- "&"
+  if(!is.null(input[["weights"]])){
+    weights <- input[["weights"]]
+    if(!.valid_rms_weights(weights)){
+      stop("'weights' must be a numeric vector of uneven length. The middle ",
+           "position will be used as the current position.",
+           call. = FALSE)
+    }
+  }
   if(!is.null(input[["minSignal"]])){
     minSignal <- input[["minSignal"]]
-    if(!is.integer(minSignal) | minSignal < 0){
+    if(!is.integer(minSignal) | minSignal < 1L){
       stop("'minSignal' must be integer with a value higher than 0.",
            call. = FALSE)
     }
@@ -60,6 +100,13 @@ setMethod(
     minScoreA <- input[["minScoreA"]]
     if(!is.numeric(minScoreA) | minScoreA < 0 | minScoreA > 1){
       stop("'minScoreA' must be numeric with a value between 0 and 1.",
+           call. = FALSE)
+    }
+  }
+  if(!is.null(input[["flankingRegion"]])){
+    flankingRegion <- input[["flankingRegion"]]
+    if(!is.integer(flankingRegion) | flankingRegion < 1L){
+      stop("'flankingRegion' must be integer with a value higher than 0L.",
            call. = FALSE)
     }
   }
@@ -84,22 +131,16 @@ setMethod(
            call. = FALSE)
     }
   }
-  if(!is.null(input[["weights"]])){
-    weights <- input[["weights"]]
-    if(!.valid_rms_weights(weights)){
-      stop("'weights' must be a numeric vector of uneven length. The middle ",
-           "position will be used as the current position.",
-           call. = FALSE)
-    }
-  }
   args <- .norm_args(input)
   args <- c(args,
-            list(minSignal = minSignal,
+            list(maxLength = maxLength,
+                 weights = weights,
+                 minSignal = minSignal,
+                 flankingRegion = flankingRegion,
                  minScoreA = minScoreA,
                  minScoreB = minScoreB,
                  minScoreRMS = minScoreRMS,
-                 scoreOperator = scoreOperator,
-                 weights = weights))
+                 scoreOperator = scoreOperator))
   args
 }
 
@@ -110,6 +151,9 @@ setMethod(
   if((length(weights) %% 2) != 1){
     return(FALSE)
   }
+  if(length(weights) < 3L){
+    return(FALSE)
+  }
   TRUE
 }
 
@@ -117,6 +161,16 @@ setMethod(
   weights <- args[["weights"]]
   if(is.null(names(weights))){
     names(weights) <- seq_along(weights) - ((length(weights) / 2) + 0.5)
+  }
+  names <- as.integer(names(weights))
+  if(any(is.na(names))){
+    stop("If 'weights' is named, all names must be coercible to integer ",
+         "values.",
+         call. = FALSE)
+  }
+  if(length(which(names == 0L)) != 1){
+    stop("If 'weights' is named, exactly one name must be '0'",
+         call. = FALSE)
   }
   weights
 }
@@ -278,6 +332,7 @@ setMethod("ModRiboMethSeq",
                            sd,
                            na.rm = TRUE))
            }))
+  countsSdL[is.na(countsSdL)] <- 0
   countsMeanR <- NumericList(
     lapply(n,
            function(j){
@@ -292,6 +347,7 @@ setMethod("ModRiboMethSeq",
                            sd,
                            na.rm = TRUE))
            }))
+  countsSdR[is.na(countsSdR)] <- 0
   # calc score per replicate
   scoreA <- NumericList(mapply(FUN = .calculate_ribometh_score_A,
                                data,
@@ -349,6 +405,131 @@ setMethod("ModRiboMethSeq",
 # }
 
 
+.aggregate_rms <- function(x,
+                           ...){
+  message("Aggregating data and calculating scores...")
+  # parameter data
+  args <- .norm_rms_args(list(...))
+  weights <- .norm_rms_weights(args)
+  weightPositions <- as.integer(names(weights))
+  # ToOo check for continuity
+  if(length(weights) != length(weightPositions)){
+    stop("Something went wrong.")
+  }
+  # get the means. the sds arecurrently disregarded for this analysis
+  mod <- aggregate(seqData(x),
+                   condition = "Treated")
+  means <- IntegerList(mod@unlistData[,which(grepl("mean",
+                                                   colnames(mod@unlistData)))])
+  means@partitioning <- mod@partitioning
+  # set up variables
+  n <- length(mod)
+  nV <- seq_len(n)
+  lengths <- lengths(mod)
+  pos <- lapply(lengths,seq_len)
+  flankingRegion <- args[["flankingRegion"]]
+  positionsR <- seq_len(flankingRegion)
+  positionsL <- rev(positionsR) * -1
+  weightPositionsL <- weightPositions[weightPositions < 0]
+  weightPositionsR <- weightPositions[weightPositions > 0]
+  weightPositionsC <- which(weightPositions == 0)
+  # subset to neightbouring positions based on the size of flankingRegions
+  neighborCountsLFR <- 
+    lapply(nV,
+           function(j){
+             IntegerList(lapply(pos[[j]],
+                                function(k){
+                                  f <- positionsL + k
+                                  ans <- means[[j]][f[f > 0]]
+                                  ans <- ans[!is.na(ans)]
+                                  ans
+                                }))
+           })
+  neighborCountsRFR <- 
+    lapply(nV,
+           function(j){
+             IntegerList(lapply(pos[[j]],
+                                function(k){
+                                  f <- positionsR + k
+                                  ans <- means[[j]][f[f > 0]]
+                                  ans <- ans[!is.na(ans)]
+                                  ans
+                                }))
+           })
+  # subset to neightbouring positions based on the size of the weights
+  neighborCountsL <- 
+    lapply(nV,
+           function(j){
+             IntegerList(lapply(pos[[j]],
+                                function(k){
+                                  f <- weightPositionsL + k
+                                  ans <- means[[j]][f[f > 0]]
+                                  ans <- ans[!is.na(ans)]
+                                  ans
+                                }))
+           })
+  neighborCountsR <- 
+    lapply(nV,
+           function(j){
+             IntegerList(lapply(pos[[j]],
+                                function(k){
+                                  f <- weightPositionsR + k
+                                  ans <- means[[j]][f[f > 0]]
+                                  ans <- ans[!is.na(ans)]
+                                  ans
+                                }))
+           })
+  # create list of weights vector alongside the neighbor counts
+  weightsListL <- 
+    lapply(nV,
+           function(j){
+             NumericList(mapply(
+               function(k,l){
+                 f <- weightPositionsL + k
+                 ans <- weights[which(f > 0 & f <= l)]
+                 ans
+               },
+               pos[[j]],
+               MoreArgs = list(l = lengths[j])))
+           })
+  weightsListR <- 
+    lapply(nV,
+           function(j){
+             NumericList(mapply(
+               function(k,l,of){
+                 f <- weightPositionsR + k
+                 f <- which(f > 0 & f <= l) + of
+                 ans <- weights[f]
+                 ans
+               },
+               pos[[j]],
+               MoreArgs = list(l = lengths[j],
+                               of = weightPositionsC)))
+           })
+  # calculate the actual scores
+  scoreA <- .get_score_A(means,
+                         neighborCountsLFR,
+                         neighborCountsRFR)
+  scoreB <- .get_score_B(means,
+                         neighborCountsL,
+                         weightsListL,
+                         neighborCountsR,
+                         weightsListR)
+  scoreRMS <- .get_score_meth(means,
+                              neighborCountsL,
+                              weightsListL,
+                              neighborCountsR,
+                              weightsListR)
+  # scoreMAX <- .get_score_max()
+  ans <- DataFrame(ends = unlist(means),
+                   scoreA = unlist(scoreA),
+                   scoreB = unlist(scoreB),
+                   scoreRMS = unlist(scoreRMS))
+  ans <- SplitDataFrameList(ans)
+  ans@partitioning <- mod@partitioning
+  ans
+}
+
 #' @name Modifier
 #' @export
 setMethod(
@@ -358,97 +539,7 @@ setMethod(
     function(x,
              ...){
       if(!hasAggregateData(x)){
-        message("Aggregating data and calculating scores...")
-        # parameter data
-        args <- .norm_rms_args(list(...))
-        weights <- .norm_rms_weights(args)
-        weightPositions <- as.integer(names(weights))
-        # ToOo check for continuity
-        if(length(weights) != length(weightPositions)){
-          stop("Something went wrong.")
-        }
-        browser()
-        # get the means. the sds arecurrently disregarded for this analysis
-        mod <- aggregate(seqData(x), condition = "Treated")
-        means <- IntegerList(mod@unlistData[,which(grepl("mean",
-                                                   colnames(mod@unlistData)))])
-        means@partitioning <- mod@partitioning
-        # set up variables
-        n <- length(mod)
-        nV <- seq_len(n)
-        lengths <- lengths(mod)
-        pos <- lapply(lengths,seq_len)
-        weightPositionsL <- weightPositions[weightPositions < 0]
-        weightPositionsR <- weightPositions[weightPositions > 0]
-        weightPositionsC <- which(weightPositions == 0)
-        # subset to neightbouring positions and set position to zero
-        neighborCountsL <- lapply(nV,
-                                  function(j){
-                                    IntegerList(lapply(pos[[j]],
-                                                       function(k){
-                                                         f <- weightPositionsL + k
-                                                         ans <- means[[j]][f[f > 0]]
-                                                         ans <- ans[!is.na(ans)]
-                                                         ans
-                                                       }))
-                                  })
-        neighborCountsR <- lapply(nV,
-                                  function(j){
-                                    IntegerList(lapply(pos[[j]],
-                                                       function(k){
-                                                         f <- weightPositionsR + k
-                                                         ans <- means[[j]][f[f > 0]]
-                                                         ans <- ans[!is.na(ans)]
-                                                         ans
-                                                       }))
-                                  })
-        # create list of weights vector alongside the neighbor counts
-        weightsListL <- lapply(nV,
-                              function(j){
-                                NumericList(mapply(
-                                  function(k,l){
-                                    f <- weightPositionsL + k
-                                    ans <- weights[which(f > 0 & f <= l)]
-                                    ans
-                                  },
-                                  pos[[j]],
-                                  MoreArgs = list(l = lengths[j])))
-                              })
-        weightsListR <- lapply(nV,
-                               function(j){
-                                 NumericList(mapply(
-                                   function(k,l,of){
-                                     f <- weightPositionsR + k
-                                     f <- which(f > 0 & f <= l) + of
-                                     ans <- weights[f]
-                                     ans
-                                   },
-                                   pos[[j]],
-                                   MoreArgs = list(l = lengths[j],
-                                                   of = weightPositionsC)))
-                               })
-        # calculate the actual scores
-        scoreA <- .get_score_A(means,
-                               neighborCountsL,
-                               neighborCountsR)
-        scoreB <- .get_score_B(means,
-                               neighborCountsL,
-                               weightsListL,
-                               neighborCountsR,
-                               weightsListR)
-        scoreRMS <- .get_score_meth(means,
-                                    neighborCountsL,
-                                    weightsListL,
-                                    neighborCountsR,
-                                    weightsListR)
-        # scoreMAX <- .get_score_max()
-        ans <- DataFrame(ends = unlist(means),
-                         scoreA = unlist(scoreA),
-                         scoreB = unlist(scoreB),
-                         scoreRMS = unlist(scoreRMS))
-        ans <- SplitDataFrameList(ans)
-        ans@partitioning <- mod@partitioning
-        x@aggregate <- ans
+        x@aggregate <- .aggregate_rms(x,...)
       }
       x
     }
@@ -479,7 +570,6 @@ setMethod(
   # find modifications
   modifications <- mapply(
     function(m,l,r){
-      browser()
       rownames(m) <- seq_len(width(r)) + 1
       m <- m[!is.na(m$scoreA) &
                !is.na(m$scoreB) &
@@ -490,9 +580,14 @@ setMethod(
                     m$scoreA >= minScoreA,
                     m$scoreB >= minScoreB,
                     m$scoreRMS >= minScoreRMS),]
+      m <- m[m$ends >= minSignal,]
       if(nrow(m) == 0L) return(NULL)
-      ans <- .construct_mod_ranges(r,m,modType = "Am",.get_rms_scores,
-                            "RNAmodR","RNAMOD")
+      ans <- .construct_mod_ranges(r,
+                                   m,
+                                   modType = "Am",
+                                   scoreFun = .get_rms_scores,
+                                   source = "RNAmodR",
+                                   type = "RNAMOD")
       ans$mod <- paste0(l[start(ans)],"m")
       ans
     },

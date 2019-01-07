@@ -1,11 +1,18 @@
 #' @include RNAmodR.R
 #' @include SequenceDataFrame-class.R
+#' @include SequenceData-utils.R
 NULL
 
 #' @name SequenceData
 #' @title SequenceData
 #' @description 
 #' title
+#' 
+#' 
+#' @param ... Optional arguments overwriting default values, which are
+#' \itemize{
+#' \item{}
+#' }
 #' 
 NULL
 
@@ -431,6 +438,7 @@ setMethod("rbind", "SequenceData",
 
 
 # object creation --------------------------------------------------------------
+
 setMethod(
   f = "initialize", 
   signature = signature(.Object = "SequenceData"),
@@ -438,9 +446,11 @@ setMethod(
                         bamfiles,
                         fasta,
                         gff,
+                        args,
                         ...){
     className <- class(.Object)
     # quality
+    .Object@minQuality <- .norm_min_quality(list(...))
     if(!is.integer(.Object@minQuality) | 
        is.null(.Object@minQuality) | 
        .Object@minQuality == 0L){
@@ -518,12 +528,28 @@ setMethod(
 }
 
 .get_mod_data_args <- function(...){
-  args <- list(...)
+  input <- list(...)
+  max_depth <- 10000L
+  maxLength <- NA
   # for pileup
-  if(is.null(args[["max_depth"]])){
-    args[["max_depth"]] <- 10000L
+  if(!is.null(input[["max_depth"]])){
+    max_depth <- input[["max_depth"]]
+    if(!is.integer(max_depth) | max_depth <= 10L){
+      stop("'max_depth' must be integer with a value higher than 10L.",
+           call. = FALSE)
+    }
+  }
+  # for protected end data
+  if(!is.null(input[["maxLength"]])){
+    maxLength <- input[["maxLength"]]
+    if(!is.integer(maxLength) | maxLength <= 1L){
+      stop("'maxLength' must be integer with a value higher than 1L or NA.",
+           call. = FALSE)
+    }
   }
   #
+  args <- list(max_depth = max_depth,
+               maxLength = maxLength)
   args
 }
 

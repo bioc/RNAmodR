@@ -43,6 +43,10 @@ setClass(Class = "EndSequenceData",
   # add some flags
   # bamWhat(param) <- c("flag","mapq")
   data <- GenomicAlignments::readGAlignments(bamFile, param = param)
+  # apply length cut off if set
+  if(!is.na(args[["maxLength"]])){
+    data <- data[width(data) <= args[["maxLength"]],]
+  }
   hits <- findOverlaps(data,parentRanges)
   # split results per transcript
   data <- split(subsetByOverlaps(data, parentRanges),
@@ -127,12 +131,12 @@ End5SequenceData <- function(bamfiles,
                              fasta,
                              gff,
                              ...){
+  args <- .get_mod_data_args(...)
   ans <- new("End5SequenceData",
              bamfiles,
              fasta,
              gff,
-             ...)
-  args <- .get_mod_data_args(...)
+             args)
   ranges <- .load_annotation(ans@gff)
   sequences <- .load_transcript_sequences(ans@fasta,
                                           ranges)
@@ -162,12 +166,12 @@ End3SequenceData <- function(bamfiles,
                              fasta,
                              gff,
                              ...){
+  args <- .get_mod_data_args(...)
   ans <- new("End3SequenceData",
              bamfiles,
              fasta,
              gff,
-             ...)
-  args <- .get_mod_data_args(...)
+             args)
   ranges <- .load_annotation(ans@gff)
   sequences <- .load_transcript_sequences(ans@fasta,
                                           ranges)
@@ -197,12 +201,12 @@ EndSequenceData <- function(bamfiles,
                             fasta,
                             gff,
                             ...){
+  args <- .get_mod_data_args(...)
   ans <- new("EndSequenceData",
              bamfiles,
              fasta,
              gff,
-             ...)
-  args <- .get_mod_data_args(...)
+             args)
   ranges <- .load_annotation(ans@gff)
   sequences <- .load_transcript_sequences(ans@fasta,
                                           ranges)
@@ -230,8 +234,6 @@ EndSequenceData <- function(bamfiles,
 
 .aggregate_end_data_mean_sd <- function(x,
                                         condition){
-  browser()
-  condition <- tolower(match.arg(condition))
   if(is(x,"CompressedSplitDataFrameList")){
     df <- x@unlistData
   } else {
@@ -271,6 +273,7 @@ setMethod("aggregate",
           signature = c(x = "EndSequenceData"),
           function(x,
                    condition = c("Both","Treated","Control")){
+            condition <- tolower(match.arg(condition))
             .aggregate_end_data_mean_sd(x,condition)
           }
 )
@@ -281,6 +284,7 @@ setMethod("aggregate",
           signature = c(x = "End5SequenceData"),
           function(x,
                    condition = c("Both","Treated","Control")){
+            condition <- tolower(match.arg(condition))
             .aggregate_end_data_mean_sd(x,condition)
           }
 )
@@ -292,6 +296,7 @@ setMethod("aggregate",
           signature = c(x = "End3SequenceData"),
           function(x,
                    condition = c("Both","Treated","Control")){
+            condition <- tolower(match.arg(condition))
             .aggregate_end_data_mean_sd(x,condition)
           }
 )

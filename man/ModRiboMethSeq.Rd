@@ -26,10 +26,40 @@
 \S4method{visualizeData}{ModRiboMethSeq}(x, i, type = c("ends", "scoreA",
   "scoreB", "scoreRMS"), start, end)
 }
+\arguments{
+\item{...}{Optional arguments overwriting default values, which are
+\itemize{
+\item{weights:}{The weights used for calculating the scores B and RMS 
+(default: \code{weights = c(0.9,1,0,1,0.9)})}
+\item{flankingRegion:}{The size of the flanking region used for calculation 
+of score A as an integer value (default: \code{flankingRegion = 6L})}
+\item{minSignal:}{The minimal singal at the position as integer value 
+(default: \code{minSignal = 10L}). If the reaction is very specific a lower
+value and even 0L may need to be used}
+\item{minScoreA:}{minimum for score A to identify 2'-O methylated positions 
+de novo (default: \code{minScoreA = 0.6})}
+\item{minScoreB:}{minimum for score B to identify 2'-O methylated positions 
+de novo (default: \code{minScoreB = 3.0})}
+\item{minScoreRMS:}{minimum for score RMS to identify 2'-O methylated 
+positions de novo (default: \code{minScoreRMS = 0.75})}
+\item{scoreOperator:}{how the minimal score should be used as logical 
+operator. "&" requires all minimal values to be exceeded, whereas "|" detects
+positions, if at least one minimal values is exceeded (default: 
+\code{scoreOperator = "|"})}
+\item{maxLength:}{The default read length. Reads with this length or longer
+are discarded, since they represent non-fragemented reads. THis is argument
+is passed on to \code{\link{ProtectedEndSequenceData}} (default: 
+\code{maxLength = 50L})}
+\item{other arguments}{which are passed on to 
+\code{\link{ProtectedEndSequenceData}}}
+}}
+}
 \description{
 title
 
-score MAX as described by publiccations from the motorin lab are not 
+score MAX as described by publiccations from the Motorin lab are not 
 implemented since an unambigeous description is not available from the 
 literature.
+
+To disable minimal values for modification calling, set them to \code{Inf}
 }

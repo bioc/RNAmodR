@@ -194,12 +194,15 @@ setMethod(f = "modifications",
           paste(tools::toTitleCase(modName), collapse = "', '"),
           "'...")
   ans@data <- do.call(ans@dataClass,
-                      list(bamfiles = ans@bamfiles,
+                      c(list(bamfiles = ans@bamfiles,
                            fasta = ans@fasta,
-                           gff = ans@gff))
+                           gff = ans@gff),
+                        args))
   ans@data@sequences <- RNAStringSet(ans@data@sequences)
   if(args[["findMod"]]){
-    ans <- do.call(modify,c(list(ans),args))
+    ans <- do.call(modify,
+                   c(list(ans),
+                     args))
   }
   ans
 }
