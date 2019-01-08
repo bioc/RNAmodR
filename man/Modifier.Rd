@@ -11,6 +11,8 @@
 \usage{
 \S4method{show}{Modifier}(object)
 
+\S4method{modifiertype}{Modifier}(x)
+
 \S4method{gff}{Modifier}(x)
 
 \S4method{fasta}{Modifier}(x)

@@ -11,6 +11,7 @@
 \alias{ModInosine,BamFileList-method}
 \alias{ModInosine,SequenceData-method}
 \alias{modify,ModInosine-method}
+\alias{ModSetInosine-class}
 \alias{visualizeData,ModInosine-method}
 \title{ModInosine}
 \usage{

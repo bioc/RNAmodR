@@ -1,5 +1,6 @@
 #' @include RNAmodR.R
 #' @include Modifier-class.R
+#' @include ModifierSet-class.R
 NULL
 
 #' @name ModInosine
@@ -211,3 +212,17 @@ setMethod("modify",
             x
           }
 )
+
+# ModSetInosine ------------------------------------------------------------
+
+#' @rdname ModInosine
+#' @export
+setClass("ModSetInosine",
+         contains = "ModifierSet",
+         prototype = list(elementType = "ModInosine"))
+
+#' @rdname ModRiboMethSeq
+#' @export
+ModSetInosine <- function(x, fasta = NA, gff = NA){
+  ModifierSet("ModInosine", x, fasta = fasta, gff = gff)
+}

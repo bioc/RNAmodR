@@ -16,6 +16,10 @@ setGeneric(
 
 # Modifier accessors ------------------------------------------------------
 setGeneric( 
+  name = "modifiertype",
+  def = function(x) standardGeneric("modifiertype")
+)
+setGeneric( 
   name = "gff",
   def = function(x) standardGeneric("gff")
 )
@@ -78,4 +82,16 @@ setGeneric(
   def = function(x,
                  ...)
     standardGeneric("aggregate")
+) 
+
+
+# ModifierSet functions --------------------------------------------------------
+
+setGeneric( 
+  name = "ModifierSet",
+  signature = "x",
+  def = function(modifiertype,
+                 x,
+                 ...)
+    standardGeneric("ModifierSet")
 ) 

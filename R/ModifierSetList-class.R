@@ -12,5 +12,4 @@ NULL
 #' @rdname ModifierSetList
 #' @export
 setClass("ModifierSetList",
-         contains = c("VIRTUAL",
-                      "SimpleList"))
+         contains = c("SimpleList"))

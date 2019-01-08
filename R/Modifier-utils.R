@@ -1,12 +1,43 @@
 #' @include RNAmodR.R
 NULL
 
+#'@importFrom stringr str_locate
+# check if a class of type x exists
+.norm_modifiertype <- function(x){
+  class <- try(getClass(x), silent = TRUE)
+  if (is(class, "try-error")){
+    stop("Class '",x,"' is not implemented.",
+         call. = FALSE)
+  }
+  if(isVirtualClass(class)){
+    stop("Class '",x,"' is virtual.")
+  }
+  if(!("Modifier" %in% extends(class))){
+    stop("Class '",x,"' does not extend the 'Modifier' class.")
+  }
+  nameId <- stringr::str_locate(class@className,"Mod")
+  if(nrow(nameId) == 0L){
+    stop("The string 'Mod' must be present once at the front of the class ",
+         "name.",
+         call. = FALSE)
+  }
+  if(nrow(nameId) > 1L || nameId[,"start"] != 1L || nameId[,"end"] != 3L){
+    stop("The string 'Mod' can only be present once at the front of the class ",
+         "name.",
+         call. = FALSE)
+  }
+  x
+}
+
+.get_class_name_for_set_from_modifier_type <- function(modifiertype){
+  gsub("Mod","ModSet",modifiertype)
+}
+
 .norm_bamfiles <- function(x,
                            className,
                            .xname = assertive::get_name_in_parent(x)){
-  # check bam files
   if(!is(x,"BamFileList")){
-    x <- try(BamFileList(x))
+    x <- try(BamFileList(x), silent = TRUE)
     if (is(x, "try-error")){
       stop("To create a ",className," object, '",.xname,"' must be a ",
            "BamFileList object or be coercible to one.",
@@ -19,7 +50,8 @@ NULL
   }
   names <- tolower(unique(names(x)))
   if(!all(names %in% SAMPLE_TYPES)){
-    stop("Names of BamFileList must either be 'Treated' or 'Control'",
+    stop("Names of BamFileList must either be 'treated' or 'control' (case ",
+         "insensitive).",
          call. = FALSE)
   }
   names(x) <- tolower(names(x))
@@ -30,7 +62,7 @@ NULL
                         className,
                         .xname = assertive::get_name_in_parent(x)){
   if(!is(x,"FaFile")){
-    x <- try(FaFile(x))
+    x <- try(FaFile(x), silent = TRUE)
     if (is(x, "try-error")){
       stop("To create a ",className," object, '",.xname,"' must be a FaFile ",
            "object or be coercible to one.",
@@ -49,7 +81,7 @@ NULL
                       className,
                       .xname = assertive::get_name_in_parent(x)){
   if(!is(x,"GFF3File")){
-    x <- try(GFF3File(x))
+    x <- try(GFF3File(x), silent = TRUE)
     if (is(x, "try-error")){
       stop("To create a ",className," object, '",.xname,"' must be a GFF3File ",
            "object or be coercible to one.",

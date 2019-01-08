@@ -32,7 +32,8 @@ setMethod(
                         bamfiles,
                         fasta,
                         gff) {
-    className <- class(.Object)
+    className <- class(.Object)[[1]]
+    className <- .norm_modifiertype(className)
     # check bam files
     bamfiles <- .norm_bamfiles(bamfiles,className)
     # check genome sequences
@@ -62,6 +63,12 @@ setMethod(
 )
 
 # accessors --------------------------------------------------------------------
+
+#' @name Modifier
+#' @export
+setMethod(f = "modifiertype", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){class(x)[[1]]})
 
 # converts the genomic coordinates to transcript based coordinates
 .get_modifications_per_transcript <- function(x){

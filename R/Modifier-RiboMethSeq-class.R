@@ -1,5 +1,6 @@
 #' @include RNAmodR.R
 #' @include Modifier-class.R
+#' @include ModifierSet-class.R
 # #' @include RiboMethSeq.R
 NULL
 
@@ -615,7 +616,17 @@ setMethod("modify",
           }
 )
 
-# ModRiboMethSeqSet ------------------------------------------------------------
+# ModSetRiboMethSeq ------------------------------------------------------------
 
+#' @rdname ModRiboMethSeq
+#' @export
+setClass("ModSetRiboMethSeq",
+         contains = "ModifierSet",
+         prototype = list(elementType = "ModRiboMethSeq"))
 
+#' @rdname ModRiboMethSeq
+#' @export
+ModSetRiboMethSeq <- function(x, fasta = NA, gff = NA){
+  ModifierSet("ModRiboMethSeq", x, fasta = fasta, gff = gff)
+}
 

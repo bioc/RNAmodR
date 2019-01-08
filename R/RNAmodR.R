@@ -19,6 +19,7 @@ NULL
 #' @import GenomicAlignments
 #' @import Biostrings
 #' @import Modstrings
+#' @import BiocParallel
 NULL
 requireNamespace("S4Vectors")
 requireNamespace("Rsamtools")
@@ -28,6 +29,7 @@ requireNamespace("GenomicAlignments")
 requireNamespace("Biostrings")
 requireNamespace("Modstrings")
 requireNamespace("rtracklayer")
+requireNamespace("BiocParallel")
 
 
 # constants --------------------------------------------------------------------
