@@ -27,6 +27,8 @@ weights: 0.8,1,0,1,0.8
 
 ```{r}
 
-
+genome2 <- "GRCh38_rRNA_tRNA.fasta"
+annotation2 <- "GRCh38_rRNA_tRNA.gff"
+files2 <-  BamFileList(c(treated = "KS01.bam"))
 
 ```
