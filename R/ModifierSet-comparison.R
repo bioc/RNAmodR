@@ -9,6 +9,12 @@ NULL
 #' @description 
 #' title
 #' 
+#' @param x a \code{Modifier} or \code{ModifierSet} object.
+#' @param coord coordinates of position to subset to. Either a \code{GRanges} or
+#' a \code{GRangesList} object. For both types the Parent column is expected to
+#' match the gene or transcript name.
+#' @param normalize either a single logical or character value. If it is a 
+#' character, it must match one of the names in the \code{ModifierSet}.
 #' @param ... optional parameters:
 #' \itemize{
 #' \item{\code{name}}{Limit results to one specific gene or transcript}
@@ -33,7 +39,6 @@ NULL
 }
 
 .compare_ModifierSet_by_GRangesList <- function(x,coord,...){
-  browser()
   data <- subsetByCoord(x,coord,...)
   args <- .norm_compare_args(list(...),data,x)
   sampleNames <- names(data)
@@ -56,6 +61,14 @@ NULL
   data$positions <- factor(as.integer(data$positions))
   data$names <- factor(data$names)
   rownames(data) <- NULL
+  # add activity information if present
+  coord <- unlist(coord)
+  coord <- coord[coord$mod %in% modType(x),]
+  if(!is.null(coord$Activity)){
+    data$Activity <- unlist(lapply(coord$Activity,
+                                   paste,
+                                   collapse = "/"))
+  }
   data
 }
 
@@ -84,20 +97,83 @@ setMethod("compareByCoord",
           }
 )
 
+.create_label <- function(list){
+  spacer <- lapply(list,
+                   function(el){
+                     length <- nchar(el)
+                     missingLength <- max(length) - length
+                     unlist(lapply(missingLength,
+                                   function(n){
+                                     paste0(rep(" ",n),collapse = "")
+                                   }))
+                   })
+  sep <- lapply(seq_along(list),
+                   function(i){
+                     if(i > 1L){
+                       rep(" - ",length(list[[i]]))
+                     } else {
+                       rep("",length(list[[i]]))
+                     }
+                   })
+  labels <- mapply(paste0, spacer, list, sep, SIMPLIFY = FALSE)
+  labels <- Reduce(paste0, rev(labels))
+  factor(labels, levels = labels)
+}
 
 #' @importFrom ggplot2 ggplot geom_raster
 #' @importFrom reshape2 melt
-.plot_compare_ModifierSet_by_GRangesList <- function(x,coord,...){
+.plot_compare_ModifierSet_by_GRangesList <- function(x,coord,normalize,...){
   data <- .compare_ModifierSet_by_GRangesList(x,coord,...)
-  data
-  browser()
+  if(!missing(normalize)){
+    colnames <- colnames(data)
+    colnames <- colnames[!(colnames %in% c("positions","names","Activity"))]
+    if(is.character(normalize)){
+      assertive::assert_is_a_string(normalize)
+      if(!(normalize %in% colnames)){
+        stop("Data column '",normalize,"' not found in data. Available columns",
+             " are '",paste(colnames, collapse = "','"),"'.",
+             call. = FALSE)
+      }
+      data[,colnames] <- as.data.frame(data[,colnames,drop = FALSE]) - 
+        data[,normalize]
+    } else if(is.logical(normalize)){
+      assertive::assert_is_a_bool(normalize)
+      if(normalize == TRUE){
+        data[,colnames] <- as.data.frame(data[,colnames,drop = FALSE]) - 
+          apply(data[,colnames],1,max)
+      }
+    } else {
+      stop("'normalize' must be a single character or a logical value.",
+           call. = FALSE)
+    }
+    
+  }
+  data$labels <- .create_label(list(as.character(data$positions),data$Activity))
   # melt data an plot
-  data <- reshape2::melt(as.data.frame(data), id.vars = c("names","positions"))
+  data$labels <- factor(data$labels, levels = rev(data$labels))
+  data$positions <- NULL
+  data$Activity <- NULL
+  data <- reshape2::melt(as.data.frame(data), id.vars = c("names","labels"))
+  # adjust limits
+  if(!missing(normalize) && normalize != FALSE){
+    max <- max(max(data$value),abs(min(data$value)))
+    max <- max(max,0.5)
+    limits <- c(round(-max,1),round(max,1))
+  } else {
+    limits <- c(NA,round(max(data$value)))
+  }
+  # plot
   ggplot2::ggplot(data) + 
     ggplot2::geom_raster(mapping = ggplot2::aes_(x = ~variable,
-                                                 y = ~positions,
+                                                 y = ~labels,
                                                  fill = ~value)) +
-    ggplot2::facet_grid(names ~ ., scales = "free", space = "free")
+    ggplot2::facet_grid(names ~ ., scales = "free", space = "free") +
+    ggplot2::scale_fill_gradientn(colours = rev(colorRamps::matlab.like(100)),
+                                  limits = limits) +
+    ggplot2::scale_y_discrete(expand = c(0,0)) +
+    ggplot2::scale_x_discrete(expand = c(0,0)) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0))
 }
 
 #' @rdname compareByCoord
@@ -106,10 +182,14 @@ setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRanges"),
           function(x,
                    coord,
+                   normalize,
                    ...){
             coord <- split(coord,
                            coord$Parent)
-            .plot_compare_ModifierSet_by_GRangesList(x,coord,...)
+            .plot_compare_ModifierSet_by_GRangesList(x,
+                                                     coord,
+                                                     normalize,
+                                                     ...)
           }
 )
 
@@ -119,7 +199,11 @@ setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRangesList"),
           function(x,
                    coord,
+                   normalize,
                    ...){
-            .plot_compare_ModifierSet_by_GRangesList(x,coord,...)
+            .plot_compare_ModifierSet_by_GRangesList(x,
+                                                     coord,
+                                                     normalize,
+                                                     ...)
           }
 )

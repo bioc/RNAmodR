@@ -128,6 +128,7 @@ setGeneric(
   signature = c("x","coord"),
   def = function(x,
                  coord,
+                 normalize,
                  ...)
     standardGeneric("plotCompareByCoord")
 ) 

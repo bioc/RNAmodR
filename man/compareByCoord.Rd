@@ -13,16 +13,27 @@
 
 \S4method{compareByCoord}{ModifierSet,GRangesList}(x, coord, ...)
 
-\S4method{plotCompareByCoord}{ModifierSet,GRanges}(x, coord, ...)
+\S4method{plotCompareByCoord}{ModifierSet,GRanges}(x, coord, normalize,
+  ...)
 
-\S4method{plotCompareByCoord}{ModifierSet,GRangesList}(x, coord, ...)
+\S4method{plotCompareByCoord}{ModifierSet,GRangesList}(x, coord, normalize,
+  ...)
 }
 \arguments{
+\item{x}{a \code{Modifier} or \code{ModifierSet} object.}
+
+\item{coord}{coordinates of position to subset to. Either a \code{GRanges} or
+a \code{GRangesList} object. For both types the Parent column is expected to
+match the gene or transcript name.}
+
 \item{...}{optional parameters:
 \itemize{
 \item{\code{name}}{Limit results to one specific gene or transcript}
 \item{...}{passed on to \code{\link{subsetByCoord}}}
 }}
+
+\item{normalize}{either a single logical or character value. If it is a 
+character, it must match one of the names in the \code{ModifierSet}.}
 }
 \description{
 title

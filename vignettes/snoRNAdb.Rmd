@@ -29,7 +29,7 @@ gr <- GRanges(seqnames = table$hgnc_symbol,
               type = "RNAMOD",
               mod = table$modification,
               Parent = table$hgnc_symbol,
-              guide = table$guide)
+              Activity = CharacterList(strsplit(table$guide,",")))
 # convert to current gene name
 parents <- gr$Parent
 dict <- data.frame(old = c("RNA5-8SN5","RNA18SN5","RNA28SN5"),
@@ -40,6 +40,6 @@ for(i in seq_len(nrow(dict))){
 }
 gr$Parent <- parents
 gr <- gr[gr$Parent %in% dict$new,]
-gr <- gr[gr$guide != "unknown",]
+gr <- gr[vapply(gr$Activity != "unknown",all,logical(1)),]
 coord <- split(gr,gr$Parent)
 ```

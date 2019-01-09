@@ -22,7 +22,6 @@ NULL
 #' \code{shortName(ModRNAString())} and of course present in metadata column 
 #' \code{mod} of \code{coord}}
 #' }
-#' 
 NULL
 
 .norm_subset_args <- function(input,x){
