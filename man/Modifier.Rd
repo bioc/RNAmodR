@@ -11,7 +11,11 @@
 \usage{
 \S4method{show}{Modifier}(object)
 
-\S4method{modifiertype}{Modifier}(x)
+\S4method{modifierType}{Modifier}(x)
+
+\S4method{modType}{Modifier}(x)
+
+\S4method{mainScore}{Modifier}(x)
 
 \S4method{gff}{Modifier}(x)
 

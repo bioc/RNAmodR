@@ -16,6 +16,7 @@ NULL
 setClass("Modifier",
          contains = c("VIRTUAL"),
          slots = c(mod = "character", # this have to be populated by subclass
+                   score = "character", # this have to be populated by subclass
                    dataClass = "character", # this have to be populated by subclass
                    bamfiles = "BamFileList",
                    conditions = "factor",
@@ -29,9 +30,15 @@ setMethod(
   f = "initialize", 
   signature = signature(.Object = "Modifier"),
   definition = function(.Object,
-                        bamfiles,
-                        fasta,
-                        gff) {
+                        bamfiles = NULL,
+                        fasta = NULL,
+                        gff = NULL) {
+    # check modification ident
+    .Object@mod <- .norm_mod(.Object@mod,className)
+    # short cut for creating an empty object
+    if(is.null(bamfiles) || is.null(fasta) || is.null(gff)){
+      return(.Object)
+    }
     className <- class(.Object)[[1]]
     className <- .norm_modifiertype(className)
     # check bam files
@@ -40,14 +47,11 @@ setMethod(
     fasta <- .norm_fasta(fasta,className)
     # check genome annotation
     gff <- .norm_gff(gff,className)
-    # check modification ident
-    mod <- .norm_mod(.Object@mod,className)
     # set clots
     .Object@bamfiles <- bamfiles
     .Object@conditions <- factor(names(bamfiles))
     .Object@fasta <- fasta
     .Object@gff <- gff
-    .Object@mod <- mod
     return(.Object)
   }
 )
@@ -66,9 +70,20 @@ setMethod(
 
 #' @name Modifier
 #' @export
-setMethod(f = "modifiertype", 
+setMethod(f = "modifierType", 
           signature = signature(x = "Modifier"),
           definition = function(x){class(x)[[1]]})
+#' @name Modifier
+#' @export
+setMethod(f = "modType", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){x@mod})
+#' @name Modifier
+#' @export
+setMethod(f = "mainScore", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){x@score})
+
 
 # converts the genomic coordinates to transcript based coordinates
 .get_modifications_per_transcript <- function(x){
@@ -121,20 +136,18 @@ setMethod(f = "sequences",
                 stop("'with.qualities' has to be a single logical value.")
               }
               if(modified == FALSE){
-                ans <- x@data@sequences
+                return(x@data@sequences)
               }
-              if(modified == TRUE){
-                mod <- .get_modifications_per_transcript(x)
-                mod <- split(mod,names(mod))
-                ans <- ModRNAStringSet(sequences(seqData(x)))
-                modSeqList <- ans[names(ans) %in% names(mod)]
-                mod <- mod[match(names(mod),names(modSeqList))]
-                ans[names(ans) %in% names(mod)] <- 
-                  combineIntoModstrings(modSeqList,
-                                        mod)
-                if(with.qualities == TRUE){
-                  browser()
-                }
+              mod <- .get_modifications_per_transcript(x)
+              mod <- split(mod,names(mod))
+              ans <- ModRNAStringSet(sequences(seqData(x)))
+              modSeqList <- ans[names(ans) %in% names(mod)]
+              mod <- mod[match(names(mod),names(modSeqList))]
+              ans[names(ans) %in% names(mod)] <- 
+                combineIntoModstrings(modSeqList,
+                                      mod)
+              if(with.qualities == TRUE){
+                browser()
               }
               ans
             }
@@ -158,13 +171,27 @@ setMethod(f = "seqData",
           signature = signature(x = "Modifier"),
           definition = function(x){x@data})
 
+.check_score_name <- function(data,score){
+  if(is(data,"CompressedSplitDataFrameList")){
+    columns <- colnames(data@unlistData)
+  } else {
+    columns <- colnames(data[[1]])
+  }
+  if(!(score %in% columns)){
+    stop("The default score is not present in the aggregate data. Contact the ",
+         "maintainer of the class used.",
+         call. = FALSE)
+  }
+  data
+}
+
 #' @name Modifier
 #' @export
 setMethod(f = "aggregateData", 
           signature = signature(x = "Modifier"),
           definition = function(x){
             x <- aggregate(x)
-            x@aggregate
+            .check_score_name(x@aggregate,x@score)
           })
   
 #' @name Modifier
@@ -289,7 +316,6 @@ setMethod(f = "aggregate",
 )
 
 # check function ---------------------------------------------------------------
-
 
 #' @name Modifier
 #' @export

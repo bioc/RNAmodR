@@ -21,6 +21,7 @@ NULL
 setClass("ModInosine",
          contains = c("Modifier"),
          prototype = list(mod = "I",
+                          score = "score",
                           dataClass = "PileupSequenceData"))
 
 setMethod(
@@ -131,6 +132,7 @@ setMethod(f = "aggregate",
           definition = 
             function(x){
               if(!hasAggregateData(x)){
+                browser()
                 x@aggregate <- aggregate(seqData(x))
               }
               x

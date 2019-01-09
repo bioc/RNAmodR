@@ -14,10 +14,28 @@ setGeneric(
                  ...) standardGeneric("match.annotation")
 ) 
 
+# ModifierSet functions --------------------------------------------------------
+setGeneric( 
+  name = "ModifierSet",
+  signature = "x",
+  def = function(modifiertype,
+                 x,
+                 ...)
+    standardGeneric("ModifierSet")
+)
+
 # Modifier accessors ------------------------------------------------------
 setGeneric( 
-  name = "modifiertype",
-  def = function(x) standardGeneric("modifiertype")
+  name = "modifierType",
+  def = function(x) standardGeneric("modifierType")
+)
+setGeneric( 
+  name = "modType",
+  def = function(x) standardGeneric("modType")
+)
+setGeneric( 
+  name = "mainScore",
+  def = function(x) standardGeneric("mainScore")
 )
 setGeneric( 
   name = "gff",
@@ -84,14 +102,32 @@ setGeneric(
     standardGeneric("aggregate")
 ) 
 
+# Modifier/ModifierSet functions ----------------------------------------------
+setGeneric( 
+  name = "subsetByCoord",
+  signature = c("x","coord"),
+  def = function(x,
+                 coord,
+                 ...)
+    standardGeneric("subsetByCoord")
+) 
 
-# ModifierSet functions --------------------------------------------------------
+# ModifierSet functions ----------------------------------------------
 
 setGeneric( 
-  name = "ModifierSet",
-  signature = "x",
-  def = function(modifiertype,
-                 x,
+  name = "compareByCoord",
+  signature = c("x","coord"),
+  def = function(x,
+                 coord,
                  ...)
-    standardGeneric("ModifierSet")
+    standardGeneric("compareByCoord")
+) 
+
+setGeneric( 
+  name = "plotCompareByCoord",
+  signature = c("x","coord"),
+  def = function(x,
+                 coord,
+                 ...)
+    standardGeneric("plotCompareByCoord")
 ) 

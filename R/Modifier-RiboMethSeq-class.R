@@ -53,6 +53,7 @@ NULL
 setClass("ModRiboMethSeq",
          contains = c("Modifier"),
          prototype = list(mod = c("Am","Cm","Gm","Um"),
+                          score = "scoreRMS",
                           dataClass = "ProtectedEndSequenceData"))
 
 
@@ -75,11 +76,11 @@ setMethod(
 
 .norm_rms_args <- function(input){
   maxLength <- 50L
-  weights <- c(0.6,1,0,1,0.6)
-  minSignal <- 25L
+  weights <- c(0.9,1,0,1,0.9)
+  minSignal <- 10L
   flankingRegion <- 6L
   minScoreA <- 0.6
-  minScoreB <- 4.0
+  minScoreB <- 3.0
   minScoreRMS <- 0.75
   scoreOperator <- "&"
   if(!is.null(input[["weights"]])){
@@ -525,7 +526,8 @@ setMethod("ModRiboMethSeq",
   ans <- DataFrame(ends = unlist(means),
                    scoreA = unlist(scoreA),
                    scoreB = unlist(scoreB),
-                   scoreRMS = unlist(scoreRMS))
+                   scoreRMS = unlist(scoreRMS),
+                   row.names = NULL)
   ans <- SplitDataFrameList(ans)
   ans@partitioning <- mod@partitioning
   ans

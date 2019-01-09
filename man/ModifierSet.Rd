@@ -5,6 +5,45 @@
 \alias{ModifierSet}
 \alias{ModifierSet-class}
 \title{ModifierSet}
+\usage{
+\S4method{modifierType}{ModifierSet}(x)
+
+\S4method{modType}{ModifierSet}(x)
+
+\S4method{mainScore}{ModifierSet}(x)
+}
+\arguments{
+\item{x}{the input which can be of the following types
+\itemize{
+\item{\code{Modifier}}{a single \code{Modifier} or a list containg only 
+\code{Modifier} objects. The input will just be used as elements of the
+\code{ModifierSet}}
+\item{\code{BamFileList}}{a named \code{BamFileList} or a list of 
+named \code{BamFileList}}
+\item{\code{list}}{a list of one or more types of elements: 
+\code{BamFileList}, a named \code{list} or named \code{character} vector. All elements must
+be or be coercible to a named \code{BamFileList} referencing existing bam 
+files. In case of a \code{character} vector, it is assumed that each element
+should be used for creation of a seperate \code{Modifier} object.}
+}}
+
+\item{fasta}{sequences matching the target sequences the reads were mapped 
+onto. This must match the information contained in the BAM files. This is 
+parameter is only required if \code{x} if not a \code{Modifier} object.}
+
+\item{gff}{annotation data, which must match the information contained in the
+BAM files. This is parameter is only required if \code{x} if not a 
+\code{Modifier} object.}
+
+\item{...}{Additional otpional parameters:
+\itemize{
+\item{internalBP}{\code{TRUE} or \code{FALSE}: should 
+parallilazation used internally for creation of each \code{Modifier} or
+should the creation of the \code{Modifier} objects be parallalized? (default:
+\code{internalBP = FALSE})}
+}
+All other arguments will be passed onto the \code{Modifier} objects.}
+}
 \description{
 title
 }

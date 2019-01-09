@@ -32,3 +32,15 @@ annotation2 <- "GRCh38_rRNA_tRNA.gff"
 files2 <-  BamFileList(c(treated = "KS01.bam"))
 
 ```
+
+```{r}
+
+genome2 <- "GRCh38_rRNA_tRNA.fasta"
+annotation2 <- "GRCh38_rRNA_tRNA.gff"
+files3 <- list("HCT116" = c(treated = "KS01.bam"),
+               "HCT116 snR46del 1" = c(treated = "KS02.bam"),
+               "HCT116 snR46del 2" = c(treated = "KS03.bam"),
+               "HCT116 snR46del 3" = c(treated = "KS04.bam"),
+               "HCT116 snR46del 5" = c(treated = "KS05.bam"))
+
+```

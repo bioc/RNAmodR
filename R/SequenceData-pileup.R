@@ -234,6 +234,7 @@ setMethod("aggregate",
                              }))
   names(ans) <- paste0("replicate.",replicates)
   ans <- do.call("DataFrame",ans)
+  browser()
   if(is(data,"CompressedSplitDataFrameList")){
     ans <- SplitDataFrameList(ans)
     ans@partitioning <- data@partitioning

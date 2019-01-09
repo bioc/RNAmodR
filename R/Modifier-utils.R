@@ -127,7 +127,6 @@ NULL
   ModExperiments
 }
 
-
 # construct GRanges object from found modifications ----------------------------
 
 .construct_mod_ranges <- function(range,
