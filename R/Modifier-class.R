@@ -62,7 +62,18 @@ setMethod(
   f = "show", 
   signature = signature(object = "Modifier"),
   definition = function(object) {
-    cat("test")
+    cat("A", class(object), "object containing",object@dataClass,
+        "with",length(object@data),"elements.\n")
+    files <- path(object@bamfiles)
+    cat("  Input files:\n",paste0("  - ",names(files),": ",files,"\n"))
+    cat("  Sequence file:",path(object@fasta),"\n")
+    cat("  Annotation file:",path(object@gff),"\n\n")
+    cat("Modification type:\n",paste0("- ",object@mod,"\n"))
+    cat("Modifications found:",ifelse(length(object@modifications) != 0L,
+                                      paste0("yes (",
+                                             length(object@modifications),
+                                             ")"),
+                                      "no"))
   }
 )
 
