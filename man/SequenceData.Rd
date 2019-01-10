@@ -28,7 +28,7 @@
 \arguments{
 \item{...}{Optional arguments overwriting default values, which are
 \itemize{
-\item{}
+\item{minQuality}{class dependent}
 }}
 }
 \description{

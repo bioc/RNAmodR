@@ -11,6 +11,8 @@
 \S4method{modType}{ModifierSet}(x)
 
 \S4method{mainScore}{ModifierSet}(x)
+
+\S4method{modifications}{ModifierSet}(x)
 }
 \arguments{
 \item{x}{the input which can be of the following types

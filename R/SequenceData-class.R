@@ -11,7 +11,7 @@ NULL
 #' 
 #' @param ... Optional arguments overwriting default values, which are
 #' \itemize{
-#' \item{}
+#' \item{minQuality}{class dependent}
 #' }
 #' 
 NULL
@@ -450,7 +450,7 @@ setMethod(
                         ...){
     className <- class(.Object)
     # quality
-    .Object@minQuality <- .norm_min_quality(list(...))
+    .Object@minQuality <- .norm_min_quality(list(...),.Object)
     if(!is.integer(.Object@minQuality) | 
        is.null(.Object@minQuality) | 
        .Object@minQuality == 0L){
@@ -529,7 +529,7 @@ setMethod(
 
 .get_mod_data_args <- function(...){
   input <- list(...)
-  max_depth <- 10000L
+  max_depth <- 10000L # the default is 250, which is to small
   maxLength <- NA
   # for pileup
   if(!is.null(input[["max_depth"]])){

@@ -136,12 +136,12 @@ PileupSequenceData <- function(bamfiles,
                                fasta,
                                gff,
                                ...){
+  args <- .get_mod_data_args(...)
   ans <- new("PileupSequenceData",
              bamfiles,
              fasta,
              gff,
-             ...)
-  args <- .get_mod_data_args(...)
+             args)
   ranges <- .load_annotation(ans@gff)
   sequences <- .load_transcript_sequences(ans@fasta,
                                           ranges)
@@ -176,11 +176,7 @@ setMethod("aggregate",
           function(x,
                    condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
-            if(is(x,"CompressedSplitDataFrameList")){
-              df <- x@unlistData
-            } else {
-              df <- x
-            }
+            df <- x@unlistData
             if(condition != "both"){
               df <- df[,x@conditions == condition, drop = FALSE]
               if(ncol(df) == 0L){
@@ -212,32 +208,8 @@ setMethod("aggregate",
             names(sds) <- paste0("sds.",colNames)
             ans <- cbind(do.call(DataFrame, means),
                          do.call(DataFrame, sds))
-            if(is(x,"CompressedSplitDataFrameList")){
-              ans <- SplitDataFrameList(ans)
-              ans@partitioning <- x@partitioning
-            }
+            ans <- SplitDataFrameList(ans)
+            ans@partitioning <- x@partitioning
             ans
           }
 )
-
-#' @importFrom matrixStats rowSds
-.aggregate_pile_up_to_coverage <- function(data){
-  if(is(data,"CompressedSplitDataFrameList")){
-    df <- data@unlistData
-  } else {
-    df <- data
-  }
-  replicates <- unique(data@replicate)
-  ans  <- IntegerList(lapply(seq_along(replicates),
-                             function(i){
-                               rowSums(as.data.frame(df[,data@replicate == i]))
-                             }))
-  names(ans) <- paste0("replicate.",replicates)
-  ans <- do.call("DataFrame",ans)
-  browser()
-  if(is(data,"CompressedSplitDataFrameList")){
-    ans <- SplitDataFrameList(ans)
-    ans@partitioning <- data@partitioning
-  }
-  ans
-}

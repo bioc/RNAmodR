@@ -42,7 +42,7 @@ setMethod(
 # constructors -----------------------------------------------------------------
 
 .norm_inosine_args <- function(input){
-  minScore <- 1
+  minScore <- 10
   if(!is.null(input[["minScore"]])){
     minScore <- input[["minScore"]]
     if(!is.numeric(minScore) | minScore < 0 | minScore > 100){
@@ -125,31 +125,69 @@ setMethod("ModInosine",
 
 # functions --------------------------------------------------------------------
 
+.calculate_inosine_score <- function(x){
+  data <- x@unlistData
+  df <- data.frame(x = data$means.G,
+                   y = data$means.A + data$means.T + data$means.C,
+                   dx = data$sds.G,
+                   dy = data$sds.A + data$sds.T + data$sds.C)
+  f <- z ~ log2(x/y) * 10
+  scores <- .mutate_with_error(df,f)
+  scores$z <- vapply(scores$z,min,numeric(1),100)
+  scores$z[is.infinite(scores$z) | is.na(scores$z)] <- 0
+  scores$dz[is.infinite(scores$dz) | is.na(scores$dz)] <- 0
+  ans <- DataFrame(value = scores$z,
+                   sd = scores$dz)
+  ans <- SplitDataFrameList(ans)
+  ans@partitioning <- x@partitioning
+  ans
+}
+
+.aggregate_pile_up_to_coverage <- function(data){
+  df <- data@unlistData
+  replicates <- unique(data@replicate)
+  ans  <- IntegerList(lapply(seq_along(replicates),
+                             function(i){
+                               rowSums(as.data.frame(df[,data@replicate == i]))
+                             }))
+  names(ans) <- paste0("replicate.",replicates)
+  ans <- do.call("DataFrame",ans)
+  ans <- SplitDataFrameList(ans)
+  ans@partitioning <- data@partitioning
+  ans
+}
+
+.aggregate_inosine <- function(x,...){
+  mod <- aggregate(seqData(x))
+  data <- seqData(x)
+  coverage <- .aggregate_pile_up_to_coverage(data)
+  score <- .calculate_inosine_score(mod)
+  ans <- cbind(DataFrame(score = unlist(score)$value,
+                         sd = unlist(score)$sd,
+                         row.names = NULL),
+               unlist(coverage))
+  ans <- SplitDataFrameList(ans)
+  ans@partitioning <- mod@partitioning
+  ans
+}
+
 #' @name Modifier
 #' @export
 setMethod(f = "aggregate", 
           signature = signature(x = "ModInosine"),
           definition = 
-            function(x){
+            function(x,
+                     ...){
               if(!hasAggregateData(x)){
-                browser()
-                x@aggregate <- aggregate(seqData(x))
+                x@aggregate <- .aggregate_inosine(x,...)
               }
               x
             }
 )
 
 .get_inosine_score <- function(data){
-  df <- data.frame(x = data$means.G,
-                   y = data$means.A,
-                   dx = data$sds.G,
-                   dy = data$sds.A)
-  f <- z ~ log2(x/y) * 10
-  scores <- .mutate_with_error(df,f)
-  scores$z[is.infinite(scores$z)] <- 100
-  scores$z <- vapply(scores$z,min,numeric(1),100)
-  list(score = scores$z,
-       sd = scores$dz)
+  list(score = data$score,
+       sd = data$sd)
 }
 
 .find_inosine <- function(x,
@@ -161,36 +199,35 @@ setMethod(f = "aggregate",
                   seq_along(ranges))
   # get the aggregate data
   mod <- aggregateData(x)
-  data <- seqData(x)
-  coverage <- .aggregate_pile_up_to_coverage(data)
   # get arguments
   minCoverage <- args[["minCoverage"]]
   minReplicate <- args[["minReplicate"]]
   minScore <- args[["minScore"]]
   # construct logical vector for passing the coverage threshold
+  coverage <- mod[,seq_len(unique(ncol(mod)) - 2) + 2,drop = FALSE]
   coverage <- apply(as.matrix(unlist(coverage)),1,
                     function(row){
                       sum(row > minCoverage) >= minReplicate
                     })
-  coverage <- split(unname(coverage),data@partitioning)
+  coverage <- split(unname(coverage),mod@partitioning)
   # find inosine positions by looking for A to G conversion at position with 
   # enough coverage
   modifications <- mapply(
     function(m,c,l,r){
       rownames(m) <- seq_len(width(r))
       m <- m[l == "A" &
-               m$means.G > m$means.A &
-               !is.na(m$means.G) &
-               !is.na(m$means.A) & 
-               c,]
+               (m$score - m$sd) >= minScore & 
+               c,] # coverage check
       if(nrow(m) == 0L) return(NULL)
-      m <- m[.get_inosine_score(m)$score >= minScore,]
-      if(nrow(m) == 0L) return(NULL)
-      ans <- .construct_mod_ranges(r,m,modType = "I",.get_inosine_score,
-                            "RNAmodR","RNAMOD")
+      ans <- .construct_mod_ranges(r,
+                                   m,
+                                   modType = "I",
+                                   .get_inosine_score,
+                                   "RNAmodR",
+                                   "RNAMOD")
       ans
     },
-    mod,
+    mod[,seq_len(2)],
     coverage,
     letters,
     ranges)

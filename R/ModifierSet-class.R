@@ -248,3 +248,11 @@ setMethod(f = "mainScore",
           signature = signature(x = "ModifierSet"),
           definition = function(x) mainScore(new(elementType(x),NULL,NULL,NULL))
 )
+#' @name ModifierSet
+#' @export
+setMethod(f = "modifications", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x) {
+            GRangesList(lapply(x,modifications))
+          }
+)

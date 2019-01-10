@@ -232,13 +232,10 @@ EndSequenceData <- function(bamfiles,
 
 # aggregation ------------------------------------------------------------------
 
+#' @importFrom matrixStats rowSds
 .aggregate_end_data_mean_sd <- function(x,
                                         condition){
-  if(is(x,"CompressedSplitDataFrameList")){
-    df <- x@unlistData
-  } else {
-    df <- x
-  }
+  df <- x@unlistData
   if(condition != "both"){
     df <- df[,x@conditions == condition, drop = FALSE]
     if(ncol(df) == 0L){
@@ -260,10 +257,8 @@ EndSequenceData <- function(bamfiles,
   names(sds) <- paste0("sds.",replicates)
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
-  if(is(x,"CompressedSplitDataFrameList")){
-    ans <- SplitDataFrameList(ans)
-    ans@partitioning <- x@partitioning
-  }
+  ans <- SplitDataFrameList(ans)
+  ans@partitioning <- x@partitioning
   ans
 }
 

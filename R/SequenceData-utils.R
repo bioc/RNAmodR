@@ -1,8 +1,8 @@
 #' @include RNAmodR.R
 NULL
 
-.norm_min_quality <- function(input){
-  minQuality <- 1L
+.norm_min_quality <- function(input,x){
+  minQuality <- x@minQuality
   if(!is.null(input[["minQuality"]])){
     minQuality <- input[["minQuality"]]
     if(!is.integer(minQuality) | minQuality < 1L){
