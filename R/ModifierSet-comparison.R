@@ -20,6 +20,10 @@ NULL
 #' \item{\code{name}}{Limit results to one specific gene or transcript}
 #' \item{...}{passed on to \code{\link{subsetByCoord}}}
 #' }
+#' 
+#' @return for \code{compareByCoord} as \code{\link{DataFrameList}} and for
+#' \code{plotCompareByCoord} a \code{ggplot} object, which can be modified 
+#' further.
 NULL
 
 .norm_compare_args <- function(input,data,x){
@@ -40,7 +44,10 @@ NULL
 
 .compare_ModifierSet_by_GRangesList <- function(x,coord,...){
   data <- subsetByCoord(x,coord,...)
-  args <- .norm_compare_args(list(...),data,x)
+  args <- .norm_compare_args(list(...),
+                             data,
+                             x)
+  # subset to compare type
   sampleNames <- names(data)
   data <- lapply(data,
                  function(d){
@@ -51,15 +58,21 @@ NULL
     data <- SplitDataFrameList(data)
   }
   colnames(data) <- sampleNames
+  # convert ids to names for labeling if present
   ranges <- unlist(ranges(x[[1]])[names(data)])
-  names(data) <- ranges[match(names(data),ranges$ID)]$Name
+  if(!is.null(ranges$Name) && 
+     any(!is.na(ranges$Name))){
+    names <- ranges[match(names(data),ranges$ID)]$Name
+    f <- !is.na(names)
+    names(data)[f] <- names[f]
+  }
+  # keep rownames/names and unlist data
   positions <- rownames(data)
   names <- as.character(Rle(names(data),lengths(data)))
   data <- unlist(data)
-  data$positions <- unlist(positions)
-  data$names <- names
-  data$positions <- factor(as.integer(data$positions))
-  data$names <- factor(data$names)
+  # add names and positions column as factors
+  data$names <- factor(names)
+  data$positions <- factor(as.integer(unlist(positions)))
   rownames(data) <- NULL
   # add activity information if present
   coord <- unlist(coord)
@@ -69,6 +82,7 @@ NULL
                                    paste,
                                    collapse = "/"))
   }
+  #
   data
 }
 
@@ -97,7 +111,7 @@ setMethod("compareByCoord",
           }
 )
 
-.create_label <- function(list){
+.create_position_labels <- function(list){
   spacer <- lapply(list,
                    function(el){
                      length <- nchar(el)
@@ -120,9 +134,18 @@ setMethod("compareByCoord",
   factor(labels, levels = labels)
 }
 
+.create_sample_labels <- function(labels){
+  labels <- as.character(labels)
+  labels <- gsub("\\.", " ",labels)
+  factor(labels)
+}
+
 #' @importFrom ggplot2 ggplot geom_raster
 #' @importFrom reshape2 melt
-.plot_compare_ModifierSet_by_GRangesList <- function(x,coord,normalize,...){
+.plot_compare_ModifierSet_by_GRangesList <- function(x,
+                                                     coord,
+                                                     normalize,
+                                                     ...){
   data <- .compare_ModifierSet_by_GRangesList(x,coord,...)
   if(!missing(normalize)){
     colnames <- colnames(data)
@@ -148,12 +171,14 @@ setMethod("compareByCoord",
     }
     
   }
-  data$labels <- .create_label(list(as.character(data$positions),data$Activity))
+  data$labels <- .create_position_labels(list(as.character(data$positions),
+                                              data$Activity))
   # melt data an plot
   data$labels <- factor(data$labels, levels = rev(data$labels))
   data$positions <- NULL
   data$Activity <- NULL
   data <- reshape2::melt(as.data.frame(data), id.vars = c("names","labels"))
+  data$variable <- .create_sample_labels(data$variable)
   # adjust limits
   if(!missing(normalize) && normalize != FALSE){
     max <- max(max(data$value),abs(min(data$value)))
@@ -168,10 +193,14 @@ setMethod("compareByCoord",
                                                  y = ~labels,
                                                  fill = ~value)) +
     ggplot2::facet_grid(names ~ ., scales = "free", space = "free") +
-    ggplot2::scale_fill_gradientn(colours = rev(colorRamps::matlab.like(100)),
+    ggplot2::scale_fill_gradientn(name = "Score",
+                                  colours = rev(colorRamps::matlab.like(100)),
                                   limits = limits) +
-    ggplot2::scale_y_discrete(expand = c(0,0)) +
-    ggplot2::scale_x_discrete(expand = c(0,0)) +
+    ggplot2::scale_y_discrete(name = "Positions",
+                              expand = c(0,0)) +
+    ggplot2::scale_x_discrete(name = "Samples",
+                              position = "top",
+                              expand = c(0,0)) +
     ggplot2::theme_minimal() +
     ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0))
 }

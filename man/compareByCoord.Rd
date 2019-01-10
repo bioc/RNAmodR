@@ -35,6 +35,11 @@ match the gene or transcript name.}
 \item{normalize}{either a single logical or character value. If it is a 
 character, it must match one of the names in the \code{ModifierSet}.}
 }
+\value{
+for \code{compareByCoord} as \code{\link{DataFrameList}} and for
+\code{plotCompareByCoord} a \code{ggplot} object, which can be modified 
+further.
+}
 \description{
 title
 }
