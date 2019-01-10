@@ -234,7 +234,8 @@ setMethod(f = "ModifierSet",
 #' @export
 setMethod(f = "modifierType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) modifierType(new(elementType(x),NULL,NULL,NULL))
+          definition = function(x) 
+            modifierType(new(elementType(x),NULL,NULL,NULL))
 )
 #' @name ModifierSet
 #' @export

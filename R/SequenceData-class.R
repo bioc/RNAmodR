@@ -45,24 +45,17 @@ setMethod("show", "SequenceData",
           function(object){
             k <- length(object)
             data_nc <- ncol(object@unlistData)
-            ranges_mcols <- mcols(object@ranges@unlistData, use.names=FALSE)
+            ranges_mcols <- mcols(object@ranges@unlistData, use.names = FALSE)
             ranges_nmc <- if (is.null(ranges_mcols)) 0L else ncol(ranges_mcols)
-            cat(classNameForDisplay(object), " of length ", k, " containing\n",
-                sep = "")
-            if (k == 0L) {
-              cat("<0 elements>\n")
-            }
-            cat(object@unlistType,"/",class(object@ranges@unlistData),
-                "/",object@sequences@elementType," elements with ",
-                data_nc, ifelse(data_nc == 1L, " data column", " data columns"),
-                " and ",
-                ranges_nmc, ifelse(ranges_nmc == 1L, " metadata column",
-                                  " metadata columns"),
-                "\n",
-                sep = "")
+            cat(classNameForDisplay(object), " with ", k, " elements ",
+                "containing ",sep = "")
+            cat(data_nc, ifelse(data_nc == 1L, " data column", " data columns"),
+                " and ",ranges_nmc, ifelse(ranges_nmc == 1L, " metadata column",
+                                           " metadata columns"),
+                "\n",sep = "")
             out_data <- NULL
             out_mdata <- NULL
-            sep <- NULL
+            # data
             if (data_nc > 0) {
               data_col_names <- colnames(object@unlistData)
               data_col_types <- 
@@ -73,6 +66,7 @@ setMethod("show", "SequenceData",
                 matrix(unlist(data_col_types, use.names = FALSE), nrow = 1,
                 dimnames = list("", data_col_names))
             }
+            # metadata
             if (ranges_nmc > 0) {
               mdata_col_names <- colnames(ranges_mcols)
               mdata_col_types <- 
@@ -84,11 +78,10 @@ setMethod("show", "SequenceData",
                                   nrow = 1,
                                   dimnames = list("", mdata_col_names))
             }
-            if(!is.null(out_data) & !is.null(out_mdata)){
-              sep <- matrix("|", dimnames = list("","|"))
-            }
-            out <- cbind(out_data,sep,out_mdata)
-            print(out, quote = FALSE, right = TRUE)
+            cat("- Data:\n")
+            print(out_data, quote = FALSE, right = TRUE)
+            cat("\n- Metadata:\n")
+            print(out_mdata, quote = FALSE, right = TRUE)
           }
 )
 # validity ---------------------------------------------------------------------
@@ -292,13 +285,7 @@ lapply_SequenceData <- function(X, FUN, ...){
   ans[non_empty_idx] <-
     lapply(non_empty_idx,
            function(i){
-             df <- new(x@unlistType,
-                       extractROWS(unlisted_X,
-                                   IRanges(X_elt_start[i], X_elt_end[i])),
-                       X@ranges[[i]],
-                       X@sequences[[i]],
-                       x@replicate,
-                       x@conditions)
+             df <- getListElement(X,i)
              FUN(df,
                  ...)
            })
@@ -316,7 +303,8 @@ setMethod("lapply", "SequenceData",
 
 setMethod("extractROWS", "SequenceData",
           function(x, i){
-            i <- normalizeSingleBracketSubscript(i, x, as.NSBS=TRUE)
+            browser()
+            i <- normalizeSingleBracketSubscript(i, x, as.NSBS = TRUE)
             ans_eltNROWS <- extractROWS(width(x@partitioning), i)
             ans_breakpoints <- suppressWarnings(cumsum(ans_eltNROWS))
             nbreakpoints <- length(ans_breakpoints)
@@ -348,87 +336,38 @@ setMethod("extractROWS", "SequenceData",
           }
 )
 
-
-# Concatenation ----------------------------------------------------------------
-
-.bindROWS <- function(...){
-  args <- list(...)
-  if (length(dim(args[[1L]])) >= 2L)
-    return(rbind(...))
-  concatenateObjects(args[[1L]], args[-1L])
-}
-
-.cbind_SequenceData_objects <- function(objects){
-  browser()
-  
-  
-}
-  
-# .cbind_SequenceData_objects <-
-#   function(x, objects=list(), use.names=TRUE, ignore.mcols=FALSE, check=TRUE)
-#   {
-#     browser()
-#     objects <- S4Vectors:::prepare_objects_to_concatenate(x, objects)
-#     all_objects <- c(list(x), objects)
-#     
-#     ## 1. Take care of the parallel slots
-#     
-#     ## Call method for Vector objects to concatenate all the parallel slots
-#     ## (only "elementMetadata" in the case of CompressedList) and stick them
-#     ## into 'ans'. Note that the resulting 'ans' can be an invalid object
-#     ## because its "elementMetadata" slot can be longer (i.e. have more rows)
-#     ## than 'ans' itself so we use 'check=FALSE' to skip validation.
-#     ans <- callNextMethod(x, objects, use.names=use.names,
-#                           ignore.mcols=ignore.mcols,
-#                           check=FALSE)
-#     
-#     ## 2. Take care of the non-parallel slots
-#     
-#     ## Concatenate the "unlistData" slots.
-#     unlistData_list <- lapply(all_objects, slot, "unlistData")
-#     ans_unlistData <- do.call(.bindROWS, unlistData_list)
-#     
-#     ## Concatenate the "partitioning" slots.
-#     ans_breakpoints <- cumsum(unlist(lapply(all_objects, elementNROWS),
-#                                      use.names=use.names))
-#     ans_partitioning <- PartitioningByEnd(ans_breakpoints)
-#     
-#     BiocGenerics:::replaceSlots(ans, unlistData=ans_unlistData,
-#                                 partitioning=ans_partitioning,
-#                                 check=check)
-#   }
-
-.check_able_to_cbind <- function(objects){
-  obj1 <- objects[[1L]]
-  chk_length <- vapply(objects,
-                       function(o){
-                         all(lengths(o) == lengths(obj1))
-                       },
-                       logical(1))
-  if(!all(chk_length)){
-    stop("Lengths of SequenceData elements do not match.",
-         call. = FALSE)
-  }
-  chk_names <- vapply(objects,
-                      function(o){
-                        all(names(o) == names(obj1))
-                      },
-                      logical(1))
-  if(!all(chk_names)){
-    stop("Names of SequenceData elements do not match.",
-         call. = FALSE)
-  }
-  NULL
-}
-
-setMethod("cbind", "SequenceData",
-          function(...){
-            objects <- list(...)
-            .check_able_to_cbind(objects)
-            .cbind_SequenceData_objects(objects)
+setMethod("getListElement", "SequenceData",
+          function(x, i, exact=TRUE)
+          {
+            i2 <- normalizeDoubleBracketSubscript(i, x, exact=exact,
+                                                  allow.NA=TRUE,
+                                                  allow.nomatch=TRUE)
+            if (is.na(i2))
+              return(NULL)
+            unlisted_x <- unlist(x, use.names=FALSE)
+            x_partitioning <- PartitioningByEnd(x)
+            window_start <- start(x_partitioning)[i2]
+            window_end <- end(x_partitioning)[i2]
+            new(x@unlistType,
+                S4Vectors:::Vector_window(unlisted_x,
+                                          start = window_start,
+                                          end = window_end),
+                x@ranges[[i2]],
+                x@sequences[[i2]],
+                x@replicate,
+                x@conditions)
           }
 )
 
+
+
+# Concatenation ----------------------------------------------------------------
+setMethod("cbind", "SequenceData",
+          function(...){
+            arg1 <- list(...)[[1L]]
+            stop("'rbind' not supported for ",class(arg1),".")
+          }
+)
 setMethod("rbind", "SequenceData",
           function(...){
             arg1 <- list(...)[[1L]]
@@ -514,6 +453,7 @@ setMethod(
   }
   ranges
 }
+
 .load_transcript_sequences <- function(fafile,
                                        ranges){
   # apperently the FaFile object does not like to be transferred. 
