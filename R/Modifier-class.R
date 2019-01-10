@@ -56,6 +56,13 @@ setMethod(
   }
 )
 
+.valid_Modifier <- function(x){
+  NULL
+}
+S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
+
+# show -------------------------------------------------------------------------
+
 #' @rdname Modifier
 #' @export
 setMethod(

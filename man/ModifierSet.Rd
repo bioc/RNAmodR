@@ -12,6 +12,11 @@
 
 \S4method{mainScore}{ModifierSet}(x)
 
+\S4method{sequences}{ModifierSet}(x, modified = FALSE,
+  with.qualities = FALSE)
+
+\S4method{ranges}{ModifierSet}(x)
+
 \S4method{modifications}{ModifierSet}(x)
 }
 \arguments{

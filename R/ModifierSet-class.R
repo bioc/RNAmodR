@@ -58,6 +58,11 @@ setMethod(
   }
 )
 
+.valid_ModifierSet <- function(x){
+  NULL
+}
+S4Vectors::setValidity2(Class = "ModifierSet",.valid_ModifierSet)
+
 # not supported functions ------------------------------------------------------
 
 setMethod(f = "relistToClass",
@@ -248,6 +253,27 @@ setMethod(f = "modType",
 setMethod(f = "mainScore", 
           signature = signature(x = "ModifierSet"),
           definition = function(x) mainScore(new(elementType(x),NULL,NULL,NULL))
+)
+#' @name ModifierSet
+#' @export
+setMethod(f = "sequences", 
+          signature = signature(x = "ModifierSet"),
+          definition = 
+            function(x,
+                     modified = FALSE,
+                     with.qualities = FALSE){
+              sequences(x[[1]],
+                        modified = modified,
+                        with.qualities = with.qualities)
+            }
+)
+#' @name ModifierSet
+#' @export
+setMethod(f = "ranges", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x){
+            ranges(seqData(x[[1]]))
+          }
 )
 #' @name ModifierSet
 #' @export
