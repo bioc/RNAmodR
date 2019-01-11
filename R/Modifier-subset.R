@@ -94,6 +94,7 @@ NULL
 .perform_subset <- function(data,
                             coord,
                             flank = 0L){
+  browser()
   l <- lengths(data)
   positions <- start(ranges(coord))
   f <- LogicalList(mapply(function(i,j){i >= j},positions,l,SIMPLIFY = FALSE))

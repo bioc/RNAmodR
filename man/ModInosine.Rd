@@ -12,7 +12,7 @@
 \alias{ModInosine,SequenceData-method}
 \alias{modify,ModInosine-method}
 \alias{ModSetInosine-class}
-\alias{visualizeData,ModInosine-method}
+\alias{visualizeDataByCoord,ModInosine,GRanges-method}
 \title{ModInosine}
 \usage{
 \S4method{ModInosine}{character}(x, fasta, gff, modifications = NULL,
@@ -25,7 +25,8 @@
 
 \S4method{modify}{ModInosine}(x, ...)
 
-\S4method{visualizeData}{ModInosine}(x, i, start, end)
+\S4method{visualizeDataByCoord}{ModInosine,GRanges}(x, coord, type = NA,
+  window.size = 15L, ...)
 }
 \description{
 title

@@ -12,48 +12,33 @@ RNAMODR_NUCLEOTIDE_COLOUR <-
 #' @rdname ModInosine
 #' @export
 setMethod(
-  f = "visualizeData", 
-  signature = signature(x = "ModInosine"),
+  f = "visualizeDataByCoord",
+  signature = signature(x = "ModInosine",
+                        coord = "GRanges"),
   definition = function(x,
-                        i,
-                        start,
-                        end){
+                        coord,
+                        type = NA,
+                        window.size = 15L,
+                        ...) {
+    callNextMethod(x = x,
+                   coord = coord,
+                   type = "score",
+                   window.size = window.size,
+                   ...)
+  }
+)
+
+setMethod(
+  f = ".dataTracksByCoord",
+  signature = signature(x = "ModInosine",
+                        data = "GRanges"),
+  definition = function(x,
+                        data,
+                        args) {
     requireNamespace("Gviz")
-    if(missing(i)){
-      i <- 1L
-    }
-    # get plotting data
-    data <- aggregateData(x)[[i]]
-    data <- data[,grepl("means",
-                        colnames(data))]
-    colnames(data) <- c(".","G","A","U","C")
-    # get coordinates
-    coord <- .norm_viz_coord(data,start,end)
-    # get plotting sequence
-    seq <- sequences(x)[[i]]
-    #
-    r <- .get_parent_annotations(ranges(x))[i]
-    chromosome <- .norm_viz_chromosome(r)
-    genome <- .norm_viz_genome(r)
-    # get plotting setting
-    groups <- colnames(data)
-    colour <- RNAMODR_NUCLEOTIDE_COLOUR[match(names(RNAMODR_NUCLEOTIDE_COLOUR),
-                                              groups)]
-    # create plot
-    dataTrack <- DataTrack(start = seq_len(nrow(data)), 
-                           end = seq_len(nrow(data)), 
-                           genome = genome,
-                           chromosome = rep(chromosome,nrow(data)),
-                           name = "rel. nucleotide occurance",
-                           data = t(as.matrix(data)),
-                           type = "hist",
-                           groups = factor(groups,levels = groups),
-                           col =  colour)
-    seqTrack <- SequenceTrack(DNAStringSet(c("chrNA" = seq)),
-                              chromosome = chromosome,
-                              noLetters = TRUE)
-    plotTracks(list(dataTrack,seqTrack),
-               from = coord$start,
-               to = coord$end)
+    browser()
+
+
+    NULL
   }
 )

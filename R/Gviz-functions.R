@@ -1,5 +1,5 @@
 #' @include RNAmodR.R
-#' @include Gviz-RNASequenceTrack-class.R
+#' @include Gviz-ModifiedSequenceTrack-class.R
 NULL
 
 .get_ModRNA_bio_color <- function(){
@@ -12,8 +12,10 @@ NULL
 }
 
 .get_RNA_bio_color <- function(){
-  alphabet <- getBioColor(type = "DNA_ALPHABET")
-  names(alphabet)[names(alphabet) == "T"] <- "U" 
+  alphabet <- getBioColor(type = "RNA_ALPHABET")
+  names(alphabet)[names(alphabet) == "T"] <- "U"
+  base_alphabet <- getBioColor(type = "RNA_BASES_N")
+  alphabet[match(names(base_alphabet),names(alphabet))] <- base_alphabet
   alphabet
 }
 
@@ -70,7 +72,7 @@ setMethod("drawGD",
                                  "fontcolor",
                                  alphabet)
             cex <- getPar(GdObject, "cex")
-            xscale <- if(!.dpOrDefault(GdObject, "reverseStrand", FALSE)) {
+            xscale <- if(!.dpOrDefault(GdObject, "reverseStrand", FALSE)){
               c(minBase, maxBase) 
             } else {
               c(maxBase, minBase)
@@ -111,8 +113,9 @@ setMethod("drawGD",
                                           "Rle"))
               at <- seq((minBase + 0.5), maxBase - 1 + 0.5, by=1)
               sequence[sequence == "-"] <- ""
-              if(perLetter < 0.5 && .dpOrDefault(GdObject, "add53", FALSE))
+              if(perLetter < 0.5 && .dpOrDefault(GdObject, "add53", FALSE)){
                 sequence[c(1, length(sequence))] <- ""
+              }
               col <- fcol[toupper(sequence)]
               if(lwidth < perLetter && !.dpOrDefault(GdObject, "noLetters", FALSE)){
                 grid.text(x = unit(at, "native"),
@@ -164,37 +167,50 @@ setMethod("subseq",
                                 end = NA,
                                 width = NA) {
             padding <- "-"
-            if(!is.na(start[1]+end[1]+width[1])){
-              warning("All 'start', 'stop' and 'width' are provided, ignoring 'width'")
+            if(!is.na(start[1] + end[1] + width[1])){
+              warning("All 'start', 'stop' and 'width' are provided, ignoring ",
+                      "'width'")
               width <- NA
             }
             ## We want start and end to be set if width is provided
             if(!is.na(width[1])){
-              if(is.na(start) && is.na(end))
-                stop("Two out of the three in 'start', 'end' and 'width' have to be provided")
-              if(is.na(start))
-                start <- end-width[1]+1
-              if(is.na(end))
-                end <- start+width[1]-1
+              if(is.na(start) && is.na(end)){
+                stop("Two out of the three in 'start', 'end' and 'width' have ",
+                     "to be provided",
+                     call. = FALSE)
+              }
+              if(is.na(start)){
+                start <- end - width[1] + 1
+              }
+              if(is.na(end)){
+                end <- start + width[1] - 1
+              }
             }
             w <- length(x)
-            if(is.na(start))
+            if(is.na(start)){
               start <- 1
-            if(w>0){
-              if(is.na(end))
+            }
+            if(w > 0){
+              if(is.na(end)){
                 end <- w
+              }
               rstart <- max(1, start[1], na.rm=TRUE)
               rend <- max(rstart, min(end[1], w, na.rm=TRUE))
-            }else{
-              if(is.na(end))
+            } else {
+              if(is.na(end)){
                 end <- start
+              }
               rend <- end
               rstart <- start
             }
-            if(rend<rstart)
-              stop("'end' has to be bigger than 'start'")
-            if((rend-rstart+1)>10e6)
-              stop("Sequence is too big! Unable to extract")
+            if(rend < rstart){
+              stop("'end' has to be bigger than 'start'",
+                   call. = FALSE)
+            }
+            if((rend - rstart + 1) > 10e6){
+              stop("Sequence is too big! Unable to extract",
+                   call. = FALSE)
+            }
             finalSeq <- rep(do.call(x@seqType,list(padding)), end-start+1)
             if(chromosome(x) %in% seqnames(x) && rend > rstart){
               chrSeq <- x@sequence[[chromosome(x)]]
@@ -203,8 +219,9 @@ setMethod("subseq",
                      ifelse(start<1, abs(start)+2, 1),
                      width=rend-rstart+1) <- seq
             }
-            if(.dpOrDefault(x, "complement", FALSE))
+            if(.dpOrDefault(x, "complement", FALSE)){
               finalSeq <- complement(finalSeq)
+            }
             return(finalSeq)
           }
 )

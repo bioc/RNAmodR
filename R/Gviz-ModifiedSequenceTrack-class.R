@@ -61,7 +61,8 @@ setMethod("initialize",
                ...))
   }
   if(!is(sequence, seqType)){
-    stop("Argument sequence must be of class '",seqType,"'")
+    stop("Argument sequence must be of class '",seqType,"'",
+         call. = FALSE)
   }
   if(is.null(names(sequence))){
     stop("The sequences in the ",seqType," must be named",

@@ -13,7 +13,7 @@
 \alias{modify,ModRiboMethSeq-method}
 \alias{ModSetRiboMethSeq-class}
 \alias{ModSetRiboMethSeq}
-\alias{visualizeData,ModRiboMethSeq-method}
+\alias{visualizeDataByCoord,ModRiboMethSeq,GRanges-method}
 \title{ModRiboMethSeq}
 \usage{
 ModSetInosine(x, fasta = NA, gff = NA)
@@ -30,8 +30,9 @@ ModSetInosine(x, fasta = NA, gff = NA)
 
 ModSetRiboMethSeq(x, fasta = NA, gff = NA)
 
-\S4method{visualizeData}{ModRiboMethSeq}(x, i, type = c("ends", "scoreA",
-  "scoreB", "scoreRMS"), start, end)
+\S4method{visualizeDataByCoord}{ModRiboMethSeq,GRanges}(x, coord,
+  type = c("ends", "scoreA", "scoreB", "scoreRMS"), window.size = 15L,
+  ...)
 }
 \arguments{
 \item{...}{Optional arguments overwriting default values, which are

@@ -43,4 +43,9 @@ files3 <- list("HCT116" = c(treated = "KS01.bam"),
                "HCT116 snR46del 3" = c(treated = "KS04.bam"),
                "HCT116 snR46del 5" = c(treated = "KS05.bam"))
 
+
+
+
+visualizeDataByCoord(msrms[[2]],singleCoord,additional.mod = coord[[3]], modified.seq = TRUE)
+
 ```

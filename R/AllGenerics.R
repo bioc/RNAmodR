@@ -84,11 +84,22 @@ setGeneric(
                  ...) standardGeneric("modify")
 )
 
-setGeneric( 
-  name = "visualizeData",
+setGeneric(
+  name = "visualizeDataByCoord",
+  signature = c("x","coord"),
   def = function(x,
-                 ...) standardGeneric("visualizeData")
-) 
+                 coord,
+                 type,
+                 window.size = 15L,
+                 ...) standardGeneric("visualizeDataByCoord")
+)
+setGeneric(
+  name = ".dataTracksByCoord",
+  signature = c("x","data"),
+  def = function(x,
+                 data,
+                 args) standardGeneric(".dataTracksByCoord")
+)
 
 # SequenceData functions -------------------------------------------------------
 

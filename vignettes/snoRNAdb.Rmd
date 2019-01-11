@@ -42,4 +42,7 @@ gr$Parent <- parents
 gr <- gr[gr$Parent %in% dict$new,]
 gr <- gr[vapply(gr$Activity != "unknown",all,logical(1)),]
 coord <- split(gr,gr$Parent)
+
+singleCoord <- coord[[3]]
+singleCoord <- singleCoord[any(singleCoord$Activity %in% "SNORD46")]
 ```

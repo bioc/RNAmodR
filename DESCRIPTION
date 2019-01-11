@@ -34,7 +34,7 @@ VignetteBuilder: knitr
 Collate:
     'RNAmodR.R'
     'AllGenerics.R'
-    'Gviz-RNASequenceTrack-class.R'
+    'Gviz-ModifiedSequenceTrack-class.R'
     'Gviz-functions.R'
     'ModRanges-class.R'
     'Modifier-utils.R'
@@ -50,6 +50,7 @@ Collate:
     'Modifier-analysis.R'
     'Modifier-check.R'
     'Modifier-subset.R'
+    'Modifier-viz.R'
     'ModifierSet-comparison.R'
     'ModifierSet-subset.R'
     'ModifierSetList-class.R'
@@ -59,6 +60,5 @@ Collate:
     'SequenceData-protected-end-pos.R'
     'SequenceData-statistics.R'
     'utils-bam.R'
-    'utils-visualize.R'
     'utils.R'
 RoxygenNote: 6.1.1

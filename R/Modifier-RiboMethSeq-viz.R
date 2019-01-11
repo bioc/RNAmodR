@@ -6,53 +6,61 @@ RNAMODR_RMS_PLOT_DATA <- c("ends",
                            "scoreA",
                            "scoreB",
                            "scoreRMS")
-RNAMODR_RMS_PLOT_DATA_NAMES <- c("5'- & 3'-ends",
-                                 "Score A",
-                                 "Score B",
-                                 "Score RiboMethSeq")
+RNAMODR_RMS_PLOT_DATA_NAMES <- c(ends = "5'- & 3'-ends",
+                                 scoreA = "Score A",
+                                 scoreB = "Score B",
+                                 scoreRMS = "Score RiboMethSeq")
+RNAMODR_RMS_PLOT_DATA_COLOURS <- c(ends = "#FBB4AE",
+                                   scoreA = "#B3CDE3",
+                                   scoreB = "#CCEBC5",
+                                   scoreRMS = "#DECBE4")
 
 #' @rdname ModRiboMethSeq
 #' @export
 setMethod(
-  f = "visualizeData", 
-  signature = signature(x = "ModRiboMethSeq"),
+  f = "visualizeDataByCoord",
+  signature = signature(x = "ModRiboMethSeq",
+                        coord = "GRanges"),
   definition = function(x,
-                        i,
+                        coord,
                         type = c("ends","scoreA","scoreB","scoreRMS"),
-                        start,
-                        end) {
-    requireNamespace("Gviz")
-    type <- type[type %in% RNAMODR_RMS_PLOT_DATA]
-    if(missing(i)){
-      i <- 1L
+                        window.size = 15L,
+                        ...) {
+    if(missing(type)){
+      type <- RNAMODR_RMS_PLOT_DATA
     }
-    # get plotting data
-    data <- aggregateData(x)[[i]]
-    # get coordinates
-    coord <- .norm_viz_coord(data,start,end)
-    # get plotting sequence
-    seq <- sequences(x)[[i]]
-    #
-    r <- .get_parent_annotations(ranges(x))[i]
-    chromosome <- .norm_viz_chromosome(r)
-    genome <- .norm_viz_genome(r)
-    #
-    dtl <- lapply(seq_along(type),
-                  function(z){
-                    DataTrack(start = seq_len(nrow(data)), 
-                              end = seq_len(nrow(data)), 
-                              genome = genome,
-                              chromosome = rep(chromosome,nrow(data)),
-                              name = RNAMODR_RMS_PLOT_DATA_NAMES[z], 
-                              data = data[,z],
-                              type = "h") 
+    callNextMethod(x = x,
+                   coord = coord,
+                   type = type,
+                   window.size = window.size,
+                   ...)
+  }
+)
+
+setMethod(
+  f = ".dataTracksByCoord",
+  signature = signature(x = "ModRiboMethSeq",
+                        data = "GRanges"),
+  definition = function(x,
+                        data,
+                        args) {
+    requireNamespace("Gviz")
+    n <- ncol(mcols(data))
+    colour <- args[["colour"]]
+    if(is.na(colour) || length(colour) != n){
+      colour <- RNAMODR_RMS_PLOT_DATA_COLOURS
+    }
+    dts <- lapply(seq_len(n),
+                  function(i){
+                    column <- colnames(mcols(data)[i])
+                    colour <- colour[column]
+                    name <- RNAMODR_RMS_PLOT_DATA_NAMES[column]
+                    DataTrack(data,
+                              data = column,
+                              name = name,
+                              fill = colour,
+                              type = "histogram")
                   })
-    seqTrack <- SequenceTrack(DNAStringSet(c("chrNA" = seq)),
-                              chromosome = chromosome,
-                              noLetters = TRUE)
-    plotTracks(c(dtl,
-                 list(seqTrack)),
-               from = coord$start,
-               to = coord$end)
+    dts
   }
 )
