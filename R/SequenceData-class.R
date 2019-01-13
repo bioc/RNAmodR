@@ -303,7 +303,6 @@ setMethod("lapply", "SequenceData",
 
 setMethod("extractROWS", "SequenceData",
           function(x, i){
-            browser()
             i <- normalizeSingleBracketSubscript(i, x, as.NSBS = TRUE)
             ans_eltNROWS <- extractROWS(width(x@partitioning), i)
             ans_breakpoints <- suppressWarnings(cumsum(ans_eltNROWS))

@@ -21,8 +21,14 @@ NULL
 #' @param ... optional parameters:
 #' \itemize{
 #' \item{\code{modified.seq}}{\code{TRUE} or \code{FALSE}. Should the sequence 
-#' shown with modified positions modified? (default: 
+#' shown with modified nucleotide positions? (default: 
 #' \code{modified.seq = FALSE})}
+#' \item{\code{additional.mod}}{other modifications, which should be shown
+#' in the annotation and sequence track.}
+#' \item{\code{annotation.track.pars}}{Parameters passed onto the A
+#' nnotationTrack.}
+#' \item{\code{sequence.track.pars}}{Parameters passed onto the SequenceTrack.}
+#' \item{\code{data.track.pars}}{Parameters passed onto the DataTrack(s).}
 #' }
 NULL
 
@@ -30,6 +36,9 @@ NULL
   modified.seq <- FALSE
   additional.mod <- GRanges()
   colour <- NA
+  sequence.track.pars <- NULL
+  annotation.track.pars <- NULL
+  data.track.pars <- NULL
   if(!is.null(input[["modified.seq"]])){
     modified.seq <- input[["modified.seq"]]
     if(!assertive::is_a_bool(modified.seq)){
@@ -39,9 +48,9 @@ NULL
   }
   if(!is.null(input[["additional.mod"]])){
     additional.mod <- input[["additional.mod"]]
-    if(!is(additional.mod,"GRanges")){
-      stop("'additional.mod' must be a GRanges object, which is compatible ",
-           "with combineIntoModstrings().",
+    if(!is(additional.mod,"GRanges") && !is(additional.mod,"GRangesList")){
+      stop("'additional.mod' must be a GRanges or GRangesList object, which is",
+           " compatible with combineIntoModstrings().",
            call. = FALSE)
     }
   }
@@ -53,9 +62,21 @@ NULL
            call. = FALSE)
     }
   }
+  if(!is.null(input[["sequence.track.pars"]])){
+    sequence.track.pars <- input[["sequence.track.pars"]]
+  }
+  if(!is.null(input[["annotation.track.pars"]])){
+    annotation.track.pars <- input[["annotation.track.pars"]]
+  }
+  if(!is.null(input[["data.track.pars"]])){
+    data.track.pars <- input[["data.track.pars"]]
+  }
   args <- list(modified.seq = modified.seq,
                additional.mod = additional.mod,
-               colour = colour)
+               colour = colour,
+               sequence.track.pars = sequence.track.pars,
+               annotation.track.pars = annotation.track.pars,
+               data.track.pars = data.track.pars)
   args
 }
 
@@ -78,22 +99,27 @@ NULL
   "chr1"
 }
 
-.norm_viz_mod_annotation <- function(list){
-  list <- lapply(list,
-                 function(l){
-                   if(length(l) == 0L) return(NULL)
-                   l <- .norm_viz_range(l)
-                   strand(l) <- "*"
-                   l$ID <- l$mod
-                   l$Activity <- NULL
-                   l
-                 })
+.norm_viz_mod_annotation <- function(additional.mod,
+                                     coord){
+  FUN <- function(l){
+    if(length(l) == 0L) return(NULL)
+    l <- .norm_viz_range(l)
+    strand(l) <- "*"
+    l$ID <- l$mod
+    l$Activity <- NULL
+    l
+  }
+  additional.mod <- .norm_addition.mod_for_visualization(additional.mod,
+                                                         coord)
+  additional.mod <- FUN(additional.mod)
+  coord <- FUN(coord)
+  list <- list(additional.mod,coord)
   list <- list[!vapply(list,is.null,logical(1))]
   ans <- unlist(GRangesList(list))
   ans[!duplicated(ans)]
 }
 
-.norm_GRanges_for_visualization <- function(coord){
+.norm_coord_for_visualization <- function(coord){
   if(length(coord) > 1L){
     stop("'coord' must be contain a single range.",
          call. = FALSE)
@@ -105,13 +131,32 @@ NULL
   coord
 }
 
+.norm_addition.mod_for_visualization <- function(additional.mod,
+                                                 coord){
+  if(is(additional.mod,"GRangesList")){
+    additional.mod <- unlist(additional.mod)
+  }
+  additional.mod <- additional.mod[additional.mod$Parent == coord$Parent]
+  additional.mod
+}
+
 .norm_data_for_visualization <- function(data,type,chromosome){
-  data <- data[,colnames(data) %in% type]
+  data <- data[,colnames(data) %in% type,drop=FALSE]
   if(ncol(data) == 0L){
     stop("No data found for the selected type(s): '",
          paste0(type,collapse = "','"),"'",
          call. = FALSE)
   }
+  n <- nrow(data)
+  ans <- GRanges(seqnames = rep(chromosome,n),
+                 ranges = IRanges(start = seq_len(n),
+                                  width = 1),
+                 strand = "*",
+                 data)
+  ans
+}
+
+.norm_seqdata_for_visualization <- function(data,chromosome){
   n <- nrow(data)
   ans <- GRanges(seqnames = rep(chromosome,n),
                  ranges = IRanges(start = seq_len(n),
@@ -138,8 +183,9 @@ NULL
 
 .get_viz_sequence <- function(seq,coord,args){
   if(args[["modified.seq"]]){
-    modifications <- args[["additional.mod"]]
-    modifications <- modifications[modifications$Parent == coord$Parent]
+    modifications <- 
+      .norm_addition.mod_for_visualization(args[["additional.mod"]],
+                                           coord)
     if(length(modifications) > 0L){
       seq <- combineIntoModstrings(seq,modifications)
     }
@@ -147,19 +193,38 @@ NULL
   seq
 }
 
-.get_viz_sequence_track <- function(seq,chromosome){
+.get_viz_sequence_track <- function(seq,chromosome,args){
+  FUN <- function(trackClass,seqClass,seq,chromosome,args){
+    set <- do.call(seqClass,list(seq))
+    names(set) <- chromosome
+    track <- do.call(trackClass,c(list(set),args))
+    track
+  }
   if(is(seq,"RNAString")){
-    set <- RNAStringSet(c(chromosome = seq))
-    names(set) <- chromosome
-    st <- RNASequenceTrack(set)
+    st <- FUN("RNASequenceTrack","RNAStringSet",seq,chromosome,args)
   } else if(is(seq,"ModRNAString")){
-    set <- ModRNAStringSet(c(chromosome = seq))
-    names(set) <- chromosome
-    st <- ModRNASequenceTrack(set)
+    st <- FUN("ModRNASequenceTrack","ModRNAStringSet",seq,chromosome,args)
   } else {
     stop("Something went wrong.")
   }
   st
+}
+
+.get_viz_annotation_track <- function(modAnnotation,
+                                      chromosome,
+                                      args){
+  at <- do.call("AnnotationTrack",
+                c(list(modAnnotation,
+                       chromosome = chromosome,
+                       collapse = TRUE,
+                       name = "",
+                       id = modAnnotation$ID,
+                       showFeatureId = TRUE,
+                       collapse = TRUE,
+                       background.title = "#FFFFFF",
+                       fontcolor.legend = "#000000"),
+                  args))
+  at
 }
 
 #' @rdname visualizeDataByCoord
@@ -174,10 +239,9 @@ setMethod(
                         window.size = 15L,
                         ...) {
     requireNamespace("Gviz")
-    browser()
     # input check
     args <- .norm_viz_args(list(...))
-    coord <- .norm_GRanges_for_visualization(coord)
+    coord <- .norm_coord_for_visualization(coord)
     # get plotting data
     seq <- .get_viz_sequence(sequences(x)[[coord$Parent]],
                              coord,
@@ -187,19 +251,23 @@ setMethod(
     data <- .norm_data_for_visualization(aggregateData(x)[[coord$Parent]],
                                          type,
                                          chromosome)
+    seqdata <- .norm_seqdata_for_visualization(
+      aggregate(seqData(x)[coord$Parent])[[1]],
+      chromosome)
     coordValues <- .get_viz_window(data,coord,window.size)
-    modAnnotation <- .norm_viz_mod_annotation(list(args[["additional.mod"]],
-                                                   coord))
+    modAnnotation <- .norm_viz_mod_annotation(args[["additional.mod"]],
+                                              coord)
     # get tracks
-    st <- .get_viz_sequence_track(seq,chromosome)
-    atm <- AnnotationTrack(modAnnotation,
-                           chromosome = chromosome,
-                           collapse = TRUE,
-                           name = "",
-                           id = modAnnotation$ID,
-                           showFeatureId = TRUE,
-                           collapse = TRUE)
-    dt <- .dataTracksByCoord(x,data,args)
+    st <- .get_viz_sequence_track(seq,
+                                  chromosome,
+                                  args[["sequence.track.pars"]])
+    atm <- .get_viz_annotation_track(modAnnotation,
+                                     chromosome,
+                                     args[["annotation.track.pars"]])
+    dt <- .dataTracksByCoord(x,data,seqdata,seq,args)
+    if(!is.list(dt)){
+      dt <- list(dt)
+    }
     # plot tracks
     plotTracks(c(dt,
                  list(st,atm)),

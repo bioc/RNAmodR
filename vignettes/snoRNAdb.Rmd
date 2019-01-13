@@ -46,3 +46,14 @@ coord <- split(gr,gr$Parent)
 singleCoord <- coord[[3]]
 singleCoord <- singleCoord[any(singleCoord$Activity %in% "SNORD46")]
 ```
+
+Inosine stuff
+```{r}
+singleCoord2 <- coord[[3]]
+singleCoord2 <- singleCoord[any(singleCoord$Activity %in% "SNORD46")]
+start(singleCoord2) <- 34
+end(singleCoord2) <- 34
+singleCoord2$mod <- "I"
+singleCoord2$Parent <- "tR(ACG)F1"
+singleCoord2$Activity <- NULL
+```

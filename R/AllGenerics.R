@@ -95,9 +95,11 @@ setGeneric(
 )
 setGeneric(
   name = ".dataTracksByCoord",
-  signature = c("x","data"),
+  signature = c("x","data","seqdata","sequence"),
   def = function(x,
                  data,
+                 seqdata,
+                 sequence,
                  args) standardGeneric(".dataTracksByCoord")
 )
 

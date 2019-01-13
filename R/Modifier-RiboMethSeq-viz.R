@@ -40,9 +40,13 @@ setMethod(
 setMethod(
   f = ".dataTracksByCoord",
   signature = signature(x = "ModRiboMethSeq",
-                        data = "GRanges"),
+                        data = "GRanges",
+                        seqdata = "GRanges",
+                        sequence = "XString"),
   definition = function(x,
                         data,
+                        seqdata,
+                        sequence,
                         args) {
     requireNamespace("Gviz")
     n <- ncol(mcols(data))
@@ -55,12 +59,20 @@ setMethod(
                     column <- colnames(mcols(data)[i])
                     colour <- colour[column]
                     name <- RNAMODR_RMS_PLOT_DATA_NAMES[column]
-                    DataTrack(data,
+                    dt <- DataTrack(data,
                               data = column,
                               name = name,
                               fill = colour,
                               type = "histogram")
+                    if(column %in% c("scoreA","scoreRMS")){
+                      displayPars(dt)$ylim = c(0,1)
+                    }
+                    displayPars(dt)$background.title <- "#FFFFFF"
+                    displayPars(dt)$fontcolor.title <- "#000000"
+                    displayPars(dt)$col.axis <- "#000000"
+                    dt
                   })
+    names(dts) <- colnames(mcols(data))
     dts
   }
 )
