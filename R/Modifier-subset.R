@@ -25,8 +25,8 @@ NULL
 NULL
 
 .norm_subset_args <- function(input,x){
-  name = NULL
-  type = modType(x)
+  name <- NULL
+  type <- modType(x)
   if(!is.null(input[["name"]])){
     name <- input[["name"]]
     if(!is.character(name) || width(name) == 0L){
@@ -91,30 +91,38 @@ NULL
   names
 }
 
+.check_for_invalid_positions <- function(data,coord){
+  lengths <- lengths(data)
+  positions <- start(ranges(coord))
+  f <- LogicalList(mapply(function(i,j){i >= j},
+                          positions,
+                          lengths,
+                          SIMPLIFY = FALSE))
+  if(!any(lengths(which(f)) > 0L )){
+    return(NULL)
+  }
+  invalidPositions <- unlist(lapply(coord[f],as.character),
+                             use.names = FALSE)
+  invalidTypes <- unlist(lapply(coord[f],function(c){c$mod}),
+                         use.names = FALSE)
+  if(length(invalidPositions) > 10L){
+    i <- seq_len(10L)
+  } else {
+    i <- seq_along(invalidPositions)
+  }
+  message <- c("'coord' for the following modifications out of range:\n",
+               paste0(invalidPositions[i]," for '",invalidTypes[i],"'",
+                      collapse = "\n"))
+  if(length(invalidPositions) > 10L){
+    message <- c(message,"and more...")
+  }
+  stop(message,call. = FALSE)
+}
+
 .perform_subset <- function(data,
                             coord,
                             flank = 0L){
-  browser()
-  l <- lengths(data)
-  positions <- start(ranges(coord))
-  f <- LogicalList(mapply(function(i,j){i >= j},positions,l,SIMPLIFY = FALSE))
-  if(any(lengths(which(f)) > 0L )){
-    invalidPositions <- unlist(lapply(coord[f],as.character),
-                               use.names = FALSE)
-    invalidTypes <- unlist(lapply(coord[f],function(c){c$mod}),
-                           use.names = FALSE)
-    if(length(invalidPositions) > 10L){
-      i <- seq_len(10L)
-    } else {
-      i <- seq_along(invalidPositions)
-    }
-    message <- c("'coord' for the following modifications out of range:\n",
-                 paste0(invalidPositions[i]," for '",invalidTypes[i],"'",collapse = "\n"))
-    if(length(invalidPositions) > 10L){
-      message <- c(message,"and more...")
-    }
-    stop(message,call. = FALSE)
-  }
+  .check_for_invalid_positions(data,coord)
   # add positions as rownames
   rownames(data@unlistData) <- unlist(lapply(lengths(data),seq_len),
                                       use.names = FALSE)
@@ -131,11 +139,46 @@ NULL
                                             coord,
                                             ...){
   args <- .norm_subset_args(list(...),x)
-  data <- aggregateData(x)
   coord <- .norm_coord(coord,args[["type"]])
+  data <- aggregateData(x)
   data <- data[.get_element_names(data,coord,args[["name"]],args[["type"]])]
   .perform_subset(data,coord)
 }
+
+################################################################################
+# This is used for ROC and shares functionality with subsetting
+.perform_label <- function(data,
+                           coord){
+  .check_for_invalid_positions(data,coord)
+  # add positions as rownames
+  rownames(data@unlistData) <- unlist(lapply(lengths(data),seq_len),
+                                      use.names = FALSE)
+  # 
+  lengths <- lengths(data)
+  positions <- start(ranges(coord))
+  labels <- LogicalList(lapply(lengths,function(l){rep(FALSE,l)}))
+  labels <- LogicalList(
+    mapply(
+      function(l,p){
+        l[p] <- TRUE
+        l
+      },
+      labels,
+      positions))
+  data@unlistData$labels <- unlist(labels)
+  return(data)
+}
+
+.label_Modifier_by_GRangesList <- function(x,
+                                           coord,
+                                           ...){
+  args <- .norm_subset_args(list(...),x)
+  coord <- .norm_coord(coord,args[["type"]])
+  data <- aggregateData(x)
+  data <- data[.get_element_names(data,coord,args[["name"]],args[["type"]])]
+  .perform_label(data,coord)
+}
+################################################################################
 
 #' @rdname subsetByCoord
 #' @export

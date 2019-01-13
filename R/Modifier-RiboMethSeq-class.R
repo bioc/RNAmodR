@@ -37,7 +37,7 @@ NULL
 #' positions, if at least one minimal values is exceeded (default: 
 #' \code{scoreOperator = "|"})}
 #' \item{maxLength:}{The default read length. Reads with this length or longer
-#' are discarded, since they represent non-fragemented reads. THis is argument
+#' are discarded, since they represent non-fragemented reads. This is argument
 #' is passed on to \code{\link{ProtectedEndSequenceData}} (default: 
 #' \code{maxLength = 50L})}
 #' \item{other arguments}{which are passed on to 
@@ -75,13 +75,13 @@ setMethod(
 # constructors -----------------------------------------------------------------
 
 .norm_rms_args <- function(input){
-  maxLength <- 50L
-  weights <- c(0.9,1,0,1,0.9)
-  minSignal <- 10L
-  flankingRegion <- 6L
-  minScoreA <- 0.6
-  minScoreB <- 3.0
-  minScoreRMS <- 0.75
+  maxLength <- 50L # for all scores
+  minSignal <- 10L # for all scores
+  flankingRegion <- 6L # for score A
+  minScoreA <- 0.6 # for score A
+  minScoreB <- 4.0 # for score B
+  minScoreRMS <- 0.75 # for score C/RMS
+  weights <- c(0.5,0.6,0.7,0.8,0.9,1,0,1,0.9,0.8,0.7,0.6,0.5) # for score B/C/RMS
   scoreOperator <- "&"
   if(!is.null(input[["weights"]])){
     weights <- input[["weights"]]

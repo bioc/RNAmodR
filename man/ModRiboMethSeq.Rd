@@ -55,7 +55,7 @@ operator. "&" requires all minimal values to be exceeded, whereas "|" detects
 positions, if at least one minimal values is exceeded (default: 
 \code{scoreOperator = "|"})}
 \item{maxLength:}{The default read length. Reads with this length or longer
-are discarded, since they represent non-fragemented reads. THis is argument
+are discarded, since they represent non-fragemented reads. This is argument
 is passed on to \code{\link{ProtectedEndSequenceData}} (default: 
 \code{maxLength = 50L})}
 \item{other arguments}{which are passed on to 

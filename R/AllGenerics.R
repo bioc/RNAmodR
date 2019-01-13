@@ -123,6 +123,15 @@ setGeneric(
                  coord,
                  ...)
     standardGeneric("subsetByCoord")
+)
+setGeneric( 
+  name = "plotROC",
+  signature = c("x"),
+  def = function(x,
+                 coord,
+                 redo = FALSE,
+                 ...)
+    standardGeneric("plotROC")
 ) 
 
 # ModifierSet functions ----------------------------------------------
