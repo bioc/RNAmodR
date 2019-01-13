@@ -11,7 +11,7 @@ NULL
 #' @description 
 #' title
 #' 
-#' score MAX as described by publiccations from the Motorin lab are not 
+#' The score MAX as described by publications from the Motorin lab are not 
 #' implemented since an unambigeous description is not available from the 
 #' literature.
 #' 
@@ -37,9 +37,10 @@ NULL
 #' positions, if at least one minimal values is exceeded (default: 
 #' \code{scoreOperator = "|"})}
 #' \item{maxLength:}{The default read length. Reads with this length or longer
-#' are discarded, since they represent non-fragemented reads. This is argument
-#' is passed on to \code{\link{ProtectedEndSequenceData}} (default: 
-#' \code{maxLength = 50L})}
+#' are discarded, since they represent non-fragemented reads. This might need to
+#' be adjusted for individual samples dending on the experimental conditions.
+#' This is argument is passed on to \code{\link{ProtectedEndSequenceData}} 
+#' (default: \code{maxLength = 50L})}
 #' \item{other arguments}{which are passed on to 
 #' \code{\link{ProtectedEndSequenceData}}}
 #' }
