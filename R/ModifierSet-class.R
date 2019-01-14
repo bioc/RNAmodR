@@ -233,6 +233,52 @@ setMethod(f = "ModifierSet",
             .modifer_to_ModifierSet(x, ...)
           })
 
+# show -------------------------------------------------------------------------
+
+#' @rdname ModifierSet
+#' @export
+setMethod(
+  f = "show", 
+  signature = signature(object = "ModifierSet"),
+  definition = function(object) {
+    browser()
+    callNextMethod()
+    cat("| Modification type(s): ",paste0(object[[1]]@mod, collapse = " / "),
+        "\n")
+    cat("| Modifications found:",lapply(object,
+                                        function(o){
+                                          ifelse(length(o@modifications) != 0L,
+                                                 paste0("yes (",
+                                                        length(o@modifications),
+                                                        ")"),
+                                                 "no")
+                                        }),"\n")
+    cat("| Settings:\n")
+    settings <- lapply(object,settings)
+    browser()
+    l <- length(settings)
+    nc <- 6
+    nr <- ceiling(l / nc)
+    settings <- lapply(settings,
+                       function(s){
+                         if(length(s) > 1L){
+                           ans <- List(s)
+                           return(ans)
+                         }
+                         s
+                       })
+    settings <- DataFrame(settings)
+    .show_settings(settings)
+    valid <- c(object@aggregateValidForCurrentArguments,
+               object@modificationsValidForCurrentArguments)
+    if(all(valid)){
+      warning("Settings were changed after data aggregation or modification ",
+              "search. Rerun with modify(x,force = TRUE) to update with ",
+              "current settings.", call. = FALSE)
+    }
+  }
+)
+
 # accessors and accessor-like functions ----------------------------------------
 
 #' @name ModifierSet

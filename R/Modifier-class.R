@@ -24,7 +24,12 @@ setClass("Modifier",
                    gff = "GFFFile",
                    data = "SequenceData",
                    aggregate = "DataFrameList",
-                   modifications = "GRanges"))
+                   modifications = "GRanges",
+                   arguments = "list",
+                   aggregateValidForCurrentArguments = "logical",
+                   modificationsValidForCurrentArguments = "logical"),
+         prototype = list(aggregateValidForCurrentArguments = FALSE,
+                          modificationsValidForCurrentArguments = FALSE))
 
 setMethod(
   f = "initialize", 
@@ -63,6 +68,31 @@ S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
 
 # show -------------------------------------------------------------------------
 
+.show_settings <- function(settings){
+  settings <- lapply(seq_len(nr),
+                     function(i){
+                       f <- seq.int(from = (i * nc) - nc + 1L,
+                                    to = i * nc)
+                       f <- f[f <= l]
+                       settings[,f]
+                     })
+  for(i in seq_along(settings)){
+    out <-
+      as.matrix(format(as.data.frame(
+        lapply(settings[[i]],showAsCell),
+        optional = TRUE)))
+    classinfo <-
+      matrix(unlist(lapply(settings[[i]], function(x) {
+        paste0("<", classNameForDisplay(x)[1],
+               ">")
+      }), use.names = FALSE), nrow = 1,
+      dimnames = list("", colnames(out)))
+    out <- rbind(classinfo, out)
+    rownames(out) <- rep(" ",nrow(out))
+    print(out, quote = FALSE, right = TRUE)
+  }
+}
+
 #' @rdname Modifier
 #' @export
 setMethod(
@@ -72,15 +102,37 @@ setMethod(
     cat("A", class(object), "object containing",object@dataClass,
         "with",length(object@data),"elements.\n")
     files <- path(object@bamfiles)
-    cat("  Input files:\n",paste0("  - ",names(files),": ",files,"\n"))
-    cat("  Sequence file:",path(object@fasta),"\n")
-    cat("  Annotation file:",path(object@gff),"\n\n")
-    cat("Modification type:\n",paste0("- ",object@mod,"\n"))
-    cat("Modifications found:",ifelse(length(object@modifications) != 0L,
+    cat("| Input files:\n",paste0("  - ",names(files),": ",files,"\n"))
+    cat("| Sequence file:",path(object@fasta),"\n")
+    cat("| Annotation file:",path(object@gff),"\n")
+    cat("| Modification type(s): ",paste0(object@mod, collapse = " / "),"\n")
+    cat("| Modifications found:",ifelse(length(object@modifications) != 0L,
                                       paste0("yes (",
                                              length(object@modifications),
                                              ")"),
-                                      "no"))
+                                      "no"),"\n")
+    cat("| Settings:\n")
+    settings <- settings(object)
+    l <- length(settings)
+    nc <- 6
+    nr <- ceiling(l / nc)
+    settings <- lapply(settings,
+                       function(s){
+                         if(length(s) > 1L){
+                           ans <- List(s)
+                           return(ans)
+                         }
+                         s
+                       })
+    settings <- DataFrame(settings)
+    .show_settings(settings)
+    valid <- c(object@aggregateValidForCurrentArguments,
+               object@modificationsValidForCurrentArguments)
+    if(!all(valid)){
+      warning("Settings were changed after data aggregation or modification ",
+              "search. Rerun with modify(x,force = TRUE) to update with ",
+              "current settings.", call. = FALSE)
+    }
   }
 )
 
@@ -102,30 +154,69 @@ setMethod(f = "mainScore",
           signature = signature(x = "Modifier"),
           definition = function(x){x@score})
 
-
-# converts the genomic coordinates to transcript based coordinates
-.get_modifications_per_transcript <- function(x){
-  ranges <- .get_parent_annotations(ranges(x))
-  modifications <- modifications(x)
-  modRanges <- ranges[as.character(ranges$ID) %in% as.character(modifications$Parent),]
-  modRanges <- modRanges[match(as.character(modRanges$ID),
-                               as.character(modifications$Parent))]
-  # modify modifcation positions from genome centric to transcript centric
-  start(modifications[strand(modifications) == "+"]) <- 
-    start(modifications[strand(modifications) == "+"]) - 
-    start(modRanges[strand(modRanges) == "+"]) + 1L
-  end(modifications[strand(modifications) == "+"]) <- 
-    end(modifications[strand(modifications) == "+"]) - 
-    start(modRanges[strand(modRanges) == "+"]) + 1L
-  end(modifications[strand(modifications) == "-"]) <- 
-    end(modRanges[strand(modRanges) == "-"]) - 
-    end(modifications[strand(modifications) == "-"]) + 1L
-  start(modifications[strand(modifications) == "-"]) <- 
-    end(modRanges[strand(modRanges) == "-"]) - 
-    start(modifications[strand(modifications) == "-"]) + 1L
-  names(modifications) <- as.character(modifications$Parent)
-  modifications
+.norm_args <- function(input){
+  minCoverage <- 10L
+  minReplicate <- 1L
+  findMod <- TRUE
+  if(!is.null(input[["minCoverage"]])){
+    minCoverage <- input[["minCoverage"]]
+    if(!is.integer(minCoverage) || 
+       minCoverage < 0L ||
+       length(minCoverage) != 1){
+      stop("'minCoverage' must be a single positive integer value.")
+    }
+  }
+  if(!is.null(input[["minReplicate"]])){
+    minReplicate <- input[["minReplicate"]]
+    if(!is.integer(minReplicate) || 
+       minReplicate < 0L ||
+       length(minReplicate) != 1){
+      stop("'minReplicate' must be a single positive integer value.")
+    }
+  }
+  if(!is.null(input[["findMod"]])){
+    findMod <- input[["findMod"]]
+    if(!assertive::is_a_bool(findMod)){
+      stop("'findMod' must be a single logical value.")
+    }
+  }
+  args <- list(minCoverage = minCoverage,
+               minReplicate = minReplicate,
+               findMod = findMod)
+  args
 }
+
+#' @name Modifier
+#' @export
+setMethod(f = "settings", 
+          signature = signature(x = "Modifier"),
+          definition = function(x,name){
+            if(missing(name)){
+              return(x@arguments)
+            }
+            if(!assertive::is_a_string(name)){
+              stop("'name' must be a single character value.")
+            }
+            x@arguments[[name]]
+          }
+)
+#' @name Modifier
+#' @export
+setReplaceMethod(f = "settings", 
+          signature = signature(x = "Modifier"),
+          definition = function(x,value){
+            if(is.null(names(value)) && length(value) > 0L){
+              stop("'value' has to be a named.")
+            }
+            if(!is.list(value)){
+              value <- as.list(value)
+            }
+            value <- .norm_args(value)
+            x@arguments[names(value)] <- unname(value)
+            x@aggregateValidForCurrentArguments <- FALSE
+            x@modificationsValidForCurrentArguments <- FALSE
+            x
+          })
 
 #' @name Modifier
 #' @export
@@ -211,7 +302,31 @@ setMethod(f = "aggregateData",
             x <- aggregate(x)
             .check_score_name(x@aggregate,x@score)
           })
-  
+
+# converts the genomic coordinates to transcript based coordinates
+.get_modifications_per_transcript <- function(x){
+  ranges <- .get_parent_annotations(ranges(x))
+  modifications <- modifications(x)
+  modRanges <- ranges[as.character(ranges$ID) %in% as.character(modifications$Parent),]
+  modRanges <- modRanges[match(as.character(modRanges$ID),
+                               as.character(modifications$Parent))]
+  # modify modifcation positions from genome centric to transcript centric
+  start(modifications[strand(modifications) == "+"]) <- 
+    start(modifications[strand(modifications) == "+"]) - 
+    start(modRanges[strand(modRanges) == "+"]) + 1L
+  end(modifications[strand(modifications) == "+"]) <- 
+    end(modifications[strand(modifications) == "+"]) - 
+    start(modRanges[strand(modRanges) == "+"]) + 1L
+  end(modifications[strand(modifications) == "-"]) <- 
+    end(modRanges[strand(modRanges) == "-"]) - 
+    end(modifications[strand(modifications) == "-"]) + 1L
+  start(modifications[strand(modifications) == "-"]) <- 
+    end(modRanges[strand(modRanges) == "-"]) - 
+    start(modifications[strand(modifications) == "-"]) + 1L
+  names(modifications) <- as.character(modifications$Parent)
+  modifications
+}
+
 #' @name Modifier
 #' @export
 setMethod(f = "modifications", 
@@ -240,6 +355,7 @@ setMethod(f = "modifications",
              bamfiles,
              fasta,
              gff)
+  settings(ans) <- args
   modName <- fullName(ModRNAString())[
     which(shortName(ModRNAString()) %in% ans@mod)]
   message("Starting to search for '",
@@ -248,13 +364,11 @@ setMethod(f = "modifications",
   ans@data <- do.call(ans@dataClass,
                       c(list(bamfiles = ans@bamfiles,
                            fasta = ans@fasta,
-                           gff = ans@gff),
-                        args))
+                           gff = ans@gff)))
   ans@data@sequences <- RNAStringSet(ans@data@sequences)
-  if(args[["findMod"]]){
+  if(settings(ans,"findMod")){
     ans <- do.call(modify,
-                   c(list(ans),
-                     args))
+                   list(ans))
   }
   ans
 }
@@ -266,44 +380,13 @@ setMethod(f = "modifications",
              x@bamfiles,
              x@fasta,
              x@gff)
+  settings(ans) <- args
   # check data type
   ans@data <- .norm_data_type(ans,x)
-  if(args[["findMod"]]){
-    ans <- do.call(modify,c(list(ans),args))
+  if(settings(ans,"findMod")){
+    ans <- do.call(modify,list(ans))
   }
   ans
-}
-
-.norm_args <- function(input){
-  minCoverage <- 10L
-  minReplicate <- 1L
-  findMod <- TRUE
-  if(!is.null(input[["minCoverage"]])){
-    minCoverage <- input[["minCoverage"]]
-    if(!is.integer(minCoverage) || 
-       minCoverage < 0L ||
-       length(minCoverage) != 1){
-      stop("'minCoverage' must be a single positive integer value.")
-    }
-  }
-  if(!is.null(input[["minReplicate"]])){
-    minReplicate <- input[["minReplicate"]]
-    if(!is.integer(minReplicate) || 
-       minReplicate < 0L ||
-       length(minReplicate) != 1){
-      stop("'minReplicate' must be a single positive integer value.")
-    }
-  }
-  if(!is.null(input[["findMod"]])){
-    findMod <- input[["findMod"]]
-    if(!assertive::is_a_bool(findMod)){
-      stop("'findMod' must be a single logical value.")
-    }
-  }
-  args <- list(minCoverage = minCoverage,
-               minReplicate = minReplicate,
-               findMod = findMod)
-  args
 }
 
 # dummy functions --------------------------------------------------------------
@@ -314,8 +397,7 @@ setMethod(f = "modifications",
 setMethod(f = "modify", 
           signature = signature(x = "Modifier"),
           definition = 
-            function(x,
-                     ...){
+            function(x){
               stop("This functions needs to be implemented by '",class(x),"'.",
                    call. = FALSE)
             }
@@ -326,8 +408,7 @@ setMethod(f = "modify",
 setMethod(f = "aggregate", 
           signature = signature(x = "Modifier"),
           definition = 
-            function(x,
-                     ...){
+            function(x){
               stop("This functions needs to be implemented by '",class(x),"'.",
                    call. = FALSE)
             }

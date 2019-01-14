@@ -38,6 +38,14 @@ setGeneric(
   def = function(x) standardGeneric("mainScore")
 )
 setGeneric( 
+  name = "settings",
+  def = function(x,name) standardGeneric("settings")
+)
+setGeneric( 
+  name = "settings<-",
+  def = function(x,name,value) standardGeneric("settings<-")
+)
+setGeneric( 
   name = "gff",
   def = function(x) standardGeneric("gff")
 )
@@ -80,8 +88,9 @@ setGeneric(
 
 setGeneric( 
   name = "modify",
+  signature = c("x"),
   def = function(x,
-                 ...) standardGeneric("modify")
+                 force = FALSE) standardGeneric("modify")
 )
 
 setGeneric(
@@ -110,6 +119,7 @@ setGeneric(
 
 setGeneric( 
   name = "aggregate",
+  signature = c("x"),
   def = function(x,
                  ...)
     standardGeneric("aggregate")

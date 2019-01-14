@@ -3,14 +3,14 @@
 \docType{methods}
 \name{roc}
 \alias{roc}
-\alias{roc,Modifier-method}
-\alias{roc,ModifierSet-method}
+\alias{plotROC,Modifier-method}
+\alias{plotROC,ModifierSet-method}
 \title{Performance}
 \usage{
-\S4method{roc}{Modifier}(x, coord, redo, redo.args, prediction.args,
+\S4method{plotROC}{Modifier}(x, coord, redo, redo.args, prediction.args,
   performance.args, plot.args)
 
-\S4method{roc}{ModifierSet}(x, coord, redo, redo.args, prediction.args,
+\S4method{plotROC}{ModifierSet}(x, coord, redo, redo.args, prediction.args,
   performance.args, plot.args)
 }
 \description{

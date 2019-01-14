@@ -23,7 +23,7 @@
 
 \S4method{bamfiles}{SequenceData}(x)
 
-\S4method{aggregate}{SequenceData}(x, ...)
+\S4method{aggregate}{SequenceData}(x)
 }
 \arguments{
 \item{...}{Optional arguments overwriting default values, which are

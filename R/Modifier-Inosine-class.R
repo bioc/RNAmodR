@@ -56,6 +56,17 @@ setMethod(
   args
 }
 
+#' @name ModInosine
+#' @export
+setReplaceMethod(f = "settings", 
+                 signature = signature(x = "ModInosine"),
+                 definition = function(x,value){
+                   x <- callNextMethod()
+                   value <- .norm_inosine_args(value)
+                   x@arguments[names(value)] <- unname(value)
+                   x
+                 })
+
 setGeneric( 
   name = "ModInosine",
   def = function(x,
@@ -71,14 +82,13 @@ setMethod("ModInosine",
                    gff,
                    modifications = NULL,
                    ...){
-            args <- .norm_inosine_args(list(...))
             ans <- .ModFromCharacter("ModInosine",
                                      x,
                                      fasta,
                                      gff,
-                                     args)
+                                     list(...))
             ans <- .norm_modifications(ans,
-                                       args)
+                                       list(...))
             ans
           }
 )
@@ -93,14 +103,13 @@ setMethod("ModInosine",
                    gff,
                    modifications = NULL,
                    ...){
-            args <- .norm_inosine_args(list(...))
             ans <- .ModFromCharacter("ModInosine",
                                      x,
                                      fasta,
                                      gff,
-                                     args)
+                                     list(...))
             ans <- .norm_modifications(ans,
-                                       args)
+                                       list(...))
             ans
           }
 )
@@ -113,12 +122,11 @@ setMethod("ModInosine",
           function(x,
                    modifications = NULL,
                    ...){
-            args <- .norm_inosine_args(list(...))
             ans <- .ModFromSequenceData("ModInosine",
                                         x,
-                                        args)
+                                        list(...))
             ans <- .norm_modifications(ans,
-                                       args)
+                                       list(...))
             ans
           }
 )
@@ -157,7 +165,7 @@ setMethod("ModInosine",
   ans
 }
 
-.aggregate_inosine <- function(x,...){
+.aggregate_inosine <- function(x){
   mod <- aggregate(seqData(x))
   data <- seqData(x)
   coverage <- .aggregate_pile_up_to_coverage(data)
@@ -177,9 +185,13 @@ setMethod(f = "aggregate",
           signature = signature(x = "ModInosine"),
           definition = 
             function(x,
-                     ...){
-              if(!hasAggregateData(x)){
-                x@aggregate <- .aggregate_inosine(x,...)
+                     force = FALSE){
+              if(missing(force)){
+                force <- FALSE
+              }
+              if(!hasAggregateData(x) || force){
+                x@aggregate <- .aggregate_inosine(x)
+                x@aggregateValidForCurrentArguments <- TRUE
               }
               x
             }
@@ -190,8 +202,7 @@ setMethod(f = "aggregate",
        sd = data$sd)
 }
 
-.find_inosine <- function(x,
-                          args){
+.find_inosine <- function(x){
   message("Searching for Inosine...")
   letters <- CharacterList(strsplit(as.character(sequences(x)),""))
   ranges <- ranges(x)
@@ -200,9 +211,9 @@ setMethod(f = "aggregate",
   # get the aggregate data
   mod <- aggregateData(x)
   # get arguments
-  minCoverage <- args[["minCoverage"]]
-  minReplicate <- args[["minReplicate"]]
-  minScore <- args[["minScore"]]
+  minCoverage <- settings(x,"minCoverage")
+  minReplicate <- settings(x,"minReplicate")
+  minScore <- settings(x,"minScore")
   # construct logical vector for passing the coverage threshold
   coverage <- mod[,seq_len(unique(ncol(mod)) - 2) + 2,drop = FALSE]
   coverage <- apply(as.matrix(unlist(coverage)),1,
@@ -242,11 +253,11 @@ setMethod(f = "aggregate",
 setMethod("modify",
           signature = c(x = "ModInosine"),
           function(x,
-                   ...){
+                   force){
             # get the aggregate data
-            x <- aggregate(x)
-            x@modifications <- .find_inosine(x,
-                                             .norm_inosine_args(list(...)))
+            x <- aggregate(x, force)
+            x@modifications <- .find_inosine(x)
+            x@modificationsValidForCurrentArguments <- TRUE
             message("done.")
             x
           }

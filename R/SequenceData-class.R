@@ -653,8 +653,7 @@ setMethod(f = "bamfiles",
 setMethod(f = "aggregate", 
           signature = signature(x = "SequenceData"),
           definition = 
-            function(x,
-                     ...){
+            function(x){
               stop("This functions needs to be implemented by '",class(x),"'.",
                    call. = FALSE)
             }

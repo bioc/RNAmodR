@@ -75,6 +75,19 @@ setMethod(
 
 # constructors -----------------------------------------------------------------
 
+.valid_rms_weights <- function(weights){
+  if(!is.numeric(weights) | !is.atomic(weights)){
+    return(FALSE)
+  }
+  if((length(weights) %% 2) != 1){
+    return(FALSE)
+  }
+  if(length(weights) < 3L){
+    return(FALSE)
+  }
+  TRUE
+}
+
 .norm_rms_args <- function(input){
   maxLength <- 50L # for all scores
   minSignal <- 10L # for all scores
@@ -82,7 +95,7 @@ setMethod(
   minScoreA <- 0.6 # for score A
   minScoreB <- 4.0 # for score B
   minScoreRMS <- 0.75 # for score C/RMS
-  weights <- c(0.5,0.6,0.7,0.8,0.9,1,0,1,0.9,0.8,0.7,0.6,0.5) # for score B/C/RMS
+  weights <- c(0.9,1,0,1,0.9) # for score B/C/RMS
   scoreOperator <- "&"
   if(!is.null(input[["weights"]])){
     weights <- input[["weights"]]
@@ -147,36 +160,16 @@ setMethod(
   args
 }
 
-.valid_rms_weights <- function(weights){
-  if(!is.numeric(weights) | !is.atomic(weights)){
-    return(FALSE)
-  }
-  if((length(weights) %% 2) != 1){
-    return(FALSE)
-  }
-  if(length(weights) < 3L){
-    return(FALSE)
-  }
-  TRUE
-}
-
-.norm_rms_weights <- function(args){
-  weights <- args[["weights"]]
-  if(is.null(names(weights))){
-    names(weights) <- seq_along(weights) - ((length(weights) / 2) + 0.5)
-  }
-  names <- as.integer(names(weights))
-  if(any(is.na(names))){
-    stop("If 'weights' is named, all names must be coercible to integer ",
-         "values.",
-         call. = FALSE)
-  }
-  if(length(which(names == 0L)) != 1){
-    stop("If 'weights' is named, exactly one name must be '0'",
-         call. = FALSE)
-  }
-  weights
-}
+#' @name ModRiboMethSeq
+#' @export
+setReplaceMethod(f = "settings", 
+                 signature = signature(x = "ModRiboMethSeq"),
+                 definition = function(x,value){
+                   x <- callNextMethod()
+                   value <- .norm_rms_args(value)
+                   x@arguments[names(value)] <- unname(value)
+                   x
+                 })
 
 
 setGeneric( 
@@ -194,14 +187,13 @@ setMethod("ModRiboMethSeq",
                    gff,
                    modifications = NULL,
                    ...){
-            args <- .norm_rms_args(list(...))
             ans <- RNAmodR:::.ModFromCharacter("ModRiboMethSeq",
                                                x,
                                                fasta,
                                                gff,
-                                               args)
+                                               list(...))
             ans <- RNAmodR:::.norm_modifications(ans,
-                                                 args)
+                                                 list(...))
             ans
           }
 )
@@ -216,14 +208,13 @@ setMethod("ModRiboMethSeq",
                    gff,
                    modifications = NULL,
                    ...){
-            args <- .norm_rms_args(list(...))
             ans <- RNAmodR:::.ModFromCharacter("ModRiboMethSeq",
                                                x,
                                                fasta,
                                                gff,
-                                               args)
+                                               list(...))
             ans <- RNAmodR:::.norm_modifications(ans,
-                                                 args)
+                                                 list(...))
             ans
           }
 )
@@ -236,12 +227,11 @@ setMethod("ModRiboMethSeq",
           function(x,
                    modifications = NULL,
                    ...){
-            args <- .norm_rms_args(list(...))
             ans <- RNAmodR:::.ModFromSequenceData("ModRiboMethSeq",
                                                   x,
-                                                  args)
+                                                  list(...))
             ans <- RNAmodR:::.norm_modifications(ans,
-                                                 args)
+                                                 list(...))
             ans
           }
 )
@@ -407,13 +397,28 @@ setMethod("ModRiboMethSeq",
 #   return(scoreMAX)
 # }
 
+.norm_rms_weights <- function(x){
+  weights <- settings(x,"weights")
+  if(is.null(names(weights))){
+    names(weights) <- seq_along(weights) - ((length(weights) / 2) + 0.5)
+  }
+  names <- as.integer(names(weights))
+  if(any(is.na(names))){
+    stop("If 'weights' is named, all names must be coercible to integer ",
+         "values.",
+         call. = FALSE)
+  }
+  if(length(which(names == 0L)) != 1){
+    stop("If 'weights' is named, exactly one name must be '0'",
+         call. = FALSE)
+  }
+  weights
+}
 
-.aggregate_rms <- function(x,
-                           ...){
+.aggregate_rms <- function(x){
   message("Aggregating data and calculating scores...")
   # parameter data
-  args <- .norm_rms_args(list(...))
-  weights <- .norm_rms_weights(args)
+  weights <- .norm_rms_weights(x)
   weightPositions <- as.integer(names(weights))
   # ToOo check for continuity
   if(length(weights) != length(weightPositions)){
@@ -430,7 +435,7 @@ setMethod("ModRiboMethSeq",
   nV <- seq_len(n)
   lengths <- lengths(mod)
   pos <- lapply(lengths,seq_len)
-  flankingRegion <- args[["flankingRegion"]]
+  flankingRegion <- settings(x,"flankingRegion")
   positionsR <- seq_len(flankingRegion)
   positionsL <- rev(positionsR) * -1
   weightPositionsL <- weightPositions[weightPositions < 0]
@@ -541,9 +546,13 @@ setMethod(
   signature = signature(x = "ModRiboMethSeq"),
   definition = 
     function(x,
-             ...){
-      if(!hasAggregateData(x)){
-        x@aggregate <- .aggregate_rms(x,...)
+             force = FALSE){
+      if(missing(force)){
+        force <- FALSE
+      }
+      if(!hasAggregateData(x) || force){
+        x@aggregate <- .aggregate_rms(x)
+        x@aggregateValidForCurrentArguments <- TRUE
       }
       x
     }
@@ -555,8 +564,7 @@ setMethod(
        scoreB = data$scoreB)
 }
 
-.find_rms <- function(x,
-                      args){
+.find_rms <- function(x){
   message("Searching for 2'-O methylations...")
   #
   data <- seqData(x)
@@ -566,11 +574,11 @@ setMethod(
   # get the aggregate data
   mod <- aggregateData(x)
   # setup args
-  minSignal <- args[["minSignal"]]
-  minScoreA <- args[["minScoreA"]]
-  minScoreB <- args[["minScoreB"]]
-  minScoreRMS <- args[["minScoreRMS"]]
-  scoreOperator <- args[["scoreOperator"]]
+  minSignal <- settings(x,"minSignal")
+  minScoreA <- settings(x,"minScoreA")
+  minScoreB <- settings(x,"minScoreB")
+  minScoreRMS <- settings(x,"minScoreRMS")
+  scoreOperator <- settings(x,"scoreOperator")
   # find modifications
   modifications <- mapply(
     function(m,l,r){
@@ -609,11 +617,11 @@ setMethod(
 setMethod("modify",
           signature = c(x = "ModRiboMethSeq"),
           function(x,
-                   ...){
+                   force){
             # get the aggregate data
-            x <- aggregate(x, ...)
-            x@modifications <- .find_rms(x,
-                                         .norm_rms_args(list(...)))
+            x <- aggregate(x, force)
+            x@modifications <- .find_rms(x)
+            x@modificationsValidForCurrentArguments <- TRUE
             message("done.")
             x
           }

@@ -18,6 +18,8 @@
 \usage{
 ModSetInosine(x, fasta = NA, gff = NA)
 
+\S4method{settings}{ModRiboMethSeq}(x) <- value
+
 \S4method{ModRiboMethSeq}{character}(x, fasta, gff, modifications = NULL,
   ...)
 
@@ -26,7 +28,7 @@ ModSetInosine(x, fasta = NA, gff = NA)
 
 \S4method{ModRiboMethSeq}{SequenceData}(x, modifications = NULL, ...)
 
-\S4method{modify}{ModRiboMethSeq}(x, ...)
+\S4method{modify}{ModRiboMethSeq}(x, force = FALSE)
 
 ModSetRiboMethSeq(x, fasta = NA, gff = NA)
 
@@ -55,9 +57,10 @@ operator. "&" requires all minimal values to be exceeded, whereas "|" detects
 positions, if at least one minimal values is exceeded (default: 
 \code{scoreOperator = "|"})}
 \item{maxLength:}{The default read length. Reads with this length or longer
-are discarded, since they represent non-fragemented reads. This is argument
-is passed on to \code{\link{ProtectedEndSequenceData}} (default: 
-\code{maxLength = 50L})}
+are discarded, since they represent non-fragemented reads. This might need to
+be adjusted for individual samples dending on the experimental conditions.
+This is argument is passed on to \code{\link{ProtectedEndSequenceData}} 
+(default: \code{maxLength = 50L})}
 \item{other arguments}{which are passed on to 
 \code{\link{ProtectedEndSequenceData}}}
 }}
@@ -65,7 +68,7 @@ is passed on to \code{\link{ProtectedEndSequenceData}} (default:
 \description{
 title
 
-score MAX as described by publiccations from the Motorin lab are not 
+The score MAX as described by publications from the Motorin lab are not 
 implemented since an unambigeous description is not available from the 
 literature.
 

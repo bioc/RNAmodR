@@ -13,6 +13,8 @@
 \alias{ModSetInosine-class}
 \title{ModInosine}
 \usage{
+\S4method{settings}{ModInosine}(x) <- value
+
 \S4method{ModInosine}{character}(x, fasta, gff, modifications = NULL,
   ...)
 
@@ -21,7 +23,7 @@
 
 \S4method{ModInosine}{SequenceData}(x, modifications = NULL, ...)
 
-\S4method{modify}{ModInosine}(x, ...)
+\S4method{modify}{ModInosine}(x, force = FALSE)
 }
 \description{
 title
