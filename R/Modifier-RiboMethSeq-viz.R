@@ -14,8 +14,16 @@ RNAMODR_RMS_PLOT_DATA_COLOURS <- c(ends = "#FBB4AE",
                                    scoreA = "#B3CDE3",
                                    scoreB = "#CCEBC5",
                                    scoreRMS = "#DECBE4")
+#' @rdname visualizeData
+#' 
+#' @details 
+#' \code{ModRiboMethSeq} specific arguments:
+#' \itemize{
+#' 
+#' }
+NULL
 
-#' @rdname ModRiboMethSeq
+#' @rdname visualizeData
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
@@ -33,6 +41,28 @@ setMethod(
                    coord = coord,
                    type = type,
                    window.size = window.size,
+                   ...)
+  }
+)
+#' @rdname visualizeData
+#' @export
+setMethod(
+  f = "visualizeData",
+  signature = signature(x = "ModRiboMethSeq"),
+  definition = function(x,
+                        name,
+                        from,
+                        to,
+                        type = c("ends","scoreA","scoreB","scoreRMS"),
+                        ...) {
+    if(missing(type)){
+      type <- RNAMODR_RMS_PLOT_DATA
+    }
+    callNextMethod(x = x,
+                   name,
+                   from,
+                   to,
+                   type = type,
                    ...)
   }
 )

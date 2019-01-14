@@ -4,8 +4,11 @@
 \name{ModifierSet}
 \alias{ModifierSet}
 \alias{ModifierSet-class}
+\alias{show,ModifierSet-method}
 \title{ModifierSet}
 \usage{
+\S4method{show}{ModifierSet}(object)
+
 \S4method{modifierType}{ModifierSet}(x)
 
 \S4method{modType}{ModifierSet}(x)
@@ -28,10 +31,11 @@
 \item{\code{BamFileList}}{a named \code{BamFileList} or a list of 
 named \code{BamFileList}}
 \item{\code{list}}{a list of one or more types of elements: 
-\code{BamFileList}, a named \code{list} or named \code{character} vector. All elements must
-be or be coercible to a named \code{BamFileList} referencing existing bam 
-files. In case of a \code{character} vector, it is assumed that each element
-should be used for creation of a seperate \code{Modifier} object.}
+\code{BamFileList}, a named \code{list} or named \code{character} vector. All
+elements must be or be coercible to a named \code{BamFileList} referencing 
+existing bam files. In case of a \code{character} vector, it is assumed that
+each element should be used for creation of a seperate \code{Modifier}
+object.}
 }}
 
 \item{fasta}{sequences matching the target sequences the reads were mapped 

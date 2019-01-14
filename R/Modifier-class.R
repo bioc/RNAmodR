@@ -69,6 +69,9 @@ S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
 # show -------------------------------------------------------------------------
 
 .show_settings <- function(settings){
+  l <- length(settings)
+  nc <- 6
+  nr <- ceiling(l / nc)
   settings <- lapply(seq_len(nr),
                      function(i){
                        f <- seq.int(from = (i * nc) - nc + 1L,
@@ -76,6 +79,11 @@ S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
                        f <- f[f <= l]
                        settings[,f]
                      })
+  if(is.null(rownames(settings[[1]]))){
+    names <- rep(" ",nrow(settings[[1]]))
+  } else {
+    names <- rownames(settings[[1]])
+  }
   for(i in seq_along(settings)){
     out <-
       as.matrix(format(as.data.frame(
@@ -88,7 +96,7 @@ S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
       }), use.names = FALSE), nrow = 1,
       dimnames = list("", colnames(out)))
     out <- rbind(classinfo, out)
-    rownames(out) <- rep(" ",nrow(out))
+    rownames(out) <- c(" ",names)
     print(out, quote = FALSE, right = TRUE)
   }
 }
@@ -113,9 +121,6 @@ setMethod(
                                       "no"),"\n")
     cat("| Settings:\n")
     settings <- settings(object)
-    l <- length(settings)
-    nc <- 6
-    nr <- ceiling(l / nc)
     settings <- lapply(settings,
                        function(s){
                          if(length(s) > 1L){
@@ -191,7 +196,7 @@ setMethod(f = "mainScore",
 setMethod(f = "settings", 
           signature = signature(x = "Modifier"),
           definition = function(x,name){
-            if(missing(name)){
+            if(missing(name) || is.null(name)){
               return(x@arguments)
             }
             if(!assertive::is_a_string(name)){
@@ -307,7 +312,8 @@ setMethod(f = "aggregateData",
 .get_modifications_per_transcript <- function(x){
   ranges <- .get_parent_annotations(ranges(x))
   modifications <- modifications(x)
-  modRanges <- ranges[as.character(ranges$ID) %in% as.character(modifications$Parent),]
+  modRanges <- 
+    ranges[as.character(ranges$ID) %in% as.character(modifications$Parent),]
   modRanges <- modRanges[match(as.character(modRanges$ID),
                                as.character(modifications$Parent))]
   # modify modifcation positions from genome centric to transcript centric
@@ -364,7 +370,8 @@ setMethod(f = "modifications",
   ans@data <- do.call(ans@dataClass,
                       c(list(bamfiles = ans@bamfiles,
                            fasta = ans@fasta,
-                           gff = ans@gff)))
+                           gff = ans@gff),
+                        settings(ans)))
   ans@data@sequences <- RNAStringSet(ans@data@sequences)
   if(settings(ans,"findMod")){
     ans <- do.call(modify,
@@ -428,4 +435,3 @@ setMethod(f = "hasAggregateData",
               return(TRUE)
             }
 )
-

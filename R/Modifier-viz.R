@@ -2,10 +2,10 @@
 #' @include Modifier-class.R
 NULL
 
-
-#' @name visualizeDataByCoord
+#' @name visualizeData
+#' @aliases visualizeDataByCoord
 #' 
-#' @title visualizeDataByCoord
+#' @title visualizeData
 #' 
 #' @description 
 #' title
@@ -105,6 +105,7 @@ NULL
     if(length(l) == 0L) return(NULL)
     l <- .norm_viz_range(l)
     strand(l) <- "*"
+    l <- l[!is.na(l$mod) && !is.null(l$mod) && !(l$mod == "")]
     l$ID <- l$mod
     l$Activity <- NULL
     l
@@ -125,7 +126,7 @@ NULL
          call. = FALSE)
   }
   if(is.null(coord$Parent)){
-    stop("'coord' must be a metadata column named 'Parent'.",
+    stop("'coord' must contain a metadata column named 'Parent'.",
          call. = FALSE)
   }
   coord
@@ -169,13 +170,14 @@ NULL
 .get_viz_window <- function(data,coord,window.size){
   window.size <- .norm_viz_windows.size(window.size)
   start <- start(coord) - window.size
-  end <- start(coord) + window.size
-  pos <- start(data)
-  if(start < min(pos)){
-    start <- as.integer(min(pos))
+  end <- end(coord) + window.size
+  pos.min <- as.integer(min(start(data)))
+  pos.max <- as.integer(max(end(data)))
+  if(start < pos.min){
+    start <- pos.min
   }
-  if(end > max(pos)){
-    end <- as.integer(max(pos))
+  if(end > pos.max){
+    end <- pos.max
   }
   list(start = start,
        end = end)
@@ -227,7 +229,7 @@ NULL
   at
 }
 
-#' @rdname visualizeDataByCoord
+#' @rdname visualizeData
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
@@ -274,6 +276,43 @@ setMethod(
                from = coordValues$start,
                to = coordValues$end,
                chromosome = chromosome)
+  }
+)
+
+.create_coord_for_visualization <- function(x,
+                                            name,
+                                            from,
+                                            to){
+  if(!(name %in% names(seqData(x)))){
+    stop("Element '",name,"' not present in data.", call. = FALSE)
+  }
+  GRanges(seqnames = "chr1",
+          ranges = IRanges::IRanges(start = as.integer(from),
+                                    end = as.integer(to)),
+          strand = "*",
+          DataFrame(Parent = name))
+}
+
+#' @rdname visualizeData
+#' @export
+setMethod(
+  f = "visualizeData",
+  signature = signature(x = "Modifier"),
+  definition = function(x,
+                        name,
+                        from,
+                        to,
+                        type = NA,
+                        ...) {
+    coord <- .create_coord_for_visualization(x,
+                                             name,
+                                             from,
+                                             to)
+    visualizeDataByCoord(x,
+                         coord,
+                         type = type,
+                         window.size = 0L,
+                         ...)
   }
 )
 

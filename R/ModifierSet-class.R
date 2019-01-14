@@ -16,10 +16,11 @@ NULL
 #' \item{\code{BamFileList}}{a named \code{BamFileList} or a list of 
 #' named \code{BamFileList}}
 #' \item{\code{list}}{a list of one or more types of elements: 
-#' \code{BamFileList}, a named \code{list} or named \code{character} vector. All elements must
-#' be or be coercible to a named \code{BamFileList} referencing existing bam 
-#' files. In case of a \code{character} vector, it is assumed that each element
-#' should be used for creation of a seperate \code{Modifier} object.}
+#' \code{BamFileList}, a named \code{list} or named \code{character} vector. All
+#' elements must be or be coercible to a named \code{BamFileList} referencing 
+#' existing bam files. In case of a \code{character} vector, it is assumed that
+#' each element should be used for creation of a seperate \code{Modifier}
+#' object.}
 #' }
 #' @param fasta sequences matching the target sequences the reads were mapped 
 #' onto. This must match the information contained in the BAM files. This is 
@@ -206,8 +207,8 @@ setMethod(f = "ModifierSet",
             stop("'x' must be a list containining only elements of the same ",
                  "type\nof 'Modifer' or elements of type ('BamFileList', ",
                  "'character', 'list') which are coercible\nto a named ",
-                 "BamFileList. In the latter case, elements must contain named ",
-                 "vectors or lists('treated' or 'control')\nand the files ",
+                 "BamFileList. In the latter case, elements must contain named",
+                 " vectors or lists('treated' or 'control')\nand the files ",
                  "referenced must exist. Please note, that the list a",
                  call. = FALSE)
           })
@@ -241,37 +242,51 @@ setMethod(
   f = "show", 
   signature = signature(object = "ModifierSet"),
   definition = function(object) {
-    browser()
     callNextMethod()
     cat("| Modification type(s): ",paste0(object[[1]]@mod, collapse = " / "),
         "\n")
-    cat("| Modifications found:",lapply(object,
-                                        function(o){
-                                          ifelse(length(o@modifications) != 0L,
-                                                 paste0("yes (",
-                                                        length(o@modifications),
-                                                        ")"),
-                                                 "no")
-                                        }),"\n")
+    mf <- lapply(seq_along(object),
+                 function(i){
+                   o <- object[[i]]
+                   c(names(object[i]),
+                     ifelse(length(o@modifications) != 0L,
+                            paste0("yes (",
+                                   length(o@modifications),
+                                   ")"),
+                            "no"))
+                 })
+    mf <- DataFrame(mf)
+    out <-
+      as.matrix(format(as.data.frame(
+        lapply(mf,showAsCell),
+        optional = TRUE)))
+    colnames(out) <- rep(" ",ncol(mf))
+    rownames(out) <- c("| Modifications found:",
+                       "                      ")
+    print(out, quote = FALSE, right = TRUE)
     cat("| Settings:\n")
-    settings <- lapply(object,settings)
-    browser()
-    l <- length(settings)
-    nc <- 6
-    nr <- ceiling(l / nc)
-    settings <- lapply(settings,
-                       function(s){
-                         if(length(s) > 1L){
-                           ans <- List(s)
-                           return(ans)
-                         }
-                         s
+    settings <- lapply(object,
+                       function(o){
+                         set <- settings(o)
+                         set <- lapply(set,
+                                       function(s){
+                                         if(length(s) > 1L){
+                                           ans <- List(s)
+                                           return(ans)
+                                         }
+                                         s
+                                       })
+                         DataFrame(set)
                        })
-    settings <- DataFrame(settings)
+    settings <- do.call(rbind,settings)
+    rownames(settings) <- names(object)
     .show_settings(settings)
-    valid <- c(object@aggregateValidForCurrentArguments,
-               object@modificationsValidForCurrentArguments)
-    if(all(valid)){
+    valid <- unlist(lapply(object,
+                           function(o){
+                             c(o@aggregateValidForCurrentArguments,
+                               o@modificationsValidForCurrentArguments)
+                           }))
+    if(!all(valid)){
       warning("Settings were changed after data aggregation or modification ",
               "search. Rerun with modify(x,force = TRUE) to update with ",
               "current settings.", call. = FALSE)

@@ -10,7 +10,7 @@ RNAMODR_I_PLOT_BASES_COLOURS <-
 RNAMODR_I_PLOT_DATA_COLOURS <- c("score" = "#ABABAB") 
 RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
 
-#' @rdname visualizeDataByCoord
+#' @rdname visualizeData
 #' 
 #' @details 
 #' \code{ModInosine} specific arguments:
@@ -19,8 +19,9 @@ RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
 #' colours of the individual bases. The names are expected to be 
 #' \code{c("G","A","U","C")}}
 #' }
+NULL
 
-#' @rdname visualizeDataByCoord
+#' @rdname visualizeData
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
@@ -28,13 +29,32 @@ setMethod(
                         coord = "GRanges"),
   definition = function(x,
                         coord,
-                        type = NA,
+                        type = "score",
                         window.size = 15L,
                         ...) {
     callNextMethod(x = x,
                    coord = coord,
                    type = "score",
                    window.size = window.size,
+                   ...)
+  }
+)
+#' @rdname visualizeData
+#' @export
+setMethod(
+  f = "visualizeData",
+  signature = signature(x = "ModInosine"),
+  definition = function(x,
+                        name,
+                        from,
+                        to,
+                        type = "score",
+                        ...) {
+    callNextMethod(x = x,
+                   name,
+                   from,
+                   to,
+                   type = "score",
                    ...)
   }
 )

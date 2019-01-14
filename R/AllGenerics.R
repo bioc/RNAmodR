@@ -24,7 +24,7 @@ setGeneric(
     standardGeneric("ModifierSet")
 )
 
-# Modifier accessors ------------------------------------------------------
+# Modifier accessors -----------------------------------------------------------
 setGeneric( 
   name = "modifierType",
   def = function(x) standardGeneric("modifierType")
@@ -39,7 +39,7 @@ setGeneric(
 )
 setGeneric( 
   name = "settings",
-  def = function(x,name) standardGeneric("settings")
+  def = function(x,name = NULL) standardGeneric("settings")
 )
 setGeneric( 
   name = "settings<-",
@@ -92,7 +92,6 @@ setGeneric(
   def = function(x,
                  force = FALSE) standardGeneric("modify")
 )
-
 setGeneric(
   name = "visualizeDataByCoord",
   signature = c("x","coord"),
@@ -101,6 +100,16 @@ setGeneric(
                  type,
                  window.size = 15L,
                  ...) standardGeneric("visualizeDataByCoord")
+)
+setGeneric(
+  name = "visualizeData",
+  signature = c("x"),
+  def = function(x,
+                 name,
+                 from = 1L,
+                 to = 30L,
+                 type,
+                 ...) standardGeneric("visualizeData")
 )
 setGeneric(
   name = ".dataTracksByCoord",
@@ -125,7 +134,7 @@ setGeneric(
     standardGeneric("aggregate")
 ) 
 
-# Modifier/ModifierSet functions ----------------------------------------------
+# Modifier/ModifierSet functions -----------------------------------------------
 setGeneric( 
   name = "subsetByCoord",
   signature = c("x","coord"),
@@ -144,7 +153,7 @@ setGeneric(
     standardGeneric("plotROC")
 ) 
 
-# ModifierSet functions ----------------------------------------------
+# ModifierSet functions --------------------------------------------------------
 
 setGeneric( 
   name = "compareByCoord",
