@@ -4,7 +4,7 @@
 NULL
 
 
-#' @name roc
+#' @name plotROC
 #' 
 #' @title Performance
 #' 
@@ -154,7 +154,7 @@ NULL
   
 }
 
-#' @rdname roc
+#' @rdname plotROC
 #' 
 #' @export
 setMethod(
@@ -180,7 +180,7 @@ setMethod(
   }
 )
 
-#' @rdname roc
+#' @rdname plotROC
 #' @export
 setMethod(
   f = "plotROC", 

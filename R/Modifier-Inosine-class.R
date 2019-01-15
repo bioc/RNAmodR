@@ -10,8 +10,10 @@ NULL
 #' @description 
 #' title
 #' 
-#' \code{score}: the score for reported Inosine positions are between 1 and 100.
-#' It is calculated as \code{min(log2(percent(G)/percent(A)) * 10,100)}.
+#' @details
+#' \code{ModInosine} score: the score for reported Inosine positions are between
+#' 1 and 100. It is calculated as \code{min(log2(percent(G) /
+#' (percent(A)+percent(T)+percent(C))) * 10,100)}.
 #' 
 NULL
 
@@ -270,7 +272,7 @@ setClass("ModSetInosine",
          contains = "ModifierSet",
          prototype = list(elementType = "ModInosine"))
 
-#' @rdname ModRiboMethSeq
+#' @rdname ModInosine
 #' @export
 ModSetInosine <- function(x, fasta = NA, gff = NA){
   ModifierSet("ModInosine", x, fasta = fasta, gff = gff)

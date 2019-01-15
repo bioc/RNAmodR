@@ -12,11 +12,13 @@ RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
 
 #' @rdname ModInosine
 #' 
+#' @name visualizeData
+#'  
 #' @details 
 #' \code{ModInosine} specific arguments for \link{visualizeData}:
 #' \itemize{
-#' \item{colour.bases}{a named character vector of \code{length = 4} for the
-#' colours of the individual bases. The names are expected to be 
+#' \item{\code{colour.bases} - }{a named character vector of \code{length = 4} 
+#' for the colours of the individual bases. The names are expected to be 
 #' \code{c("G","A","U","C")}}
 #' }
 NULL

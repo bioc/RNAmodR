@@ -13,6 +13,8 @@
 \alias{ModInosine,SequenceData-method}
 \alias{modify,ModInosine-method}
 \alias{ModSetInosine-class}
+\alias{ModSetInosine}
+\alias{visualizeData}
 \alias{visualizeDataByCoord,ModInosine,GRanges-method}
 \alias{visualizeData,ModInosine-method}
 \title{ModInosine}
@@ -31,6 +33,8 @@
 
 \S4method{modify}{ModInosine}(x, force = FALSE)
 
+ModSetInosine(x, fasta = NA, gff = NA)
+
 \S4method{visualizeDataByCoord}{ModInosine,GRanges}(x, coord,
   type = "score", window.size = 15L, ...)
 
@@ -39,7 +43,16 @@
 }
 \description{
 title
+}
+\details{
+\code{ModInosine} score: the score for reported Inosine positions are between
+1 and 100. It is calculated as \code{min(log2(percent(G) /
+(percent(A)+percent(T)+percent(C))) * 10,100)}.
 
-\code{score}: the score for reported Inosine positions are between 1 and 100.
-It is calculated as \code{min(log2(percent(G)/percent(A)) * 10,100)}.
+\code{ModInosine} specific arguments for \link{visualizeData}:
+\itemize{
+\item{\code{colour.bases} - }{a named character vector of \code{length = 4} 
+for the colours of the individual bases. The names are expected to be 
+\code{c("G","A","U","C")}}
+}
 }
