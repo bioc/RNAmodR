@@ -1,10 +1,14 @@
 Package: RNAmodR
 Title: Detection of post-transcriptional modifications
-Version: 0.0.1
-Authors@R: person("Felix G.M.",
-                  "Ernst",
-                  email = "felix.gm.ernst@outlook.com",
-                  role = c("aut", "cre"))
+Version: 0.0.2
+Authors@R: c(person("Felix G.M.", 
+                    "Ernst", 
+                    email = "felix.gm.ernst@outlook.com", 
+                    role = c("aut", "cre")),
+             person("Denis L.J.", 
+                    "Lafontaine", 
+                    email = "denis.lafontaine@ulb.ac.be", 
+                    role = c("ctb", "fnd")))
 Description: What the package does (one paragraph).
 Depends:
     R (>= 3.5),
@@ -39,15 +43,12 @@ Collate:
     'Gviz-functions.R'
     'ModRanges-class.R'
     'Modifier-utils.R'
-    'SequenceData-utils.R'
     'SequenceDataFrame-class.R'
     'SequenceData-class.R'
     'Modifier-class.R'
     'ModifierSet-class.R'
     'Modifier-Inosine-class.R'
     'Modifier-Inosine-viz.R'
-    'Modifier-RiboMethSeq-class.R'
-    'Modifier-RiboMethSeq-viz.R'
     'Modifier-analysis.R'
     'Modifier-check.R'
     'Modifier-roc.R'
@@ -59,8 +60,8 @@ Collate:
     'SequenceData-coverage.R'
     'SequenceData-end-pos.R'
     'SequenceData-pileup.R'
+    'SequenceData-viz.R'
     'SequenceData-protected-end-pos.R'
-    'SequenceData-statistics.R'
     'utils-bam.R'
     'utils.R'
 RoxygenNote: 6.1.1

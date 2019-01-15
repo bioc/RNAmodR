@@ -10,10 +10,10 @@ RNAMODR_I_PLOT_BASES_COLOURS <-
 RNAMODR_I_PLOT_DATA_COLOURS <- c("score" = "#ABABAB") 
 RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
 
-#' @rdname visualizeData
+#' @rdname ModInosine
 #' 
 #' @details 
-#' \code{ModInosine} specific arguments:
+#' \code{ModInosine} specific arguments for \link{visualizeData}:
 #' \itemize{
 #' \item{colour.bases}{a named character vector of \code{length = 4} for the
 #' colours of the individual bases. The names are expected to be 
@@ -21,7 +21,7 @@ RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
 #' }
 NULL
 
-#' @rdname visualizeData
+#' @rdname ModInosine
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
@@ -39,7 +39,7 @@ setMethod(
                    ...)
   }
 )
-#' @rdname visualizeData
+#' @rdname ModInosine
 #' @export
 setMethod(
   f = "visualizeData",
@@ -60,7 +60,7 @@ setMethod(
 )
 
 setMethod(
-  f = ".dataTracksByCoord",
+  f = ".dataTracks",
   signature = signature(x = "ModInosine",
                         data = "GRanges",
                         seqdata = "GRanges",

@@ -36,8 +36,8 @@ NULL
   modified.seq <- FALSE
   additional.mod <- GRanges()
   colour <- NA
-  sequence.track.pars <- NULL
-  annotation.track.pars <- NULL
+  sequence.track.pars <- list(add53 = FALSE)
+  annotation.track.pars <- list()
   data.track.pars <- NULL
   if(!is.null(input[["modified.seq"]])){
     modified.seq <- input[["modified.seq"]]
@@ -138,7 +138,10 @@ NULL
     additional.mod <- unlist(additional.mod)
   }
   additional.mod <- additional.mod[additional.mod$Parent == coord$Parent]
-  additional.mod
+  GRanges(seqnames = coord$Parent,
+          ranges = ranges(additional.mod),
+          strand = strand(additional.mod),
+          mcols(additional.mod))
 }
 
 .norm_data_for_visualization <- function(data,type,chromosome){
@@ -199,8 +202,17 @@ NULL
   FUN <- function(trackClass,seqClass,seq,chromosome,args){
     set <- do.call(seqClass,list(seq))
     names(set) <- chromosome
-    track <- do.call(trackClass,c(list(set),args))
+    track <- do.call(trackClass,c(list(set),
+                                  args))
     track
+  }
+  if(!is(seq,"DNAString") && !is(seq,"RNAString") && !is(seq,"ModRNAString")){
+    stop("Invalid sequence type '",class(seq),"'. sequences(x) must be a ",
+         "RNA/ModRNA/DNAString.",
+         call. = FALSE)
+  }
+  if(is(seq,"DNAString")){
+    seq <- as(seq,"RNAString")
   }
   if(is(seq,"RNAString")){
     st <- FUN("RNASequenceTrack","RNAStringSet",seq,chromosome,args)
@@ -266,7 +278,11 @@ setMethod(
     atm <- .get_viz_annotation_track(modAnnotation,
                                      chromosome,
                                      args[["annotation.track.pars"]])
-    dt <- .dataTracksByCoord(x,data,seqdata,seq,args)
+    dt <- .dataTracks(x,
+                      data = data,
+                      seqdata = seqdata,
+                      sequence = seq,
+                      args = args)
     if(!is.list(dt)){
       dt <- list(dt)
     }
@@ -317,13 +333,17 @@ setMethod(
 )
 
 setMethod(
-  f = ".dataTracksByCoord",
+  f = ".dataTracks",
   signature = signature(x = "Modifier",
-                        data = "ANY"),
+                        data = "ANY",
+                        seqdata = "ANY",
+                        sequence = "ANY"),
   definition = function(x,
                         data,
+                        seqdata,
+                        sequence,
                         args) {
-    stop(".dataTracksByCoord needs to be implemented for class '",class(x)[[1]],
+    stop(".dataTracks needs to be implemented for class '",class(x)[[1]],
          "'")
   }
 )

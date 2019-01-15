@@ -60,6 +60,7 @@ setMethod("consolidateTrack",
             return(GdObject)
           })
 
+#' @import grid
 setMethod("drawGD",
           signature = signature("ModifiedSequenceTrack"),
           definition = function(GdObject,
@@ -67,6 +68,7 @@ setMethod("drawGD",
                                 maxBase,
                                 prepare = FALSE,
                                 ...) {
+            requireNamespace("grid")
             alphabet <- displayPars(GdObject)$fontcolor
             fcol <- .dpOrDefault(GdObject,
                                  "fontcolor",
@@ -79,7 +81,7 @@ setMethod("drawGD",
             }
             pushViewport(viewport(xscale = xscale,
                                   clip = TRUE,
-                                  gp = .fontGp(GdObject, cex=cex)))
+                                  gp = .fontGp(GdObject,cex = cex)))
             if(prepare){
               pres <- .pxResolution()
               nsp <-  max(as.numeric(convertHeight(stringHeight(
@@ -95,29 +97,34 @@ setMethod("drawGD",
             if(delta == 0){
               return(invisible(GdObject))
             }
-            lwidth <- min(max(as.numeric(convertUnit(stringWidth(names(alphabet)),
-                                                 "inches"))),0.15)
+            lwidth <- min(max(as.numeric(convertUnit(
+              stringWidth(names(alphabet)),"inches"))),0.15)
             perLetter <- Gviz:::vpLocation()$isize["width"] / 
               (maxBase - minBase + 1)
             diff <- .pxResolution(.dpOrDefault(GdObject, "min.width", 2),
                                   coord = "x")
             if(diff > 1 || (maxBase - minBase + 1) >= 10e6){
               grid.lines(x = unit(c(minBase, maxBase), "native"),
-                         y=0.5,
-                         gp = gpar(col = .dpOrDefault(GdObject, "col", "darkgray"),
-                                   lwd = .dpOrDefault(GdObject, "lwd", 2)))
+                         y = 0.5,
+                         gp = gpar(col = .dpOrDefault(GdObject,
+                                                      "col",
+                                                      "darkgray"),
+                                   lwd = .dpOrDefault(GdObject,
+                                                      "lwd",
+                                                      2)))
             } else {
               sequence <- as.character(as(subseq(GdObject,
                                                  start = minBase,
                                                  end = maxBase - 1),
                                           "Rle"))
-              at <- seq((minBase + 0.5), maxBase - 1 + 0.5, by=1)
+              at <- seq((minBase + 0.5), maxBase - 1 + 0.5, by = 1)
               sequence[sequence == "-"] <- ""
               if(perLetter < 0.5 && .dpOrDefault(GdObject, "add53", FALSE)){
                 sequence[c(1, length(sequence))] <- ""
               }
               col <- fcol[toupper(sequence)]
-              if(lwidth < perLetter && !.dpOrDefault(GdObject, "noLetters", FALSE)){
+              if(lwidth < perLetter && 
+                 !.dpOrDefault(GdObject, "noLetters", FALSE)){
                 grid.text(x = unit(at, "native"),
                           y = 0.5,
                           label = sequence,
@@ -133,8 +140,7 @@ setMethod("drawGD",
               }
             }
             ## The direction indicators
-            if(.dpOrDefault(GdObject, "add53", FALSE))
-            {
+            if(.dpOrDefault(GdObject, "add53", FALSE)){
               if(.dpOrDefault(GdObject, "complement", FALSE)){
                 grid.text(label = expression("3'"),
                           x = unit(minBase + 0.1, "native"),

@@ -299,7 +299,7 @@ setMethod(f = "seqData",
   data
 }
 
-#' @name Modifier
+#' @name aggregate
 #' @export
 setMethod(f = "aggregateData", 
           signature = signature(x = "Modifier"),
@@ -333,7 +333,7 @@ setMethod(f = "aggregateData",
   modifications
 }
 
-#' @name Modifier
+#' @rdname modify
 #' @export
 setMethod(f = "modifications", 
           signature = signature(x = "Modifier"),
@@ -399,7 +399,13 @@ setMethod(f = "modifications",
 # dummy functions --------------------------------------------------------------
 # these need to be implemented by each subclass
 
-#' @name Modifier
+#' @name modify
+#' 
+#' @title modify
+#' 
+#' @description 
+#' title
+#' 
 #' @export
 setMethod(f = "modify", 
           signature = signature(x = "Modifier"),
@@ -410,7 +416,14 @@ setMethod(f = "modify",
             }
 )
 
-#' @name Modifier
+#' @name aggregate
+#' @aliases hasAggregateData aggregateData
+#' 
+#' @title aggregate
+#' 
+#' @description 
+#' title
+#' 
 #' @export
 setMethod(f = "aggregate", 
           signature = signature(x = "Modifier"),
@@ -423,7 +436,7 @@ setMethod(f = "aggregate",
 
 # check function ---------------------------------------------------------------
 
-#' @name Modifier
+#' @rdname aggregate
 #' @export
 setMethod(f = "hasAggregateData", 
           signature = signature(x = "Modifier"),

@@ -21,34 +21,21 @@ setClass(Class = "CoverageSequenceData",
                                                       ranges,
                                                       param,
                                                       args = list()){
+  ranges <- .get_parent_annotations(ranges)
   # get data per chromosome
   coverage <- coverage(bamFile, param = param)
-  coverage <- coverage[names(coverage) %in% as.character(seqnames(ranges))]
+  coverage <- 
+    coverage[names(coverage) %in% as.character(seqnames(ranges))]
   coverage <- as(coverage,"IntegerList")
   coverage <- coverage[order(names(coverage))]
   # split into per gene data
-  ranges <- .get_parent_annotations(ranges)
   ranges <- split(ranges,GenomeInfoDb::seqnames(ranges))
   ranges <- ranges[order(names(ranges))]
   if(any(names(ranges) != names(coverage))){
     stop("Something went wrong.")
   }
-  coverage <- mapply(
-    function(co,r){
-      # can this be streamlined ?
-      starts <- start(r)
-      ends <- end(r)
-      ans <- lapply(seq_along(r),
-             function(i){
-               co[starts[i]:ends[i]]
-             })
-      names(ans) <- r$ID
-      ans
-    },
-    coverage,
-    ranges,
-    SIMPLIFY = FALSE)
-  as(do.call(c,unname(coverage)),"IntegerList")
+  names(coverage) <- ranges$ID
+  coverage
 }
 
 #' @rdname CoverageSequenceData
@@ -57,12 +44,12 @@ CoverageSequenceData <- function(bamfiles,
                             fasta,
                             gff,
                             ...){
+  args <- .get_mod_data_args(...)
   ans <- new("CoverageSequenceData",
              bamfiles,
              fasta,
              gff,
-             ...)
-  args <- .get_mod_data_args(...)
+             args)
   ranges <- .load_annotation(ans@gff)
   sequences <- .load_transcript_sequences(ans@fasta,
                                           ranges)

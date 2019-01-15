@@ -2,9 +2,10 @@
 #' @include Modifier-class.R
 NULL
 
-#' @name subsetByCoord
+#' @name subset
+#' @aliases subsetByCoord
 #' 
-#' @title subsetByCoord
+#' @title subset
 #' 
 #' @description 
 #' title
@@ -180,7 +181,7 @@ NULL
 }
 ################################################################################
 
-#' @rdname subsetByCoord
+#' @rdname subset
 #' @export
 setMethod("subsetByCoord",
           signature = c("Modifier","GRanges"),
@@ -192,7 +193,7 @@ setMethod("subsetByCoord",
             .subset_Modifier_by_GRangesList(x,coord,...)
           }
 )
-#' @rdname subsetByCoord
+#' @rdname subset
 #' @export
 setMethod("subsetByCoord",
           signature = c("Modifier","GRangesList"),
@@ -219,7 +220,7 @@ setMethod("subsetByCoord",
          })
 }
 
-#' @rdname subsetByCoord
+#' @rdname subset
 #' @export
 setMethod("subsetByCoord",
           signature = c("ModifierSet","GRanges"),
@@ -231,7 +232,7 @@ setMethod("subsetByCoord",
             .subset_ModifierSet_by_GRangesList(x,coord,...)
           }
 )
-#' @rdname subsetByCoord
+#' @rdname subset
 #' @export
 setMethod("subsetByCoord",
           signature = c("ModifierSet","GRangesList"),

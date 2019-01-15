@@ -76,3 +76,14 @@ MOD_TRANSCRIPT_FEATURES <- c("gene",
                              "intron",
                              "five_prime_UTR_intron",
                              "three_prime_UTR_intron")
+
+
+#' @name RNAmodR-internals
+#' @aliases .dataTrack
+#' 
+#' @title RNAmodR internal functions
+#' 
+#' @description
+#' These functions are not intended for general use, but maybe exported for 
+#' additional package development.
+NULL

@@ -4,7 +4,7 @@
 NULL
 
 #' @name ModInosine
-#' @aliases Inosine ModifierInosine
+#' @aliases Inosine ModifierInosine ICE-Seq
 #' 
 #' @title ModInosine
 #' @description 
@@ -13,7 +13,6 @@ NULL
 #' \code{score}: the score for reported Inosine positions are between 1 and 100.
 #' It is calculated as \code{min(log2(percent(G)/percent(A)) * 10,100)}.
 #' 
-
 NULL
 
 #' @rdname ModInosine
@@ -179,7 +178,7 @@ setMethod("ModInosine",
   ans
 }
 
-#' @name Modifier
+#' @name ModInosine
 #' @export
 setMethod(f = "aggregate", 
           signature = signature(x = "ModInosine"),

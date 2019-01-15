@@ -2,9 +2,10 @@
 #' @include ModifierSet-class.R
 NULL
 
-#' @name compareByCoord
+#' @name compare
+#' @aliases compareByCoord
 #' 
-#' @title compareByCoord
+#' @title compare
 #' 
 #' @description 
 #' title
@@ -87,7 +88,7 @@ NULL
 }
 
 
-#' @rdname compareByCoord
+#' @rdname compare
 #' @export
 setMethod("compareByCoord",
           signature = c("ModifierSet","GRanges"),
@@ -100,7 +101,7 @@ setMethod("compareByCoord",
           }
 )
 
-#' @rdname compareByCoord
+#' @rdname compare
 #' @export
 setMethod("compareByCoord",
           signature = c("ModifierSet","GRangesList"),
@@ -205,7 +206,7 @@ setMethod("compareByCoord",
     ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0))
 }
 
-#' @rdname compareByCoord
+#' @rdname compare
 #' @export
 setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRanges"),
@@ -222,7 +223,7 @@ setMethod("plotCompareByCoord",
           }
 )
 
-#' @rdname compareByCoord
+#' @rdname compare
 #' @export
 setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRangesList"),

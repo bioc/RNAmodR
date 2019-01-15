@@ -78,3 +78,17 @@ dt <- DataTrack(start = seq(1, 121),
           name = "sinus", 
           data = aggregateData(mrms)[[1]]$scoreA) 
 ```
+
+
+# Classes
+
+## SequenceData
+
+## Modifier
+
+## ModifierSet
+
+# Example analysis workflow
+
+## Creation of Modifier or ModifierSet
+

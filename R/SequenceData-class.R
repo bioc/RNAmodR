@@ -1,6 +1,5 @@
 #' @include RNAmodR.R
 #' @include SequenceDataFrame-class.R
-#' @include SequenceData-utils.R
 NULL
 
 #' @name SequenceData
@@ -377,6 +376,18 @@ setMethod("rbind", "SequenceData",
 
 # object creation --------------------------------------------------------------
 
+.norm_min_quality <- function(input,x){
+  minQuality <- x@minQuality
+  if(!is.null(input[["minQuality"]])){
+    minQuality <- input[["minQuality"]]
+    if(!is.integer(minQuality) | minQuality < 1L){
+      stop("'minQuality' must be integer with a value higher than 0L.",
+           call. = FALSE)
+    }
+  }
+  minQuality
+}
+
 setMethod(
   f = "initialize", 
   signature = signature(.Object = "SequenceData"),
@@ -470,6 +481,7 @@ setMethod(
   input <- list(...)
   max_depth <- 10000L # the default is 250, which is to small
   maxLength <- NA
+  minCoverage <- NA
   # for pileup
   if(!is.null(input[["max_depth"]])){
     max_depth <- input[["max_depth"]]
@@ -486,9 +498,18 @@ setMethod(
            call. = FALSE)
     }
   }
+  # for norm protected end data
+  if(!is.null(input[["minCoverage"]])){
+    minCoverage <- input[["minCoverage"]]
+    if(!is.integer(minCoverage) | minCoverage <= 1L){
+      stop("'minCoverage' must be integer with a value higher than 1L or NA.",
+           call. = FALSE)
+    }
+  }
   #
   args <- list(max_depth = max_depth,
-               maxLength = maxLength)
+               maxLength = maxLength,
+               minCoverage = minCoverage)
   args
 }
 
@@ -499,14 +520,13 @@ setMethod(
   conditionsFmultiplier <- 1L
   # work with the unlisted data and construct a CompressedSplitDataFrameList
   # from this
-  if(is(data[[1L]],"IntegerList")){
+  if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
     data <- lapply(data,
                    function(d){
                      d[order(names(d))]
                    })
     data <- lapply(data, unlist)
     data <- DataFrame(data)
-    genes_ids <- unique(rownames(df))
   } else if(is(data[[1L]],"DataFrameList")) {
     data <- lapply(data, unlist, use.names = FALSE)
     ncols <- unique(unlist(lapply(data, ncol)))
