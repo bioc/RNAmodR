@@ -190,6 +190,8 @@ setMethod(f = "relistToClass",
        listData = x)
 }
 
+#' @rdname ModifierSet
+#' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "list"),
           function(modifiertype, x, ...) {
@@ -212,21 +214,24 @@ setMethod(f = "ModifierSet",
                  "referenced must exist. Please note, that the list a",
                  call. = FALSE)
           })
-
+#' @rdname ModifierSet
+#' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "character"),
           function(modifiertype, x, fasta, gff, ...) {
             browser()
             .bamfiles_to_ModifierSet(modifiertype, x, fasta, gff, ...)
           })
-
+#' @rdname ModifierSet
+#' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "BamFileList"),
           function(modifiertype, x, fasta, gff, ...) {
             browser()
             .bamfiles_to_ModifierSet(modifiertype, x, fasta, gff, ...)
           })
-
+#' @rdname ModifierSet
+#' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "Modifier"),
           function(modifiertype, x, ...) {
@@ -236,8 +241,6 @@ setMethod(f = "ModifierSet",
 
 # show -------------------------------------------------------------------------
 
-#' @rdname ModifierSet
-#' @export
 setMethod(
   f = "show", 
   signature = signature(object = "ModifierSet"),

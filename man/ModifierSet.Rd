@@ -4,10 +4,19 @@
 \name{ModifierSet}
 \alias{ModifierSet}
 \alias{ModifierSet-class}
-\alias{show,ModifierSet-method}
+\alias{ModifierSet,list-method}
+\alias{ModifierSet,character-method}
+\alias{ModifierSet,BamFileList-method}
+\alias{ModifierSet,Modifier-method}
 \title{ModifierSet}
 \usage{
-\S4method{show}{ModifierSet}(object)
+\S4method{ModifierSet}{list}(modifiertype, x, ...)
+
+\S4method{ModifierSet}{character}(modifiertype, x, fasta, gff, ...)
+
+\S4method{ModifierSet}{BamFileList}(modifiertype, x, fasta, gff, ...)
+
+\S4method{ModifierSet}{Modifier}(modifiertype, x, ...)
 
 \S4method{modifierType}{ModifierSet}(x)
 
@@ -38,14 +47,6 @@ each element should be used for creation of a seperate \code{Modifier}
 object.}
 }}
 
-\item{fasta}{sequences matching the target sequences the reads were mapped 
-onto. This must match the information contained in the BAM files. This is 
-parameter is only required if \code{x} if not a \code{Modifier} object.}
-
-\item{gff}{annotation data, which must match the information contained in the
-BAM files. This is parameter is only required if \code{x} if not a 
-\code{Modifier} object.}
-
 \item{...}{Additional otpional parameters:
 \itemize{
 \item{internalBP}{\code{TRUE} or \code{FALSE}: should 
@@ -54,6 +55,14 @@ should the creation of the \code{Modifier} objects be parallalized? (default:
 \code{internalBP = FALSE})}
 }
 All other arguments will be passed onto the \code{Modifier} objects.}
+
+\item{fasta}{sequences matching the target sequences the reads were mapped 
+onto. This must match the information contained in the BAM files. This is 
+parameter is only required if \code{x} if not a \code{Modifier} object.}
+
+\item{gff}{annotation data, which must match the information contained in the
+BAM files. This is parameter is only required if \code{x} if not a 
+\code{Modifier} object.}
 }
 \description{
 title
