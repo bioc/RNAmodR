@@ -149,31 +149,48 @@ setMethod(f = "relistToClass",
     BiocParallel::register(BiocParallel::SerialParam())
   }
   # do analysis by calling the Modifier classes
+  FUN <- function(i,
+                  z,
+                  n,
+                  args,
+                  modifiertype,
+                  PACKAGE){
+    suppressPackageStartupMessages({
+      requireNamespace(PACKAGE)
+    })
+    if(!is.null(n)){
+      message(i,". ",modifiertype," analysis '",n,"':")
+    } else {
+      message(i,". ",modifiertype," analysis:")
+    }
+    # choose were to use parallelization
+    if(args[["internalBP"]] == FALSE){
+      BiocParallel::register(BiocParallel::SerialParam())
+    }
+    # do not pass this argument along to objects
+    args[["internalBP"]] <- NULL
+    #
+    if(is(x,"BamFileList")){
+      METHOD <- selectMethod(modifiertype,"BamFileList")
+    } else {
+      METHOD <- selectMethod(modifiertype,"character")
+    }
+    do.call(METHOD,
+            c(list(z,
+                   fasta = fasta,
+                   gff = gff,
+                   modifications = modifications),
+              args))
+  }
+  PACKAGE <- getClass(modifiertype)@package
   x <- BiocParallel::bpmapply(
-    function(i,z,n,args){
-      if(!is.null(n)){
-        message(i,". ",modifiertype," analysis '",n,"':")
-      } else {
-        message(i,". ",modifiertype," analysis:")
-      }
-      # choose were to use parallelization
-      if(args[["internalBP"]] == FALSE){
-        BiocParallel::register(SerialParam())
-      }
-      # do not pass this argument along to objects
-      args[["internalBP"]] <- NULL
-      #
-      do.call(modifiertype,
-              c(list(z,
-                     fasta = fasta,
-                     gff = gff,
-                     modifications = modifications),
-                args))
-    },
+    FUN,
     ni,
     x,
     names,
-    MoreArgs = list(args = args),
+    MoreArgs = list(args = args,
+                    modifiertype = modifiertype,
+                    PACKAGE = PACKAGE),
     SIMPLIFY = FALSE)
   if(!all(vapply(names,is.null,logical(1)))){
     names(x) <- names

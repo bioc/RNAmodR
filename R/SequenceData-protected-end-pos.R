@@ -32,7 +32,6 @@ ProtectedEndSequenceData <- function(bamfiles,
                                      fasta,
                                      gff,
                                      ...){
-  browser()
   args <- .get_mod_data_args(...)
   ans <- new("ProtectedEndSequenceData",
              bamfiles,

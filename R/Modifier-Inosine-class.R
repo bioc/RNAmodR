@@ -83,10 +83,11 @@ setMethod("ModInosine",
                    gff,
                    modifications = NULL,
                    ...){
-            ans <- .ModFromCharacter("ModInosine",
-                                     x,
-                                     fasta,
-                                     gff,
+            ans <- new("ModInosine",
+                       x,
+                       fasta,
+                       gff)
+            ans <- .ModFromCharacter(ans,
                                      list(...))
             ans <- .norm_modifications(ans,
                                        list(...))
@@ -104,10 +105,11 @@ setMethod("ModInosine",
                    gff,
                    modifications = NULL,
                    ...){
-            ans <- .ModFromCharacter("ModInosine",
-                                     x,
-                                     fasta,
-                                     gff,
+            ans <- new("ModInosine",
+                       x,
+                       fasta,
+                       gff)
+            ans <- .ModFromCharacter(ans,
                                      list(...))
             ans <- .norm_modifications(ans,
                                        list(...))
@@ -123,7 +125,11 @@ setMethod("ModInosine",
           function(x,
                    modifications = NULL,
                    ...){
-            ans <- .ModFromSequenceData("ModInosine",
+            ans <- new("ModInosine",
+                       bamfiles(x),
+                       fasta(x),
+                       gff(x))
+            ans <- .ModFromSequenceData(ans,
                                         x,
                                         list(...))
             ans <- .norm_modifications(ans,

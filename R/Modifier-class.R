@@ -352,15 +352,8 @@ setMethod(f = "modifications",
 
 # constructors -----------------------------------------------------------------
 
-.ModFromCharacter <- function(class,
-                              bamfiles,
-                              fasta,
-                              gff,
+.ModFromCharacter <- function(ans,
                               args){
-  ans <- new(class,
-             bamfiles,
-             fasta,
-             gff)
   settings(ans) <- args
   modName <- fullName(ModRNAString())[
     which(shortName(ModRNAString()) %in% ans@mod)]
@@ -368,9 +361,9 @@ setMethod(f = "modifications",
           paste(tools::toTitleCase(modName), collapse = "', '"),
           "'...")
   ans@data <- do.call(ans@dataClass,
-                      c(list(bamfiles = ans@bamfiles,
-                           fasta = ans@fasta,
-                           gff = ans@gff),
+                      c(list(bamfiles = bamfiles(ans),
+                             fasta = fasta(ans),
+                             gff = gff(ans)),
                         settings(ans)))
   ans@data@sequences <- RNAStringSet(ans@data@sequences)
   if(settings(ans,"findMod")){
@@ -380,13 +373,9 @@ setMethod(f = "modifications",
   ans
 }
 
-.ModFromSequenceData <- function(class,
+.ModFromSequenceData <- function(ans,
                                  x,
                                  args){
-  ans <- new(class,
-             x@bamfiles,
-             x@fasta,
-             x@gff)
   settings(ans) <- args
   # check data type
   ans@data <- .norm_data_type(ans,x)
