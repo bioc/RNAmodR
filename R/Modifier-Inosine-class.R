@@ -151,9 +151,9 @@ setMethod("ModInosine",
   scores$z <- vapply(scores$z,min,numeric(1),100)
   scores$z[is.infinite(scores$z) | is.na(scores$z)] <- 0
   scores$dz[is.infinite(scores$dz) | is.na(scores$dz)] <- 0
-  ans <- DataFrame(value = scores$z,
-                   sd = scores$dz)
-  ans <- SplitDataFrameList(ans)
+  ans <- S4Vectors::DataFrame(value = scores$z,
+                              sd = scores$dz)
+  ans <- IRanges::SplitDataFrameList(ans)
   ans@partitioning <- x@partitioning
   ans
 }
@@ -161,13 +161,13 @@ setMethod("ModInosine",
 .aggregate_pile_up_to_coverage <- function(data){
   df <- data@unlistData
   replicates <- unique(data@replicate)
-  ans  <- IntegerList(lapply(seq_along(replicates),
-                             function(i){
-                               rowSums(as.data.frame(df[,data@replicate == i]))
-                             }))
+  ans  <- IRanges::IntegerList(lapply(seq_along(replicates),
+                                      function(i){
+                                        rowSums(as.data.frame(df[,data@replicate == i]))
+                                      }))
   names(ans) <- paste0("replicate.",replicates)
-  ans <- do.call("DataFrame",ans)
-  ans <- SplitDataFrameList(ans)
+  ans <- do.call(S4Vectors::DataFrame,ans)
+  ans <- IRanges::SplitDataFrameList(ans)
   ans@partitioning <- data@partitioning
   ans
 }
@@ -177,11 +177,11 @@ setMethod("ModInosine",
   data <- seqData(x)
   coverage <- .aggregate_pile_up_to_coverage(data)
   score <- .calculate_inosine_score(mod)
-  ans <- cbind(DataFrame(score = unlist(score)$value,
-                         sd = unlist(score)$sd,
-                         row.names = NULL),
+  ans <- cbind(S4Vectors::DataFrame(score = unlist(score)$value,
+                                    sd = unlist(score)$sd,
+                                    row.names = NULL),
                unlist(coverage))
-  ans <- SplitDataFrameList(ans)
+  ans <- IRanges::SplitDataFrameList(ans)
   ans@partitioning <- mod@partitioning
   ans
 }
@@ -211,9 +211,9 @@ setMethod(f = "aggregate",
 
 .find_inosine <- function(x){
   message("Searching for Inosine...")
-  letters <- CharacterList(strsplit(as.character(sequences(x)),""))
+  letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   ranges <- ranges(x)
-  ranges <- split(.get_parent_annotations(ranges),
+  ranges <- split(RNAmodR:::.get_parent_annotations(ranges),
                   seq_along(ranges))
   # get the aggregate data
   mod <- aggregateData(x)
@@ -221,8 +221,9 @@ setMethod(f = "aggregate",
   minCoverage <- settings(x,"minCoverage")
   minReplicate <- settings(x,"minReplicate")
   minScore <- settings(x,"minScore")
+  browser()
   # construct logical vector for passing the coverage threshold
-  coverage <- mod[,seq_len(unique(ncol(mod)) - 2) + 2,drop = FALSE]
+  coverage <- mod[,seq_len(unique(IRanges::ncol(mod)) - 2) + 2,drop = FALSE]
   coverage <- apply(as.matrix(unlist(coverage)),1,
                     function(row){
                       sum(row > minCoverage) >= minReplicate
@@ -237,21 +238,22 @@ setMethod(f = "aggregate",
                (m$score - m$sd) >= minScore & 
                c,] # coverage check
       if(nrow(m) == 0L) return(NULL)
-      ans <- .construct_mod_ranges(r,
-                                   m,
-                                   modType = "I",
-                                   .get_inosine_score,
-                                   "RNAmodR",
-                                   "RNAMOD")
+      ans <- .constructModRanges(r,
+                                 m,
+                                 modType = "I",
+                                 RNAmodR:::.get_inosine_score,
+                                 "RNAmodR",
+                                 "RNAMOD")
       ans
     },
     mod[,seq_len(2)],
     coverage,
     letters,
     ranges)
-  modifications <- GRangesList(modifications[!vapply(modifications,
-                                                     is.null,
-                                                     logical(1))])
+  modifications <- GenomicRanges::GRangesList(
+    modifications[!vapply(modifications,
+                          is.null,
+                          logical(1))])
   unname(unlist(modifications))
 }
 

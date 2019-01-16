@@ -14,7 +14,8 @@ Depends:
     R (>= 3.5),
     IRanges,
     GenomicRanges,
-    Modstrings
+    Modstrings,
+    Rsamtools
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
@@ -58,6 +59,7 @@ Collate:
     'ModifierSet-subset.R'
     'ModifierSetList-class.R'
     'SequenceData-coverage.R'
+    'SequenceData-end-pos-normalized.R'
     'SequenceData-end-pos.R'
     'SequenceData-pileup.R'
     'SequenceData-viz.R'

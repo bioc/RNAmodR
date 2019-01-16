@@ -22,12 +22,11 @@ NULL
 #' @import BiocParallel
 NULL
 requireNamespace("S4Vectors")
-requireNamespace("Rsamtools")
 requireNamespace("IRanges")
 requireNamespace("GenomicRanges")
 requireNamespace("GenomicAlignments")
-requireNamespace("Biostrings")
 requireNamespace("Modstrings")
+requireNamespace("Rsamtools")
 requireNamespace("rtracklayer")
 requireNamespace("BiocParallel")
 

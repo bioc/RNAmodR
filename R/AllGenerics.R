@@ -113,6 +113,18 @@ setGeneric(
 
 # Modifier functions -----------------------------------------------------------
 
+#' @rdname RNAmodR-internals
+#' @export
+setGeneric( 
+  name = ".constructModRanges",
+  signature = c("range","data"),
+  def = function(range,
+                 data,
+                 modType,
+                 scoreFun,
+                 source,
+                 type) standardGeneric(".constructModRanges")
+)
 #' @rdname modify
 #' @export
 setGeneric( 
@@ -121,6 +133,8 @@ setGeneric(
   def = function(x,
                  force = FALSE) standardGeneric("modify")
 )
+#' @rdname plotROC
+#' @export
 setGeneric( 
   name = "plotROC",
   signature = c("x"),
