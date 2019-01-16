@@ -494,8 +494,10 @@ setMethod(
   if(!is.null(input[["maxLength"]])){
     maxLength <- input[["maxLength"]]
     if(!is.integer(maxLength) | maxLength <= 1L){
-      stop("'maxLength' must be integer with a value higher than 1L or NA.",
-           call. = FALSE)
+      if(!is.na(maxLength)){
+        stop("'maxLength' must be integer with a value higher than 1L or NA.",
+             call. = FALSE)
+      }
     }
   }
   # for norm protected end data
@@ -570,65 +572,20 @@ setMethod(
   x
 }
 
-# returns the position data for analysis as a list of data per replicate for
-# individual transcript
-.subset_to_intersecting_transcripts <- function(ID,
-                                                data,
-                                                class){
+# subset to conditions
+.subset_to_condition <- function(data,
+                                 conditions,
+                                 condition){
+  if(condition != "both"){
+    data <- data[,conditions == condition, drop = FALSE]
+    if(ncol(data) == 0L){
+      stop("No data for condition '",condition,"' found.")
+    }
+  }
   data
 }
 
-# detect modifications in each file
-.quantify_read_data_per_file <- function(bamFile,
-                                         genome,
-                                         ranges,
-                                         dataFUN,
-                                         param = NULL,
-                                         args = list()){
-  # load the bamfile
-  bamData <- GenomicAlignments::readGAlignments(bamFile,
-                                                param = param)
-  # Total counts
-  totalCounts <- Rsamtools::idxstatsBam(bamFile,
-                                        param = param)
-  totalCounts <- sum(totalCounts$mapped)
-  # process result and split into chunks based on ranges
-  IDs <- .get_IDs_from_scanBamParam(param)
-  if(length(IDs) == 0){
-    stop("Invalid ScanBamParam object.")
-  }
-  ranges_subset <- ranges[.get_unique_identifiers(ranges) %in% IDs,]
-  hits <- IRanges::findOverlaps(bamData,
-                                ranges_subset)
-  bamData <- IRanges::extractList(bamData, 
-                                  S4Vectors::split(
-                                    S4Vectors::from(hits),
-                                    as.factor(S4Vectors::to(hits))))
-  f <- as.numeric(names(bamData))
-  names(bamData) <- .get_unique_identifiers(ranges_subset)[f]
-  # check for data
-  if(length(bamData) == 0){
-    warning("No reads detected in bam file '",
-            bamFile,
-            "'")
-    return(NULL)
-  }
-  # split ranges and get corresponding sequences
-  rangesList <- split(ranges_subset[f],
-                      names(bamData))
-  sequences <- Rsamtools::getSeq(genome,ranges_subset[f])
-  # get the data per transcript
-  data <- mapply(dataFUN,
-                 bamData,
-                 sequences,
-                 rangesList,
-                 MoreArgs = list(totalCounts = totalCounts),
-                 SIMPLIFY = FALSE)
-  # remove entries for transcript for which position data is insufficient
-  data <- data[!vapply(data, is.null, logical(1))]
-  if(length(data) == 0) return(NULL)
-  return(data)
-}
+
 
 
 

@@ -40,61 +40,59 @@ setClass(Class = "EndSequenceData",
                                                   type = "5prime",
                                                   args = list()){
   parentRanges <- .get_parent_annotations(ranges)
-  # add some flags
-  # bamWhat(param) <- c("flag","mapq")
   data <- GenomicAlignments::readGAlignments(bamFile, param = param)
   # apply length cut off if set
   if(!is.na(args[["maxLength"]])){
     data <- data[width(data) <= args[["maxLength"]],]
   }
-  hits <- findOverlaps(data,parentRanges)
+  hits <- GenomicAlignments::findOverlaps(data,parentRanges)
   # split results per transcript
-  data <- split(subsetByOverlaps(data, parentRanges),
-                subjectHits(hits))
+  data <- split(IRanges::subsetByOverlaps(data, parentRanges),
+                S4Vectors::subjectHits(hits))
   # factor for found and non found transcripts
   f <- as.integer(names(data))
   f_not_found <- as.integer(
     seq_along(parentRanges)[!(seq_along(parentRanges) %in% 
                                 unique(subjectHits(hits)))])
   # get data for lapply
-  starts <- start(data)
-  ends <- end(data)
-  widths <- width(parentRanges)
-  strands <- as.character(strand(parentRanges)[f])
+  starts <- BiocGenerics::start(data)
+  ends <- BiocGenerics::end(data)
+  widths <- BiocGenerics::width(parentRanges)
+  strands <- as.character(BiocGenerics::strand(parentRanges)[f])
   # aggregate 5'-pos of reads based on strand information
   if(type == "5prime"){
-    data <- IntegerList(lapply(seq_along(data),
-                               function(i){
-                                 if(strands[i] == "+"){
-                                   starts[[i]]
-                                 } else {
-                                   ends[[i]]
-                                 }
-                               }))
+    data <- IRanges::IntegerList(lapply(seq_along(data),
+                                        function(i){
+                                          if(strands[i] == "+"){
+                                            starts[[i]]
+                                          } else {
+                                            ends[[i]]
+                                          }
+                                        }))
   } else if(type == "3prime"){
-    data <- IntegerList(lapply(seq_along(data),
-                               function(i){
-                                 if(strands[i] == "-"){
-                                   starts[[i]]
-                                 } else {
-                                   ends[[i]]
-                                 }
-                               }))
+    data <- IRanges::IntegerList(lapply(seq_along(data),
+                                        function(i){
+                                          if(strands[i] == "-"){
+                                            starts[[i]]
+                                          } else {
+                                            ends[[i]]
+                                          }
+                                        }))
   } else if(type == "all"){
-    data <- IntegerList(lapply(seq_along(data),
-                               function(i){
-                                 c(starts[[i]],ends[[i]])
-                               }))
+    data <- IRanges::IntegerList(lapply(seq_along(data),
+                                        function(i){
+                                          c(starts[[i]],ends[[i]])
+                                        }))
   } else if(type == "protected_ends"){
-    data <- IntegerList(lapply(seq_along(data),
-                               function(i){
-                                 c(starts[[i]]-1,ends[[i]])
-                               }))
+    data <- IRanges::IntegerList(lapply(seq_along(data),
+                                        function(i){
+                                          c(starts[[i]]-1,ends[[i]])
+                                        }))
   } else {
     stop("Something went wrong. Invalid type '", type, "'.")
   }
   # calculate tables and add empty positions
-  data <- IntegerList(mapply(
+  data <- IRanges::IntegerList(mapply(
     function(d,w){
       bg <- table(seq_len(w)) - 1
       d <- table(d)
@@ -110,7 +108,7 @@ setClass(Class = "EndSequenceData",
     widths[f],SIMPLIFY = FALSE))
   names(data) <- f
   # get data for empty transcripts
-  data_not_found <- IntegerList(mapply(
+  data_not_found <- IRanges::IntegerList(mapply(
     function(w){
       d <- table(seq_len(w)) - 1
       as.integer(d)
@@ -233,28 +231,29 @@ EndSequenceData <- function(bamfiles,
 # aggregation ------------------------------------------------------------------
 
 #' @importFrom matrixStats rowSds
-.aggregate_end_data_mean_sd <- function(x,
+.aggregate_list_data_mean_sd <- function(x,
                                         condition){
-  df <- x@unlistData
-  if(condition != "both"){
-    df <- df[,x@conditions == condition, drop = FALSE]
-    if(ncol(df) == 0L){
-      stop("No data for condition '",condition,"' found.")
-    }
-  }
+  df <- .subset_to_condition(x@unlistData,
+                             x@conditions,
+                             condition)
+  # set up some base values. replicates is here the same as the number of 
+  # columns, since a list per replicate is assumed
   replicates <- unique(x@replicate)
+  # get means
   means <- NumericList(lapply(replicates,
                               function(rep){
                                 rowMeans(as.data.frame(df[,x@replicate == rep]),
                                          na.rm = TRUE)
                               }))
   names(means) <- paste0("means.",replicates)
+  # get sds
   sds <- NumericList(lapply(replicates,
                             function(rep){
                               matrixStats::rowSds(as.matrix(df[,x@replicate == rep]),
                                                   na.rm = TRUE)
                             }))
   names(sds) <- paste0("sds.",replicates)
+  # assemble data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
   ans <- SplitDataFrameList(ans)
@@ -269,7 +268,7 @@ setMethod("aggregate",
           function(x,
                    condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
-            .aggregate_end_data_mean_sd(x,condition)
+            .aggregate_list_data_mean_sd(x,condition)
           }
 )
 
@@ -280,7 +279,7 @@ setMethod("aggregate",
           function(x,
                    condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
-            .aggregate_end_data_mean_sd(x,condition)
+            .aggregate_list_data_mean_sd(x,condition)
           }
 )
 
@@ -292,6 +291,6 @@ setMethod("aggregate",
           function(x,
                    condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
-            .aggregate_end_data_mean_sd(x,condition)
+            .aggregate_list_data_mean_sd(x,condition)
           }
 )

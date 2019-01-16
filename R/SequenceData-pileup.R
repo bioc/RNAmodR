@@ -22,7 +22,7 @@ setClass(Class = "PileupSequenceData",
 .pileup_measure_colnames <- c("-","G","A","T","C")
 
 .fill_up_pileup_data <- function(d,r){
-  pos <- seq_len(width(r))
+  pos <- seq_len(BiocGenerics::width(r))
   if(is.null(d)){
     colnames <- .pileup_colnames
     d <- data.frame(pos = pos,
@@ -62,7 +62,7 @@ setClass(Class = "PileupSequenceData",
     d <- reshape2::dcast(d, pos ~ variable, fun.aggregate = sum, fill = 0)
     colnames <- colnames(d)
   }
-  df <- DataFrame(d)
+  df <- S4Vectors::DataFrame(d)
   colnames(df) <- colnames
   df <- df[,.pileup_colnames]
   df
@@ -87,12 +87,14 @@ setClass(Class = "PileupSequenceData",
                        "left_bins", 
                        "query_bins", 
                        "cycle_bins")]
-  parentRanges <- .get_parent_annotations(ranges)
+  parentRanges <- RNAmodR:::.get_parent_annotations(ranges)
   pileupArgs <- pileupArgs[!vapply(pileupArgs,is.null,logical(1))]
   # get data per chromosome
   pileupParam <- do.call("PileupParam",pileupArgs)
-  pileup <- pileup(bamFile, scanBamParam = param, pileupParam = pileupParam)
-  pileup <- DataFrame(pileup)
+  pileup <- Rsamtools::pileup(bamFile,
+                              scanBamParam = param,
+                              pileupParam = pileupParam)
+  pileup <- S4Vectors::DataFrame(pileup)
   # reformat data
   pileup$seqnames <- as.character(pileup$seqnames)
   pileup$nucleotide <- as.character(pileup$nucleotide)
@@ -103,8 +105,8 @@ setClass(Class = "PileupSequenceData",
   # sanitize pilup data
   # - keep only data for correct strand
   # - fillup empty positions with zero
-  strands <- as.character(strand(parentRanges))
-  pileup <- SplitDataFrameList(
+  strands <- as.character(BiocGenerics::strand(parentRanges))
+  pileup <- IRanges::SplitDataFrameList(
     mapply(
       function(d,r,strand){
         ans <- NULL
@@ -167,6 +169,49 @@ PileupSequenceData <- function(bamfiles,
 
 # aggregation ------------------------------------------------------------------
 
+# aggregate
+# - calculate percentage
+# - calculate mean per observation
+# - calculate sd per observation
+#' @importFrom matrixStats rowSds
+.aggregate_data_frame_percentage_mean_sd <- function(x,condition){
+  df <- .subset_to_condition(x@unlistData,
+                             x@conditions,
+                             condition)
+  # set up some base values
+  replicates <- unique(x@replicate)
+  ncol <- ncol(df[,x@replicate == 1L,drop = FALSE])
+  seqAdd <- seq.int(from = 0, to = ncol(df) - 1, by = ncol)
+  colNames <- strsplit(colnames(df)[seq_len(ncol)],"\\.")
+  colNames <- IRanges::CharacterList(colNames)[as.list(lengths(colNames))]
+  # get percentage per replicate
+  for(i in seq_along(replicates)){
+    df[,x@replicate == i] <- 
+      as.data.frame(df[,x@replicate == i]) / 
+      rowSums(as.data.frame(df[,x@replicate == i]))
+  }
+  # get means
+  means <- IRanges::NumericList(lapply(seq_len(ncol),
+                                       function(i){
+                                         rowMeans(as.data.frame(df[,i + seqAdd]),
+                                                  na.rm = TRUE)
+                                       }))
+  names(means) <- paste0("means.",colNames)
+  # get sds
+  sds <- IRanges::NumericList(lapply(seq_len(ncol),
+                                     function(i){
+                                       matrixStats::rowSds(as.matrix(df[,i + seqAdd]),
+                                                           na.rm = TRUE)
+                                     }))
+  names(sds) <- paste0("sds.",colNames)
+  # merge data
+  ans <- cbind(do.call(DataFrame, means),
+               do.call(DataFrame, sds))
+  ans <- IRanges::SplitDataFrameList(ans)
+  ans@partitioning <- x@partitioning
+  ans
+}
+
 #' @name PileupSequenceData
 #' @importFrom matrixStats rowSds
 #' 
@@ -176,40 +221,6 @@ setMethod("aggregate",
           function(x,
                    condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
-            df <- x@unlistData
-            if(condition != "both"){
-              df <- df[,x@conditions == condition, drop = FALSE]
-              if(ncol(df) == 0L){
-                stop("No data for condition '",condition,"' found.")
-              }
-            }
-            replicates <- unique(x@replicate)
-            for(i in seq_along(replicates)){
-              df[,x@replicate == i] <- 
-                as.data.frame(df[,x@replicate == i]) / 
-                rowSums(as.data.frame(df[,x@replicate == i]))
-            }
-            ncol <- ncol(df[,x@replicate == 1L,drop = FALSE])
-            seqAdd <- seq.int(from = 0, to = ncol(df) - 1, by = ncol)
-            colNames <- data.frame(strsplit(colnames(df)[seq_len(ncol)],"\\."),
-                                   stringsAsFactors = FALSE)
-            colNames <- as.character(colNames[nrow(colNames),])
-            means <- NumericList(lapply(seq_len(ncol),
-                                        function(i){
-                                          rowMeans(as.data.frame(df[,i + seqAdd]),
-                                                   na.rm = TRUE)
-                                        }))
-            names(means) <- paste0("means.",colNames)
-            sds <- NumericList(lapply(seq_len(ncol),
-                                      function(i){
-                                        matrixStats::rowSds(as.matrix(df[,i + seqAdd]),
-                                                            na.rm = TRUE)
-                                      }))
-            names(sds) <- paste0("sds.",colNames)
-            ans <- cbind(do.call(DataFrame, means),
-                         do.call(DataFrame, sds))
-            ans <- SplitDataFrameList(ans)
-            ans@partitioning <- x@partitioning
-            ans
+            .aggregate_data_frame_percentage_mean_sd(x,condition)
           }
 )
