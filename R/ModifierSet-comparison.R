@@ -186,7 +186,7 @@ setMethod("compareByCoord",
     max <- max(max,0.5)
     limits <- c(round(-max,1),round(max,1))
   } else {
-    limits <- c(NA,round(max(data$value)))
+    limits <- c(0,round(max(data$value)))
   }
   # plot
   ggplot2::ggplot(data) + 

@@ -68,7 +68,7 @@ setMethod("aggregate",
           function(x,
                    condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
-            .aggregate_end_data_mean_sd(x,condition)
+            .aggregate_list_data_mean_sd(x,condition)
           }
 )
 

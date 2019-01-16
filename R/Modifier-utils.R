@@ -127,35 +127,6 @@ NULL
   ModExperiments
 }
 
-# construct GRanges object from found modifications ----------------------------
-
-.construct_mod_ranges <- function(range,
-                                  data,
-                                  modType,
-                                  scoreFun,
-                                  source,
-                                  type){
-  positions <- as.integer(rownames(data))
-  if(as.character(strand(range)) == "-"){
-    positions <- end(range) - positions + 1L
-  } else {
-    positions <- start(range) + positions - 1L
-  }
-  mranges <- do.call("GRanges",
-                     c(list(seqnames = rep(as.character(seqnames(range)),
-                                           nrow(data)),
-                            ranges = IRanges::IRanges(start = positions,
-                                                      width = 1L),
-                            strand = strand(range),
-                            seqinfo = seqinfo(range),
-                            mod = rep(modType,nrow(data))),
-                       source = source,
-                       type = type,
-                       do.call(scoreFun,list(data)),
-                       list(Parent = range$ID)))
-  mranges
-}
-
 # error propagation ------------------------------------------------------------
 
 ################################################################################
@@ -193,3 +164,43 @@ NULL
   }
   return(.data)
 }
+
+# construct GRanges object from found modifications ----------------------------
+
+#' @rdname RNAmodR-internals
+#' @export
+setMethod(f = ".constructModRanges",
+          signature = c(range = "GRanges",
+                        data = "DataFrame"),
+          function(range,
+                   data,
+                   modType,
+                   scoreFun,
+                   source,
+                   type) {
+            if(nrow(data) == 0L) {
+              return(GenomicRanges::GRanges()) 
+            }
+            positions <- as.integer(rownames(data))
+            if(as.character(BiocGenerics::strand(range)) == "-"){
+              positions <- BiocGenerics::end(range) - positions + 1L
+            } else {
+              positions <- BiocGenerics::start(range) + positions - 1L
+            }
+            mranges <- do.call(
+              GenomicRanges::GRanges,
+              c(list(seqnames = rep(as.character(GenomeInfoDb::seqnames(range)),
+                                    nrow(data)),
+                     ranges = IRanges::IRanges(start = positions,
+                                               width = 1L),
+                     strand = BiocGenerics::strand(range),
+                     seqinfo = GenomeInfoDb::seqinfo(range),
+                     mod = rep(modType,nrow(data))),
+                source = source,
+                type = type,
+                do.call(scoreFun,
+                        list(data)),
+                list(Parent = range$ID)))
+            mranges
+          }
+)
