@@ -131,10 +131,8 @@ setMethod("[", "SequenceDataFrame",
                 xstub <- setNames(seq_along(x), names(x))
                 j <- normalizeSingleBracketSubscript(j, xstub)
               }
-              new_listData <- extractROWS(x@listData, j)
-              new_mcols <- extractROWS(mcols(x), j)
               x <- initialize(x,
-                              df = as(new_listData,"DataFrame"),
+                              df = as(x,"DataFrame")[, j, drop = FALSE],
                               ranges = x@ranges,
                               sequence = x@sequence,
                               replicate = x@replicate[j],
@@ -149,19 +147,15 @@ setMethod("[", "SequenceDataFrame",
             if (!missing(i)){
               x <- extractROWS(x, i)
             }
-            if (missing(drop)){ # drop by default if only one column left
-              drop <- ncol(x) == 1L
+            if (missing(drop)){
+              drop <- TRUE
             }  
             if (drop) {
-              ## one column left
-              if (ncol(x) == 1L){
-                return(x[[1L]])
-              }
               ## one row left
               if (nrow(x) == 1L){
                 return(as(x, "list"))
               }
             }
-            x
+            as(x,"DataFrame")
           }
 )

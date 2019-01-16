@@ -22,7 +22,7 @@ setClass(Class = "PileupSequenceData",
 .pileup_measure_colnames <- c("-","G","A","T","C")
 
 .fill_up_pileup_data <- function(d,r){
-  pos <- seq_len(BiocGenerics::width(r))
+  pos <- BiocGenerics::start(r):BiocGenerics::end(r)
   if(is.null(d)){
     colnames <- .pileup_colnames
     d <- data.frame(pos = pos,
@@ -106,6 +106,7 @@ setClass(Class = "PileupSequenceData",
   # - keep only data for correct strand
   # - fillup empty positions with zero
   strands <- as.character(BiocGenerics::strand(parentRanges))
+  rl <- split(parentRanges,seq_along(parentRanges))
   pileup <- IRanges::SplitDataFrameList(
     mapply(
       function(d,r,strand){
@@ -124,9 +125,10 @@ setClass(Class = "PileupSequenceData",
         ans
       },
       pileup,
-      split(parentRanges,seq_along(parentRanges)),
+      rl,
       strands,
       SIMPLIFY = FALSE))
+  names(pileup) <- parentRanges$ID
   pileup
 }
 

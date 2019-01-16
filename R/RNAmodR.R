@@ -48,6 +48,8 @@ GFF_COLNAMES <- c("source",
                   "gene",
                   "protein_id",
                   "transcript_id")
+#' @name RNAmodR-internals
+#' @export
 MOD_CONTAINING_FEATURES <- c("transcript",
                              "gene",
                              "mRNA",

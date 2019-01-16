@@ -77,9 +77,9 @@ setMethod("show", "SequenceData",
                                   nrow = 1,
                                   dimnames = list("", mdata_col_names))
             }
-            cat("- Data:\n")
+            cat("- Data columns:\n")
             print(out_data, quote = FALSE, right = TRUE)
-            cat("\n- Metadata:\n")
+            cat("\n- Ranges metadata columns:\n")
             print(out_mdata, quote = FALSE, right = TRUE)
           }
 )
@@ -93,7 +93,7 @@ S4Vectors::setValidity2(Class = "SequenceData",.valid.SequenceData)
 ################################################################################
 # list methods -----------------------------------------------------------------
 
-extractElement <- function(x, i){
+.extractElement <- function(x, i){
   unlisted_x <- unlist(x, use.names=FALSE)
   x_partitioning <- PartitioningByEnd(x)
   window_start <- start(x_partitioning)[i]
@@ -120,7 +120,7 @@ setMethod("getListElement", "SequenceData",
             if (is.na(i2)){
               return(NULL)
             }
-            extractElement(x, i)
+            .extractElement(x, i)
           }
 )
 
@@ -180,8 +180,6 @@ setMethod("setListElement", "SequenceData",
             .replace_list_element(x, i2, value)
           }
 )
-
-
 
 lsubset_List_by_List <- function(x, i, value){
   lx <- length(x)
@@ -249,7 +247,7 @@ lsubset_List_by_List <- function(x, i, value){
 setReplaceMethod("[", "SequenceData",
                  function(x, i, j,..., value){
                    if(!is(value,"SequenceData")){
-                     stop("invalid value. must be 'SequenceData'.")
+                     stop("invalid value. must be '",class(x),"'.")
                    }
                    browser()
                    if (!missing(j) || length(list(...)) > 0L){
@@ -335,8 +333,7 @@ setMethod("extractROWS", "SequenceData",
 )
 
 setMethod("getListElement", "SequenceData",
-          function(x, i, exact=TRUE)
-          {
+          function(x, i, exact=TRUE){
             i2 <- normalizeDoubleBracketSubscript(i, x, exact=exact,
                                                   allow.NA=TRUE,
                                                   allow.nomatch=TRUE)
@@ -363,13 +360,13 @@ setMethod("getListElement", "SequenceData",
 setMethod("cbind", "SequenceData",
           function(...){
             arg1 <- list(...)[[1L]]
-            stop("'rbind' not supported for ",class(arg1),".")
+            stop("'rbind' is not supported for ",class(arg1),".")
           }
 )
 setMethod("rbind", "SequenceData",
           function(...){
             arg1 <- list(...)[[1L]]
-            stop("'rbind' not supported for ",class(arg1),".")
+            stop("'rbind' is not supported for ",class(arg1),".")
           }
 )
 
@@ -474,7 +471,7 @@ setMethod(
   # get sequence per transcript
   seq <- getSeq(FaFile(fafile), gr)
   names(seq) <- gr$ID
-  seq
+  as(seq,"RNAStringSet")
 }
 
 .get_mod_data_args <- function(...){
@@ -515,31 +512,45 @@ setMethod(
   args
 }
 
-.postprocess_read_data <- function(x,
-                                   data,
-                                   ranges,
-                                   sequences){
-  conditionsFmultiplier <- 1L
-  # work with the unlisted data and construct a CompressedSplitDataFrameList
-  # from this
+.norm_postprocess_read_data <- function(data){
   if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
     data <- lapply(data,
                    function(d){
                      d[order(names(d))]
                    })
     data <- lapply(data, unlist)
-    data <- DataFrame(data)
+    if(length(unique(lengths(data))) != 1L){
+      stop("Data is of unequal length and cannot be coerced to a DataFrame.",
+           call. = FALSE)
+    }
+    data <- S4Vectors::DataFrame(data)
   } else if(is(data[[1L]],"DataFrameList")) {
     data <- lapply(data, unlist, use.names = FALSE)
     ncols <- unique(unlist(lapply(data, ncol)))
     if(length(ncols) != 1L){
       stop("Something went wrong. Width of data should be constant.")
     }
-    conditionsFmultiplier <- ncols
+    if(length(unique(vapply(data,nrow,numeric(1)))) != 1L){
+      stop("Data is of unequal length and cannot be merged into a DataFrame.",
+           call. = FALSE)
+    }
     data <- do.call(cbind,data)
   } else {
     stop("Something went wrong.")
   }
+  rownames(data) <- NULL
+  data
+}
+
+.postprocess_read_data <- function(x,
+                                   data,
+                                   ranges,
+                                   sequences){
+  conditionsFmultiplier <- length(data)
+  # work with the unlisted data and construct a CompressedSplitDataFrameList
+  # from this
+  data <- .norm_postprocess_read_data(data)
+  conditionsFmultiplier <- ncol(data) / conditionsFmultiplier 
   # create partitioning object from ranges
   parentRanges <- .get_parent_annotations(ranges)
   partitioning <- PartitioningByEnd(parentRanges)
@@ -584,9 +595,6 @@ setMethod(
   }
   data
 }
-
-
-
 
 
 # accessors --------------------------------------------------------------------

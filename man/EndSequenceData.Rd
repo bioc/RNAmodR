@@ -4,11 +4,11 @@
 \docType{class}
 \name{EndSequenceData}
 \alias{EndSequenceData}
+\alias{End5SequenceData}
+\alias{End3SequenceData}
 \alias{End5SequenceData-class}
 \alias{End3SequenceData-class}
 \alias{EndSequenceData-class}
-\alias{End5SequenceData}
-\alias{End3SequenceData}
 \title{EndSequenceData}
 \usage{
 End5SequenceData(bamfiles, fasta, gff, ...)

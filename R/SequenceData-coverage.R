@@ -23,17 +23,16 @@ setClass(Class = "CoverageSequenceData",
                                                       args = list()){
   ranges <- .get_parent_annotations(ranges)
   # get data per chromosome
-  coverage <- coverage(bamFile, param = param)
+  coverage <- GenomicAlignments::coverage(bamFile, param = param)
   coverage <- 
     coverage[names(coverage) %in% as.character(seqnames(ranges))]
   coverage <- as(coverage,"IntegerList")
-  coverage <- coverage[order(names(coverage))]
-  # split into per gene data
-  ranges <- split(ranges,GenomeInfoDb::seqnames(ranges))
-  ranges <- ranges[order(names(ranges))]
-  if(any(names(ranges) != names(coverage))){
-    stop("Something went wrong.")
-  }
+  coverage <- IRanges::IntegerList(
+    lapply(split(ranges,
+                 seq_along(ranges)),
+           function(r){
+             coverage[[seqnames(r)]][start(r):end(r)]
+           }))
   names(coverage) <- ranges$ID
   coverage
 }
@@ -41,9 +40,9 @@ setClass(Class = "CoverageSequenceData",
 #' @rdname CoverageSequenceData
 #' @export
 CoverageSequenceData <- function(bamfiles,
-                            fasta,
-                            gff,
-                            ...){
+                                 fasta,
+                                 gff,
+                                 ...){
   args <- .get_mod_data_args(...)
   ans <- new("CoverageSequenceData",
              bamfiles,

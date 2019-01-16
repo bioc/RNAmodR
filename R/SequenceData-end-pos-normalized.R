@@ -3,6 +3,7 @@
 NULL
 
 #' @name NormEndSequenceData
+#' @aliases NormEnd5SequenceData NormEnd3SequenceData
 #' 
 #' @title NormEndSequenceData
 #' 
@@ -29,54 +30,26 @@ setClass(Class = "NormEnd3SequenceData",
 .get_position_data_of_transcript_ends_norm <- function(bamFile,
                                                        ranges,
                                                        param,
-                                                       type = "5prime",
+                                                       type = c("5prime",
+                                                                "3prime"),
                                                        args = list()){
+  type <- match.arg(type)
   parentRanges <- RNAmodR:::.get_parent_annotations(ranges)
-  data <- GenomicAlignments::readGAlignments(bamFile, param = param)
-  # apply length cut off if set
-  if(!is.na(args[["maxLength"]])){
-    data <- data[BiocGenerics::width(data) <= args[["maxLength"]],]
-  }
-  hits <- GenomicAlignments::findOverlaps(data,parentRanges)
-  # split results per transcript
-  data <- split(IRanges::subsetByOverlaps(data, parentRanges),
-                S4Vectors::subjectHits(hits))
+  data <- .load_bam_alignment_data(bamFile,param,parentRanges,args)
   # factor for found and non found transcripts
   f <- as.integer(names(data))
   f_not_found <- as.integer(
     seq_along(parentRanges)[!(seq_along(parentRanges) %in% 
-                                unique(S4Vectors::subjectHits(hits)))])
-  # get data for lapply
-  starts <- BiocGenerics::start(data)
-  ends <- BiocGenerics::end(data)
-  widths <- BiocGenerics::width(parentRanges)
+                                unique(names(data)))])
+  # summarize pos of reads based on type
   strands <- as.character(BiocGenerics::strand(parentRanges)[f])
-  # aggregate 5'-pos of reads based on strand information
-  if(type == "5prime"){
-    enddata <- IRanges::IntegerList(lapply(seq_along(data),
-                               function(i){
-                                 if(strands[i] == "+"){
-                                   starts[[i]]
-                                 } else {
-                                   ends[[i]]
-                                 }
-                               }))
-  } else if(type == "3prime"){
-    enddata <- IRanges::IntegerList(lapply(seq_along(data),
-                               function(i){
-                                 if(strands[i] == "-"){
-                                   starts[[i]]
-                                 } else {
-                                   ends[[i]]
-                                 }
-                               }))
-  } else {
-    stop("Something went wrong. Invalid type '", type, "'.")
-  }
+  enddata <- .summarize_to_position_data(data,strands,type)
   # tabulate the counts per position
+  rl <- split(ranges(parentRanges),seq_along(parentRanges))
   enddata <- IRanges::IntegerList(mapply(
-    function(d,w){
-      bg <- table(seq_len(w)) - 1
+    function(d,r){
+      bg <- table(start(r):end(r)) - 1
+      d <- d[d >= start(r) & d <= end(r)]
       d <- table(d)
       d <- d[as.integer(names(d)) > 0L]
       d <- reshape2::acast(data.frame(pos = as.integer(c(names(bg),names(d))),
@@ -87,7 +60,8 @@ setClass(Class = "NormEnd3SequenceData",
       as.integer(d)
     },
     enddata,
-    widths[f],SIMPLIFY = FALSE))
+    rl[f],
+    SIMPLIFY = FALSE))
   names(enddata) <- f
   # noralize against total number transcript or against the overlap per position
   normTranscript <- (enddata / BiocGenerics::lengths(data)) * 1000
@@ -104,11 +78,11 @@ setClass(Class = "NormEnd3SequenceData",
     SIMPLIFY = FALSE))
   # calculate tables and add empty positions
   data_not_found <- IRanges::IntegerList(mapply(
-    function(w){
-      d <- table(seq_len(w)) - 1
+    function(r){
+      d <- table(start(r):end(r)) - 1
       as.integer(d)
     },
-    widths[f_not_found],SIMPLIFY = FALSE))
+    rl[f_not_found],SIMPLIFY = FALSE))
   names(data_not_found) <- f_not_found
   # merge data with empty data and order based on factor numbers
   enddata <- c(enddata,data_not_found)

@@ -21,74 +21,128 @@ bibliography: references.bib
 BiocStyle::markdown(css.files = c('custom.css'))
 ```
 
-```{r, echo = FALSE, results = 'asis'}
-library(RNAmodR)
-library(Rsamtools)
-```
-
-```{r, echo = FALSE, results = 'asis'}
-genome <- system.file("extdata","example.fasta" ,package = "RNAmodR")
-annotation <- system.file("extdata","example.gff3" ,package = "RNAmodR")
-files <-  BamFileList(c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR"),
-                      Treated = system.file("extdata","example2.bam" ,package = "RNAmodR"),
-                      Treated = system.file("extdata","example3.bam" ,package = "RNAmodR")))
-```
-
-```{r, echo = FALSE, results = 'asis'}
-mi <- ModInosine(files,genome,annotation)
-```
-
-```{r, echo = FALSE, results = 'asis'}
-files2 <- BamFileList(c(Treated = "KS01.bam"))
-genome2 <- "GRCh38_rRNA_tRNA.fasta"
-annotation2 <- "GRCh38_rRNA_tRNA.gff"
-```
-
-```{r, echo = FALSE, results = 'asis'}
-mrms <- ModRiboMethSeq(files2,genome2,annotation2)
-```
-
-
-```{r, echo = FALSE, results = 'asis'}
-Hsa_mod <- read.csv2("literature/Hsa_rRNA_modifications.csv", encoding = "UTF-8-BOM")
-colnames(Hsa_mod) <- c("molecule","pos","type","score1","score2")
-Hsa_mod <- split(Hsa_mod,Hsa_mod$molecule)
-
-Hsa18S <- GRanges(seqnames = "rRNA18S",
-                  ranges = IRanges::IRanges(start = Hsa_mod$`18S`$pos,
-                                            width = 1),
-                  mod = Hsa_mod$`18S`$type)
-Hsa28S <- GRanges(seqnames = "rRNA28S",
-                  ranges = IRanges::IRanges(start = Hsa_mod$`28S`$pos,
-                                            width = 1),
-                  mod = Hsa_mod$`28S`$type)
-Hsa58S <- GRanges(seqnames = "rRNA58S",
-                  ranges = IRanges::IRanges(start = Hsa_mod$`5.8S`$pos,
-                                            width = 1),
-                  mod = Hsa_mod$`5.8S`$type)
-```
-
-
-```{r, echo = FALSE, results = 'asis'}
-
-dt <- DataTrack(start = seq(1, 121), 
-          width = 1,
-          chromosome = "chrX",
-          genome = "hg19", 
-          name = "sinus", 
-          data = aggregateData(mrms)[[1]]$scoreA) 
-```
-
+# Introduction
 
 # Classes
 
+# Examples
+
+```{r, echo = FALSE}
+suppressPackageStartupMessages({
+  library(RNAmodR)
+})
+```
+```{r, eval = FALSE}
+library(RNAmodR)
+```
+
 ## SequenceData
+
+Loading example files
+
+```{r example_files}
+gff <- system.file("extdata","example1.gff3" ,package = "RNAmodR")
+fasta <- system.file("extdata","example1.fasta" ,package = "RNAmodR")
+files <-  BamFileList(c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR"),
+                        Treated = system.file("extdata","example2.bam" ,package = "RNAmodR"),
+                        Treated = system.file("extdata","example3.bam" ,package = "RNAmodR")))
+```
+
+Each `SequenceData` object is created with a named character vector, which can 
+be coerced to a `BamFileList` or named `BamFileList`. The names must be either
+"treated" or "control" describing the condition of the data file. Multiple 
+files can be given per condition and are used as replicates.
+
+```{r seqdata}
+seqdata <- End5SequenceData(files,fasta,gff)
+seqdata
+```
+
+Each `SequenceData` contains data per transcript alongside the annotation 
+information and the sequence. Upon subsetting a `SequenceDataFrame` is returned
+independent of the class of `SequenceData`.
+
+```{r seqdata2}
+seqdata[[1]]
+```
+
+Currently the following `SequenceData` classes are implemented:
+
+ * `End5SequenceData`
+ * `End3SequenceData`
+ * `EndSequenceData`
+ * `ProtectedEndSequenceData`
+ * `CoverageSequenceData`
+ * `PileupSequenceData`
+ * `NormEnd5SequenceData`
+ * `NormEnd3SequenceData`
+
+The data types and names of the columns are different for most of the 
+`SequenceData` classes. As a naming convenction a descriptor is combined with
+the condition as defined in files input and the replicate. For more details
+please have a look at the man pages, e.g. `?End5SequenceData`.
+
+Subsetting of a `SequenceDataFrame` returns a `SequenceDataFrame` or `DataFrame`, 
+if it is subset by a column or row, respectively. The `drop` argument is 
+ignored for column subsetting and is set to `FALSE`.
+
+```{r seqdata3}
+sdf <- seqdata[[1]]
+sdf[,2]
+sdf[1:10,]
+```
 
 ## Modifier
 
+The `SequenceData` classes are used to hold the data to detect certain features
+within high throughput sequencing data. To assign the presence of specific
+modifications for an established pattern the `Modifier` class is used. For
+example mapped reads from the AlkAnilineSeq method can analyzed using the
+`ModAlkAnilineSeq` class to reveal the presence of m7G by detecting the
+accumulation of 5'-ends at the N+1 position, since m7G is susceptible cleavage
+by the aniline treatment [@].
+
+To fix the data processing and detection strategy, for each type of sequencing 
+method a `Modifier` class can be developed to detect specific modifications.
+For more information on how to develop such a class and maybe a corresponding 
+`SequenceData` class, please have a look at the vignette XXX.
+
+Currently three `Modifier` classes are available:
+
+ * `ModInosine`
+ * `ModAlkAnilineSeq` from the `RNAmodR.AlkAnilineSeq` package
+ * `ModRiboMethSeq` from the `RNAmodR.RiboMethSeq` package
+ 
+
+
 ## ModifierSet
+
 
 # Example analysis workflow
 
 ## Creation of Modifier or ModifierSet
+
+
+## Analysis of detected modifications
+
+## Compairing results
+
+### Modifications described in the literare
+found modifications to modifications described in the literature
+
+
+### Detecting the loss of a modification
+
+
+
+# Additional function of ...
+
+
+## ... the `SequenceData` classes
+
+
+## ... the `Modifier` classes
+
+
+## ... the `ModifierSet` classes
 

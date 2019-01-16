@@ -3,10 +3,10 @@
 \docType{class}
 \name{NormEndSequenceData}
 \alias{NormEndSequenceData}
-\alias{NormEnd5SequenceData-class}
-\alias{NormEnd3SequenceData-class}
 \alias{NormEnd5SequenceData}
 \alias{NormEnd3SequenceData}
+\alias{NormEnd5SequenceData-class}
+\alias{NormEnd3SequenceData-class}
 \title{NormEndSequenceData}
 \usage{
 NormEnd5SequenceData(bamfiles, fasta, gff, ...)

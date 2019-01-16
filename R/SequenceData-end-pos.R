@@ -3,6 +3,7 @@
 NULL
 
 #' @name EndSequenceData
+#' @aliases End5SequenceData End3SequenceData EndSequenceData
 #' 
 #' @title EndSequenceData
 #' 
@@ -33,33 +34,23 @@ setClass(Class = "EndSequenceData",
 
 # End5SequenceData ------------------------------------------------------------------
 
-#'@importFrom reshape2 acast
-.get_position_data_of_transcript_ends <- function(bamFile,
-                                                  ranges,
-                                                  param,
-                                                  type = "5prime",
-                                                  args = list()){
-  parentRanges <- .get_parent_annotations(ranges)
+.load_bam_alignment_data <- function(bamFile,param,ranges,args){
   data <- GenomicAlignments::readGAlignments(bamFile, param = param)
   # apply length cut off if set
   if(!is.na(args[["maxLength"]])){
     data <- data[width(data) <= args[["maxLength"]],]
   }
-  hits <- GenomicAlignments::findOverlaps(data,parentRanges)
+  hits <- GenomicAlignments::findOverlaps(data,ranges)
   # split results per transcript
-  data <- split(IRanges::subsetByOverlaps(data, parentRanges),
+  data <- split(IRanges::subsetByOverlaps(data, ranges),
                 S4Vectors::subjectHits(hits))
-  # factor for found and non found transcripts
-  f <- as.integer(names(data))
-  f_not_found <- as.integer(
-    seq_along(parentRanges)[!(seq_along(parentRanges) %in% 
-                                unique(subjectHits(hits)))])
+}
+
+.summarize_to_position_data <- function(data,strands,type){
   # get data for lapply
   starts <- BiocGenerics::start(data)
   ends <- BiocGenerics::end(data)
-  widths <- BiocGenerics::width(parentRanges)
-  strands <- as.character(BiocGenerics::strand(parentRanges)[f])
-  # aggregate 5'-pos of reads based on strand information
+  # aggregate pos of reads based on strand information
   if(type == "5prime"){
     data <- IRanges::IntegerList(lapply(seq_along(data),
                                         function(i){
@@ -91,10 +82,36 @@ setClass(Class = "EndSequenceData",
   } else {
     stop("Something went wrong. Invalid type '", type, "'.")
   }
+  data
+}
+
+#'@importFrom reshape2 acast
+.get_position_data_of_transcript_ends <- function(bamFile,
+                                                  ranges,
+                                                  param,
+                                                  type = c("5prime",
+                                                           "3prime",
+                                                           "all",
+                                                           "protected_ends"),
+                                                  args = list()){
+  type <- match.arg(type)
+  parentRanges <- .get_parent_annotations(ranges)
+  data <- .load_bam_alignment_data(bamFile,param,parentRanges,args)
+  # factor for found and non found transcripts
+  f <- as.integer(names(data))
+  f_not_found <- as.integer(
+    seq_along(parentRanges)[!(seq_along(parentRanges) %in% 
+                                unique(names(data)))])
+  # summarize pos of reads based on type
+  strands <- as.character(BiocGenerics::strand(parentRanges)[f])
+  data <- .summarize_to_position_data(data,strands,type)
   # calculate tables and add empty positions
+  # also remove overhanging read data
+  rl <- split(ranges(parentRanges),seq_along(parentRanges))
   data <- IRanges::IntegerList(mapply(
-    function(d,w){
-      bg <- table(seq_len(w)) - 1
+    function(d,r){
+      bg <- table(start(r):end(r)) - 1
+      d <- d[d >= start(r) & d <= end(r)]
       d <- table(d)
       d <- d[as.integer(names(d)) > 0L]
       d <- reshape2::acast(data.frame(pos = as.integer(c(names(bg),names(d))),
@@ -105,15 +122,17 @@ setClass(Class = "EndSequenceData",
       as.integer(d)
     },
     data,
-    widths[f],SIMPLIFY = FALSE))
+    rl[f],
+    SIMPLIFY = FALSE))
   names(data) <- f
   # get data for empty transcripts
   data_not_found <- IRanges::IntegerList(mapply(
-    function(w){
-      d <- table(seq_len(w)) - 1
+    function(r){
+      d <- table(start(r):end(r)) - 1
       as.integer(d)
     },
-    widths[f_not_found],SIMPLIFY = FALSE))
+    rl[f_not_found],
+    SIMPLIFY = FALSE))
   names(data_not_found) <- f_not_found
   # merge and order based on factor numbers
   data <- c(data,data_not_found)
