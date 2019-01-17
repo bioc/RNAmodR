@@ -138,6 +138,9 @@ NULL
     additional.mod <- unlist(additional.mod)
   }
   additional.mod <- additional.mod[additional.mod$Parent == coord$Parent]
+  if(length(additional.mod) == 0L){
+    return(additional.mod)
+  }
   GRanges(seqnames = coord$Parent,
           ranges = ranges(additional.mod),
           strand = strand(additional.mod),
@@ -186,11 +189,8 @@ NULL
        end = end)
 }
 
-.get_viz_sequence <- function(seq,coord,args){
+.get_viz_sequence <- function(seq,coord,args,modifications){
   if(args[["modified.seq"]]){
-    modifications <- 
-      .norm_addition.mod_for_visualization(args[["additional.mod"]],
-                                           coord)
     if(length(modifications) > 0L){
       seq <- combineIntoModstrings(seq,modifications)
     }
@@ -257,9 +257,12 @@ setMethod(
     args <- .norm_viz_args(list(...))
     coord <- .norm_coord_for_visualization(coord)
     # get plotting data
+    modAnnotation <- .norm_viz_mod_annotation(args[["additional.mod"]],
+                                              coord)
     seq <- .get_viz_sequence(sequences(x)[[coord$Parent]],
                              coord,
-                             args)
+                             args,
+                             modAnnotation)
     range <- .norm_viz_range(ranges(x)[[coord$Parent]])
     chromosome <- .norm_viz_chromosome(range)
     data <- .norm_data_for_visualization(aggregateData(x)[[coord$Parent]],
@@ -269,8 +272,6 @@ setMethod(
       aggregate(seqData(x)[coord$Parent])[[1]],
       chromosome)
     coordValues <- .get_viz_window(data,coord,window.size)
-    modAnnotation <- .norm_viz_mod_annotation(args[["additional.mod"]],
-                                              coord)
     # get tracks
     st <- .get_viz_sequence_track(seq,
                                   chromosome,
