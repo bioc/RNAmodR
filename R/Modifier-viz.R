@@ -32,7 +32,7 @@ NULL
 #' }
 NULL
 
-.norm_viz_args <- function(input){
+.norm_viz_args_Modifier <- function(input){
   modified.seq <- FALSE
   additional.mod <- GRanges()
   colour <- NA
@@ -173,7 +173,7 @@ NULL
   ans
 }
 
-.get_viz_window <- function(data,coord,window.size){
+.get_viz_window_Modifier <- function(data,coord,window.size){
   window.size <- .norm_viz_windows.size(window.size)
   start <- start(coord) - window.size
   end <- end(coord) + window.size
@@ -202,8 +202,10 @@ NULL
   FUN <- function(trackClass,seqClass,seq,chromosome,args){
     set <- do.call(seqClass,list(seq))
     names(set) <- chromosome
-    track <- do.call(trackClass,c(list(set),
-                                  args))
+    track <- do.call(trackClass,list(set))
+    if(!is.null(args[["sequence.track.pars"]])){
+      Gviz::displayPars(track) <- args[["sequence.track.pars"]]
+    }
     track
   }
   if(!is(seq,"DNAString") && !is(seq,"RNAString") && !is(seq,"ModRNAString")){
@@ -227,17 +229,18 @@ NULL
 .get_viz_annotation_track <- function(modAnnotation,
                                       chromosome,
                                       args){
-  at <- do.call("AnnotationTrack",
-                c(list(modAnnotation,
-                       chromosome = chromosome,
-                       collapse = TRUE,
-                       name = "",
-                       id = modAnnotation$ID,
-                       showFeatureId = TRUE,
-                       collapse = TRUE,
-                       background.title = "#FFFFFF",
-                       fontcolor.legend = "#000000"),
-                  args))
+  at <- Gviz::AnnotationTrack(modAnnotation,
+                              chromosome = chromosome,
+                              collapse = TRUE,
+                              name = "",
+                              id = modAnnotation$ID,
+                              showFeatureId = TRUE,
+                              collapse = TRUE,
+                              background.title = "#FFFFFF",
+                              fontcolor.legend = "#000000")
+  if(!is.null(args[["annotation.track.pars"]])){
+    Gviz::displayPars(at) <- args[["annotation.track.pars"]]
+  }
   at
 }
 
@@ -254,7 +257,7 @@ setMethod(
                         ...) {
     requireNamespace("Gviz")
     # input check
-    args <- .norm_viz_args(list(...))
+    args <- .norm_viz_args_Modifier(list(...))
     coord <- .norm_coord_for_visualization(coord)
     # get plotting data
     modAnnotation <- .norm_viz_mod_annotation(args[["additional.mod"]],
@@ -271,14 +274,10 @@ setMethod(
     seqdata <- .norm_seqdata_for_visualization(
       aggregate(seqData(x)[coord$Parent])[[1]],
       chromosome)
-    coordValues <- .get_viz_window(data,coord,window.size)
+    coordValues <- .get_viz_window_Modifier(data,coord,window.size)
     # get tracks
-    st <- .get_viz_sequence_track(seq,
-                                  chromosome,
-                                  args[["sequence.track.pars"]])
-    atm <- .get_viz_annotation_track(modAnnotation,
-                                     chromosome,
-                                     args[["annotation.track.pars"]])
+    st <- .get_viz_sequence_track(seq,chromosome,args)
+    atm <- .get_viz_annotation_track(modAnnotation,chromosome,args)
     dt <- .dataTracks(x,
                       data = data,
                       seqdata = seqdata,
@@ -300,8 +299,17 @@ setMethod(
                                             name,
                                             from,
                                             to){
-  if(!(name %in% names(seqData(x)))){
-    stop("Element '",name,"' not present in data.", call. = FALSE)
+  if(is(x,"Modifier")){
+    if(!(name %in% names(seqData(x)))){
+      stop("Element '",name,"' not present in data.", call. = FALSE)
+    }
+  } else if(is(x,"ModifierSet")){
+    names <- lapply(lapply(x,seqData),names)
+    if(any(!vapply(names,function(n){name %in% n},logical(1)))){
+      stop("Element '",name,"' not present in data.", call. = FALSE)
+    }
+  } else {
+    stop("Something went wrong.")
   }
   GRanges(seqnames = "chr1",
           ranges = IRanges::IRanges(start = as.integer(from),
@@ -348,3 +356,15 @@ setMethod(
          "'")
   }
 )
+
+
+# viz utils --------------------------------------------------------------------
+
+.is_colour <- function(x) {
+  vapply(x,
+         function(z) {
+           tryCatch(is.matrix(col2rgb(z)), 
+                    error = function(e) FALSE)
+         },
+         logical(1))
+}

@@ -2,6 +2,9 @@
 #' @include SequenceData-class.R
 NULL
 
+# This might change
+.norm_viz_args_SequenceData <- .norm_viz_args_Modifier
+
 #' @rdname visualizeData
 #' @export
 setMethod(
@@ -15,7 +18,7 @@ setMethod(
                         ...) {
     requireNamespace("Gviz")
     # input check
-    args <- .norm_viz_args(list(...))
+    args <- .norm_viz_args_SequenceData(list(...))
     coord <- .norm_coord_for_visualization(coord)
     # get plotting data
     seq <- .get_viz_sequence(sequences(x)[[coord$Parent]],
