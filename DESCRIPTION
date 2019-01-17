@@ -56,6 +56,7 @@ Collate:
     'Modifier-subset.R'
     'Modifier-viz.R'
     'ModifierSet-comparison.R'
+    'ModifierSet-viz.R'
     'ModifierSetList-class.R'
     'SequenceData-coverage.R'
     'SequenceData-end-pos.R'
@@ -63,7 +64,6 @@ Collate:
     'SequenceData-pileup.R'
     'SequenceData-viz.R'
     'SequenceData-protected-end-pos.R'
-    'TxRanges-class.R'
     'utils-bam.R'
     'utils.R'
 RoxygenNote: 6.1.1
