@@ -6,6 +6,8 @@ NULL
 #' @name ModInosine
 #' @aliases Inosine ModifierInosine ICE-Seq
 #' 
+#' @author Felix G.M. Ernst \email{felix.gm.ernst@@outlook.com}
+#' 
 #' @title ModInosine
 #' @description 
 #' title

@@ -56,3 +56,6 @@ for the colours of the individual bases. The names are expected to be
 \code{c("G","A","U","C")}}
 }
 }
+\author{
+Felix G.M. Ernst \email{felix.gm.ernst@outlook.com}
+}

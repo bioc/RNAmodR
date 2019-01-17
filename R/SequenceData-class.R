@@ -378,8 +378,10 @@ setMethod("rbind", "SequenceData",
   if(!is.null(input[["minQuality"]])){
     minQuality <- input[["minQuality"]]
     if(!is.integer(minQuality) | minQuality < 1L){
-      stop("'minQuality' must be integer with a value higher than 0L.",
-           call. = FALSE)
+      if(!is.na(minQuality)){
+        stop("'minQuality' must be integer with a value higher than 0L.",
+             call. = FALSE)
+      }
     }
   }
   minQuality
@@ -477,6 +479,7 @@ setMethod(
 .get_mod_data_args <- function(...){
   input <- list(...)
   max_depth <- 10000L # the default is 250, which is to small
+  minLength <- NA
   maxLength <- NA
   minCoverage <- NA
   # for pileup
@@ -484,6 +487,22 @@ setMethod(
     max_depth <- input[["max_depth"]]
     if(!is.integer(max_depth) | max_depth <= 10L){
       stop("'max_depth' must be integer with a value higher than 10L.",
+           call. = FALSE)
+    }
+  }
+  # for protected end data
+  if(!is.null(input[["minLength"]])){
+    minLength <- input[["minLength"]]
+    if(!is.integer(minLength) | minLength < 1L){
+      if(!is.na(minLength)){
+        stop("'minLength' must be integer with a value higher than 0L or NA.",
+             call. = FALSE)
+      }
+    }
+  }
+  if(!is.na(minLength) && !is.na(maxLength)){
+    if(minLength > maxLength){
+      stop("'minLength' must be smaller or equal to 'maxLength'.",
            call. = FALSE)
     }
   }
@@ -507,6 +526,7 @@ setMethod(
   }
   #
   args <- list(max_depth = max_depth,
+               minLength = minLength,
                maxLength = maxLength,
                minCoverage = minCoverage)
   args

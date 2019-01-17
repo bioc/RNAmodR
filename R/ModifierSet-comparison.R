@@ -83,6 +83,9 @@ NULL
                                    paste,
                                    collapse = "/"))
   }
+  if(!is.null(coord$mod)){
+    data$mod <- unlist(coord$mod)
+  }
   #
   data
 }
@@ -112,9 +115,31 @@ setMethod("compareByCoord",
           }
 )
 
-.create_position_labels <- function(list){
+.norm_compare_plot_args <- function(input){
+  limits <- NA
+  if(!is.null(input[["limits"]])){
+    limits <- input[["limits"]]
+    if(!is.numeric(limits) | length(limits) != 2L){
+      stop("'limits' must be numeric vector with the length == 2.",
+           call. = FALSE)
+    }
+  }
+  args <- list(limits = limits)
+  args
+}
+
+.create_position_labels <- function(positions,
+                                    mod,
+                                    activity){
+  if(is.factor(positions)){
+    positions <- as.numeric(as.character(positions))
+  }
+  list <- list(as.character(positions),
+               mod,
+               activity)
   spacer <- lapply(list,
                    function(el){
+                     if(is.null(el)) return(NULL)
                      length <- nchar(el)
                      missingLength <- max(length) - length
                      unlist(lapply(missingLength,
@@ -132,7 +157,8 @@ setMethod("compareByCoord",
                    })
   labels <- mapply(paste0, spacer, list, sep, SIMPLIFY = FALSE)
   labels <- Reduce(paste0, rev(labels))
-  factor(labels, levels = labels)
+  f <- factor(labels, levels = unique(labels))
+  reorder(f,positions)
 }
 
 .create_sample_labels <- function(labels){
@@ -147,10 +173,11 @@ setMethod("compareByCoord",
                                                      coord,
                                                      normalize,
                                                      ...){
+  args <- .norm_compare_plot_args(list(...))
   data <- .compare_ModifierSet_by_GRangesList(x,coord,...)
   if(!missing(normalize)){
     colnames <- colnames(data)
-    colnames <- colnames[!(colnames %in% c("positions","names","Activity"))]
+    colnames <- colnames[!(colnames %in% c("positions","names","mod","Activity"))]
     if(is.character(normalize)){
       assertive::assert_is_a_string(normalize)
       if(!(normalize %in% colnames)){
@@ -172,11 +199,13 @@ setMethod("compareByCoord",
     }
     
   }
-  data$labels <- .create_position_labels(list(as.character(data$positions),
-                                              data$Activity))
+  data$labels <- .create_position_labels(data$positions,
+                                         data$mod,
+                                         data$Activity)
   # melt data an plot
-  data$labels <- factor(data$labels, levels = rev(data$labels))
+  data$labels <- factor(data$labels, levels = rev(levels(data$labels)))
   data$positions <- NULL
+  data$mod <- NULL
   data$Activity <- NULL
   data <- reshape2::melt(as.data.frame(data), id.vars = c("names","labels"))
   data$variable <- .create_sample_labels(data$variable)
@@ -184,9 +213,13 @@ setMethod("compareByCoord",
   if(!missing(normalize) && normalize != FALSE){
     max <- max(max(data$value),abs(min(data$value)))
     max <- max(max,0.5)
-    limits <- c(round(-max,1),round(max,1))
+    max <- round(max,1) + 0.1
+    limits <- c(-max,max)
   } else {
     limits <- c(0,round(max(data$value)))
+  }
+  if(!is.na(args[["limits"]])){
+    limits <- args[["limits"]]
   }
   # plot
   ggplot2::ggplot(data) + 

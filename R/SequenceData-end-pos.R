@@ -36,9 +36,20 @@ setClass(Class = "EndSequenceData",
 
 .load_bam_alignment_data <- function(bamFile,param,ranges,args){
   data <- GenomicAlignments::readGAlignments(bamFile, param = param)
+  if(length(data) == 0L){
+    stop("No reads found in data.", call. = FALSE)
+  }
   # apply length cut off if set
   if(!is.na(args[["maxLength"]])){
     data <- data[width(data) <= args[["maxLength"]],]
+  }
+  if(!is.na(args[["minLength"]])){
+    data <- data[width(data) >= args[["minLength"]],]
+  }
+  if(length(data) == 0L){
+    stop("No reads found in data with read length equal or between 'minLength'",
+         " (",args[["minLength"]]," nt) and 'maxLength' (",args[["maxLength"]],
+         " nt).", call. = FALSE)
   }
   hits <- GenomicAlignments::findOverlaps(data,ranges)
   # split results per transcript

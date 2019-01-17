@@ -28,6 +28,7 @@ NULL
 .norm_subset_args <- function(input,x){
   name <- NULL
   type <- modType(x)
+  flank <- 0L
   if(!is.null(input[["name"]])){
     name <- input[["name"]]
     if(!is.character(name) || width(name) == 0L){
@@ -46,8 +47,16 @@ NULL
            call. = FALSE)
     }
   }
+  if(!is.null(input[["flank"]])){
+    flank <- input[["flank"]]
+    if(!is.integer(flank) || flank < 0L){
+      stop("'flank' must be a single integer value equal or higher than 0L.",
+           call. = FALSE)
+    }
+  }
   args <- list(name = name,
-               type = type)
+               type = type,
+               flank = flank)
   args
 }
 
@@ -127,7 +136,7 @@ NULL
   # add positions as rownames
   rownames(data@unlistData) <- unlist(lapply(lengths(data),seq_len),
                                       use.names = FALSE)
-  # construct flnaking vector
+  # construct flanking vector
   flank <- seq.int(from = -flank,to = flank, by = 1L)
   f <- IntegerList(lapply(start(ranges(coord)),
                           function(i){
@@ -143,7 +152,7 @@ NULL
   coord <- .norm_coord(coord,args[["type"]])
   data <- aggregateData(x)
   data <- data[.get_element_names(data,coord,args[["name"]],args[["type"]])]
-  .perform_subset(data,coord)
+  .perform_subset(data,coord,args[["flank"]])
 }
 
 ################################################################################
@@ -216,7 +225,7 @@ setMethod("subsetByCoord",
                                            coord,
                                            args[["name"]],
                                            args[["type"]])]
-           .perform_subset(data,coord)
+           .perform_subset(data,coord,args[["flank"]])
          })
 }
 

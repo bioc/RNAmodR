@@ -1,5 +1,6 @@
 #' @include RNAmodR.R
 #' @include SequenceData-class.R
+#' @include SequenceDataList-class.R
 #' @include Modifier-utils.R
 NULL
 
@@ -10,6 +11,9 @@ NULL
 #' @description 
 #' title
 NULL
+
+setClassUnion("SequenceData_OR_SequenceDataList",
+              c("SequenceData", "SequenceDataList"))
 
 #' @rdname Modifier
 #' @export
@@ -22,7 +26,7 @@ setClass("Modifier",
                    conditions = "factor",
                    fasta = "FaFile",
                    gff = "GFFFile",
-                   data = "SequenceData",
+                   data = "SequenceData_OR_SequenceDataList",
                    aggregate = "DataFrameList",
                    modifications = "GRanges",
                    arguments = "list",
