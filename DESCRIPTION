@@ -9,7 +9,9 @@ Authors@R: c(person("Felix G.M.",
                     "Lafontaine", 
                     email = "denis.lafontaine@ulb.ac.be", 
                     role = c("ctb", "fnd")))
-Description: What the package does (one paragraph).
+Description: Loading/aggregation of data and other utilites to detect and 
+    compare post-transcriptional modifications within high througput sequencing
+    data.
 Depends:
     R (>= 3.5),
     IRanges,

@@ -181,66 +181,65 @@ setMethod("setListElement", "SequenceData",
           }
 )
 
-lsubset_List_by_List <- function(x, i, value){
-  lx <- length(x)
-  li <- length(i)
-  if (li == 0L) {
-    ## Surprisingly, in that case, `[<-` on standard vectors does not
-    ## even look at 'value'. So neither do we...
-    return(x)
-  }
-  lv <- length(value)
-  if (lv == 0L){
-    stop("replacement has length zero")
-  }
-  value <- normalizeSingleBracketReplacementValue(value, x)
-  if (is.null(names(i))) {
-    if (li != lx){
-      stop("when list-like subscript is unnamed, it must have the ",
-           "length of list-like object to subset")
-    }
-    if (!is(x, "SimpleList")) {
-      ## We'll try to take a fast path.
-      if (is(i, "List")) {
-        fast_path <- .select_fast_path(i, x)
-      } else {
-        i2 <- as(i, "List")
-        i2_elttype <- elementType(i2)
-        if (length(i2) == li && all(sapply(i, is, i2_elttype))) {
-          fast_path <- .select_fast_path(i2, x)
-          if (!is.na(fast_path))
-            i <- i2
-        } else {
-          fast_path <- NA_character_
-        }
-      }
-      if (!is.na(fast_path)){
-        return(.fast_lsubset_List_by_List(x, i, value))  # fast path
-      }
-    }
-    i2x <- seq_len(li)
-  } else {
-    if (is.null(names(x))){
-      stop("cannot subset an unnamed list-like object ",
-           "by a named list-like subscript")
-    }
-    i2x <- match(names(i), names(x))
-    if (anyMissing(i2x)){
-      stop("list-like subscript has names not in ",
-           "list-like object to subset")
-    }
-    if (anyDuplicated(i2x)){
-      stop("list-like subscript has duplicated names")
-    }
-  }
-  value <- .adjust_value_length(value, li)
-  ## Slow path (loops over the list elements of 'x').
-  for (k in seq_len(li)){
-    x[[i2x[k]]] <- replaceROWS(x[[i2x[k]]], i[[k]], value[[k]])
-  }
-  return(x)
-}
-
+# lsubset_List_by_List <- function(x, i, value){
+#   lx <- length(x)
+#   li <- length(i)
+#   if (li == 0L) {
+#     ## Surprisingly, in that case, `[<-` on standard vectors does not
+#     ## even look at 'value'. So neither do we...
+#     return(x)
+#   }
+#   lv <- length(value)
+#   if (lv == 0L){
+#     stop("replacement has length zero")
+#   }
+#   value <- S4Vectors:::normalizeSingleBracketReplacementValue(value, x)
+#   if (is.null(names(i))) {
+#     if (li != lx){
+#       stop("when list-like subscript is unnamed, it must have the ",
+#            "length of list-like object to subset")
+#     }
+#     if (!is(x, "SimpleList")) {
+#       ## We'll try to take a fast path.
+#       if (is(i, "List")) {
+#         fast_path <- S4Vectors:::.select_fast_path(i, x)
+#       } else {
+#         i2 <- as(i, "List")
+#         i2_elttype <- elementType(i2)
+#         if (length(i2) == li && all(sapply(i, is, i2_elttype))) {
+#           fast_path <- S4Vectors:::.select_fast_path(i2, x)
+#           if (!is.na(fast_path))
+#             i <- i2
+#         } else {
+#           fast_path <- NA_character_
+#         }
+#       }
+#       if (!is.na(fast_path)){
+#         return(S4Vectors:::.fast_lsubset_List_by_List(x, i, value))  # fast path
+#       }
+#     }
+#     i2x <- seq_len(li)
+#   } else {
+#     if (is.null(names(x))){
+#       stop("cannot subset an unnamed list-like object ",
+#            "by a named list-like subscript")
+#     }
+#     i2x <- match(names(i), names(x))
+#     if (anyMissing(i2x)){
+#       stop("list-like subscript has names not in ",
+#            "list-like object to subset")
+#     }
+#     if (anyDuplicated(i2x)){
+#       stop("list-like subscript has duplicated names")
+#     }
+#   }
+#   value <- S4Vectors:::.adjust_value_length(value, li)
+#   ## Slow path (loops over the list elements of 'x').
+#   for (k in seq_len(li)){
+#     x[[i2x[k]]] <- replaceROWS(x[[i2x[k]]], i[[k]], value[[k]])
+#   }
+#   return(x)
+# }
 
 #' @name SequenceData
 #' @export
@@ -254,20 +253,19 @@ setReplaceMethod("[", "SequenceData",
                      stop("invalid subsetting")
                    }
                    if (!missing(i)){
-                     return(lsubset_List_by_List(x, i, value))
+                     return(S4Vectors:::lsubset_List_by_List(x, i, value))
                    }
                    callNextMethod(x, i, value=value)
                  }
 )
 
-##################
-# looping
 
+# looping ----------------------------------------------------------------------
 
 lapply_SequenceData <- function(X, FUN, ...){
   FUN <- match.fun(FUN)
-  ans <- vector(mode="list", length=length(X))
-  unlisted_X <- unlist(X, use.names=FALSE)
+  ans <- vector(mode = "list", length = length(X))
+  unlisted_X <- unlist(X, use.names = FALSE)
   X_partitioning <- PartitioningByEnd(X)
   X_elt_width <- width(X_partitioning)
   empty_idx <- which(X_elt_width == 0L)
@@ -276,9 +274,6 @@ lapply_SequenceData <- function(X, FUN, ...){
   non_empty_idx <- which(X_elt_width != 0L)
   if (length(non_empty_idx) == 0L)
     return(ans)
-  X_elt_start <- start(X_partitioning)
-  X_elt_end <- end(X_partitioning)
-  slot_names <- 
   ans[non_empty_idx] <-
     lapply(non_empty_idx,
            function(i){
@@ -357,6 +352,7 @@ setMethod("getListElement", "SequenceData",
 
 
 # Concatenation ----------------------------------------------------------------
+
 setMethod("cbind", "SequenceData",
           function(...){
             arg1 <- list(...)[[1L]]
@@ -369,7 +365,6 @@ setMethod("rbind", "SequenceData",
             stop("'rbind' is not supported for ",class(arg1),".")
           }
 )
-
 
 # object creation --------------------------------------------------------------
 
