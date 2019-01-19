@@ -20,17 +20,18 @@ setClass("SequenceData",
                       "CompressedSplitDataFrameList"),
          slots = c(ranges = "GRangesList",
                    sequences = "XStringSet",
+                   sequencesType = "character",
                    bamfiles = "BamFileList",
                    fasta = "FaFile",
                    gff = "GFFFile",
                    minQuality = "integer",
                    chromosomes = "character",
                    unlistType = "character",
-                   sequenceDataType = "factor",
                    replicate = "factor",
                    conditions = "factor"),
          prototype = list(ranges = GRangesList(),
-                          sequences = DNAStringSet(),
+                          sequencesType = "RNAStringSet",
+                          sequences = RNAStringSet(),
                           unlistType = "SequenceDataFrame"))
 
 # for concat
@@ -180,85 +181,6 @@ setMethod("setListElement", "SequenceData",
             .replace_list_element(x, i2, value)
           }
 )
-
-# lsubset_List_by_List <- function(x, i, value){
-#   lx <- length(x)
-#   li <- length(i)
-#   if (li == 0L) {
-#     ## Surprisingly, in that case, `[<-` on standard vectors does not
-#     ## even look at 'value'. So neither do we...
-#     return(x)
-#   }
-#   lv <- length(value)
-#   if (lv == 0L){
-#     stop("replacement has length zero")
-#   }
-#   value <- S4Vectors:::normalizeSingleBracketReplacementValue(value, x)
-#   if (is.null(names(i))) {
-#     if (li != lx){
-#       stop("when list-like subscript is unnamed, it must have the ",
-#            "length of list-like object to subset")
-#     }
-#     if (!is(x, "SimpleList")) {
-#       ## We'll try to take a fast path.
-#       if (is(i, "List")) {
-#         fast_path <- S4Vectors:::.select_fast_path(i, x)
-#       } else {
-#         i2 <- as(i, "List")
-#         i2_elttype <- elementType(i2)
-#         if (length(i2) == li && all(sapply(i, is, i2_elttype))) {
-#           fast_path <- S4Vectors:::.select_fast_path(i2, x)
-#           if (!is.na(fast_path))
-#             i <- i2
-#         } else {
-#           fast_path <- NA_character_
-#         }
-#       }
-#       if (!is.na(fast_path)){
-#         return(S4Vectors:::.fast_lsubset_List_by_List(x, i, value))  # fast path
-#       }
-#     }
-#     i2x <- seq_len(li)
-#   } else {
-#     if (is.null(names(x))){
-#       stop("cannot subset an unnamed list-like object ",
-#            "by a named list-like subscript")
-#     }
-#     i2x <- match(names(i), names(x))
-#     if (anyMissing(i2x)){
-#       stop("list-like subscript has names not in ",
-#            "list-like object to subset")
-#     }
-#     if (anyDuplicated(i2x)){
-#       stop("list-like subscript has duplicated names")
-#     }
-#   }
-#   value <- S4Vectors:::.adjust_value_length(value, li)
-#   ## Slow path (loops over the list elements of 'x').
-#   for (k in seq_len(li)){
-#     x[[i2x[k]]] <- replaceROWS(x[[i2x[k]]], i[[k]], value[[k]])
-#   }
-#   return(x)
-# }
-
-#' @name SequenceData
-#' @export
-setReplaceMethod("[", "SequenceData",
-                 function(x, i, j,..., value){
-                   if(!is(value,"SequenceData")){
-                     stop("invalid value. must be '",class(x),"'.")
-                   }
-                   browser()
-                   if (!missing(j) || length(list(...)) > 0L){
-                     stop("invalid subsetting")
-                   }
-                   if (!missing(i)){
-                     return(S4Vectors:::lsubset_List_by_List(x, i, value))
-                   }
-                   callNextMethod(x, i, value=value)
-                 }
-)
-
 
 # looping ----------------------------------------------------------------------
 
@@ -410,7 +332,6 @@ setMethod(
     .Object@bamfiles <- bamfiles
     .Object@replicate <- factor(seq_along(bamfiles))
     .Object@conditions <- factor(names(bamfiles))
-    .Object@sequenceDataType <- factor(rep(class(.Object)[1L],length(bamfiles)))
     .Object@fasta <- fasta
     .Object@gff <- gff
     # additional sanity checks
@@ -586,10 +507,9 @@ setMethod(
   x@unlistData <- data
   x@replicate <- rep(x@replicate, each = conditionsFmultiplier)
   x@conditions <- rep(x@conditions, each = conditionsFmultiplier)
-  x@sequenceDataType <- rep(x@sequenceDataType, each = conditionsFmultiplier)
   x@partitioning <- partitioning
   x@ranges <- ranges
-  x@sequences <- sequences
+  x@sequences <- as(sequences,x@sequencesType)
   names(x) <- as.character(parentRanges$ID)
   if(any(names(x@ranges) != names(x@sequences)) || 
      any(names(x@ranges) != names(x))){

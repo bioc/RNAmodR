@@ -54,8 +54,7 @@ seqData(x)
 
 \S4method{fasta}{Modifier}(x)
 
-\S4method{sequences}{Modifier}(x, modified = FALSE,
-  with.qualities = FALSE)
+\S4method{sequences}{Modifier}(x, modified = FALSE)
 
 \S4method{ranges}{Modifier}(x)
 

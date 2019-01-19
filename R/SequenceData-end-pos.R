@@ -88,6 +88,8 @@ setClass(Class = "EndSequenceData",
   } else if(type == "protected_ends"){
     data <- IRanges::IntegerList(lapply(seq_along(data),
                                         function(i){
+                                          # offset applied to start to
+                                          # sync the data on the position
                                           c(starts[[i]]-1,ends[[i]])
                                         }))
   } else {

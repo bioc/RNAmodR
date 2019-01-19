@@ -11,8 +11,6 @@
 
 \S4method{setListElement}{SequenceData}(x, i, value)
 
-\S4method{[}{SequenceData,ANY,ANY,ANY}(x, i, j, ...) <- value
-
 \S4method{gff}{SequenceData}(x)
 
 \S4method{fasta}{SequenceData}(x)

@@ -37,7 +37,8 @@ Imports:
 Suggests:
     BiocStyle,
     knitr,
-    rmarkdown
+    rmarkdown,
+    RNAmodR.Data
 VignetteBuilder: knitr
 Collate:
     'RNAmodR.R'

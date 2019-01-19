@@ -25,7 +25,7 @@ setClass("ModInosine",
          contains = c("Modifier"),
          prototype = list(mod = "I",
                           score = "score",
-                          dataClass = "PileupSequenceData"))
+                          dataType = "PileupSequenceData"))
 
 setMethod(
   f = "initialize", 
@@ -42,7 +42,7 @@ setMethod(
   }
 )
 
-# constructors -----------------------------------------------------------------
+# settings ---------------------------------------------------------------------
 
 .norm_inosine_args <- function(input){
   minScore <- 10
@@ -70,6 +70,37 @@ setReplaceMethod(f = "settings",
                    x
                  })
 
+# constructor ------------------------------------------------------------------
+
+.ModInosine_from_character <- function(x,
+                                          fasta,
+                                          gff,
+                                          args){
+  ans <- new("ModInosine",
+             x,
+             fasta,
+             gff)
+  ans <- RNAmodR:::.ModFromCharacter(ans,
+                                     args)
+  ans <- RNAmodR:::.norm_modifications(ans,
+                                       args)
+  ans
+}
+.ModInosine_from_SequenceData <- function(x,
+                                             args){
+  x <- as(x,"SequenceDataList")
+  ans <- new("ModInosine",
+             bamfiles(x),
+             fasta(x),
+             gff(x))
+  ans <- RNAmodR:::.ModFromSequenceData(ans,
+                                        x,
+                                        args)
+  ans <- RNAmodR:::.norm_modifications(ans,
+                                       args)
+  ans
+}
+
 setGeneric( 
   name = "ModInosine",
   def = function(x,
@@ -83,17 +114,11 @@ setMethod("ModInosine",
           function(x,
                    fasta,
                    gff,
-                   modifications = NULL,
                    ...){
-            ans <- new("ModInosine",
-                       x,
-                       fasta,
-                       gff)
-            ans <- .ModFromCharacter(ans,
-                                     list(...))
-            ans <- .norm_modifications(ans,
-                                       list(...))
-            ans
+            .ModInosine_from_character(x,
+                                          fasta,
+                                          gff,
+                                          list(...))
           }
 )
 
@@ -105,17 +130,11 @@ setMethod("ModInosine",
           function(x,
                    fasta,
                    gff,
-                   modifications = NULL,
                    ...){
-            ans <- new("ModInosine",
-                       x,
-                       fasta,
-                       gff)
-            ans <- .ModFromCharacter(ans,
-                                     list(...))
-            ans <- .norm_modifications(ans,
+            .ModInosine_from_character(x,
+                                       fasta,
+                                       gff,
                                        list(...))
-            ans
           }
 )
 
@@ -125,18 +144,19 @@ setMethod("ModInosine",
 setMethod("ModInosine",
           signature = c(x = "SequenceData"),
           function(x,
-                   modifications = NULL,
                    ...){
-            ans <- new("ModInosine",
-                       bamfiles(x),
-                       fasta(x),
-                       gff(x))
-            ans <- .ModFromSequenceData(ans,
-                                        x,
-                                        list(...))
-            ans <- .norm_modifications(ans,
-                                       list(...))
-            ans
+            .ModInosine_from_SequenceData(list(x),
+                                          list(...))
+          }
+)
+#' @rdname ModInosine
+#' @export
+setMethod("ModInosine",
+          signature = c(x = "list"),
+          function(x,
+                   ...){
+            .ModInosine_from_SequenceData(x,
+                                          list(...))
           }
 )
 
@@ -274,7 +294,7 @@ setMethod("modify",
           }
 )
 
-# ModSetInosine ------------------------------------------------------------
+# ModSetInosine ----------------------------------------------------------------
 
 #' @rdname ModInosine
 #' @export

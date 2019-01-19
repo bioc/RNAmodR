@@ -18,8 +18,10 @@ SequenceDataList(...)
 
 \S4method{bamfiles}{SequenceDataList}(x)
 
-\S4method{aggregate}{SequenceDataList}(x)
+\S4method{aggregate}{SequenceDataList}(x, condition = "Treated")
 }
 \description{
 title
+
+default names are class names
 }

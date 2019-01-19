@@ -11,6 +11,7 @@
 \alias{ModInosine,character-method}
 \alias{ModInosine,BamFileList-method}
 \alias{ModInosine,SequenceData-method}
+\alias{ModInosine,list-method}
 \alias{modify,ModInosine-method}
 \alias{ModSetInosine-class}
 \alias{ModSetInosine}
@@ -21,13 +22,13 @@
 \usage{
 \S4method{settings}{ModInosine}(x) <- value
 
-\S4method{ModInosine}{character}(x, fasta, gff, modifications = NULL,
-  ...)
+\S4method{ModInosine}{character}(x, fasta, gff, ...)
 
-\S4method{ModInosine}{BamFileList}(x, fasta, gff, modifications = NULL,
-  ...)
+\S4method{ModInosine}{BamFileList}(x, fasta, gff, ...)
 
-\S4method{ModInosine}{SequenceData}(x, modifications = NULL, ...)
+\S4method{ModInosine}{SequenceData}(x, ...)
+
+\S4method{ModInosine}{list}(x, ...)
 
 \S4method{aggregate}{ModInosine}(x, force = FALSE)
 

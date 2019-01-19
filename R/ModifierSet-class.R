@@ -59,7 +59,23 @@ setMethod(
   }
 )
 
+# validity ---------------------------------------------------------------------
+
 .valid_ModifierSet <- function(x){
+  elementTypeX <- modifierType(x)
+  if (!all(vapply(as.list(x),
+                  function(xi) extends(class(xi), elementTypeX),
+                  logical(1)))){
+    return(paste("All 'Modifier' in '",class(x),"' must be of ",
+                 elementTypeX, "objects"))
+  }
+  valid_Modifier <- lapply(x@listData,
+                           .valid_Modifier)
+  valid_Modifier <- valid_Modifier[!vapply(valid_Modifier,is.null,logical(1))]
+  if(length(valid_Modifier) != 0L){
+    return(paste(paste0(seq_along(valid_Modifier),". :",valid_Modifier),
+                 collapse = "\n"))
+  }
   NULL
 }
 S4Vectors::setValidity2(Class = "ModifierSet",.valid_ModifierSet)
@@ -126,7 +142,6 @@ setMethod(f = "relistToClass",
                                      x,
                                      fasta,
                                      gff,
-                                     modifications,
                                      ...){
   # check and normalize input
   args <- .norm_ModifierSet_args(list(...))
@@ -178,8 +193,7 @@ setMethod(f = "relistToClass",
     do.call(METHOD,
             c(list(z,
                    fasta = fasta,
-                   gff = gff,
-                   modifications = modifications),
+                   gff = gff),
               args))
   }
   PACKAGE <- getClass(modifiertype)@package
@@ -200,9 +214,8 @@ setMethod(f = "relistToClass",
        listData = x)
 }
 
-.modifer_to_ModifierSet <- function(x, ...){
+.Modifer_to_ModifierSet <- function(x, ...){
   modifiertype <- modifierType(x[[1]])
-  browser()
   new2(.get_class_name_for_set_from_modifier_type(modifiertype),
        listData = x)
 }
@@ -223,7 +236,7 @@ setMethod(f = "ModifierSet",
                                               args[["gff"]], 
                                               ...))
             }
-            stop("'x' must be a list containining only elements of the same ",
+            stop("'x' must be a list containing only elements of the same ",
                  "type\nof 'Modifer' or elements of type ('BamFileList', ",
                  "'character', 'list') which are coercible\nto a named ",
                  "BamFileList. In the latter case, elements must contain named",
@@ -244,7 +257,6 @@ setMethod(f = "ModifierSet",
 setMethod(f = "ModifierSet",
           signature = c(x = "BamFileList"),
           function(modifiertype, x, fasta, gff, ...) {
-            browser()
             .bamfiles_to_ModifierSet(modifiertype, x, fasta, gff, ...)
           })
 #' @rdname ModifierSet
@@ -252,8 +264,7 @@ setMethod(f = "ModifierSet",
 setMethod(f = "ModifierSet",
           signature = c(x = "Modifier"),
           function(modifiertype, x, ...) {
-            browser()
-            .modifer_to_ModifierSet(x, ...)
+            .Modifer_to_ModifierSet(x, ...)
           })
 
 # show -------------------------------------------------------------------------

@@ -41,11 +41,11 @@ library(RNAmodR)
 Loading example files
 
 ```{r example_files}
-gff <- system.file("extdata","example1.gff3" ,package = "RNAmodR")
-fasta <- system.file("extdata","example1.fasta" ,package = "RNAmodR")
-files <-  BamFileList(c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR"),
-                        Treated = system.file("extdata","example2.bam" ,package = "RNAmodR"),
-                        Treated = system.file("extdata","example3.bam" ,package = "RNAmodR")))
+gff <- system.file("extdata","example1.gff3" ,package = "RNAmodR.Data")
+fasta <- system.file("extdata","example1.fasta" ,package = "RNAmodR.Data")
+files <-  BamFileList(c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR.Data"),
+                        Treated = system.file("extdata","example2.bam" ,package = "RNAmodR.Data"),
+                        Treated = system.file("extdata","example3.bam" ,package = "RNAmodR.Data")))
 ```
 
 Each `SequenceData` object is created with a named character vector, which can 

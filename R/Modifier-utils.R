@@ -107,8 +107,8 @@ NULL
 }
 
 .norm_data_type <- function(ans,pd){
-  if(!is(pd,ans@dataClass)){
-    stop("Data class '",ans@dataClass,"' is required by '",class(.Object),"'.",
+  if(!is(pd,ans@dataType)){
+    stop("Data class '",ans@dataType,"' is required by '",class(.Object),"'.",
          "\n'",class(pd),"' was provided. Aborting...",
          call. = FALSE)
   }

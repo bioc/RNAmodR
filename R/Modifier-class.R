@@ -21,7 +21,7 @@ setClass("Modifier",
          contains = c("VIRTUAL"),
          slots = c(mod = "character", # this have to be populated by subclass
                    score = "character", # this have to be populated by subclass
-                   dataClass = "character", # this have to be populated by subclass
+                   dataType = "character", # this have to be populated by subclass
                    bamfiles = "BamFileList",
                    conditions = "factor",
                    fasta = "FaFile",
@@ -65,8 +65,44 @@ setMethod(
   }
 )
 
-.valid_Modifier <- function(x){
+# validity ---------------------------------------------------------------------
+
+.norm_SequenceData_elements <- function(x,list){
+  if(is(list,"SequenceData")){
+    list <- list(list)
+  } else {
+    if(is(list,"list")){
+      browser()
+      elementTypeMatch <- !vapply(list,is,logical(1),"SequenceData")
+      if(any(elementTypeMatch)){
+        stop("Not all elements are 'SequenceData' objects.", call. = FALSE)
+      }
+    }
+  }
+  elementTypes <- vapply(list,class,character(1))
+  if(length(elementTypes) != length(x@dataType)){
+    stop("Number of 'SequenceData' elements does not match the requirements of",
+         " ",class(x),". '",paste(x@dataType, collapse = "','"),"' are ",
+         "required", call. = FALSE)
+  }
+  elementTypes <- elementTypes[match(elementTypes,x@dataType)]
+  if(any(elementTypes != x@dataType)){
+    stop("Type of SequenceData elements does not match the requirements of ",
+         class(x),". '",paste(x@dataType, collapse = "','"),"' are ",
+         "required", call. = FALSE)
+  }
+}
+
+.valid_SequenceData <- function(x){
+  tmp <- try(.norm_SequenceData_elements(x,x@data))
+  if (inherits(tmp, "try-error")){
+    return(tmp)
+  }
   NULL
+}
+
+.valid_Modifier <- function(x){
+  c(.valid_SequenceData(x))
 }
 S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
 
@@ -111,7 +147,7 @@ setMethod(
   f = "show", 
   signature = signature(object = "Modifier"),
   definition = function(object) {
-    cat("A", class(object), "object containing",object@dataClass,
+    cat("A", class(object), "object containing",object@dataType,
         "with",length(object@data),"elements.\n")
     files <- path(object@bamfiles)
     cat("| Input files:\n",paste0("  - ",names(files),": ",files,"\n"))
@@ -245,16 +281,12 @@ setMethod(f = "sequences",
           signature = signature(x = "Modifier"),
           definition = 
             function(x,
-                     modified = FALSE,
-                     with.qualities = FALSE){
+                     modified = FALSE){
               if(!assertive::is_a_bool(modified)){
                 stop("'modified' has to be a single logical value.")
               }
-              if(!assertive::is_a_bool(with.qualities)){
-                stop("'with.qualities' has to be a single logical value.")
-              }
               if(modified == FALSE){
-                return(x@data@sequences)
+                return(sequences(seqData(x)))
               }
               mod <- .get_modifications_per_transcript(x)
               mod <- split(mod,names(mod))
@@ -264,9 +296,6 @@ setMethod(f = "sequences",
               ans[names(ans) %in% names(mod)] <- 
                 combineIntoModstrings(modSeqList,
                                       mod)
-              if(with.qualities == TRUE){
-                browser()
-              }
               ans
             }
 )
@@ -358,34 +387,71 @@ setMethod(f = "modifications",
 
 .ModFromCharacter <- function(ans,
                               args){
+  # settings
   settings(ans) <- args
+  #
   modName <- fullName(ModRNAString())[
     which(shortName(ModRNAString()) %in% ans@mod)]
   message("Starting to search for '",
           paste(tools::toTitleCase(modName), collapse = "', '"),
           "'...")
-  ans@data <- do.call(ans@dataClass,
-                      c(list(bamfiles = bamfiles(ans),
-                             fasta = fasta(ans),
-                             gff = gff(ans)),
-                        settings(ans)))
-  ans@data@sequences <- RNAStringSet(ans@data@sequences)
+  # get SequenceData
+  data <- lapply(ans@dataType,
+                 function(class){
+                   do.call(class,
+                           c(list(bamfiles = bamfiles(ans),
+                                  fasta = fasta(ans),
+                                  gff = gff(ans)),
+                             settings(ans)))
+                 })
+  if(length(data) > 1L){
+    ans@data <- as(data,"SequenceDataList")
+  } else {
+    ans@data <- data[[1]]
+  }
   if(settings(ans,"findMod")){
     ans <- do.call(modify,
                    list(ans))
   }
+  validObject(ans)
   ans
+}
+
+.check_list_for_SequenceData_elements <- function(ans,list){
+  if(is(ans,"character") && extends(ans,"Modifier")){
+    ans <- getclass(ans)@prototype
+  } else if(!is(ans,"Modifier")) {
+    stop("Something went wrong.")
+  }
+  if(!is(list,"list")){
+    list <- list(list)
+  }
+  .norm_SequenceData_elements(ans,list)
+  if(length(list) == 1L){
+    return(list[[1]])
+  }
+  as(list,"SequenceDataList")
 }
 
 .ModFromSequenceData <- function(ans,
                                  x,
                                  args){
+  # settings
   settings(ans) <- args
-  # check data type
-  ans@data <- .norm_data_type(ans,x)
+  # check data type, length
+  ans@data <- .check_list_for_SequenceData_elements(ans,x)
+  # validate
+  validObject(ans)
+  #
+  modName <- fullName(ModRNAString())[
+    which(shortName(ModRNAString()) %in% ans@mod)]
+  message("Starting to search for '",
+          paste(tools::toTitleCase(modName), collapse = "', '"),
+          "'...")
   if(settings(ans,"findMod")){
     ans <- do.call(modify,list(ans))
   }
+  validObject(ans)
   ans
 }
 
