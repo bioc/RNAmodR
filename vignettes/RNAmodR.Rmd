@@ -1,10 +1,8 @@
 ---
-title: "RNAmodR"
+title: "RNAmodR: analyzing high throughput sequencing data for post-transcriptional RNA modification footprints"
 author: "Felix G.M. Ernst"
 date: "`r Sys.Date()`"
 package: RNAmodR
-abstract: >
-  Examples
 output:
   BiocStyle::html_document:
     toc: true
@@ -43,9 +41,9 @@ Loading example files
 ```{r example_files}
 gff <- system.file("extdata","example1.gff3" ,package = "RNAmodR.Data")
 fasta <- system.file("extdata","example1.fasta" ,package = "RNAmodR.Data")
-files <-  BamFileList(c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR.Data"),
-                        Treated = system.file("extdata","example2.bam" ,package = "RNAmodR.Data"),
-                        Treated = system.file("extdata","example3.bam" ,package = "RNAmodR.Data")))
+files <-  list("one" = c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR.Data")),
+               "two" = c(Treated = system.file("extdata","example2.bam" ,package = "RNAmodR.Data")),
+               "three" = c(Treated = system.file("extdata","example3.bam" ,package = "RNAmodR.Data")))
 ```
 
 Each `SequenceData` object is created with a named character vector, which can 
@@ -102,26 +100,51 @@ example mapped reads from the AlkAnilineSeq method can analyzed using the
 accumulation of 5'-ends at the N+1 position, since m7G is susceptible cleavage
 by the aniline treatment [@].
 
-To fix the data processing and detection strategy, for each type of sequencing 
-method a `Modifier` class can be developed to detect specific modifications.
-For more information on how to develop such a class and maybe a corresponding 
-`SequenceData` class, please have a look at the vignette XXX.
+To fixate the data processing and detection strategy, for each type of 
+sequencingmethod a `Modifier` class can be developed to detect specific 
+modifications. For more information on how to develop such a class and maybe a 
+corresponding `SequenceData` class, please have a look at the vignette XXX.
 
-Currently three `Modifier` classes are available:
+Initially three `Modifier` classes are available:
 
  * `ModInosine`
  * `ModAlkAnilineSeq` from the `RNAmodR.AlkAnilineSeq` package
  * `ModRiboMethSeq` from the `RNAmodR.RiboMethSeq` package
  
+`Modifier` objects can contain multiple `SequenceData` objects as elements of
+a `SequenceDataList` class. The elements of this class are usually different 
+types of `SequenceData`. However, they are required to contain data for the 
+same annotation and sequence data.
+
+`Modifier` objects are created with the same arguments as `SequenceData` objects
+and will start loading the necessary `SequenceData` objects from these. In 
+addition they will start automatically to search for modifications, if the 
+optional argument `findMod` is not set to `FALSE`. 
+
+```{r modifier1}
+m <- Modifier()
+```
+
+```{r modifier2}
+m <- Modifier()
+```
 
 
 ## ModifierSet
 
+Each `Modifier` object is able to represent one sample type with multiple 
+replicates of data. To easily compare multiple sample types the `ModifierSet`
+class is implemented.
 
-# Example analysis workflow
+The `ModifierSet` object is created from a named list of named character vectors
+or `BamFileList` objects. Each element in the list is a sample type with a 
+corresponding name. Each entry in the character vector/`BamFileList` is a 
+replicate.
 
-## Creation of Modifier or ModifierSet
 
+```{r modifierset1}
+ms <- ModifierSet()
+```
 
 ## Analysis of detected modifications
 
@@ -135,11 +158,15 @@ found modifications to modifications described in the literature
 
 
 
-# Additional function of ...
+
+
+
+# Additional functions of ...
 
 
 ## ... the `SequenceData` classes
 
+### The `SequenceDataList` class
 
 ## ... the `Modifier` classes
 
