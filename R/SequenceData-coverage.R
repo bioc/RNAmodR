@@ -40,21 +40,21 @@ setClass(Class = "CoverageSequenceData",
 #' @rdname CoverageSequenceData
 #' @export
 CoverageSequenceData <- function(bamfiles,
-                                 fasta,
-                                 gff,
+                                 annotation,
+                                 sequences,
+                                 seqinfo,
                                  ...){
   args <- .get_mod_data_args(...)
+  txdb <- .norm_annotation(annotation)
+  sequences <- .norm_sequences(sequences)
+  seqinfo <- .norm_seqnames(bamfiles, annotation, sequences, seqinfo)
   ans <- new("CoverageSequenceData",
              bamfiles,
-             fasta,
-             gff,
+             seqinfo,
              args)
-  ranges <- .load_annotation(ans@gff)
-  sequences <- .load_transcript_sequences(ans@fasta,
-                                          ranges)
-  param <- .assemble_scanBamParam(ranges,
-                                  ans@minQuality,
-                                  ans@chromosomes)
+  ranges <- .load_annotation(txdb, ans@seqinfo)
+  sequences <- .load_transcript_sequences(sequences, ranges)
+  param <- .assemble_scanBamParam(ranges, ans@minQuality, ans@seqinfo)
   message("Loading Coverage data from BAM files...")
   data <- lapply(ans@bamfiles,
                  FUN = .get_position_data_of_transcript_coverage,

@@ -216,18 +216,10 @@ setAs("ANY", "SequenceDataList", function(from) {
 
 #' @name SequenceDataList
 #' @export
-setMethod(f = "gff", 
+setMethod(f = "seqinfo", 
           signature = signature(x = "SequenceDataList"),
           definition = function(x){
-            fasta(x[[1]])
-          })
-
-#' @name SequenceDataList
-#' @export
-setMethod(f = "fasta", 
-          signature = signature(x = "SequenceDataList"),
-          definition = function(x){
-            fasta(x[[1]])
+            seqinfo(x[[1]])
           })
 
 #' @name SequenceDataList

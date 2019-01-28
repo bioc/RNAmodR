@@ -59,14 +59,8 @@ setGeneric(
 #' @rdname Modifier
 #' @export
 setGeneric( 
-  name = "gff",
-  def = function(x) standardGeneric("gff")
-)
-#' @rdname Modifier
-#' @export
-setGeneric( 
-  name = "fasta",
-  def = function(x) standardGeneric("fasta")
+  name = "seqinfo",
+  def = function(x) standardGeneric("seqinfo")
 )
 #' @rdname Modifier
 #' @export

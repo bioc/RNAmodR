@@ -22,8 +22,7 @@ setClass("SequenceData",
                    sequences = "XStringSet",
                    sequencesType = "character",
                    bamfiles = "BamFileList",
-                   fasta = "FaFile",
-                   gff = "GFFFile",
+                   seqinfo = "Seqinfo",
                    minQuality = "integer",
                    chromosomes = "character",
                    unlistType = "character",
@@ -82,6 +81,8 @@ setMethod("show", "SequenceData",
             print(out_data, quote = FALSE, right = TRUE)
             cat("\n- Ranges metadata columns:\n")
             print(out_mdata, quote = FALSE, right = TRUE)
+            print("Sequence info file:")
+            print(paste0("|    ",capture.output(show(object@seqinfo))))
           }
 )
 # validity ---------------------------------------------------------------------
@@ -241,8 +242,6 @@ setMethod("extractROWS", "SequenceData",
                        ranges = ans_ranges,
                        sequences = ans_sequences,
                        bamfiles = x@bamfiles,
-                       fasta = x@fasta,
-                       gff = x@gff,
                        unlistData = ans_unlistData,
                        partitioning = ans_partitioning,
                        elementMetadata = ans_elementMetadata)
@@ -309,8 +308,7 @@ setMethod(
   signature = signature(.Object = "SequenceData"),
   definition = function(.Object,
                         bamfiles,
-                        fasta,
-                        gff,
+                        seqinfo,
                         args,
                         ...){
     className <- class(.Object)
@@ -324,32 +322,12 @@ setMethod(
     }
     # check bam files
     bamfiles <- .norm_bamfiles(bamfiles,className)
-    # check genome sequences
-    fasta <- .norm_fasta(fasta,className)
-    # check genome annotation
-    gff <- .norm_gff(gff,className)
     # set clots
     .Object@bamfiles <- bamfiles
     .Object@replicate <- factor(seq_along(bamfiles))
     .Object@conditions <- factor(names(bamfiles))
-    .Object@fasta <- fasta
-    .Object@gff <- gff
+    .Object@seqinfo <- .norm_seqinfo(seqinfo)
     # additional sanity checks
-    sequenceNames <- unique(as.character(
-      GenomeInfoDb::seqnames(scanFaIndex(path(.Object@fasta)))))
-    chromosomeNames <- unique(as.character(
-      GenomeInfoDb::seqnames(import(.Object@gff))))
-    ### add bam seqnames check
-    
-    ###
-    .Object@chromosomes <- intersect(sequenceNames,
-                                     chromosomeNames)
-    .Object@chromosomes <- .Object@chromosomes[order(.Object@chromosomes)]
-    if(length(.Object@chromosomes) == 0){
-      stop("chromosome information in annotation input and sequence names in ",
-           "fasta file do not match.",
-           call. = FALSE)
-    }
     .Object <- callNextMethod(.Object,...)
     .Object
   }
@@ -358,39 +336,156 @@ setMethod(
 ################################################################################
 # common utility functions -----------------------------------------------------
 
-# load gff annotation prepare a GRangesList per parent element
-# parent element has no parent themselves
-.load_annotation <- function(gfffile){
-  ranges <- import(gfffile)
-  if(any(is.na(ranges$ID))){
-    stop("ID column of annotation must not be empty.",
+.norm_files <- function(file){
+  assertive::assert_all_are_existing_files(c(file))
+  file
+}
+
+# try to coerce the input to a Seqinfo object
+.norm_seqinfo <- function(seqinfo){
+  if(!is(seqinfo,"Seqinfo")){
+    tmp <- try(Seqinfo(seqinfo))
+    if(is(tmp,"try-error")){
+      stop("Input is not a Seqinfo object and could not be coerced to ",
+           "one.",
+           call. = FALSE)
+    }
+    seqinfo <- tmp
+  }
+  seqinfo
+}
+
+.norm_gff <- function(gff){
+  if(!is(gff,"GFF3File")){
+    assertive::assert_all_are_existing_files(c(gff))
+    tmp <- try(GFF3File(gff))
+    if(is(tmp,"try-error")){
+      stop("Input is not a GFF3File and could not be coerced to one.",
+           call. = FALSE)
+    }
+    gff <- tmp
+  }
+  gff
+}
+
+# Either return a FaFile or BSgenome object
+.norm_sequences <- function(seq){
+  if(!is(seq,"FaFile") && !is(seq,"BSgenome")){
+    assertive::assert_all_are_existing_files(c(seq))
+    tmp <- try(FaFile(seq))
+    if(is(tmp,"try-error")){
+      stop("Input is not a FaFile and could not be coerced to one.",
+           call. = FALSE)
+    }
+    seq <- tmp
+    Rsamtools::indexFa(seq)
+  } else if(is(seq,"FaFile")) {
+    assertive::assert_all_are_existing_files(c(path(seq)))
+    Rsamtools::indexFa(seq)
+  } else if(is(seq,"BSgenome")) {
+    assertive::assert_all_are_true(validObject(seq))
+  } else {
+    stop("Something went wrong. Unrecognized sequence input.")
+  }
+  seq
+}
+
+# Return a TxDb object
+.norm_annotation <- function(annotation){
+  if(!is(annotation,"GFFFile") && !is(annotation,"TxDb")){
+    annotation <- .norm_gff(annotation)
+  } else if(is(annotation,"GFFFile")) {
+    assertive::assert_all_are_existing_files(c(path(annotation)))
+  } else if(is(annotation,"TxDb")) {
+    assertive::assert_all_are_true(validObject(annotation))
+  } else {
+    stop("Something went wrong. Unrecognized annotation input.")
+  }
+  if(!is(annotation,"TxDb")){
+    annotation <- GenomicFeatures::makeTxDbFromGFF(
+      path(annotation))
+  }
+  annotation
+}
+
+# retrieve a Seqinfo object from the bam headers
+.bam_header_to_seqinfo <- function(bfl){
+  if(is(bfl,"BamFile")){
+    bfl <- BamFileList(bfl)
+  }
+  if(!is(bfl,"BamFileList")){
+    stop("BamFileList required.")
+  }
+  header <- Rsamtools::scanBamHeader(bfl[[1]])
+  targets <- names(header[[1]]$targets)
+  seqinfo <- Seqinfo(targets)
+  seqinfo
+}
+
+# Retrieve the intersection of seqnames in annotation, sequence and seqinfo
+# data
+.norm_seqnames <- function(bamfiles,
+                           annotation,
+                           sequences,
+                           seqinfo){
+  browser()
+  # norm seqinfo
+  if(!is(seqinfo,"Seqinfo") && 
+     (is(seqinfo,"BamFile") | is(seqinfo,"BamFileList"))){
+    seqinfo <- .bam_header_to_seqinfo(seqinfo)
+  }
+  if(!is(seqinfo,"Seqinfo")){
+    seqinfo <- .norm_seqinfo(seqinfo)
+  }
+  # norm annotation
+  if(!is(annotation,"TxDb")){
+    annotation  <- .norm_annotation(annotation)
+  }
+  # norm sequences input
+  if(is(sequences,"FaFile")){
+    seqnames <- names(Rsamtools::scanFa(sequences))
+  } else if(is(sequences,"BSgenome")) {
+    seqnames <- seqnames(sequences)
+  }
+  seqnames <- seqnames[seqnames %in% seqlevels(annotation)]
+  seqnames <- seqnames[seqnames %in% seqnames(seqinfo)]
+  if( length(seqnames) == 0L ) {
+    stop("No intersection between chromosome names in fasta, ",
+         "annotation and seqinfo data.", 
          call. = FALSE)
   }
-  # keep only features which can contain mmodifications
-  ranges <- .subset_mod_containing_features(ranges)
-  # split GRanges per parent
-  ranges <- split(ranges,.get_children_factor(ranges))
-  # keep parent only data as metadata. this is basically the transcript to be
-  # analyzed
-  metadata(ranges)[["parents"]] <- .get_parent_annotations(ranges)
-  if(any(metadata(ranges)[["parents"]]$ID != names(ranges))){
-    stop("Something went wrong.", call. = FALSE)
-  }
+  return(invisible(seqnames))
+}
+
+################################################################################
+
+# load annotation as GRangesList. one element per transcript
+.load_annotation <- function(annotation, seqinfo){
+  browser()
+  txdb <- .norm_annotation(annotation)
+  ranges <- GenomicFeatures::exonsBy(txdb, by = "tx")
+  ranges <- .subset_by_seqinfo(ranges, seqinfo)
   ranges
 }
 
-.load_transcript_sequences <- function(fafile,
-                                       ranges){
-  # apperently the FaFile object does not like to be transferred. 
-  # Therefore it is recreated on-the-fly.
-  fafile <- path(fafile)
-  # get transcript ranges
-  gr <- .get_parent_annotations(ranges)
-  # get sequence per transcript
-  seq <- getSeq(FaFile(fafile), gr)
-  names(seq) <- gr$ID
+# load the transcript sequence per transcript aka. one sequence per GRangesList
+# element
+.load_transcript_sequences <- function(sequences,
+                                       grl){
+  browser()
+  sequences <- .norm_sequences(sequences)
+  seq <- getSeq(sequences, grl)
   as(seq,"RNAStringSet")
 }
+
+# remove any elements, which are not in the seqinfo
+.subset_by_seqinfo <- function(grl,seqinfo){
+  grl <- grl[seqnames(grl) %in% seqnames(seqinfo)]
+  grl <- grl[width(grl@partitioning) != 0L]
+  grl
+}
+
+################################################################################
 
 .get_mod_data_args <- function(...){
   input <- list(...)
@@ -536,15 +631,9 @@ setMethod(
 
 #' @name SequenceData
 #' @export
-setMethod(f = "gff", 
+setMethod(f = "seqinfo", 
           signature = signature(x = "SequenceData"),
-          definition = function(x){x@gff})
-
-#' @name SequenceData
-#' @export
-setMethod(f = "fasta", 
-          signature = signature(x = "SequenceData"),
-          definition = function(x){x@fasta})
+          definition = function(x){x@seqinfo})
 
 #' @name SequenceData
 #' @export

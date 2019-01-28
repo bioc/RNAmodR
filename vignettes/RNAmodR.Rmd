@@ -173,3 +173,13 @@ found modifications to modifications described in the literature
 
 ## ... the `ModifierSet` classes
 
+
+
+# Annotation data
+
+```{r}
+library(EnsDb.Hsapiens.v86)
+keys <- keys(edb, keytype = "TXID")
+res <- select(edb, keys=keys, columns = c("TXBIOTYPE"), keytype="TXID")
+
+```

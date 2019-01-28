@@ -265,15 +265,9 @@ setReplaceMethod(f = "settings",
 
 #' @name Modifier
 #' @export
-setMethod(f = "gff", 
+setMethod(f = "seqinfo", 
           signature = signature(x = "Modifier"),
-          definition = function(x){x@gff})
-  
-#' @name Modifier
-#' @export
-setMethod(f = "fasta", 
-          signature = signature(x = "Modifier"),
-          definition = function(x){x@fasta})
+          definition = function(x){x@seqinfo})
  
 #' @name Modifier
 #' @export
