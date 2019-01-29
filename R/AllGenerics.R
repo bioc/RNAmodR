@@ -141,6 +141,12 @@ setGeneric(
 
 # SequenceData functions -------------------------------------------------------
 
+setGeneric( 
+  name = "SequenceData",
+  signature = c("annotation","sequences"),
+  def = function(dataType, files, annotation, sequences, seqinfo, FUN, ...)
+    standardGeneric("SequenceData")
+) 
 
 # Modifier/SequenceData functions ----------------------------------------------
 

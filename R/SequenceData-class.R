@@ -33,6 +33,12 @@ setClass("SequenceData",
                           sequences = RNAStringSet(),
                           unlistType = "SequenceDataFrame"))
 
+# class names must be compatible with this class name generation function
+sequenceDataClass <- function(dataType){
+  ans <- paste0(dataType,"SequenceData")
+  ans
+}
+
 # for concat
 #' @name SequenceData
 #' @export
@@ -333,8 +339,68 @@ setMethod(
   }
 )
 
+# internal SequenceData constructor
+.new_SequenceData <- function(dataType, files, annotation, sequences, seqinfo,
+                              FUN, ...){
+  FUN <- .norm_data_FUN(FUN)
+  # get arguments
+  args <- .get_mod_data_args(...)
+  # get annotation and sequence data
+  txdb <- .norm_annotation(annotation)
+  sequences <- .norm_sequences(sequences)
+  seqinfo <- .norm_seqnames(files, annotation, sequences, seqinfo)
+  # create the class
+  ans <- new(sequenceDataClass(dataType), files, seqinfo, args)
+  # load transcript data and sequence data as well as the ScanBamParam
+  ranges <- .load_annotation(txdb, ans@seqinfo)
+  sequences <- .load_transcript_sequences(sequences, ranges)
+  param <- .assemble_scanBamParam(ranges, ans@minQuality, ans@seqinfo)
+  # run the specific data aggregation function
+  data <- FUN(ans, ranges, sequences, param)
+  # post process the data
+  .postprocess_read_data(ans, data, ranges, sequences)
+}
+
+setMethod("SequenceData",
+          signature = c(annotation = "TxDb",
+                        sequences = "BSgenome"),
+          function(dataType, files, annotation, sequences, seqinfo,
+                   FUN, ...){
+            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
+                              FUN, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GFF3File",
+                        sequences = "BSgenome"),
+          function(dataType, files, annotation, sequences, seqinfo,
+                   FUN, ...){
+            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
+                              FUN, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GFF3File",
+                        sequences = "FaFile"),
+          function(dataType, files, annotation, sequences, seqinfo,
+                   FUN, ...){
+            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
+                              FUN, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "TxDb",
+                        sequences = "FaFile"),
+          function(dataType, files, annotation, sequences, seqinfo,
+                   FUN, ...){
+            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
+                              FUN, ...)
+          })
+
+
 ################################################################################
 # common utility functions -----------------------------------------------------
+
+.norm_data_FUN <- function(FUN){
+  FUN
+}
 
 .norm_files <- function(file){
   assertive::assert_all_are_existing_files(c(file))
@@ -482,6 +548,7 @@ setMethod(
 .subset_by_seqinfo <- function(grl,seqinfo){
   grl <- grl[seqnames(grl) %in% seqnames(seqinfo)]
   grl <- grl[width(grl@partitioning) != 0L]
+  seqlevels(grl) <- seqlevels(seqinfo)
   grl
 }
 
