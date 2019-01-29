@@ -146,7 +146,7 @@ setMethod(f = "relistToClass",
   # check and normalize input
   args <- .norm_ModifierSet_args(list(...))
   fasta <- .norm_fasta(fasta, modifiertype)
-  gff <- .norm_gff(gff, modifiertype)
+  gff <- .norm_gff(gff)
   modifiertype <- .norm_modifiertype(modifiertype)
   if(!is.list(x)){
     x <- list(x)

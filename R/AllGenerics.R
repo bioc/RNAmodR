@@ -148,6 +148,13 @@ setGeneric(
     standardGeneric("SequenceData")
 ) 
 
+setGeneric( 
+  name = ".get_Data",
+  signature = c("x","grl","sequences","param"),
+  def = function(x, grl, sequences, param)
+    standardGeneric(".get_Data")
+) 
+
 # Modifier/SequenceData functions ----------------------------------------------
 
 #' @rdname aggregate

@@ -8,9 +8,7 @@
 \usage{
 SequenceDataList(...)
 
-\S4method{gff}{SequenceDataList}(x)
-
-\S4method{fasta}{SequenceDataList}(x)
+\S4method{seqinfo}{SequenceDataList}(x)
 
 \S4method{sequences}{SequenceDataList}(x)
 

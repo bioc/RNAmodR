@@ -7,8 +7,7 @@
 \alias{mainScore}
 \alias{settings}
 \alias{settings<-}
-\alias{gff}
-\alias{fasta}
+\alias{seqinfo}
 \alias{sequences}
 \alias{bamfiles}
 \alias{seqData}
@@ -28,9 +27,7 @@ settings(x, name = NULL)
 
 settings(x, name) <- value
 
-gff(x)
-
-fasta(x)
+seqinfo(x)
 
 sequences(x, ...)
 
@@ -50,9 +47,7 @@ seqData(x)
 
 \S4method{settings}{Modifier}(x) <- value
 
-\S4method{gff}{Modifier}(x)
-
-\S4method{fasta}{Modifier}(x)
+\S4method{seqinfo}{Modifier}(x)
 
 \S4method{sequences}{Modifier}(x, modified = FALSE)
 

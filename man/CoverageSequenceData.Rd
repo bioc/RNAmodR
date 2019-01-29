@@ -6,7 +6,7 @@
 \alias{CoverageSequenceData-class}
 \title{CoverageSequenceData}
 \usage{
-CoverageSequenceData(bamfiles, fasta, gff, ...)
+CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 }
 \description{
 title

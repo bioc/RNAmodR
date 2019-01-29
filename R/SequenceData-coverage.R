@@ -37,36 +37,31 @@ setClass(Class = "CoverageSequenceData",
   coverage
 }
 
+setMethod(".get_Data",
+          signature = c(x = "CoverageSequenceData",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x,
+                                grl,
+                                sequences,
+                                param){
+            data <- lapply(x@bamfiles,
+                           FUN = .get_position_data_of_transcript_coverage,
+                           ranges = grl,
+                           param = param,
+                           args = settings(x))
+            names(data) <- paste0("coverage.",
+                                  names(x@bamfiles),
+                                  ".",
+                                  seq_along(x@bamfiles))
+            data
+          })
+
 #' @rdname CoverageSequenceData
 #' @export
-CoverageSequenceData <- function(bamfiles,
-                                 annotation,
-                                 sequences,
-                                 seqinfo,
-                                 ...){
-  args <- .get_mod_data_args(...)
-  txdb <- .norm_annotation(annotation)
-  sequences <- .norm_sequences(sequences)
-  seqinfo <- .norm_seqnames(bamfiles, annotation, sequences, seqinfo)
-  ans <- new("CoverageSequenceData",
-             bamfiles,
-             seqinfo,
-             args)
-  ranges <- .load_annotation(txdb, ans@seqinfo)
-  sequences <- .load_transcript_sequences(sequences, ranges)
-  param <- .assemble_scanBamParam(ranges, ans@minQuality, ans@seqinfo)
-  message("Loading Coverage data from BAM files...")
-  data <- lapply(ans@bamfiles,
-                 FUN = .get_position_data_of_transcript_coverage,
-                 ranges = ranges,
-                 param = param,
-                 args = args)
-  names(data) <- paste0("coverage.",
-                        names(ans@bamfiles),
-                        ".",
-                        seq_along(ans@bamfiles))
-  .postprocess_read_data(ans,
-                         data,
-                         ranges,
-                         sequences)
+CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  browser()
+  SequenceData("Coverage", files = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
 }

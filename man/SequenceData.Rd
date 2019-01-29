@@ -11,9 +11,7 @@
 
 \S4method{setListElement}{SequenceData}(x, i, value)
 
-\S4method{gff}{SequenceData}(x)
-
-\S4method{fasta}{SequenceData}(x)
+\S4method{seqinfo}{SequenceData}(x)
 
 \S4method{sequences}{SequenceData}(x)
 

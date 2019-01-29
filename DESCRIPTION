@@ -47,6 +47,7 @@ Collate:
     'Gviz-functions.R'
     'Modifier-utils.R'
     'SequenceDataFrame-class.R'
+    'normalization.R'
     'SequenceData-class.R'
     'SequenceDataList-class.R'
     'Modifier-class.R'
