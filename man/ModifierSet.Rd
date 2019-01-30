@@ -12,10 +12,11 @@
 \usage{
 \S4method{ModifierSet}{list}(className, x, ...)
 
-\S4method{ModifierSet}{character}(className, x, annotation, sequences, ...)
+\S4method{ModifierSet}{character}(className, x, annotation, sequences,
+  seqinfo, ...)
 
 \S4method{ModifierSet}{BamFileList}(className, x, annotation, sequences,
-  ...)
+  seqinfo, ...)
 
 \S4method{ModifierSet}{Modifier}(className, x, ...)
 
