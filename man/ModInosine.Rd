@@ -8,10 +8,6 @@
 \alias{ModifierInosine}
 \alias{ICE-Seq}
 \alias{ModInosine-class}
-\alias{ModInosine,character-method}
-\alias{ModInosine,BamFileList-method}
-\alias{ModInosine,SequenceData-method}
-\alias{ModInosine,list-method}
 \alias{modify,ModInosine-method}
 \alias{ModSetInosine-class}
 \alias{ModSetInosine}
@@ -22,19 +18,13 @@
 \usage{
 \S4method{settings}{ModInosine}(x) <- value
 
-\S4method{ModInosine}{character}(x, fasta, gff, ...)
-
-\S4method{ModInosine}{BamFileList}(x, fasta, gff, ...)
-
-\S4method{ModInosine}{SequenceData}(x, ...)
-
-\S4method{ModInosine}{list}(x, ...)
+ModInosine(x, annotation, sequences, seqinfo, ...)
 
 \S4method{aggregate}{ModInosine}(x, force = FALSE)
 
 \S4method{modify}{ModInosine}(x, force = FALSE)
 
-ModSetInosine(x, fasta = NA, gff = NA)
+ModSetInosine(x, annotation = NA, sequences = NA)
 
 \S4method{visualizeDataByCoord}{ModInosine,GRanges}(x, coord,
   type = "score", window.size = 15L, ...)

@@ -27,21 +27,6 @@ setClass("ModInosine",
                           score = "score",
                           dataType = "PileupSequenceData"))
 
-setMethod(
-  f = "initialize", 
-  signature = signature(.Object = "ModInosine"),
-  definition = function(.Object,
-                        bamfiles,
-                        fasta,
-                        gff) {
-    .Object <- callNextMethod(.Object,
-                              bamfiles,
-                              fasta,
-                              gff)
-    return(.Object)
-  }
-)
-
 # settings ---------------------------------------------------------------------
 
 .norm_inosine_args <- function(input){
@@ -63,7 +48,7 @@ setMethod(
 #' @export
 setReplaceMethod(f = "settings", 
                  signature = signature(x = "ModInosine"),
-                 definition = function(x,value){
+                 definition = function(x, value){
                    x <- callNextMethod()
                    value <- .norm_inosine_args(value)
                    x@arguments[names(value)] <- unname(value)
@@ -72,93 +57,13 @@ setReplaceMethod(f = "settings",
 
 # constructor ------------------------------------------------------------------
 
-.ModInosine_from_character <- function(x,
-                                          fasta,
-                                          gff,
-                                          args){
-  ans <- new("ModInosine",
-             x,
-             fasta,
-             gff)
-  ans <- RNAmodR:::.ModFromCharacter(ans,
-                                     args)
-  ans <- RNAmodR:::.norm_modifications(ans,
-                                       args)
-  ans
-}
-.ModInosine_from_SequenceData <- function(x,
-                                             args){
-  x <- as(x,"SequenceDataList")
-  ans <- new("ModInosine",
-             bamfiles(x),
-             fasta(x),
-             gff(x))
-  ans <- RNAmodR:::.ModFromSequenceData(ans,
-                                        x,
-                                        args)
-  ans <- RNAmodR:::.norm_modifications(ans,
-                                       args)
-  ans
-}
-
-setGeneric( 
-  name = "ModInosine",
-  def = function(x,
-                 ...) standardGeneric("ModInosine")
-)
 # Create Modifier class from file character, fasta and gff file
 #' @rdname ModInosine
 #' @export
-setMethod("ModInosine",
-          signature = c(x = "character"),
-          function(x,
-                   fasta,
-                   gff,
-                   ...){
-            .ModInosine_from_character(x,
-                                          fasta,
-                                          gff,
-                                          list(...))
-          }
-)
-
-# Create Modifier class from bamfiles, fasta and gff file
-#' @rdname ModInosine
-#' @export
-setMethod("ModInosine",
-          signature = c(x = "BamFileList"),
-          function(x,
-                   fasta,
-                   gff,
-                   ...){
-            .ModInosine_from_character(x,
-                                       fasta,
-                                       gff,
-                                       list(...))
-          }
-)
-
-# Create Modifier class from existing SequenceData
-#' @rdname ModInosine
-#' @export
-setMethod("ModInosine",
-          signature = c(x = "SequenceData"),
-          function(x,
-                   ...){
-            .ModInosine_from_SequenceData(list(x),
-                                          list(...))
-          }
-)
-#' @rdname ModInosine
-#' @export
-setMethod("ModInosine",
-          signature = c(x = "list"),
-          function(x,
-                   ...){
-            .ModInosine_from_SequenceData(x,
-                                          list(...))
-          }
-)
+ModInosine <- function(x, annotation, sequences, seqinfo, ...){
+  Modifier("ModInosine", x = x, annotation = annotation, sequences = sequences,
+           seqinfo = seqinfo, ...)
+}
 
 # functions --------------------------------------------------------------------
 
@@ -213,8 +118,7 @@ setMethod("ModInosine",
 setMethod(f = "aggregate", 
           signature = signature(x = "ModInosine"),
           definition = 
-            function(x,
-                     force = FALSE){
+            function(x, force = FALSE){
               if(missing(force)){
                 force <- FALSE
               }
@@ -283,8 +187,7 @@ setMethod(f = "aggregate",
 #' @export
 setMethod("modify",
           signature = c(x = "ModInosine"),
-          function(x,
-                   force){
+          function(x, force){
             # get the aggregate data
             x <- aggregate(x, force)
             x@modifications <- .find_inosine(x)
@@ -304,6 +207,6 @@ setClass("ModSetInosine",
 
 #' @rdname ModInosine
 #' @export
-ModSetInosine <- function(x, fasta = NA, gff = NA){
-  ModifierSet("ModInosine", x, fasta = fasta, gff = gff)
+ModSetInosine <- function(x, annotation = NA, sequences = NA){
+  ModifierSet("ModInosine", x, annotation = annotation, sequences = sequences)
 }

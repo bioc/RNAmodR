@@ -10,13 +10,14 @@
 \alias{ModifierSet,Modifier-method}
 \title{ModifierSet}
 \usage{
-\S4method{ModifierSet}{list}(modifiertype, x, ...)
+\S4method{ModifierSet}{list}(className, x, ...)
 
-\S4method{ModifierSet}{character}(modifiertype, x, fasta, gff, ...)
+\S4method{ModifierSet}{character}(className, x, annotation, sequences, ...)
 
-\S4method{ModifierSet}{BamFileList}(modifiertype, x, fasta, gff, ...)
+\S4method{ModifierSet}{BamFileList}(className, x, annotation, sequences,
+  ...)
 
-\S4method{ModifierSet}{Modifier}(modifiertype, x, ...)
+\S4method{ModifierSet}{Modifier}(className, x, ...)
 
 \S4method{modifierType}{ModifierSet}(x)
 
@@ -56,13 +57,13 @@ should the creation of the \code{Modifier} objects be parallalized? (default:
 }
 All other arguments will be passed onto the \code{Modifier} objects.}
 
-\item{fasta}{sequences matching the target sequences the reads were mapped 
-onto. This must match the information contained in the BAM files. This is 
-parameter is only required if \code{x} if not a \code{Modifier} object.}
-
-\item{gff}{annotation data, which must match the information contained in the
-BAM files. This is parameter is only required if \code{x} if not a 
+\item{annotation}{annotation data, which must match the information contained
+in the BAM files. This is parameter is only required if \code{x} if not a 
 \code{Modifier} object.}
+
+\item{sequences}{sequences matching the target sequences the reads were 
+mapped onto. This must match the information contained in the BAM files. This
+is parameter is only required if \code{x} if not a \code{Modifier} object.}
 }
 \description{
 title

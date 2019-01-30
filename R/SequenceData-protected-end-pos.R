@@ -53,10 +53,8 @@ setMethod(".get_Data",
 #' @export
 ProtectedEndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, 
                                      ...){
-  # get arguments
-  args <- .get_mod_data_args(...)
   SequenceData("ProtectedEnd", files = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, args = args, ...)
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 
 # aggregation ------------------------------------------------------------------

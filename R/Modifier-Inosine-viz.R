@@ -29,16 +29,9 @@ setMethod(
   f = "visualizeDataByCoord",
   signature = signature(x = "ModInosine",
                         coord = "GRanges"),
-  definition = function(x,
-                        coord,
-                        type = "score",
-                        window.size = 15L,
-                        ...) {
-    callNextMethod(x = x,
-                   coord = coord,
-                   type = "score",
-                   window.size = window.size,
-                   ...)
+  definition = function(x, coord, type = "score", window.size = 15L, ...) {
+    callNextMethod(x = x, coord = coord, type = "score", 
+                   window.size = window.size, ...)
   }
 )
 #' @rdname ModInosine
@@ -46,18 +39,8 @@ setMethod(
 setMethod(
   f = "visualizeData",
   signature = signature(x = "ModInosine"),
-  definition = function(x,
-                        name,
-                        from,
-                        to,
-                        type = "score",
-                        ...) {
-    callNextMethod(x = x,
-                   name,
-                   from,
-                   to,
-                   type = "score",
-                   ...)
+  definition = function(x, name, from, to, type = "score", ...) {
+    callNextMethod(x = x, name, from, to, type = "score", ...)
   }
 )
 
@@ -67,11 +50,7 @@ setMethod(
                         data = "GRanges",
                         seqdata = "GRanges",
                         sequence = "XString"),
-  definition = function(x,
-                        data,
-                        seqdata,
-                        sequence,
-                        args) {
+  definition = function(x, data, seqdata, sequence, args) {
     requireNamespace("Gviz")
     n <- ncol(mcols(data))
     colour.bases <- args[["colour.bases"]]

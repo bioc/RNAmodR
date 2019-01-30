@@ -157,10 +157,8 @@ setMethod(".get_Data",
 #' @name PileupSequenceData
 #' @export
 PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  # get arguments
-  args <- .get_mod_data_args(...)
   SequenceData("Pileup", files = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, args = args, ...)
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 
 # aggregation ------------------------------------------------------------------

@@ -54,8 +54,6 @@ Collate:
     'ModifierSet-class.R'
     'Modifier-Inosine-class.R'
     'Modifier-Inosine-viz.R'
-    'Modifier-analysis.R'
-    'Modifier-check.R'
     'Modifier-roc.R'
     'Modifier-subset.R'
     'Modifier-viz.R'

@@ -1,16 +1,6 @@
 #' @include RNAmodR.R
 NULL
 
-.get_class_name_for_set_from_modifier_type <- function(modifiertype){
-  gsub("Mod","ModSet",modifiertype)
-}
-
-.get_ModExperiment_objects <- function(...){
-  args <- list(...)
-  ModExperiments <- args[lapply(args,is,"ModExperiment")]
-  ModExperiments
-}
-
 # error propagation ------------------------------------------------------------
 
 ################################################################################

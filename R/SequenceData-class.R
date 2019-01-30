@@ -324,10 +324,11 @@ setMethod(
 
 # internal SequenceData constructor
 .new_SequenceData <- function(dataType, files, annotation, sequences, seqinfo,
-                              args, ...){
+                              ...){
   if(is.null(dataType)){
     stop("Invalid data type.")
   }
+  args <- list(...)
   className <- sequenceDataClass(dataType)
   # check bam files
   files <- .norm_bamfiles(files, className)
@@ -336,7 +337,7 @@ setMethod(
   sequences <- .norm_sequences(sequences, className)
   seqinfo <- .norm_seqnames(files, txdb, sequences, seqinfo, className)
   # create the class
-  ans <- new(className, files, seqinfo, ...)
+  ans <- new(className, files, seqinfo, args)
   # load transcript data and sequence data as well as the ScanBamParam
   grl <- .load_annotation(txdb, ans@seqinfo)
   sequences <- .load_transcript_sequences(sequences, grl)
@@ -348,67 +349,58 @@ setMethod(
 }
 
 setMethod("SequenceData",
-          signature = c(annotation = "character",
-                        sequences = "character"),
+          signature = c(annotation = "character", sequences = "character"),
           function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              args, ...)
+                              ...)
           })
 setMethod("SequenceData",
-          signature = c(annotation = "character",
-                        sequences = "BSgenome"),
+          signature = c(annotation = "character", sequences = "BSgenome"),
           function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              args, ...)
+                              ...)
           })
 setMethod("SequenceData",
-          signature = c(annotation = "TxDb",
-                        sequences = "character"),
+          signature = c(annotation = "TxDb", sequences = "character"),
           function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              args, ...)
+                              ...)
           })
 setMethod("SequenceData",
-          signature = c(annotation = "TxDb",
-                        sequences = "BSgenome"),
+          signature = c(annotation = "TxDb", sequences = "BSgenome"),
           function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              args)
+                              ...)
           })
 setMethod("SequenceData",
-          signature = c(annotation = "GFF3File",
-                        sequences = "BSgenome"),
+          signature = c(annotation = "GFF3File", sequences = "BSgenome"),
           function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              args, ...)
+                              ...)
           })
 setMethod("SequenceData",
-          signature = c(annotation = "GFF3File",
-                        sequences = "character"),
+          signature = c(annotation = "GFF3File", sequences = "character"),
           function(dataType, files, annotation, sequences, seqinfo, args){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              args)
+                              ...)
           })
 setMethod("SequenceData",
-          signature = c(annotation = "character",
-                        sequences = "FaFile"),
+          signature = c(annotation = "character", sequences = "FaFile"),
           function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              args, ...)
+                              ...)
           })
 setMethod("SequenceData",
-          signature = c(annotation = "GFF3File",
-                        sequences = "FaFile"),
+          signature = c(annotation = "GFF3File", sequences = "FaFile"),
           function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              args, ...)
+                              ...)
           })
 setMethod("SequenceData",
-          signature = c(annotation = "TxDb",
-                        sequences = "FaFile"),
+          signature = c(annotation = "TxDb", sequences = "FaFile"),
           function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              args, ...)
+                              ...)
           })
 
 

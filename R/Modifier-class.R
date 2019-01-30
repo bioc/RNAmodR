@@ -38,10 +38,7 @@ setClass("Modifier",
 setMethod(
   f = "initialize", 
   signature = signature(.Object = "Modifier"),
-  definition = function(.Object,
-                        bamfiles = NULL,
-                        fasta = NULL,
-                        gff = NULL) {
+  definition = function(.Object, bamfiles = NULL) {
     # check modification ident
     .Object@mod <- .norm_mod(.Object@mod,className)
     # short cut for creating an empty object
@@ -52,15 +49,9 @@ setMethod(
     className <- .norm_modifiertype(className)
     # check bam files
     bamfiles <- .norm_bamfiles(bamfiles,className)
-    # check genome sequences
-    fasta <- .norm_fasta(fasta,className)
-    # check genome annotation
-    gff <- .norm_gff(gff,className)
     # set clots
     .Object@bamfiles <- bamfiles
     .Object@conditions <- factor(names(bamfiles))
-    .Object@fasta <- fasta
-    .Object@gff <- gff
     return(.Object)
   }
 )
@@ -235,7 +226,7 @@ setMethod(f = "mainScore",
 #' @export
 setMethod(f = "settings", 
           signature = signature(x = "Modifier"),
-          definition = function(x,name){
+          definition = function(x, name){
             if(missing(name) || is.null(name)){
               return(x@arguments)
             }
@@ -249,7 +240,7 @@ setMethod(f = "settings",
 #' @export
 setReplaceMethod(f = "settings", 
           signature = signature(x = "Modifier"),
-          definition = function(x,value){
+          definition = function(x, value){
             if(is.null(names(value)) && length(value) > 0L){
               stop("'value' has to be a named.")
             }
@@ -274,8 +265,7 @@ setMethod(f = "seqinfo",
 setMethod(f = "sequences", 
           signature = signature(x = "Modifier"),
           definition = 
-            function(x,
-                     modified = FALSE){
+            function(x, modified = FALSE){
               if(!assertive::is_a_bool(modified)){
                 stop("'modified' has to be a single logical value.")
               }
@@ -365,8 +355,7 @@ setMethod(f = "aggregateData",
 setMethod(f = "modifications", 
           signature = signature(x = "Modifier"),
           definition = 
-            function(x,
-                     perTranscript = FALSE){
+            function(x, perTranscript = FALSE){
               if(!assertive::is_a_bool(perTranscript)){
                 stop("'perTranscript' has to be a single logical value.")
               }
@@ -379,24 +368,31 @@ setMethod(f = "modifications",
 
 # constructors -----------------------------------------------------------------
 
-.ModFromCharacter <- function(ans,
-                              args){
+.new_ModFromCharacter <- function(className, x, annotation, sequences, seqinfo,
+                                  ...){
+  browser()
+  ans <- new(className, x)
   # settings
-  settings(ans) <- args
+  settings(ans) <- list(...)
   #
-  modName <- fullName(ModRNAString())[
-    which(shortName(ModRNAString()) %in% ans@mod)]
-  message("Starting to search for '",
-          paste(tools::toTitleCase(modName), collapse = "', '"),
-          "'...")
+  f <- which(shortName(ModRNAString()) %in% ans@mod)
+  modName <- fullName(ModRNAString())[f]
+  message("Starting to search for '", paste(tools::toTitleCase(modName), 
+                                            collapse = "', '"),
+          "' ... ", appendLF = FALSE)
+  #
+  annotation <- .norm_annotation(annotation, className)
+  sequences <- .norm_sequences(sequences, className)
+  seqinfo <- .norm_seqnames(bamfiles(ans), annotation, sequences, seqinfo,
+                            className)
   # get SequenceData
   data <- lapply(ans@dataType,
                  function(class){
-                   do.call(class,
-                           c(list(bamfiles = bamfiles(ans),
-                                  fasta = fasta(ans),
-                                  gff = gff(ans)),
-                             settings(ans)))
+                   do.call(class, c(list(files = bamfiles(ans),
+                                         annotation = annotation,
+                                         sequences = sequences,
+                                         seqinfo = seqinfo),
+                                    settings(ans)))
                  })
   if(length(data) > 1L){
     ans@data <- as(data,"SequenceDataList")
@@ -407,11 +403,13 @@ setMethod(f = "modifications",
     ans <- do.call(modify,
                    list(ans))
   }
+  message("OK")
   validObject(ans)
+  ans <- .norm_modifications(ans, settings(ans))
   ans
 }
 
-.check_list_for_SequenceData_elements <- function(ans,list){
+.check_list_for_SequenceData_elements <- function(ans, list){
   if(is(ans,"character") && extends(ans,"Modifier")){
     ans <- getclass(ans)@prototype
   } else if(!is(ans,"Modifier")) {
@@ -427,27 +425,50 @@ setMethod(f = "modifications",
   as(list,"SequenceDataList")
 }
 
-.ModFromSequenceData <- function(ans,
-                                 x,
-                                 args){
+.new_ModFromSequenceData <- function(className, x, ...){
+  browser()
+  ans <- new(className, x)
   # settings
-  settings(ans) <- args
+  settings(ans) <- list(...)
   # check data type, length
   ans@data <- .check_list_for_SequenceData_elements(ans,x)
   # validate
   validObject(ans)
   #
-  modName <- fullName(ModRNAString())[
-    which(shortName(ModRNAString()) %in% ans@mod)]
-  message("Starting to search for '",
-          paste(tools::toTitleCase(modName), collapse = "', '"),
-          "'...")
+  f <- which(shortName(ModRNAString()) %in% ans@mod)
+  modName <- fullName(ModRNAString())[f]
+  message("Starting to search for '", paste(tools::toTitleCase(modName),
+                                            collapse = "', '"),
+          "' ... ", appendLF = FALSE)
   if(settings(ans,"findMod")){
     ans <- do.call(modify,list(ans))
   }
+  message("OK")
   validObject(ans)
+  ans <- .norm_modifications(ans, settings(ans))
   ans
 }
+
+setMethod("Modifier",
+          signature = c(x = "SequenceData"),
+          function(className, x, annotation = NULL, sequences = NULL, 
+                   seqinfo = NULL, ...){
+            .new_ModFromSequenceData(className, x, ...)
+          })
+setMethod("Modifier",
+          signature = c(x = "character"),
+          function(className, x, annotation = NULL, sequences = NULL, 
+                   seqinfo = NULL, ...){
+            .new_ModFromCharacter(className, x, annotation, sequences, seqinfo,
+                                  ...)
+          })
+setMethod("Modifier",
+          signature = c(x = "BamFileList"),
+          function(className, x, annotation = NULL, sequences = NULL, 
+                   seqinfo = NULL, ...){
+            .new_ModFromCharacter(className, x, annotation, sequences, seqinfo,
+                                  ...)
+          })
 
 # dummy functions --------------------------------------------------------------
 # these need to be implemented by each subclass

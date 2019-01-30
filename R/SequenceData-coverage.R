@@ -57,10 +57,8 @@ setMethod(".get_Data",
 #' @rdname CoverageSequenceData
 #' @export
 CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  # get arguments
-  args <- .get_mod_data_args(...)
   SequenceData("Coverage", files = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, args = args, ...)
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 
 # aggregation ------------------------------------------------------------------
@@ -69,7 +67,6 @@ CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 setMethod("aggregate",
           signature = c(x = "CoverageSequenceData"),
           function(x, condition = c("Both","Treated","Control")){
-            browser()
             condition <- tolower(match.arg(condition))
             .aggregate_list_data_mean_sd(x,condition)
           }

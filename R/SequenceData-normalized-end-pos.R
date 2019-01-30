@@ -30,7 +30,6 @@ setClass(Class = "NormEnd3SequenceData",
                                                        type = c("5prime",
                                                                 "3prime"),
                                                        args = list()){
-  browser()
   type <- match.arg(type)
   strands_u <- .get_strand_u_GRangesList(grl)
   data <- .load_bam_alignment_data(bamFile, param, grl, args)
@@ -146,18 +145,14 @@ setMethod(".get_Data",
 #' @rdname NormEndSequenceData
 #' @export
 NormEnd5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  # get arguments
-  args <- .get_mod_data_args(...)
   SequenceData("NormEnd5", files = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, args = args, ...)
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 #' @rdname EndSequenceData
 #' @export
 NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  # get arguments
-  args <- .get_mod_data_args(...)
   SequenceData("NormEnd3", files = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, args = args, ...)
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 
 # aggregation ------------------------------------------------------------------

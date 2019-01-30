@@ -41,9 +41,9 @@ Loading example files
 ```{r example_files}
 gff <- system.file("extdata","example1.gff3" ,package = "RNAmodR.Data")
 fasta <- system.file("extdata","example1.fasta" ,package = "RNAmodR.Data")
-files <-  list("one" = c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR.Data")),
-               "two" = c(Treated = system.file("extdata","example2.bam" ,package = "RNAmodR.Data")),
-               "three" = c(Treated = system.file("extdata","example3.bam" ,package = "RNAmodR.Data")))
+files <- c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR.Data"),
+           Treated = system.file("extdata","example2.bam" ,package = "RNAmodR.Data"),
+           Treated = system.file("extdata","example3.bam" ,package = "RNAmodR.Data"))
 ```
 
 Each `SequenceData` object is created with a named character vector, which can 

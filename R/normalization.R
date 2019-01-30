@@ -70,25 +70,6 @@ NULL
   seq
 }
 
-.norm_fasta <- function(x,
-                        className,
-                        .xname = assertive::get_name_in_parent(x)){
-  if(!is(x,"FaFile")){
-    x <- try(FaFile(x), silent = TRUE)
-    if (is(x, "try-error")){
-      stop("To create a ",className," object, '",.xname,"' must be a FaFile ",
-           "object or be coercible to one.",
-           call. = FALSE)
-    }
-  }
-  if(!all(file.exists(path(x)))){
-    stop("The fasta file does not exist at the given location.",
-         call. = FALSE)
-  }
-  indexFa(x)
-  x
-}
-
 # BamFiles ---------------------------------------------------------------------
 
 
@@ -96,12 +77,13 @@ NULL
                            className,
                            .xname = assertive::get_name_in_parent(x)){
   if(!is(x,"BamFileList")){
-    x <- try(BamFileList(x), silent = TRUE)
+    tmp <- try(BamFileList(x), silent = TRUE)
     if (is(x, "try-error")){
       stop("To create a ",className," object, '",.xname,"' must be a ",
            "BamFileList object or be coercible to one.",
            call. = FALSE)
     }
+    x <- tmp
   }
   if(length(files) == 0L){
     stop("BamFileList is empty.",
@@ -131,8 +113,8 @@ NULL
   }
   headers <- lapply(bfl,Rsamtools::scanBamHeader)
   targets <- lapply(headers,"[[","targets")
-  targets <- Reduce(intersect,targets)
-  seqinfo <- Seqinfo(names(targets),targets)
+  targets <- unique(do.call(c,lapply(unname(targets),names)))
+  seqinfo <- Seqinfo(targets)
   seqinfo
 }
 

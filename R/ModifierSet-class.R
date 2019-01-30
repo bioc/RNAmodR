@@ -22,12 +22,12 @@ NULL
 #' each element should be used for creation of a seperate \code{Modifier}
 #' object.}
 #' }
-#' @param fasta sequences matching the target sequences the reads were mapped 
-#' onto. This must match the information contained in the BAM files. This is 
-#' parameter is only required if \code{x} if not a \code{Modifier} object.
-#' @param gff annotation data, which must match the information contained in the
-#' BAM files. This is parameter is only required if \code{x} if not a 
+#' @param annotation annotation data, which must match the information contained
+#' in the BAM files. This is parameter is only required if \code{x} if not a 
 #' \code{Modifier} object.
+#' @param sequences sequences matching the target sequences the reads were 
+#' mapped onto. This must match the information contained in the BAM files. This
+#' is parameter is only required if \code{x} if not a \code{Modifier} object.
 #' @param ... Additional otpional parameters:
 #' \itemize{
 #' \item{internalBP}{\code{TRUE} or \code{FALSE}: should 
@@ -69,8 +69,7 @@ setMethod(
     return(paste("All 'Modifier' in '",class(x),"' must be of ",
                  elementTypeX, "objects"))
   }
-  valid_Modifier <- lapply(x@listData,
-                           .valid_Modifier)
+  valid_Modifier <- lapply(x@listData, .valid_Modifier)
   valid_Modifier <- valid_Modifier[!vapply(valid_Modifier,is.null,logical(1))]
   if(length(valid_Modifier) != 0L){
     return(paste(paste0(seq_along(valid_Modifier),". :",valid_Modifier),
@@ -138,16 +137,15 @@ setMethod(f = "relistToClass",
   TRUE
 }
 
-.bamfiles_to_ModifierSet <- function(modifiertype,
-                                     x,
-                                     fasta,
-                                     gff,
-                                     ...){
+.get_class_name_for_set_from_modifier_type <- function(modifiertype){
+  gsub("Mod","ModSet",modifiertype)
+}
+
+.bamfiles_to_ModifierSet <- function(className, x, annotation, sequences,
+                                     seqinfo, ...){
   # check and normalize input
   args <- .norm_ModifierSet_args(list(...))
-  fasta <- .norm_fasta(fasta, modifiertype)
-  gff <- .norm_gff(gff)
-  modifiertype <- .norm_modifiertype(modifiertype)
+  className <- .norm_modifiertype(className)
   if(!is.list(x)){
     x <- list(x)
   }
@@ -155,28 +153,24 @@ setMethod(f = "relistToClass",
   if(is.null(names)){
     names <- vector(mode = "list", length = length(x))
   }
-  x <- lapply(x,
-              .norm_bamfiles,
-              modifiertype)
+  x <- lapply(x, .norm_bamfiles, className)
+  annotation <- .norm_annotation(annotation, className)
+  sequences <- .norm_sequences(sequences, className)
+  seqinfo <- .norm_seqnames(x, annotation, sequences, seqinfo, className)
   ni <- seq_along(x)
   # choose were to use parallelization
   if(args[["internalBP"]] == TRUE){
     BiocParallel::register(BiocParallel::SerialParam())
   }
   # do analysis by calling the Modifier classes
-  FUN <- function(i,
-                  z,
-                  n,
-                  args,
-                  modifiertype,
-                  PACKAGE){
+  FUN <- function(i, z, n, args, className, PACKAGE){
     suppressPackageStartupMessages({
       requireNamespace(PACKAGE)
     })
     if(!is.null(n)){
-      message(i,". ",modifiertype," analysis '",n,"':")
+      message(i,". ",className," analysis '",n,"':")
     } else {
-      message(i,". ",modifiertype," analysis:")
+      message(i,". ",className," analysis:")
     }
     # choose were to use parallelization
     if(args[["internalBP"]] == FALSE){
@@ -186,54 +180,61 @@ setMethod(f = "relistToClass",
     args[["internalBP"]] <- NULL
     #
     if(is(x,"BamFileList")){
-      METHOD <- selectMethod(modifiertype,"BamFileList")
+      METHOD <- selectMethod(className,"BamFileList")
     } else {
-      METHOD <- selectMethod(modifiertype,"character")
+      METHOD <- selectMethod(className,"character")
     }
     do.call(METHOD,
             c(list(z,
-                   fasta = fasta,
-                   gff = gff),
+                   annotation = annotation,
+                   sequences = sequences,
+                   seqinfo = seqinfo),
               args))
   }
-  PACKAGE <- getClass(modifiertype)@package
-  x <- BiocParallel::bpmapply(
-    FUN,
-    ni,
-    x,
-    names,
-    MoreArgs = list(args = args,
-                    modifiertype = modifiertype,
-                    PACKAGE = PACKAGE),
-    SIMPLIFY = FALSE)
+  PACKAGE <- getClass(className)@package
+  x <- BiocParallel::bpmapply(FUN,
+                              ni, x, names,
+                              MoreArgs = list(args = args, 
+                                              className = className, 
+                                              PACKAGE = PACKAGE),
+                              SIMPLIFY = FALSE)
   if(!all(vapply(names,is.null,logical(1)))){
     names(x) <- names
   }
   # pass results to ModifierSet object
-  new2(.get_class_name_for_set_from_modifier_type(modifiertype),
-       listData = x)
+  new2(.get_class_name_for_set_from_modifier_type(className), listData = x)
 }
 
 .Modifer_to_ModifierSet <- function(x, ...){
-  modifiertype <- modifierType(x[[1]])
-  new2(.get_class_name_for_set_from_modifier_type(modifiertype),
-       listData = x)
+  if(!is.list(x)){
+    x <- list(x)
+  }
+  elementType <- modifierType(x[[1]])
+  className <- .get_class_name_for_set_from_modifier_type(elementType)
+  if (!all(vapply(x,
+                  function(xi) extends(class(xi), elementType),
+                  logical(1)))){
+    return(paste("All 'Modifier' in '",className,"' must be of ",
+                 elementType, " objects"))
+  }
+  new2(className, listData = x)
 }
 
 #' @rdname ModifierSet
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "list"),
-          function(modifiertype, x, ...) {
+          function(className, x, ...) {
+            browser()
             if(.contains_only_Modifier(x)){
-              return(.modifer_to_ModifierSet(x, ...))
+              return(.Modifer_to_ModifierSet(x, ...))
             }
             if(.contains_only_bamfiles(x)){
               args <- list(...)
-              return(.bamfiles_to_ModifierSet(modifiertype, 
-                                              x, 
-                                              args[["fasta"]], 
-                                              args[["gff"]], 
+              return(.bamfiles_to_ModifierSet(className, x, 
+                                              args[["annotation"]], 
+                                              args[["sequences"]], 
+                                              args[["seqinfo"]], 
                                               ...))
             }
             stop("'x' must be a list containing only elements of the same ",
@@ -248,22 +249,22 @@ setMethod(f = "ModifierSet",
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "character"),
-          function(modifiertype, x, fasta, gff, ...) {
+          function(className, x, annotation, sequences, seqinfo, ...) {
             browser()
-            .bamfiles_to_ModifierSet(modifiertype, x, fasta, gff, ...)
+            .bamfiles_to_ModifierSet(className, x, sequences, sequences, ...)
           })
 #' @rdname ModifierSet
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "BamFileList"),
-          function(modifiertype, x, fasta, gff, ...) {
-            .bamfiles_to_ModifierSet(modifiertype, x, fasta, gff, ...)
+          function(className, x, annotation, sequences, seqinfo,...) {
+            .bamfiles_to_ModifierSet(className, x, sequences, sequences, ...)
           })
 #' @rdname ModifierSet
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "Modifier"),
-          function(modifiertype, x, ...) {
+          function(className, x, ...) {
             .Modifer_to_ModifierSet(x, ...)
           })
 
@@ -351,9 +352,7 @@ setMethod(f = "mainScore",
 setMethod(f = "sequences", 
           signature = signature(x = "ModifierSet"),
           definition = 
-            function(x,
-                     modified = FALSE,
-                     with.qualities = FALSE){
+            function(x, modified = FALSE, with.qualities = FALSE){
               sequences(x[[1]],
                         modified = modified,
                         with.qualities = with.qualities)

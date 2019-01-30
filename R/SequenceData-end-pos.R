@@ -220,26 +220,20 @@ setMethod(".get_Data",
 #' @rdname EndSequenceData
 #' @export
 End5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  # get arguments
-  args <- .get_mod_data_args(...)
   SequenceData("End5", files = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, args = args, ...)
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 #' @rdname EndSequenceData
 #' @export
 End3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  # get arguments
-  args <- .get_mod_data_args(...)
   SequenceData("End3", files = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, args = args, ...)
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 #' @rdname EndSequenceData
 #' @export
 EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  # get arguments
-  args <- .get_mod_data_args(...)
   SequenceData("End", files = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, args = args, ...)
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 
 # aggregation ------------------------------------------------------------------
