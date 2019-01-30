@@ -21,6 +21,7 @@ setClass(Class = "PileupSequenceData",
 .pileup_colnames <- c("pos","-","G","A","T","C")
 .pileup_measure_colnames <- c("-","G","A","T","C")
 
+#' @importFrom reshape2 dcast melt
 .fill_up_pileup_data <- function(d,r){
   pos <- BiocGenerics::start(r):BiocGenerics::end(r)
   if(is.null(d)){
@@ -68,11 +69,9 @@ setClass(Class = "PileupSequenceData",
   df
 }
 
-.get_position_data_of_transcript_pileup <- function(bamFile,
-                                                    ranges,
-                                                    sequences,
-                                                    param,
-                                                    args = list()){
+#' @importFrom reshape2 dcast
+.get_position_data_of_transcript_pileup <- function(bamFile, grl, sequences,
+                                                    param, args = list()){
   # get user set argumenst
   pileupArgs <- args[c("max_depth", 
                        "min_base_quality", 
@@ -132,41 +131,36 @@ setClass(Class = "PileupSequenceData",
   pileup
 }
 
+setMethod(".get_Data",
+          signature = c(x = "PileupSequenceData",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x, grl, sequences, param, args){
+            message("Loading Pileup data from BAM files ... ",
+                    appendLF = FALSE)
+            files <- bamfiles(x)
+            data <- lapply(files,
+                           FUN = .get_position_data_of_transcript_pileup,
+                           grl = grl,
+                           sequences = sequences,
+                           param = param,
+                           args = args)
+            names(data) <- paste0("pileup.",
+                                  names(files),
+                                  ".",
+                                  seq_along(files))
+            data
+          }
+)
+
 #' @name PileupSequenceData
-#' @importFrom reshape2 dcast melt
-#' 
 #' @export
-PileupSequenceData <- function(bamfiles,
-                               fasta,
-                               gff,
-                               ...){
+PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  # get arguments
   args <- .get_mod_data_args(...)
-  ans <- new("PileupSequenceData",
-             bamfiles,
-             fasta,
-             gff,
-             args)
-  ranges <- .load_annotation(ans@gff)
-  sequences <- .load_transcript_sequences(ans@fasta,
-                                          ranges)
-  param <- .assemble_scanBamParam(ranges,
-                                  ans@minQuality,
-                                  ans@chromosomes)
-  message("Loading Pileup data from BAM files...")
-  data <- lapply(ans@bamfiles,
-                 FUN = .get_position_data_of_transcript_pileup,
-                 ranges = ranges,
-                 sequences = sequences,
-                 param = param,
-                 args = args)
-  names(data) <- paste0("pileup.",
-                        names(ans@bamfiles),
-                        ".",
-                        seq_along(ans@bamfiles))
-  .postprocess_read_data(ans,
-                         data,
-                         ranges,
-                         sequences)
+  SequenceData("Pileup", files = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, args = args, ...)
 }
 
 # aggregation ------------------------------------------------------------------
@@ -215,14 +209,25 @@ PileupSequenceData <- function(bamfiles,
 }
 
 #' @name PileupSequenceData
-#' @importFrom matrixStats rowSds
-#' 
 #' @export
 setMethod("aggregate",
           signature = c(x = "PileupSequenceData"),
-          function(x,
-                   condition = c("Both","Treated","Control")){
+          function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
             .aggregate_data_frame_percentage_mean_sd(x,condition)
           }
+)
+
+
+# data visualization -----------------------------------------------------------
+setMethod(
+  f = ".dataTracks",
+  signature = signature(x = "PileupSequenceData",
+                        data = "missing",
+                        seqdata = "GRanges",
+                        sequence = "XString"),
+  definition = function(x, seqdata, sequence,  args) {
+    requireNamespace("Gviz")
+    browser()
+  }
 )

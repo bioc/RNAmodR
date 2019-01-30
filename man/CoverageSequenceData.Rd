@@ -7,6 +7,9 @@
 \title{CoverageSequenceData}
 \usage{
 CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
+
+\S4method{aggregate}{CoverageSequenceData}(x, condition = c("Both",
+  "Treated", "Control"))
 }
 \description{
 title

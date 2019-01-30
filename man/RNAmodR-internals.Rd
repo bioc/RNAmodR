@@ -11,6 +11,8 @@
 \usage{
 .constructModRanges(range, data, modType, scoreFun, source, type)
 
+.get_Data(x, grl, sequences, param, args)
+
 .dataTracks(x, data, seqdata, sequence, args)
 
 \S4method{.constructModRanges}{GRanges,DataFrame}(range, data, modType,

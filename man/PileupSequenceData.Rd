@@ -6,7 +6,7 @@
 \alias{PileupSequenceData-class}
 \title{PileupSequenceData}
 \usage{
-PileupSequenceData(bamfiles, fasta, gff, ...)
+PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 \S4method{aggregate}{PileupSequenceData}(x, condition = c("Both",
   "Treated", "Control"))

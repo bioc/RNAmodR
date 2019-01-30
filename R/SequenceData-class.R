@@ -41,6 +41,7 @@ sequenceDataClass <- function(dataType){
   if(is(tmp,"try-error")){
     stop("Class '",ans,"' not found: ",tmp)
   }
+  
   ans
 }
 
@@ -64,7 +65,6 @@ setMethod("show", "SequenceData",
                                            " metadata columns"),
                 "\n",sep = "")
             out_data <- NULL
-            out_mdata <- NULL
             # data
             if (data_nc > 0) {
               data_col_names <- colnames(object@unlistData)
@@ -76,24 +76,10 @@ setMethod("show", "SequenceData",
                 matrix(unlist(data_col_types, use.names = FALSE), nrow = 1,
                 dimnames = list("", data_col_names))
             }
-            # metadata
-            if (ranges_nmc > 0) {
-              mdata_col_names <- colnames(ranges_mcols)
-              mdata_col_types <- 
-                lapply(ranges_mcols, function(x) {
-                  paste0("<", classNameForDisplay(x)[1],">")
-                })
-              out_mdata <- matrix(unlist(mdata_col_types,
-                                         use.names = FALSE),
-                                  nrow = 1,
-                                  dimnames = list("", mdata_col_names))
-            }
             cat("- Data columns:\n")
             print(out_data, quote = FALSE, right = TRUE)
-            cat("\n- Ranges metadata columns:\n")
-            print(out_mdata, quote = FALSE, right = TRUE)
-            print("Sequence info file:")
-            print(paste0("|    ",capture.output(show(object@seqinfo))))
+            cat("-")
+            cat(paste0(" ",capture.output(show(object@seqinfo)),"\n"))
           }
 )
 # validity ---------------------------------------------------------------------
@@ -261,9 +247,9 @@ setMethod("extractROWS", "SequenceData",
 
 setMethod("getListElement", "SequenceData",
           function(x, i, exact=TRUE){
-            i2 <- normalizeDoubleBracketSubscript(i, x, exact=exact,
-                                                  allow.NA=TRUE,
-                                                  allow.nomatch=TRUE)
+            i2 <- normalizeDoubleBracketSubscript(i, x, exact = exact,
+                                                  allow.NA = TRUE,
+                                                  allow.nomatch = TRUE)
             if (is.na(i2))
               return(NULL)
             unlisted_x <- unlist(x, use.names=FALSE)
@@ -280,7 +266,6 @@ setMethod("getListElement", "SequenceData",
                 x@conditions)
           }
 )
-
 
 
 # Concatenation ----------------------------------------------------------------
@@ -317,11 +302,7 @@ setMethod("rbind", "SequenceData",
 setMethod(
   f = "initialize", 
   signature = signature(.Object = "SequenceData"),
-  definition = function(.Object,
-                        bamfiles,
-                        seqinfo,
-                        args,
-                        ...){
+  definition = function(.Object, bamfiles, seqinfo, ...){
     # quality
     .Object@minQuality <- .norm_min_quality(list(...),.Object)
     if(!is.integer(.Object@minQuality) | 
@@ -330,7 +311,7 @@ setMethod(
       stop("Minimum quality is not set for '",class(.Object),"'.",
            call. = FALSE)
     }
-    # set clots
+    # set slots
     .Object@bamfiles <- bamfiles
     .Object@replicate <- factor(seq_along(bamfiles))
     .Object@conditions <- factor(names(bamfiles))
@@ -343,94 +324,91 @@ setMethod(
 
 # internal SequenceData constructor
 .new_SequenceData <- function(dataType, files, annotation, sequences, seqinfo,
-                              ...){
-  browser()
+                              args, ...){
   if(is.null(dataType)){
     stop("Invalid data type.")
   }
   className <- sequenceDataClass(dataType)
   # check bam files
   files <- .norm_bamfiles(files, className)
-  # get arguments
-  args <- .get_mod_data_args(...)
   # get annotation and sequence data
   txdb <- .norm_annotation(annotation, className)
   sequences <- .norm_sequences(sequences, className)
   seqinfo <- .norm_seqnames(files, txdb, sequences, seqinfo, className)
   # create the class
-  ans <- new(className, files, seqinfo, args)
+  ans <- new(className, files, seqinfo, ...)
   # load transcript data and sequence data as well as the ScanBamParam
-  ranges <- .load_annotation(txdb, ans@seqinfo)
-  sequences <- .load_transcript_sequences(sequences, ranges)
-  param <- .assemble_scanBamParam(ranges, ans@minQuality, ans@seqinfo)
+  grl <- .load_annotation(txdb, ans@seqinfo)
+  sequences <- .load_transcript_sequences(sequences, grl)
+  param <- .assemble_scanBamParam(grl, ans@minQuality, ans@seqinfo)
   # run the specific data aggregation function
-  data <- .get_Data(ans, ranges, sequences, param)
+  data <- .get_Data(ans, grl, sequences, param, args)
   # post process the data
-  .postprocess_read_data(ans, data, ranges, sequences)
+  .postprocess_read_data(ans, data, grl, sequences)
 }
 
 setMethod("SequenceData",
           signature = c(annotation = "character",
                         sequences = "character"),
-          function(dataType, files, annotation, sequences, seqinfo, ...){
+          function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
+                              args, ...)
           })
 setMethod("SequenceData",
           signature = c(annotation = "character",
                         sequences = "BSgenome"),
-          function(dataType, files, annotation, sequences, seqinfo, ...){
+          function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
+                              args, ...)
           })
 setMethod("SequenceData",
           signature = c(annotation = "TxDb",
                         sequences = "character"),
-          function(dataType, files, annotation, sequences, seqinfo, ...){
+          function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
+                              args, ...)
           })
 setMethod("SequenceData",
           signature = c(annotation = "TxDb",
                         sequences = "BSgenome"),
-          function(dataType, files, annotation, sequences, seqinfo, ...){
+          function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
+                              args)
           })
 setMethod("SequenceData",
           signature = c(annotation = "GFF3File",
                         sequences = "BSgenome"),
-          function(dataType, files, annotation, sequences, seqinfo, ...){
+          function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
+                              args, ...)
           })
 setMethod("SequenceData",
           signature = c(annotation = "GFF3File",
                         sequences = "character"),
-          function(dataType, files, annotation, sequences, seqinfo, ...){
+          function(dataType, files, annotation, sequences, seqinfo, args){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
+                              args)
           })
 setMethod("SequenceData",
           signature = c(annotation = "character",
                         sequences = "FaFile"),
-          function(dataType, files, annotation, sequences, seqinfo, ...){
+          function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
+                              args, ...)
           })
 setMethod("SequenceData",
           signature = c(annotation = "GFF3File",
                         sequences = "FaFile"),
-          function(dataType, files, annotation, sequences, seqinfo, ...){
+          function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
+                              args, ...)
           })
 setMethod("SequenceData",
           signature = c(annotation = "TxDb",
                         sequences = "FaFile"),
-          function(dataType, files, annotation, sequences, seqinfo, ...){
+          function(dataType, files, annotation, sequences, seqinfo, args, ...){
             .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
+                              args, ...)
           })
 
 
@@ -523,10 +501,6 @@ setMethod("SequenceData",
 
 .norm_postprocess_read_data <- function(data){
   if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
-    data <- lapply(data,
-                   function(d){
-                     d[order(names(d))]
-                   })
     data <- lapply(data, unlist)
     if(length(unique(lengths(data))) != 1L){
       stop("Data is of unequal length and cannot be coerced to a DataFrame.",
@@ -547,13 +521,12 @@ setMethod("SequenceData",
   } else {
     stop("Something went wrong.")
   }
-  rownames(data) <- NULL
   data
 }
 
 .postprocess_read_data <- function(x,
                                    data,
-                                   ranges,
+                                   grl,
                                    sequences){
   conditionsFmultiplier <- length(data)
   # work with the unlisted data and construct a CompressedSplitDataFrameList
@@ -561,33 +534,30 @@ setMethod("SequenceData",
   data <- .norm_postprocess_read_data(data)
   conditionsFmultiplier <- ncol(data) / conditionsFmultiplier 
   # create partitioning object from ranges
-  parentRanges <- .get_parent_annotations(ranges)
-  partitioning <- PartitioningByEnd(parentRanges)
-  f <- Rle(parentRanges$ID,width(parentRanges))
-  if(sum(width(partitioning)) != nrow(data) ||
-     length(f) != nrow(data)){
+  partitioning <- PartitioningByWidth(sum(width(grl)))
+  if(sum(width(partitioning)) != nrow(data)){
     stop("Something went wrong. Length of data and Ranges do not match.")
   }
-  # order data so that is matched the PartitioningByEnd object
-  data <- split(data,f)
-  data <- data[match(names(data),parentRanges$ID)]
-  data <- unlist(data, use.names = FALSE)
+  # order data so that is matched the PartitioningByWidth object
+  data <- IRanges::SplitDataFrameList(data)
+  data@partitioning <- as(partitioning,"PartitioningByEnd")
+  positions <- .seqs_rl(grl)
+  rownames(data) <- IRanges::CharacterList(positions)
   # order sequences
-  sequences <- sequences[match(names(sequences),parentRanges$ID)]
-  x@chromosomes <- x@chromosomes[match(x@chromosomes,
-                                       GenomeInfoDb::seqnames(parentRanges))]
+  sequences <- sequences[match(names(grl),names(sequences))]
   # store data
-  x@unlistData <- data
+  x@unlistData <- data@unlistData
   x@replicate <- rep(x@replicate, each = conditionsFmultiplier)
   x@conditions <- rep(x@conditions, each = conditionsFmultiplier)
-  x@partitioning <- partitioning
-  x@ranges <- ranges
+  x@partitioning <- data@partitioning
+  x@ranges <- grl
   x@sequences <- as(sequences,x@sequencesType)
-  names(x) <- as.character(parentRanges$ID)
+  names(x) <- names(grl)
   if(any(names(x@ranges) != names(x@sequences)) || 
      any(names(x@ranges) != names(x))){
     stop("Something went wrong.")
   }
+  message("OK")
   x
 }
 
@@ -633,7 +603,7 @@ setMethod(f = "bamfiles",
 
 
 # dummy functions --------------------------------------------------------------
-# these need to be implemented by each subclass
+# this needs to be implemented by each subclass
 
 #' @name SequenceData
 #' @export
@@ -644,4 +614,18 @@ setMethod(f = "aggregate",
               stop("This functions needs to be implemented by '",class(x),"'.",
                    call. = FALSE)
             }
+)
+
+# data visualization -----------------------------------------------------------
+# this needs to be implemented by each subclass
+setMethod(
+  f = ".dataTracks",
+  signature = signature(x = "SequenceData",
+                        data = "missing",
+                        seqdata = "GRanges",
+                        sequence = "XString"),
+  definition = function(x, seqdata, sequence,  args) {
+    stop("This functions needs to be implemented by '",class(x),"'.",
+         call. = FALSE)
+  }
 )

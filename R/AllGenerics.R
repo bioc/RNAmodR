@@ -144,14 +144,15 @@ setGeneric(
 setGeneric( 
   name = "SequenceData",
   signature = c("annotation","sequences"),
-  def = function(dataType, files, annotation, sequences, seqinfo, FUN, ...)
+  def = function(dataType, files, annotation, sequences, seqinfo, args, ...)
     standardGeneric("SequenceData")
 ) 
-
+#' @name RNAmodR-internals
+#' @export
 setGeneric( 
   name = ".get_Data",
   signature = c("x","grl","sequences","param"),
-  def = function(x, grl, sequences, param)
+  def = function(x, grl, sequences, param, args)
     standardGeneric(".get_Data")
 ) 
 

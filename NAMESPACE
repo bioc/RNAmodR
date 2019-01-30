@@ -3,6 +3,7 @@
 export("settings<-")
 export(.constructModRanges)
 export(.dataTracks)
+export(.get_Data)
 export(CoverageSequenceData)
 export(End3SequenceData)
 export(End5SequenceData)
