@@ -5,10 +5,11 @@ NULL
 #' @name subset
 #' @aliases subsetByCoord
 #' 
-#' @title subset
+#' @title Subsetting data from a \code{Modifier} or \code{ModifierSet} object.
 #' 
 #' @description 
-#' title
+#' With \code{subsetByCoord} data from a \code{Modifier} or \code{ModifierSet} 
+#' object will be subset to position as defined in \code{coord}.
 #' 
 #' @param x a \code{Modifier} or \code{ModifierSet} object.
 #' @param coord coordinates of position to subset to. Either a \code{GRanges} or
@@ -54,9 +55,7 @@ NULL
            call. = FALSE)
     }
   }
-  args <- list(name = name,
-               type = type,
-               flank = flank)
+  args <- list(name = name, type = type, flank = flank)
   args
 }
 
@@ -79,11 +78,11 @@ NULL
   coord
 }
 
-.get_element_names <- function(data,coord,name,type){
+.get_element_names <- function(data, coord, name, type){
   namesData <- names(data)
   namesCoord <- as.character(names(coord))
   if(is.null(name)){
-    names <- intersect(namesData,namesCoord)
+    names <- intersect(namesData, namesCoord)
     message <- c("No intersection between names in data of 'x' and Parent in ",
                  "'coord'\n for modification type '",
                  paste(type, collapse = "','"),"'.")
@@ -129,13 +128,11 @@ NULL
   stop(message,call. = FALSE)
 }
 
-.perform_subset <- function(data,
-                            coord,
-                            flank = 0L){
+.perform_subset <- function(data, coord, flank = 0L){
+  if(!all(names(data) == names(coord))){
+    stop("Length and/or order of data and coord do not match.")
+  }
   .check_for_invalid_positions(data,coord)
-  # add positions as rownames
-  rownames(data@unlistData) <- unlist(lapply(lengths(data),seq_len),
-                                      use.names = FALSE)
   # construct flanking vector
   flank <- seq.int(from = -flank,to = flank, by = 1L)
   f <- IntegerList(lapply(start(ranges(coord)),
@@ -145,14 +142,14 @@ NULL
   return(data[f])
 }
 
-.subset_Modifier_by_GRangesList <- function(x,
-                                            coord,
-                                            ...){
-  args <- .norm_subset_args(list(...),x)
-  coord <- .norm_coord(coord,args[["type"]])
+.subset_Modifier_by_GRangesList <- function(x, coord, ...){
+  args <- .norm_subset_args(list(...), x)
+  coord <- .norm_coord(coord, args[["type"]])
   data <- aggregateData(x)
-  data <- data[.get_element_names(data,coord,args[["name"]],args[["type"]])]
-  .perform_subset(data,coord,args[["flank"]])
+  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
+  data <- data[match(names, names(data))]
+  coord <- coord[match(names, names(coord))]
+  .perform_subset(data, coord, args[["flank"]])
 }
 
 ################################################################################
@@ -166,27 +163,27 @@ NULL
   # 
   lengths <- lengths(data)
   positions <- start(ranges(coord))
-  labels <- LogicalList(lapply(lengths,function(l){rep(FALSE,l)}))
-  labels <- LogicalList(
-    mapply(
-      function(l,p){
-        l[p] <- TRUE
-        l
-      },
-      labels,
-      positions))
+  labels <- IRanges::LogicalList(lapply(lengths,function(l){rep(FALSE,l)}))
+  labels <- IRanges::LogicalList(mapply(
+    function(l,p){
+      l[p] <- TRUE
+      l
+    },
+    labels,
+    positions,
+    SIMPLIFY = FALSE))
   data@unlistData$labels <- unlist(labels)
   return(data)
 }
 
-.label_Modifier_by_GRangesList <- function(x,
-                                           coord,
-                                           ...){
-  args <- .norm_subset_args(list(...),x)
-  coord <- .norm_coord(coord,args[["type"]])
+.label_Modifier_by_GRangesList <- function(x, coord, ...){
+  args <- .norm_subset_args(list(...), x)
+  coord <- .norm_coord(coord, args[["type"]])
   data <- aggregateData(x)
-  data <- data[.get_element_names(data,coord,args[["name"]],args[["type"]])]
-  .perform_label(data,coord)
+  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
+  data <- data[match(names, names(data))]
+  coord <- coord[match(names, names(coord))]
+  .perform_label(data, coord)
 }
 ################################################################################
 
@@ -213,19 +210,17 @@ setMethod("subsetByCoord",
           }
 )
 
-.subset_ModifierSet_by_GRangesList <- function(x,
-                                               coord,
-                                               ...){
+.subset_ModifierSet_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...),x)
   coord <- .norm_coord(coord,args[["type"]])
   lapply(x,
          function(z){
            data <- aggregateData(z)
-           data <- data[.get_element_names(data,
-                                           coord,
-                                           args[["name"]],
-                                           args[["type"]])]
-           .perform_subset(data,coord,args[["flank"]])
+           names <- .get_element_names(data, coord, args[["name"]],
+                                       args[["type"]])
+           data <- data[match(names, names(data))]
+           coord <- coord[match(names, names(coord))]
+           .perform_subset(data, coord, args[["flank"]])
          })
 }
 

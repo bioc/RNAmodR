@@ -8,7 +8,7 @@
 \alias{subsetByCoord,Modifier,GRangesList-method}
 \alias{subsetByCoord,ModifierSet,GRanges-method}
 \alias{subsetByCoord,ModifierSet,GRangesList-method}
-\title{subset}
+\title{Subsetting data from a \code{Modifier} or \code{ModifierSet} object.}
 \usage{
 subsetByCoord(x, coord, ...)
 
@@ -40,5 +40,6 @@ is derived from the \code{modType(x)}, but it can be overwritten using
 }}
 }
 \description{
-title
+With \code{subsetByCoord} data from a \code{Modifier} or \code{ModifierSet} 
+object will be subset to position as defined in \code{coord}.
 }

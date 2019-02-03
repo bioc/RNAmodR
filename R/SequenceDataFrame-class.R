@@ -6,12 +6,22 @@ NULL
 #' @title SequenceDataFrame
 #' 
 #' @description 
-#' title
+#' The \code{SequenceDataFrame} class contains data for positions along a 
+#' transcripts. It is used to describe elements from a \code{SequenceData}
+#' object.
 #' 
+#' @param ranges a \code{GRanges} object containing all annotation elements
+#' for a transcript.
+#' @param sequence \code{XString} object describing the nucleotide sequence of 
+#' the transcript.
+#' @param conditions The condition of each column or set of columns. Either 
+#' \code{control} or \code{treated}.
+#' @param replicate The replicate of each column or set of columns for the 
+#' individual conditions
 #' 
 NULL
 
-# SequenceDataFrame -----------------------------------------------------------------
+# SequenceDataFrame ------------------------------------------------------------
 
 #' @rdname SequenceDataFrame
 #' @export

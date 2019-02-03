@@ -10,7 +10,7 @@
 \alias{compareByCoord,ModifierSet,GRangesList-method}
 \alias{plotCompareByCoord,ModifierSet,GRanges-method}
 \alias{plotCompareByCoord,ModifierSet,GRangesList-method}
-\title{compare}
+\title{Comparison of Samples}
 \usage{
 compare(x, name, from = 1L, to = 30L, ...)
 
@@ -47,10 +47,18 @@ match the gene or transcript name.}
 character, it must match one of the names in the \code{ModifierSet}.}
 }
 \value{
-for \code{compareByCoord} as \code{\link{DataFrameList}} and for
-\code{plotCompareByCoord} a \code{ggplot} object, which can be modified 
-further.
+\code{compareByCoord} returns a \code{\link{DataFrameList}} and 
+\code{plotCompareByCoord} returns a \code{ggplot} object, which can be 
+modified further. The \code{\link{DataFrameList}} contains columns per sample
+as well as \code{names}, \code{positions} and \code{mod} incorporated from 
+the \code{coord} input. If \code{coord} contains a column \code{Activity} 
+this is included in the results as well.
 }
 \description{
-title
+To compare data of different samples, a \code{\link{ModifierSet}} is used.
+To select the data alongside the transcripts and their positions a 
+\code{GRanges} or a \code{GRangesList} needs to be supplied. In case of a 
+\code{GRanges} object, the parent column must match the transcript names
+as defined by the out put of \code{ranges(x)}, whereas in case of a 
+\code{GRangesList} the element names must match the transcript names.
 }

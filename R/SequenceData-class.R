@@ -4,16 +4,39 @@
 NULL
 
 #' @name SequenceData
+#' 
 #' @title SequenceData
+#' 
 #' @description 
-#' title
+#' The \code{SequenceData} class is a virtual class. It contains data on each
+#' position alongside transcripts defined in the \code{ranges} slot.
 #' 
+#' It also holds the nucleotide sequence of these transcripts.
 #' 
+#' @param dataType The prefix for construction the class name of the 
+#' \code{SequenceData} subclass to be constructed.
+#' @param bamfiles the input which can be of the following types
+#' \itemize{
+#' \item{\code{BamFileList}:} {a named \code{BamFileList}}
+#' \item{\code{character}:} {a \code{character} vector, which must be coercible
+#' to a named \code{BamFileList} referencing existing bam files. Valid names are
+#' \code{control} and \code{treated} to define conditions and replicates}
+#' }
+#' @param annotation annotation data, which must match the information contained
+#' in the BAM files.
+#' @param sequences sequences matching the target sequences the reads were 
+#' mapped onto. This must match the information contained in the BAM files.
+#' @param seqinfo optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
+#' subset the transcripts analyzed on a chromosome basis.
 #' @param ... Optional arguments overwriting default values, which are
 #' \itemize{
 #' \item{minQuality}{class dependent}
 #' }
 #' 
+#' #' @param conditions The condition of each column or set of columns. Either 
+#' \code{control} or \code{treated}.
+#' @param replicate The replicate of each column or set of columns for the 
+#' individual conditions
 NULL
 
 setClass("SequenceData",
@@ -27,8 +50,8 @@ setClass("SequenceData",
                    minQuality = "integer",
                    chromosomes = "character",
                    unlistType = "character",
-                   replicate = "factor",
-                   conditions = "factor"),
+                   conditions = "factor",
+                   replicate = "factor"),
          prototype = list(ranges = GRangesList(),
                           sequencesType = "RNAStringSet",
                           sequences = RNAStringSet(),
@@ -239,6 +262,7 @@ setMethod("extractROWS", "SequenceData",
                        ranges = ans_ranges,
                        sequences = ans_sequences,
                        bamfiles = x@bamfiles,
+                       seqinfo = x@seqinfo,
                        unlistData = ans_unlistData,
                        partitioning = ans_partitioning,
                        elementMetadata = ans_elementMetadata)
@@ -284,156 +308,6 @@ setMethod("rbind", "SequenceData",
 )
 
 # object creation --------------------------------------------------------------
-
-.norm_min_quality <- function(input,x){
-  minQuality <- x@minQuality
-  if(!is.null(input[["minQuality"]])){
-    minQuality <- input[["minQuality"]]
-    if(!is.integer(minQuality) | minQuality < 1L){
-      if(!is.na(minQuality)){
-        stop("'minQuality' must be integer with a value higher than 0L.",
-             call. = FALSE)
-      }
-    }
-  }
-  minQuality
-}
-
-setMethod(
-  f = "initialize", 
-  signature = signature(.Object = "SequenceData"),
-  definition = function(.Object, bamfiles, seqinfo, ...){
-    # quality
-    .Object@minQuality <- .norm_min_quality(list(...),.Object)
-    if(!is.integer(.Object@minQuality) | 
-       is.null(.Object@minQuality) | 
-       .Object@minQuality == 0L){
-      stop("Minimum quality is not set for '",class(.Object),"'.",
-           call. = FALSE)
-    }
-    # set slots
-    .Object@bamfiles <- bamfiles
-    .Object@replicate <- factor(seq_along(bamfiles))
-    .Object@conditions <- factor(names(bamfiles))
-    .Object@seqinfo <- .norm_seqinfo(seqinfo)
-    # additional sanity checks
-    .Object <- callNextMethod(.Object,...)
-    .Object
-  }
-)
-
-# internal SequenceData constructor
-.new_SequenceData <- function(dataType, files, annotation, sequences, seqinfo,
-                              ...){
-  if(is.null(dataType)){
-    stop("Invalid data type.")
-  }
-  args <- list(...)
-  className <- sequenceDataClass(dataType)
-  # check bam files
-  files <- .norm_bamfiles(files, className)
-  # get annotation and sequence data
-  txdb <- .norm_annotation(annotation, className)
-  sequences <- .norm_sequences(sequences, className)
-  seqinfo <- .norm_seqnames(files, txdb, sequences, seqinfo, className)
-  # create the class
-  ans <- new(className, files, seqinfo, args)
-  # load transcript data and sequence data as well as the ScanBamParam
-  grl <- .load_annotation(txdb, ans@seqinfo)
-  sequences <- .load_transcript_sequences(sequences, grl)
-  param <- .assemble_scanBamParam(grl, ans@minQuality, ans@seqinfo)
-  # run the specific data aggregation function
-  data <- .get_Data(ans, grl, sequences, param, args)
-  # post process the data
-  .postprocess_read_data(ans, data, grl, sequences)
-}
-
-setMethod("SequenceData",
-          signature = c(annotation = "character", sequences = "character"),
-          function(dataType, files, annotation, sequences, seqinfo, args, ...){
-            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
-          })
-setMethod("SequenceData",
-          signature = c(annotation = "character", sequences = "BSgenome"),
-          function(dataType, files, annotation, sequences, seqinfo, args, ...){
-            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
-          })
-setMethod("SequenceData",
-          signature = c(annotation = "TxDb", sequences = "character"),
-          function(dataType, files, annotation, sequences, seqinfo, args, ...){
-            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
-          })
-setMethod("SequenceData",
-          signature = c(annotation = "TxDb", sequences = "BSgenome"),
-          function(dataType, files, annotation, sequences, seqinfo, args, ...){
-            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
-          })
-setMethod("SequenceData",
-          signature = c(annotation = "GFF3File", sequences = "BSgenome"),
-          function(dataType, files, annotation, sequences, seqinfo, args, ...){
-            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
-          })
-setMethod("SequenceData",
-          signature = c(annotation = "GFF3File", sequences = "character"),
-          function(dataType, files, annotation, sequences, seqinfo, args){
-            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
-          })
-setMethod("SequenceData",
-          signature = c(annotation = "character", sequences = "FaFile"),
-          function(dataType, files, annotation, sequences, seqinfo, args, ...){
-            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
-          })
-setMethod("SequenceData",
-          signature = c(annotation = "GFF3File", sequences = "FaFile"),
-          function(dataType, files, annotation, sequences, seqinfo, args, ...){
-            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
-          })
-setMethod("SequenceData",
-          signature = c(annotation = "TxDb", sequences = "FaFile"),
-          function(dataType, files, annotation, sequences, seqinfo, args, ...){
-            .new_SequenceData(dataType, files, annotation, sequences, seqinfo,
-                              ...)
-          })
-
-
-################################################################################
-# common utility functions -----------------------------------------------------
-
-# load annotation as GRangesList. one element per transcript
-.load_annotation <- function(txdb, seqinfo){
-  ranges <- GenomicFeatures::exonsBy(txdb, by = "tx")
-  ranges <- .subset_by_seqinfo(ranges, seqinfo)
-  ranges
-}
-
-# load the transcript sequence per transcript aka. one sequence per GRangesList
-# element
-.load_transcript_sequences <- function(sequences,
-                                       grl){
-  seq <- getSeq(sequences, unlist(grl))
-  seq <- split(seq,grl@partitioning)
-  seq <- Reduce(c,lapply(seq,Biostrings::xscat))
-  names(seq) <- names(grl)
-  as(seq,"RNAStringSet")
-}
-
-# remove any elements, which are not in the seqinfo
-.subset_by_seqinfo <- function(grl,seqinfo){
-  grl <- grl[seqnames(grl) %in% seqnames(seqinfo)]
-  grl <- grl[width(grl@partitioning) != 0L]
-  seqlevels(grl) <- seqlevels(seqinfo)
-  grl
-}
-
-################################################################################
 
 .get_mod_data_args <- function(...){
   input <- list(...)
@@ -490,6 +364,165 @@ setMethod("SequenceData",
                minCoverage = minCoverage)
   args
 }
+
+.norm_min_quality <- function(input,x){
+  minQuality <- x@minQuality
+  if(!is.null(input[["minQuality"]])){
+    minQuality <- input[["minQuality"]]
+    if(!is.integer(minQuality) | minQuality < 1L){
+      if(!is.na(minQuality)){
+        stop("'minQuality' must be integer with a value higher than 0L.",
+             call. = FALSE)
+      }
+    }
+  }
+  minQuality
+}
+
+.get_replicate_number <- function(bamfiles, conditions){
+  control_rep <- seq_along(bamfiles[conditions == "control"])
+  treated_rep <- seq_along(bamfiles[conditions == "treated"])
+  rep <- c(control_rep,treated_rep)
+  rep <- rep[c(which(conditions == "control"),
+               which(conditions == "treated"))]
+  factor(rep)
+}
+
+setMethod(
+  f = "initialize", 
+  signature = signature(.Object = "SequenceData"),
+  definition = function(.Object, bamfiles, seqinfo, ...){
+    # quality
+    .Object@minQuality <- .norm_min_quality(list(...),.Object)
+    if(!is.integer(.Object@minQuality) | 
+       is.null(.Object@minQuality) | 
+       .Object@minQuality == 0L){
+      stop("Minimum quality is not set for '",class(.Object),"'.",
+           call. = FALSE)
+    }
+    # set slots
+    .Object@bamfiles <- bamfiles
+    .Object@conditions <- factor(names(bamfiles))
+    .Object@replicate <- .get_replicate_number(bamfiles, .Object@conditions)
+    .Object@seqinfo <- .norm_seqinfo(seqinfo)
+    # additional sanity checks
+    .Object <- callNextMethod(.Object,...)
+    .Object
+  }
+)
+
+# internal SequenceData constructor
+.new_SequenceData <- function(dataType, bamfiles, annotation, sequences, seqinfo,
+                              ...){
+  if(is.null(dataType)){
+    stop("Invalid data type.")
+  }
+  args <- .get_mod_data_args(...)
+  className <- sequenceDataClass(dataType)
+  # check bam files
+  bamfiles <- .norm_bamfiles(bamfiles, className)
+  # get annotation and sequence data
+  txdb <- .norm_annotation(annotation, className)
+  sequences <- .norm_sequences(sequences, className)
+  seqinfo <- .norm_seqnames(bamfiles, txdb, sequences, seqinfo, className)
+  # create the class
+  ans <- new(className, bamfiles, seqinfo, args)
+  # load transcript data and sequence data as well as the ScanBamParam
+  grl <- .load_annotation(txdb, ans@seqinfo)
+  sequences <- .load_transcript_sequences(sequences, grl)
+  param <- .assemble_scanBamParam(grl, ans@minQuality, ans@seqinfo)
+  # run the specific data aggregation function
+  data <- .get_Data(ans, grl, sequences, param, args)
+  # post process the data
+  .postprocess_read_data(ans, data, grl, sequences)
+}
+
+setMethod("SequenceData",
+          signature = c(annotation = "character", sequences = "character"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "character", sequences = "BSgenome"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "TxDb", sequences = "character"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "TxDb", sequences = "BSgenome"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GFF3File", sequences = "BSgenome"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GFF3File", sequences = "character"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "character", sequences = "FaFile"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GFF3File", sequences = "FaFile"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "TxDb", sequences = "FaFile"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+
+
+################################################################################
+# common utility functions -----------------------------------------------------
+
+# load annotation as GRangesList. one element per transcript
+.load_annotation <- function(txdb, seqinfo){
+  ranges <- GenomicFeatures::exonsBy(txdb, by = "tx")
+  ranges <- .subset_by_seqinfo(ranges, seqinfo)
+  ranges
+}
+
+# load the transcript sequence per transcript aka. one sequence per GRangesList
+# element
+.load_transcript_sequences <- function(sequences,
+                                       grl){
+  seq <- getSeq(sequences, unlist(grl))
+  seq <- split(seq,grl@partitioning)
+  seq <- Reduce(c,lapply(seq,Biostrings::xscat))
+  names(seq) <- names(grl)
+  as(seq,"RNAStringSet")
+}
+
+# remove any elements, which are not in the seqinfo
+.subset_by_seqinfo <- function(grl,seqinfo){
+  grl <- grl[GenomicRanges::seqnames(grl) %in% GenomeInfoDb::seqnames(seqinfo)]
+  grl <- grl[width(grl@partitioning) != 0L]
+  GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(seqinfo)
+  grl
+}
+
+################################################################################
 
 .norm_postprocess_read_data <- function(data){
   if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){

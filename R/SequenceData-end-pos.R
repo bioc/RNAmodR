@@ -220,19 +220,19 @@ setMethod(".get_Data",
 #' @rdname EndSequenceData
 #' @export
 End5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("End5", files = bamfiles, annotation = annotation,
+  SequenceData("End5", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
 #' @rdname EndSequenceData
 #' @export
 End3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("End3", files = bamfiles, annotation = annotation,
+  SequenceData("End3", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
 #' @rdname EndSequenceData
 #' @export
 EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("End", files = bamfiles, annotation = annotation,
+  SequenceData("End", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
 

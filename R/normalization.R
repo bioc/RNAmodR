@@ -3,11 +3,10 @@ NULL
 
 # Annotation -------------------------------------------------------------------
 
-.norm_gff <- function(x,
-                      className,
+.norm_gff <- function(x, className,
                       .xname = assertive::get_name_in_parent(x)){
   if(!is(x,"GFF3File")){
-    x <- try(GFF3File(x), silent = TRUE)
+    x <- try(rtracklayer::GFF3File(x), silent = TRUE)
     if (is(x, "try-error")){
       stop("To create a ",className," object, '",.xname,"' must be a GFF3File ",
            "object or be coercible to one.",
@@ -22,8 +21,7 @@ NULL
 }
 
 # Return a TxDb object
-.norm_annotation <- function(annotation,
-                             className,
+.norm_annotation <- function(annotation, className,
                              .xname = assertive::get_name_in_parent(x)){
   if(!is(annotation,"GFFFile") && !is(annotation,"TxDb")){
     annotation <- .norm_gff(annotation, className, .xname)
@@ -46,18 +44,17 @@ NULL
 # Sequences --------------------------------------------------------------------
 
 # Either return a FaFile or BSgenome object
-.norm_sequences <- function(seq,
-                            className,
+.norm_sequences <- function(seq, className,
                             .xname = assertive::get_name_in_parent(x)){
   if(!is(seq,"FaFile") && !is(seq,"BSgenome")){
-    assertive::assert_all_are_existing_files(c(seq))
-    tmp <- try(FaFile(seq))
+    tmp <- try(Rsamtools::FaFile(seq))
     if(is(tmp,"try-error")){
       stop("Input is not a FaFile and could not be coerced to one during ",
            "creation of class '",className,"'.",
            call. = FALSE)
     }
     seq <- tmp
+    assertive::assert_all_are_existing_files(c(path(seq)))
   } else if(is(seq,"FaFile")) {
     assertive::assert_all_are_existing_files(c(path(seq)))
   } else if(is(seq,"BSgenome")) {
@@ -73,11 +70,10 @@ NULL
 # BamFiles ---------------------------------------------------------------------
 
 
-.norm_bamfiles <- function(x,
-                           className,
+.norm_bamfiles <- function(x, className,
                            .xname = assertive::get_name_in_parent(x)){
   if(!is(x,"BamFileList")){
-    tmp <- try(BamFileList(x), silent = TRUE)
+    tmp <- try(Rsamtools::BamFileList(x), silent = TRUE)
     if (is(x, "try-error")){
       stop("To create a ",className," object, '",.xname,"' must be a ",
            "BamFileList object or be coercible to one.",
@@ -85,7 +81,7 @@ NULL
     }
     x <- tmp
   }
-  if(length(files) == 0L){
+  if(length(x) == 0L){
     stop("BamFileList is empty.",
          call. = FALSE)
   }
@@ -106,7 +102,7 @@ NULL
 # retrieve a Seqinfo object from the bam headers
 .bam_header_to_seqinfo <- function(bfl){
   if(is(bfl,"BamFile")){
-    bfl <- BamFileList(bfl)
+    bfl <- Rsamtools::BamFileList(bfl)
   }
   if(!is(bfl,"BamFileList")){
     stop("BamFileList required.")
@@ -114,7 +110,7 @@ NULL
   headers <- lapply(bfl,Rsamtools::scanBamHeader)
   targets <- lapply(headers,"[[","targets")
   targets <- unique(do.call(c,lapply(unname(targets),names)))
-  seqinfo <- Seqinfo(targets)
+  seqinfo <- GenomeInfoDb::Seqinfo(targets)
   seqinfo
 }
 
@@ -124,7 +120,7 @@ NULL
 # try to coerce the input to a Seqinfo object
 .norm_seqinfo <- function(seqinfo){
   if(!is(seqinfo,"Seqinfo")){
-    tmp <- try(Seqinfo(seqinfo))
+    tmp <- try(GenomeInfoDb::Seqinfo(seqinfo))
     if(is(tmp,"try-error")){
       stop("Input is not a Seqinfo object and could not be coerced to ",
            "one.",
@@ -139,7 +135,8 @@ NULL
 # data
 .norm_seqnames <- function(bamfiles, annotation, sequences, seqinfo, className){
   # norm seqinfo
-  if(missing(seqinfo)){
+  if(missing(seqinfo) || 
+     (!is(seqinfo,"Seqinfo") && (is.na(seqinfo) || is.null(seqinfo)))){
     seqinfo <- .bam_header_to_seqinfo(bamfiles)
   }
   if(!is(seqinfo,"Seqinfo") && 
@@ -157,10 +154,10 @@ NULL
   if(is(sequences,"FaFile")){
     seqnames <- names(Rsamtools::scanFa(sequences))
   } else if(is(sequences,"BSgenome")) {
-    seqnames <- seqnames(sequences)
+    seqnames <- BSgenome::seqnames(sequences)
   }
-  seqnames <- seqnames[seqnames %in% seqlevels(annotation)]
-  seqnames <- seqnames[seqnames %in% seqnames(seqinfo)]
+  seqnames <- seqnames[seqnames %in% GenomeInfoDb::seqlevels(annotation)]
+  seqnames <- seqnames[seqnames %in% GenomeInfoDb::seqnames(seqinfo)]
   if( length(seqnames) == 0L ) {
     stop("No intersection between chromosome names in fasta, ",
          "annotation and seqinfo data.", 
@@ -199,9 +196,8 @@ NULL
   x
 }
 
-.norm_mod <- function(mod,
-                      className){
-  f <- mod %in% shortName(ModRNAString())
+.norm_mod <- function(mod, className){
+  f <- mod %in% shortName(Modstrings::ModRNAString())
   if(length(which(f)) != length(mod)){
     stop("Modification '",mod[!f],"' as defined for ",className," does not ",
          "exist in the Modstrings dictionary for modified RNA sequences.",
@@ -210,7 +206,7 @@ NULL
   mod
 }
 
-.norm_data_type <- function(ans,pd){
+.norm_data_type <- function(ans, pd){
   if(!is(pd,ans@dataType)){
     stop("Data class '",ans@dataType,"' is required by '",class(.Object),"'.",
          "\n'",class(pd),"' was provided. Aborting...",
@@ -219,7 +215,7 @@ NULL
   pd
 }
 
-.norm_modifications <- function(ans,args){
+.norm_modifications <- function(ans, args){
   # ToDo: implement sanity check for given modifications
   ans
 }

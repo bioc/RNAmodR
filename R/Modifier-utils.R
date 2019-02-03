@@ -63,7 +63,7 @@ setMethod(f = ".constructModRanges",
             }
             mranges <- do.call(
               GenomicRanges::GRanges,
-              c(list(seqnames = rep(as.character(GenomeInfoDb::seqnames(range)),
+              c(list(seqnames = rep(as.character(GenomicRanges::seqnames(range)),
                                     nrow(data)),
                      ranges = IRanges::IRanges(start = positions,
                                                width = 1L),
@@ -73,8 +73,7 @@ setMethod(f = ".constructModRanges",
                 source = source,
                 type = type,
                 do.call(scoreFun,
-                        list(data)),
-                list(Parent = range$ID)))
+                        list(data))))
             mranges
           }
 )

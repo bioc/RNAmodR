@@ -22,8 +22,8 @@ setClass(Class = "PileupSequenceData",
 .pileup_measure_colnames <- c("-","G","A","T","C")
 
 #' @importFrom reshape2 dcast melt
-.fill_up_pileup_data <- function(d,r){
-  pos <- BiocGenerics::start(r):BiocGenerics::end(r)
+.fill_up_pileup_data <- function(d,seq){
+  pos <- seq
   if(is.null(d)){
     colnames <- .pileup_colnames
     d <- data.frame(pos = pos,
@@ -86,7 +86,6 @@ setClass(Class = "PileupSequenceData",
                        "left_bins", 
                        "query_bins", 
                        "cycle_bins")]
-  parentRanges <- RNAmodR:::.get_parent_annotations(ranges)
   pileupArgs <- pileupArgs[!vapply(pileupArgs,is.null,logical(1))]
   # get data per chromosome
   pileupParam <- do.call("PileupParam",pileupArgs)
@@ -94,40 +93,36 @@ setClass(Class = "PileupSequenceData",
                               scanBamParam = param,
                               pileupParam = pileupParam)
   pileup <- S4Vectors::DataFrame(pileup)
-  # reformat data
-  pileup$seqnames <- as.character(pileup$seqnames)
-  pileup$nucleotide <- as.character(pileup$nucleotide)
   # split into data per transcript which is defined by the which_label column
   # format: chromosome:start-end
-  pileup <- split(pileup,
-                  pileup$which_label)
+  pileup <- split(pileup, pileup$which_label)
+  if(length(pileup) != length(grl)){
+    stop("Something went wrong.")
+  }
   # sanitize pilup data
   # - keep only data for correct strand
   # - fillup empty positions with zero
-  strands <- as.character(BiocGenerics::strand(parentRanges))
-  rl <- split(parentRanges,seq_along(parentRanges))
+  strands_u <- .get_strand_u_GRangesList(grl)
+  seqs <- .seqs_rl(grl)
   pileup <- IRanges::SplitDataFrameList(
     mapply(
-      function(d,r,strand){
+      function(d,seq,strand){
         ans <- NULL
         d <- d[d$strand == strand,]
         if(nrow(d) > 0) {
-          ans <- reshape2::dcast(
-            as.data.frame(d),
-            pos ~ nucleotide,
-            sum,
-            value.var = "count")
+          ans <- reshape2::dcast(as.data.frame(d), pos ~ nucleotide, sum,
+                                 value.var = "count")
         }
-        ans <- .fill_up_pileup_data(ans,r)
+        ans <- .fill_up_pileup_data(ans,seq)
         # remove pos column since we don't need this anymore. seq_along == pos
         ans$pos <- NULL
         ans
       },
       pileup,
-      rl,
-      strands,
+      seqs,
+      strands_u,
       SIMPLIFY = FALSE))
-  names(pileup) <- parentRanges$ID
+  names(pileup) <- names(grl)
   pileup
 }
 
@@ -157,7 +152,7 @@ setMethod(".get_Data",
 #' @name PileupSequenceData
 #' @export
 PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("Pileup", files = bamfiles, annotation = annotation,
+  SequenceData("Pileup", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
 

@@ -3,29 +3,54 @@
 #' @include ModifierSet-class.R
 NULL
 
-
 #' @name plotROC
 #' 
-#' @title Performance
+#' @title ROCR functions for \code{Modifier} and \code{ModifierSet} objects
 #' 
 #' @description 
-#' title
+#' \code{plotROC} streamlines labeling, prediction, performance and plotting
+#' to test the peformance of a \code{Modifier} object and the data analyzed via
+#' the functionallity from the \code{ROCR} package.
+#' 
+#' The data from \code{x} will be labeled as positive using the \code{coord}
+#' arguments. The other arguments will be passed on to the specific \code{ROCR}
+#' functions.
+#' 
+#' By default the \code{prediction.args} include three values:
+#' \itemize{
+#' \item{\code{measure = "tpr"}}
+#' \item{\code{x.measure = "fpr"}}
+#' \item{\code{score = mainScore(x)}}
+#' }
+#' The remaining arguments are not predefined.
+#' 
+#' @param x a \code{Modifier} or a \code{ModifierSet} object
+#' @param coord coordinates of position to label as positive. Either a 
+#' \code{GRanges} or a \code{GRangesList} object. For both types the Parent 
+#' column is expected to match the gene or transcript name.
+#' @param prediction.args arguments which will be used for calling 
+#' \code{\link[ROCR:prediction]{prediction}} form the \code{ROCR} package
+#' @param performance.args arguments which will be used for calling 
+#' \code{\link[ROCR:performance]{performance}} form the \code{ROCR} package
+#' @param plot.args arguments which will be used for calling \code{plot} on the
+#' performance object of the \code{ROCR} package
 NULL
 
 .norm_prediction_args <- function(input){
   if(missing(input)){
     input <- list()
   }
-  args <- list()
+  args <- input
   args
 }
 
-.norm_performance_args <- function(input){
+.norm_performance_args <- function(input, x){
   if(missing(input)){
     input <- list()
   }
   measure <- "tpr"
   x.measure <- "fpr"
+  score <- mainScore(x)
   if(!is.null(input[["measure"]])){
     measure <- input[["measure"]]
     if(!assertive::is_a_string(measure)){
@@ -52,7 +77,10 @@ NULL
     }
   }
   args <- list(measure = measure,
-               x.measure = x.measure)
+               x.measure = x.measure,
+               score = score)
+  args <- c(args,
+            input[!(names(input) %in% names(args))])
   args
 }
 
@@ -73,8 +101,7 @@ NULL
   args
 }
 
-.get_prediction_data <- function(x,
-                                 coord){
+.get_prediction_data_Modifier <- function(x, coord){
   data <- .label_Modifier_by_GRangesList(x,coord)
   colnames <- colnames(data@unlistData)
   colnames <- colnames[stringr::str_detect(colnames,"score")]
@@ -92,12 +119,14 @@ NULL
   data
 }
 
+.get_prediction_data_ModifierSet <- function(x, coord){
+  browser()
+  
+}
+
 #' @importFrom colorRamps matlab.like
 #' @importFrom ROCR prediction performance
-.plot_ROCR <- function(data,
-                       prediction.args,
-                       performance.args,
-                       plot.args){
+.plot_ROCR <- function(data, prediction.args, performance.args, plot.args){
   # add argument logical vector
   n <- length(data)
   # save mfrow setting
@@ -145,7 +174,8 @@ NULL
     names(data),
     MoreArgs = list(prediction.args = prediction.args,
                     performance.args = performance.args,
-                    plot.args = plot.args))
+                    plot.args = plot.args),
+    SIMPLIFY = FALSE)
   for(i in seq_len(n_remaining)){
     plot.new()
   }
@@ -155,27 +185,15 @@ NULL
 }
 
 #' @rdname plotROC
-#' 
 #' @export
 setMethod(
   f = "plotROC", 
   signature = signature(x = "Modifier"),
-  definition = function(x,
-                        coord,
-                        redo,
-                        redo.args,
-                        prediction.args,
-                        performance.args,
-                        plot.args) {
-    if(missing(redo) || 
-       (assertive::is_a_bool(redo) && redo == FALSE)){
-      data <- .get_prediction_data(x,coord)
-    } else {
-      browser()
-    }
+  definition = function(x, coord, prediction.args, performance.args, plot.args){
+    data <- .get_prediction_data(x, coord)
     .plot_ROCR(data,
                .norm_prediction_args(prediction.args),
-               .norm_performance_args(performance.args),
+               .norm_performance_args(performance.args, x),
                .norm_plot_args(plot.args))
   }
 )
@@ -185,15 +203,9 @@ setMethod(
 setMethod(
   f = "plotROC", 
   signature = signature(x = "ModifierSet"),
-  definition = function(x,
-                        coord,
-                        redo,
-                        redo.args,
-                        prediction.args,
-                        performance.args,
-                        plot.args) {
+  definition = function(x, coord, prediction.args, performance.args, plot.args){
     browser()
-    data <- list()
+    data <- .get_prediction_data_ModifierSet(x, coord)
     .plot_ROCR(data,
                .norm_prediction_args(prediction.args),
                .norm_perfomance_args(performance.args),

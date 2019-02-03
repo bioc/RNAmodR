@@ -22,11 +22,40 @@
 \S4method{aggregate}{SequenceData}(x)
 }
 \arguments{
+\item{dataType}{The prefix for construction the class name of the 
+\code{SequenceData} subclass to be constructed.}
+
+\item{bamfiles}{the input which can be of the following types
+\itemize{
+\item{\code{BamFileList}:} {a named \code{BamFileList}}
+\item{\code{character}:} {a \code{character} vector, which must be coercible
+to a named \code{BamFileList} referencing existing bam files. Valid names are
+\code{control} and \code{treated} to define conditions and replicates}
+}}
+
+\item{annotation}{annotation data, which must match the information contained
+in the BAM files.}
+
+\item{sequences}{sequences matching the target sequences the reads were 
+mapped onto. This must match the information contained in the BAM files.}
+
+\item{seqinfo}{optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
+subset the transcripts analyzed on a chromosome basis.}
+
 \item{...}{Optional arguments overwriting default values, which are
 \itemize{
 \item{minQuality}{class dependent}
-}}
+}
+
+#' @param conditions The condition of each column or set of columns. Either 
+\code{control} or \code{treated}.}
+
+\item{replicate}{The replicate of each column or set of columns for the 
+individual conditions}
 }
 \description{
-title
+The \code{SequenceData} class is a virtual class. It contains data on each
+position alongside transcripts defined in the \code{ranges} slot.
+
+It also holds the nucleotide sequence of these transcripts.
 }

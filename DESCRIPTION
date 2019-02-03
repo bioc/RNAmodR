@@ -16,8 +16,7 @@ Depends:
     R (>= 3.5),
     IRanges,
     GenomicRanges,
-    Modstrings,
-    Rsamtools
+    Modstrings
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
@@ -25,10 +24,18 @@ Imports:
     methods,
     assertive,
     S4Vectors,
+    BiocParallel,
     GenomicAlignments,
-    GenomicRanges,
+    Biostrings,
+    GenomeInfoDb,
     Rsamtools,
     rtracklayer,
+    RColorBrewer,
+    colorRamps,
+    ggplot2,
+    matrixStats,
+    reshape2,
+    stringr,
     dplyr,
     stats,
     biovizBase,
@@ -59,7 +66,6 @@ Collate:
     'Modifier-viz.R'
     'ModifierSet-comparison.R'
     'ModifierSet-viz.R'
-    'ModifierSetList-class.R'
     'SequenceData-coverage.R'
     'SequenceData-end-pos.R'
     'SequenceData-normalized-end-pos.R'

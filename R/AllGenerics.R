@@ -1,17 +1,33 @@
 #' @include RNAmodR.R
 NULL
 
-# ModifierSet functions --------------------------------------------------------
+# Class constructors -----------------------------------------------------------
+
+setGeneric( 
+  name = "SequenceData",
+  signature = c("annotation","sequences"),
+  def = function(dataType, bamfiles, annotation, sequences, seqinfo, ...)
+    standardGeneric("SequenceData")
+) 
+
+setGeneric( 
+  name = "Modifier",
+  signature = c("x"),
+  def = function(className, x, annotation, sequences, seqinfo, ...)
+    standardGeneric("Modifier")
+) 
+
 setGeneric( 
   name = "ModifierSet",
-  signature = "x",
-  def = function(modifiertype, x, ...)
+  signature = c("x"),
+  def = function(className, x, annotation, sequences, seqinfo, ...)
     standardGeneric("ModifierSet")
 )
 
 # Modifier accessors -----------------------------------------------------------
 
 #' @rdname Modifier
+#' @name Modifier
 #' @export
 setGeneric( 
   name = "modifierType",
@@ -65,36 +81,15 @@ setGeneric(
   name = "seqData",
   def = function(x) standardGeneric("seqData")
 ) 
-#' @rdname aggregate
-#' @export
-setGeneric( 
-  name = "aggregateData",
-  def = function(x) standardGeneric("aggregateData")
-) 
 #' @rdname modify
+#' @name modify
 #' @export
 setGeneric( 
   name = "modifications",
   def = function(x, ...) standardGeneric("modifications")
 ) 
 
-# check functions --------------------------------------------------------------
-
-#' @rdname aggregate
-#' @export
-setGeneric( 
-  name = "hasAggregateData",
-  def = function(x, ...) standardGeneric("hasAggregateData")
-) 
-
 # Modifier functions -----------------------------------------------------------
-
-setGeneric( 
-  name = "Modifier",
-  signature = c("x"),
-  def = function(className, x, annotation, sequences, seqinfo, args, ...)
-    standardGeneric("Modifier")
-) 
 
 #' @rdname RNAmodR-internals
 #' @export
@@ -122,12 +117,6 @@ setGeneric(
 
 # SequenceData functions -------------------------------------------------------
 
-setGeneric( 
-  name = "SequenceData",
-  signature = c("annotation","sequences"),
-  def = function(dataType, files, annotation, sequences, seqinfo, args, ...)
-    standardGeneric("SequenceData")
-) 
 #' @name RNAmodR-internals
 #' @export
 setGeneric( 
@@ -144,9 +133,22 @@ setGeneric(
 setGeneric( 
   name = "aggregate",
   signature = c("x"),
-  def = function(x, ...)
-    standardGeneric("aggregate")
+  def = function(x, ...) standardGeneric("aggregate")
 )
+#' @rdname aggregate
+#' @export
+setGeneric( 
+  name = "aggregateData",
+  def = function(x) standardGeneric("aggregateData")
+) 
+#' @rdname aggregate
+#' @export
+setGeneric( 
+  name = "hasAggregateData",
+  signature = c("x"),
+  def = function(x, ...) standardGeneric("hasAggregateData")
+) 
+
 
 # SequenceData/Modifier/ModifierSet functions ----------------------------------
 

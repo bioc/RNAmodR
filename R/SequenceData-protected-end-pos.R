@@ -53,7 +53,7 @@ setMethod(".get_Data",
 #' @export
 ProtectedEndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, 
                                      ...){
-  SequenceData("ProtectedEnd", files = bamfiles, annotation = annotation,
+  SequenceData("ProtectedEnd", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
 

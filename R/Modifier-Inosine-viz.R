@@ -10,20 +10,7 @@ RNAMODR_I_PLOT_BASES_COLOURS <-
 RNAMODR_I_PLOT_DATA_COLOURS <- c("score" = "#ABABAB") 
 RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
 
-#' @rdname ModInosine
-#' 
-#' @name visualizeData
-#'  
-#' @details 
-#' \code{ModInosine} specific arguments for \link{visualizeData}:
-#' \itemize{
-#' \item{\code{colour.bases} - }{a named character vector of \code{length = 4} 
-#' for the colours of the individual bases. The names are expected to be 
-#' \code{c("G","A","U","C")}}
-#' }
-NULL
-
-#' @rdname ModInosine
+#' @rdname ModInosine-functions
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
@@ -34,7 +21,7 @@ setMethod(
                    window.size = window.size, ...)
   }
 )
-#' @rdname ModInosine
+#' @rdname ModInosine-functions
 #' @export
 setMethod(
   f = "visualizeData",
@@ -107,3 +94,33 @@ setMethod(
          bases = dtbases)
   }
 )
+
+#' @rdname ModInosine-functions
+#' @export
+setMethod(
+  f = "visualizeDataByCoord",
+  signature = signature(x = "ModSetInosine",
+                        coord = "GRanges"),
+  definition = function(x, coord, type = "score", window.size = 15L, ...) {
+    if(missing(type)){
+      type <- "scoreRMS"
+    }
+    type <- match.arg(type, "score")
+    callNextMethod(x = x, coord = coord, type = type, window.size = window.size,
+                   ...)
+  }
+)
+#' @rdname ModInosine-functions
+#' @export
+setMethod(
+  f = "visualizeData",
+  signature = signature(x = "ModSetInosine"),
+  definition = function(x, name, from, to, type = "score", ...) {
+    if(missing(type)){
+      type <- "score"
+    }
+    type <- match.arg(type, "score")
+    callNextMethod(x = x, name, from, to, type = type, ...)
+  }
+)
+

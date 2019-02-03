@@ -145,13 +145,13 @@ setMethod(".get_Data",
 #' @rdname NormEndSequenceData
 #' @export
 NormEnd5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("NormEnd5", files = bamfiles, annotation = annotation,
+  SequenceData("NormEnd5", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
-#' @rdname EndSequenceData
+#' @rdname NormEndSequenceData
 #' @export
 NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("NormEnd3", files = bamfiles, annotation = annotation,
+  SequenceData("NormEnd3", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
 

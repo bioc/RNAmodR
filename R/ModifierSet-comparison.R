@@ -5,10 +5,15 @@ NULL
 #' @name compare
 #' @aliases compareByCoord
 #' 
-#' @title compare
+#' @title Comparison of Samples
 #' 
 #' @description 
-#' title
+#' To compare data of different samples, a \code{\link{ModifierSet}} is used.
+#' To select the data alongside the transcripts and their positions a 
+#' \code{GRanges} or a \code{GRangesList} needs to be supplied. In case of a 
+#' \code{GRanges} object, the parent column must match the transcript names
+#' as defined by the out put of \code{ranges(x)}, whereas in case of a 
+#' \code{GRangesList} the element names must match the transcript names.
 #' 
 #' @param x a \code{Modifier} or \code{ModifierSet} object.
 #' @param coord coordinates of position to subset to. Either a \code{GRanges} or
@@ -22,13 +27,17 @@ NULL
 #' \item{...}{passed on to \code{\link{subsetByCoord}}}
 #' }
 #' 
-#' @return for \code{compareByCoord} as \code{\link{DataFrameList}} and for
-#' \code{plotCompareByCoord} a \code{ggplot} object, which can be modified 
-#' further.
+#' @return \code{compareByCoord} returns a \code{\link{DataFrameList}} and 
+#' \code{plotCompareByCoord} returns a \code{ggplot} object, which can be 
+#' modified further. The \code{\link{DataFrameList}} contains columns per sample
+#' as well as \code{names}, \code{positions} and \code{mod} incorporated from 
+#' the \code{coord} input. If \code{coord} contains a column \code{Activity} 
+#' this is included in the results as well.
 NULL
 
-.norm_compare_args <- function(input,data,x){
+.norm_compare_args <- function(input, data, x){
   compareType <- mainScore(x)
+  alias <- NA
   if(!is.null(input[["compareType"]])){
     compareType <- input[["compareType"]]
     colnames <- unique(unlist(colnames(data[[1]])))
@@ -39,37 +48,57 @@ NULL
            call. = FALSE)
     }
   }
-  args <- list(compareType = compareType)
+  if(!is.null(input[["alias"]])){
+    alias <- input[["alias"]]
+    if(!is.data.frame(alias)){
+      stop("'alias' has to be a data.frame with 'tx_id' and 'name' columns.",
+           call. = FALSE)
+    }
+    colnames <- c("tx_id","name")
+    if(!all(colnames %in% colnames(alias))){
+      stop("'alias' has to be a data.frame with 'tx_id' and 'name' columns.",
+           call. = FALSE)
+    }
+    alias <- alias[,colnames]
+    if(any(duplicated(alias$tx_id))){
+      stop("Values in 'tx_id' have to be unique.",
+           call. = FALSE)
+    }
+    names <- unique(unlist(lapply(data,names)))
+    if(!all(alias$tx_id %in% names)){
+      stop("All values in 'tx_id' have to be valid transcript ids used as",
+           "names for the data.", call. = FALSE)
+    }
+  }
+  args <- list(compareType = compareType,
+               alias = alias)
   args
 }
 
-.compare_ModifierSet_by_GRangesList <- function(x,coord,...){
-  data <- subsetByCoord(x,coord,...)
-  args <- .norm_compare_args(list(...),
-                             data,
-                             x)
+.compare_ModifierSet_by_GRangesList <- function(x, coord, ...){
+  data <- subsetByCoord(x, coord, ...)
+  args <- .norm_compare_args(list(...), data, x)
   # subset to compare type
   sampleNames <- names(data)
   data <- lapply(data,
                  function(d){
                    d[,args[["compareType"]],drop = FALSE]
                  })
-  data <- do.call(cbind,data)
+  data <- do.call(cbind, data)
   if(!is(data,"CompressedSplitDataFrameList")){
     data <- SplitDataFrameList(data)
   }
   colnames(data) <- sampleNames
+  coord <- coord[match(names(data), names(coord))]
   # convert ids to names for labeling if present
-  ranges <- unlist(ranges(x[[1]])[names(data)])
-  if(!is.null(ranges$Name) && 
-     any(!is.na(ranges$Name))){
-    names <- ranges[match(names(data),ranges$ID)]$Name
-    f <- !is.na(names)
-    names(data)[f] <- names[f]
+  if(!is.na(args["alias"])){
+    alias <- args[["alias"]]
+    m <- match(names(data),as.character(alias$tx_id))
+    names(data)[m] <- as.character(alias$name)
   }
   # keep rownames/names and unlist data
   positions <- rownames(data)
-  names <- as.character(Rle(names(data),lengths(data)))
+  names <- as.character(Rle(names(data), lengths(data)))
   data <- unlist(data)
   # add names and positions column as factors
   data$names <- factor(names)
@@ -79,9 +108,7 @@ NULL
   coord <- unlist(coord)
   coord <- coord[coord$mod %in% modType(x),]
   if(!is.null(coord$Activity)){
-    data$Activity <- unlist(lapply(coord$Activity,
-                                   paste,
-                                   collapse = "/"))
+    data$Activity <- unlist(lapply(coord$Activity, paste, collapse = "/"))
   }
   if(!is.null(coord$mod)){
     data$mod <- unlist(coord$mod)
@@ -95,12 +122,9 @@ NULL
 #' @export
 setMethod("compareByCoord",
           signature = c("ModifierSet","GRanges"),
-          function(x,
-                   coord,
-                   ...){
-            coord <- split(coord,
-                           coord$Parent)
-            .compare_ModifierSet_by_GRangesList(x,coord,...)
+          function(x, coord, ...){
+            coord <- split(coord, coord$Parent)
+            .compare_ModifierSet_by_GRangesList(x, coord, ...)
           }
 )
 
@@ -108,10 +132,8 @@ setMethod("compareByCoord",
 #' @export
 setMethod("compareByCoord",
           signature = c("ModifierSet","GRangesList"),
-          function(x,
-                   coord,
-                   ...){
-            .compare_ModifierSet_by_GRangesList(x,coord,...)
+          function(x, coord, ...){
+            .compare_ModifierSet_by_GRangesList(x, coord, ...)
           }
 )
 
@@ -169,12 +191,9 @@ setMethod("compareByCoord",
 
 #' @importFrom ggplot2 ggplot geom_raster
 #' @importFrom reshape2 melt
-.plot_compare_ModifierSet_by_GRangesList <- function(x,
-                                                     coord,
-                                                     normalize,
-                                                     ...){
+.plot_compare_ModifierSet_by_GRangesList <- function(x, coord, normalize,  ...){
   args <- .norm_compare_plot_args(list(...))
-  data <- .compare_ModifierSet_by_GRangesList(x,coord,...)
+  data <- .compare_ModifierSet_by_GRangesList(x, coord, ...)
   if(!missing(normalize)){
     colnames <- colnames(data)
     colnames <- colnames[!(colnames %in% c("positions","names","mod","Activity"))]
@@ -243,16 +262,9 @@ setMethod("compareByCoord",
 #' @export
 setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRanges"),
-          function(x,
-                   coord,
-                   normalize,
-                   ...){
-            coord <- split(coord,
-                           coord$Parent)
-            .plot_compare_ModifierSet_by_GRangesList(x,
-                                                     coord,
-                                                     normalize,
-                                                     ...)
+          function(x, coord, normalize, ...){
+            coord <- split(coord, coord$Parent)
+            .plot_compare_ModifierSet_by_GRangesList(x, coord, normalize, ...)
           }
 )
 
@@ -260,13 +272,7 @@ setMethod("plotCompareByCoord",
 #' @export
 setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRangesList"),
-          function(x,
-                   coord,
-                   normalize,
-                   ...){
-            .plot_compare_ModifierSet_by_GRangesList(x,
-                                                     coord,
-                                                     normalize,
-                                                     ...)
+          function(x, coord, normalize, ...){
+            .plot_compare_ModifierSet_by_GRangesList(x, coord, normalize, ...)
           }
 )

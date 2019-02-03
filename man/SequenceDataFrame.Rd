@@ -14,6 +14,21 @@ SequenceDataFrame(df, ranges, sequence, replicate, conditions)
 
 \S4method{ranges}{SequenceDataFrame}(x)
 }
+\arguments{
+\item{ranges}{a \code{GRanges} object containing all annotation elements
+for a transcript.}
+
+\item{sequence}{\code{XString} object describing the nucleotide sequence of 
+the transcript.}
+
+\item{replicate}{The replicate of each column or set of columns for the 
+individual conditions}
+
+\item{conditions}{The condition of each column or set of columns. Either 
+\code{control} or \code{treated}.}
+}
 \description{
-title
+The \code{SequenceDataFrame} class contains data for positions along a 
+transcripts. It is used to describe elements from a \code{SequenceData}
+object.
 }

@@ -98,7 +98,8 @@ NULL
       seq.int(f,t,by)
     },
     from,
-    to)
+    to,
+    SIMPLIFY = FALSE)
   ans <- IRanges::IntegerList(ans)
   width_x <- IRanges::IntegerList(split(width(ans@partitioning),
                                         names(ans@partitioning)))

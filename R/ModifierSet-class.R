@@ -6,21 +6,29 @@ NULL
 #' 
 #' @title ModifierSet
 #' @description 
-#' title
+#' The \code{ModifierSet} class allows multiple \code{\link{Modifier}} objects
+#' to be created from the same annotation and sequence data varying only the 
+#' bam input files.
 #' 
+#' In addition the comparison of samples is also done via calling functions on 
+#' the \code{ModifierSet} objects.
+#' 
+#' The \code{ModifierSet} is a virtual class, which derives from the 
+#' \code{SimpleList} with the slot \code{elementType = "Modifier"}. As 
+#' the \code{Modifier} tt must be implemented for the specific analysis.
+#' 
+#' @param className The name of the class which should be constructed.
 #' @param x the input which can be of the following types
 #' \itemize{
-#' \item{\code{Modifier}}{a single \code{Modifier} or a list containg only 
+#' \item{\code{Modifier}:} {a single \code{Modifier} or a list containg only 
 #' \code{Modifier} objects. The input will just be used as elements of the
 #' \code{ModifierSet}}
-#' \item{\code{BamFileList}}{a named \code{BamFileList} or a list of 
+#' \item{\code{BamFileList}:} {a named \code{BamFileList} or a list of 
 #' named \code{BamFileList}}
-#' \item{\code{list}}{a list of one or more types of elements: 
+#' \item{\code{list}:} {a list of one or more types of elements: 
 #' \code{BamFileList}, a named \code{list} or named \code{character} vector. All
 #' elements must be or be coercible to a named \code{BamFileList} referencing 
-#' existing bam files. In case of a \code{character} vector, it is assumed that
-#' each element should be used for creation of a seperate \code{Modifier}
-#' object.}
+#' existing bam files. Valid names are \code{control} and \code{treated}}
 #' }
 #' @param annotation annotation data, which must match the information contained
 #' in the BAM files. This is parameter is only required if \code{x} if not a 
@@ -28,9 +36,11 @@ NULL
 #' @param sequences sequences matching the target sequences the reads were 
 #' mapped onto. This must match the information contained in the BAM files. This
 #' is parameter is only required if \code{x} if not a \code{Modifier} object.
+#' @param seqinfo optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
+#' subset the transcripts analyzed on a chromosome basis.
 #' @param ... Additional otpional parameters:
 #' \itemize{
-#' \item{internalBP}{\code{TRUE} or \code{FALSE}: should 
+#' \item{internalBP }{\code{TRUE} or \code{FALSE}: should 
 #' parallilazation used internally for creation of each \code{Modifier} or
 #' should the creation of the \code{Modifier} objects be parallalized? (default:
 #' \code{internalBP = FALSE})}
@@ -48,16 +58,6 @@ setClass("ModifierSet",
 
 
 setMethod("pcompareRecursively", "ModifierSet", function(x) FALSE)
-
-setMethod(
-  f = "initialize", 
-  signature = signature(.Object = "ModifierSet"),
-  definition = function(.Object,
-                        ...) {
-    callNextMethod(.Object,
-                   ...)
-  }
-)
 
 # validity ---------------------------------------------------------------------
 
@@ -127,11 +127,13 @@ setMethod(f = "relistToClass",
      !all(tolower(names) %in% c("treated","control"))){
     return(FALSE)
   }
-  x <- unlist(x)
-  x[classNames %in% c("BamFileList","BamFile")] <- 
-    lapply(x[classNames %in% c("BamFileList","BamFile")],
-           path)
-  if(!all(file.exists(unlist(x)))){
+  x <- lapply(x,.norm_bamfiles)
+  x <- unlist(x) # a list of BamFileList cannot be unlisted. However this 
+                 # normalizes x
+  if(!all(vapply(x,is,logical(1),"BamFileList"))){
+    return(FALSE)
+  }
+  if(!all(file.exists(vapply(x,path,character(1))))){
     return(FALSE)
   }
   TRUE
@@ -149,21 +151,23 @@ setMethod(f = "relistToClass",
   if(!is.list(x)){
     x <- list(x)
   }
-  names <- names(x)
-  if(is.null(names)){
+  names <- as.list(names(x))
+  if(length(names) == 0L){
     names <- vector(mode = "list", length = length(x))
   }
   x <- lapply(x, .norm_bamfiles, className)
-  annotation <- .norm_annotation(annotation, className)
   sequences <- .norm_sequences(sequences, className)
-  seqinfo <- .norm_seqnames(x, annotation, sequences, seqinfo, className)
+  if(missing(seqinfo)){
+    seqinfo <- NA
+  }
   ni <- seq_along(x)
   # choose were to use parallelization
   if(args[["internalBP"]] == TRUE){
     BiocParallel::register(BiocParallel::SerialParam())
   }
   # do analysis by calling the Modifier classes
-  FUN <- function(i, z, n, args, className, PACKAGE){
+  FUN <- function(i, z, n, args, className, PACKAGE, CLASSFUN, annotation,
+                  sequences, seqinfo){
     suppressPackageStartupMessages({
       requireNamespace(PACKAGE)
     })
@@ -178,13 +182,7 @@ setMethod(f = "relistToClass",
     }
     # do not pass this argument along to objects
     args[["internalBP"]] <- NULL
-    #
-    if(is(x,"BamFileList")){
-      METHOD <- selectMethod(className,"BamFileList")
-    } else {
-      METHOD <- selectMethod(className,"character")
-    }
-    do.call(METHOD,
+    do.call(CLASSFUN,
             c(list(z,
                    annotation = annotation,
                    sequences = sequences,
@@ -192,15 +190,20 @@ setMethod(f = "relistToClass",
               args))
   }
   PACKAGE <- getClass(className)@package
+  CLASSFUN <- get(className)
   x <- BiocParallel::bpmapply(FUN,
                               ni, x, names,
                               MoreArgs = list(args = args, 
                                               className = className, 
-                                              PACKAGE = PACKAGE),
+                                              PACKAGE = PACKAGE,
+                                              CLASSFUN = CLASSFUN,
+                                              annotation = annotation,
+                                              sequences = sequences,
+                                              seqinfo = seqinfo),
                               SIMPLIFY = FALSE)
-  if(!all(vapply(names,is.null,logical(1)))){
-    names(x) <- names
-  }
+  f <- vapply(names,is.null,logical(1))
+  names[f] <- as.list(as.character(seq_along(x))[f])
+  names(x) <- unlist(names)
   # pass results to ModifierSet object
   new2(.get_class_name_for_set_from_modifier_type(className), listData = x)
 }
@@ -224,18 +227,15 @@ setMethod(f = "relistToClass",
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "list"),
-          function(className, x, ...) {
-            browser()
+          function(className, x, annotation = NULL, sequences = NULL, 
+                   seqinfo = NULL, ...) {
             if(.contains_only_Modifier(x)){
               return(.Modifer_to_ModifierSet(x, ...))
             }
             if(.contains_only_bamfiles(x)){
               args <- list(...)
-              return(.bamfiles_to_ModifierSet(className, x, 
-                                              args[["annotation"]], 
-                                              args[["sequences"]], 
-                                              args[["seqinfo"]], 
-                                              ...))
+              return(.bamfiles_to_ModifierSet(className, x, annotation, 
+                                              sequences, seqinfo, ...))
             }
             stop("'x' must be a list containing only elements of the same ",
                  "type\nof 'Modifer' or elements of type ('BamFileList', ",
@@ -249,16 +249,19 @@ setMethod(f = "ModifierSet",
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "character"),
-          function(className, x, annotation, sequences, seqinfo, ...) {
-            browser()
-            .bamfiles_to_ModifierSet(className, x, sequences, sequences, ...)
+          function(className, x, annotation = NULL, sequences = NULL, 
+                   seqinfo = NULL, ...) {
+            .bamfiles_to_ModifierSet(className, x, annotation, sequences,
+                                     seqinfo, ...)
           })
 #' @rdname ModifierSet
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "BamFileList"),
-          function(className, x, annotation, sequences, seqinfo,...) {
-            .bamfiles_to_ModifierSet(className, x, sequences, sequences, ...)
+          function(className, x, annotation = NULL, sequences = NULL,
+                   seqinfo = NULL, ...) {
+            .bamfiles_to_ModifierSet(className, x, annotation, sequences,
+                                     seqinfo, ...)
           })
 #' @rdname ModifierSet
 #' @export
@@ -275,8 +278,7 @@ setMethod(
   signature = signature(object = "ModifierSet"),
   definition = function(object) {
     callNextMethod()
-    cat("| Modification type(s): ",paste0(object[[1]]@mod, collapse = " / "),
-        "\n")
+    cat("| Modification type(s): ",paste0(object[[1]]@mod, collapse = " / "))
     mf <- lapply(seq_along(object),
                  function(i){
                    o <- object[[i]]
@@ -288,13 +290,15 @@ setMethod(
                             "no"))
                  })
     mf <- DataFrame(mf)
-    out <-
-      as.matrix(format(as.data.frame(
-        lapply(mf,showAsCell),
-        optional = TRUE)))
+    out <- as.matrix(format(as.data.frame(lapply(mf,showAsCell),
+                                          optional = TRUE)))
     colnames(out) <- rep(" ",ncol(mf))
-    rownames(out) <- c("| Modifications found:",
-                       "                      ")
+    if(is.null(names(object))){
+      rownames(out) <- c("| Modifications found:")
+    } else {
+      rownames(out) <- c("                      ",
+                         "| Modifications found:")
+    }
     print(out, quote = FALSE, right = TRUE)
     cat("| Settings:\n")
     settings <- lapply(object,
@@ -332,30 +336,26 @@ setMethod(
 #' @export
 setMethod(f = "modifierType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) 
-            modifierType(new(elementType(x),NULL,NULL,NULL))
+          definition = function(x) modifierType(new(elementType(x),NULL))
 )
 #' @name ModifierSet
 #' @export
 setMethod(f = "modType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) modType(new(elementType(x),NULL,NULL,NULL))
+          definition = function(x) modType(new(elementType(x),NULL))
 )
 #' @name ModifierSet
 #' @export
 setMethod(f = "mainScore", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) mainScore(new(elementType(x),NULL,NULL,NULL))
+          definition = function(x) mainScore(new(elementType(x),NULL))
 )
 #' @name ModifierSet
 #' @export
 setMethod(f = "sequences", 
           signature = signature(x = "ModifierSet"),
-          definition = 
-            function(x, modified = FALSE, with.qualities = FALSE){
-              sequences(x[[1]],
-                        modified = modified,
-                        with.qualities = with.qualities)
+          definition = function(x, modified = FALSE, with.qualities = FALSE){
+              sequences(x[[1]], modified = modified)
             }
 )
 #' @name ModifierSet

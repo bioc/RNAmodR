@@ -6,7 +6,19 @@
 \alias{RNAmodR-package}
 \title{RNAmodR}
 \description{
-todo xczCZXcZZcc cCX
+\code{RNAmodR} implements class and a workflows to detect
+post-transcriptional RNA modifications in high throughput sequencing data.
+
+From the a basic \code{SequenceData} speficic subclasses are derived
+containing specific aspects of aligned reads, e.g. 5'-end positions or pileup
+data. From this \code{Modifier} class can be used to detect specific patterns
+for individual types of modifications. The \code{SequenceData} classes can be
+shared by different \code{Modifier} classes allowing easy adapattion to new
+methods.
+}
+\seealso{
+The \code{RNAmodR.RiboMethSeq} and \code{RNAmodR.AlkAnilineSeq}
+package.
 }
 \author{
 Felix G M Ernst [aut]

@@ -24,12 +24,13 @@ setClass(Class = "CoverageSequenceData",
   coverage <- as(coverage,"IntegerList")
   # subset per transcript
   seqs <- .seqs_rl(grl)
-  coverage <- IRanges::IntegerList(
-    mapply(function(gr,s){
-      coverage[[seqnames(gr)]][s]
+  coverage <- IRanges::IntegerList(mapply(
+    function(gr,s){
+      coverage[[GenomicRanges::seqnames(gr)]][s]
     },
     grl,
-    seqs))
+    seqs,
+    SIMPLIFY = FALSE))
   coverage
 }
 
@@ -57,7 +58,7 @@ setMethod(".get_Data",
 #' @rdname CoverageSequenceData
 #' @export
 CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("Coverage", files = bamfiles, annotation = annotation,
+  SequenceData("Coverage", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
 

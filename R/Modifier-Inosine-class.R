@@ -6,11 +6,15 @@ NULL
 #' @name ModInosine
 #' @aliases Inosine ModifierInosine ICE-Seq
 #' 
-#' @author Felix G.M. Ernst \email{felix.gm.ernst@@outlook.com}
+#' @author Felix G.M. Ernst [aut]
 #' 
 #' @title ModInosine
+#' 
 #' @description 
-#' title
+#' Inosine can be detected in sequence by the conversion of A positions to G.
+#' \code{ModInosine} uses to search for Inosine positions.
+#' 
+#' \code{\link{ModInosine-functions}}
 #' 
 #' @details
 #' \code{ModInosine} score: the score for reported Inosine positions are between
@@ -29,6 +33,34 @@ setClass("ModInosine",
 
 # settings ---------------------------------------------------------------------
 
+#' @name ModInosine-functions
+#' 
+#' @title Functions for ModInosine
+#' 
+#' @description
+#' All of the functions of \code{\link[RNAmodR:Modifier]{Modifier}} and the
+#' \code{\link[RNAmodR:Modifier]{ModifierSet}} classes are inherited by the 
+#' \code{ModInosine} and \code{ModSetInosine} classes.
+#' 
+#' Check below for the specifically implemented functions.
+#' 
+#' @param x a \code{\link[RNAmodR:Modifier]{Modifier}} or a 
+#' \code{\link[RNAmodR:ModifierSet]{ModifierSet}} object. For more details see 
+#' also the man pages for the functions mentioned below.
+#' @param value See \code{\link{settings}}
+#' @param force See \code{\link{aggregate}}
+#' @param coord,name,from,to,type,window.size,... See 
+#' \code{\link{visualizeData}}
+#' 
+#' @details 
+#' \code{ModInosine} specific arguments for \link{visualizeData}:
+#' \itemize{
+#' \item{\code{colour.bases} - }{a named character vector of \code{length = 4} 
+#' for the colours of the individual bases. The names are expected to be 
+#' \code{c("G","A","U","C")}}
+#' }
+NULL
+
 .norm_inosine_args <- function(input){
   minScore <- 10
   if(!is.null(input[["minScore"]])){
@@ -44,7 +76,7 @@ setClass("ModInosine",
   args
 }
 
-#' @name ModInosine
+#' @rdname ModInosine-functions
 #' @export
 setReplaceMethod(f = "settings", 
                  signature = signature(x = "ModInosine"),
@@ -113,7 +145,7 @@ ModInosine <- function(x, annotation, sequences, seqinfo, ...){
   ans
 }
 
-#' @name ModInosine
+#' @rdname ModInosine-functions
 #' @export
 setMethod(f = "aggregate", 
           signature = signature(x = "ModInosine"),
@@ -136,18 +168,14 @@ setMethod(f = "aggregate",
 }
 
 .find_inosine <- function(x){
-  message("Searching for Inosine...")
+  message("Searching for Inosine ... ", appendLF = FALSE)
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
-  ranges <- ranges(x)
-  ranges <- split(RNAmodR:::.get_parent_annotations(ranges),
-                  seq_along(ranges))
   # get the aggregate data
   mod <- aggregateData(x)
   # get arguments
   minCoverage <- settings(x,"minCoverage")
   minReplicate <- settings(x,"minReplicate")
   minScore <- settings(x,"minScore")
-  browser()
   # construct logical vector for passing the coverage threshold
   coverage <- mod[,seq_len(unique(IRanges::ncol(mod)) - 2) + 2,drop = FALSE]
   coverage <- apply(as.matrix(unlist(coverage)),1,
@@ -175,15 +203,24 @@ setMethod(f = "aggregate",
     mod[,seq_len(2)],
     coverage,
     letters,
-    ranges)
-  modifications <- GenomicRanges::GRangesList(
-    modifications[!vapply(modifications,
-                          is.null,
-                          logical(1))])
+    ranges(x),
+    SIMPLIFY = FALSE)
+  f <- !vapply(modifications,
+               is.null,
+               logical(1))
+  modifications <- mapply(
+    function(m,name){
+      m$Parent <- name
+      m
+    },
+    modifications[f],
+    names(grl)[f],
+    SIMPLIFY = FALSE)
+  modifications <- GenomicRanges::GRangesList(modifications)
   unname(unlist(modifications))
 }
 
-#' @rdname ModInosine
+#' @rdname ModInosine-functions
 #' @export
 setMethod("modify",
           signature = c(x = "ModInosine"),
@@ -192,7 +229,6 @@ setMethod("modify",
             x <- aggregate(x, force)
             x@modifications <- .find_inosine(x)
             x@modificationsValidForCurrentArguments <- TRUE
-            message("done.")
             x
           }
 )
@@ -207,6 +243,7 @@ setClass("ModSetInosine",
 
 #' @rdname ModInosine
 #' @export
-ModSetInosine <- function(x, annotation = NA, sequences = NA){
-  ModifierSet("ModInosine", x, annotation = annotation, sequences = sequences)
+ModSetInosine <- function(x, annotation, sequences, seqinfo, ...){
+  ModifierSet("ModInosine", x = x, annotation = annotation,
+              sequences = sequences, seqinfo = seqinfo, ...)
 }

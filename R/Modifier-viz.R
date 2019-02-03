@@ -3,7 +3,7 @@
 NULL
 
 #' @name visualizeData
-#' @aliases visualizeDataByCoord
+#' @aliases visualizeData visualizeDataByCoord
 #' 
 #' @title visualizeData
 #' 
@@ -11,7 +11,7 @@ NULL
 #' title
 #' 
 #' @param x a \code{Modifier} or \code{ModifierSet} object.
-#' @param coord coordinates of a single position to subset to as a 
+#' @param coord coordinates of a positions to subset to as a 
 #' \code{GRanges} object. The Parent column is expected to match the gene or 
 #' transcript name.
 #' @param type the data type of data show as data tracks.

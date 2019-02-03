@@ -49,7 +49,7 @@ NULL
   grl@unlistData <- unname(grl@unlistData)
   gr <- unlist(grl)
   grl <- split(gr,
-               seqnames(gr))
+               GenomicRanges::seqnames(gr))
   # assemble param
   param <- Rsamtools::ScanBamParam(which = grl, 
                                    what = what, 
