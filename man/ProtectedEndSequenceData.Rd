@@ -6,7 +6,10 @@
 \alias{ProtectedEndSequenceData-class}
 \title{ProtectedEndSequenceData}
 \usage{
-ProtectedEndSequenceData(bamfiles, fasta, gff, ...)
+ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
+
+\S4method{aggregate}{ProtectedEndSequenceData}(x, condition = c("Both",
+  "Treated", "Control"))
 }
 \description{
 title

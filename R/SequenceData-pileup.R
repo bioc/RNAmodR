@@ -21,8 +21,9 @@ setClass(Class = "PileupSequenceData",
 .pileup_colnames <- c("pos","-","G","A","T","C")
 .pileup_measure_colnames <- c("-","G","A","T","C")
 
-.fill_up_pileup_data <- function(d,r){
-  pos <- BiocGenerics::start(r):BiocGenerics::end(r)
+#' @importFrom reshape2 dcast melt
+.fill_up_pileup_data <- function(d,seq){
+  pos <- seq
   if(is.null(d)){
     colnames <- .pileup_colnames
     d <- data.frame(pos = pos,
@@ -68,11 +69,9 @@ setClass(Class = "PileupSequenceData",
   df
 }
 
-.get_position_data_of_transcript_pileup <- function(bamFile,
-                                                    ranges,
-                                                    sequences,
-                                                    param,
-                                                    args = list()){
+#' @importFrom reshape2 dcast
+.get_position_data_of_transcript_pileup <- function(bamFile, grl, sequences,
+                                                    param, args = list()){
   # get user set argumenst
   pileupArgs <- args[c("max_depth", 
                        "min_base_quality", 
@@ -87,7 +86,6 @@ setClass(Class = "PileupSequenceData",
                        "left_bins", 
                        "query_bins", 
                        "cycle_bins")]
-  parentRanges <- RNAmodR:::.get_parent_annotations(ranges)
   pileupArgs <- pileupArgs[!vapply(pileupArgs,is.null,logical(1))]
   # get data per chromosome
   pileupParam <- do.call("PileupParam",pileupArgs)
@@ -95,78 +93,67 @@ setClass(Class = "PileupSequenceData",
                               scanBamParam = param,
                               pileupParam = pileupParam)
   pileup <- S4Vectors::DataFrame(pileup)
-  # reformat data
-  pileup$seqnames <- as.character(pileup$seqnames)
-  pileup$nucleotide <- as.character(pileup$nucleotide)
   # split into data per transcript which is defined by the which_label column
   # format: chromosome:start-end
-  pileup <- split(pileup,
-                  pileup$which_label)
+  pileup <- split(pileup, pileup$which_label)
+  if(length(pileup) != length(grl)){
+    stop("Something went wrong.")
+  }
   # sanitize pilup data
   # - keep only data for correct strand
   # - fillup empty positions with zero
-  strands <- as.character(BiocGenerics::strand(parentRanges))
-  rl <- split(parentRanges,seq_along(parentRanges))
+  strands_u <- .get_strand_u_GRangesList(grl)
+  seqs <- .seqs_rl(grl)
   pileup <- IRanges::SplitDataFrameList(
     mapply(
-      function(d,r,strand){
+      function(d,seq,strand){
         ans <- NULL
         d <- d[d$strand == strand,]
         if(nrow(d) > 0) {
-          ans <- reshape2::dcast(
-            as.data.frame(d),
-            pos ~ nucleotide,
-            sum,
-            value.var = "count")
+          ans <- reshape2::dcast(as.data.frame(d), pos ~ nucleotide, sum,
+                                 value.var = "count")
         }
-        ans <- .fill_up_pileup_data(ans,r)
+        ans <- .fill_up_pileup_data(ans,seq)
         # remove pos column since we don't need this anymore. seq_along == pos
         ans$pos <- NULL
         ans
       },
       pileup,
-      rl,
-      strands,
+      seqs,
+      strands_u,
       SIMPLIFY = FALSE))
-  names(pileup) <- parentRanges$ID
+  names(pileup) <- names(grl)
   pileup
 }
 
+setMethod(".get_Data",
+          signature = c(x = "PileupSequenceData",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x, grl, sequences, param, args){
+            message("Loading Pileup data from BAM files ... ",
+                    appendLF = FALSE)
+            files <- bamfiles(x)
+            data <- lapply(files,
+                           FUN = .get_position_data_of_transcript_pileup,
+                           grl = grl,
+                           sequences = sequences,
+                           param = param,
+                           args = args)
+            names(data) <- paste0("pileup.",
+                                  names(files),
+                                  ".",
+                                  seq_along(files))
+            data
+          }
+)
+
 #' @name PileupSequenceData
-#' @importFrom reshape2 dcast melt
-#' 
 #' @export
-PileupSequenceData <- function(bamfiles,
-                               fasta,
-                               gff,
-                               ...){
-  args <- .get_mod_data_args(...)
-  ans <- new("PileupSequenceData",
-             bamfiles,
-             fasta,
-             gff,
-             args)
-  ranges <- .load_annotation(ans@gff)
-  sequences <- .load_transcript_sequences(ans@fasta,
-                                          ranges)
-  param <- .assemble_scanBamParam(ranges,
-                                  ans@minQuality,
-                                  ans@chromosomes)
-  message("Loading Pileup data from BAM files...")
-  data <- lapply(ans@bamfiles,
-                 FUN = .get_position_data_of_transcript_pileup,
-                 ranges = ranges,
-                 sequences = sequences,
-                 param = param,
-                 args = args)
-  names(data) <- paste0("pileup.",
-                        names(ans@bamfiles),
-                        ".",
-                        seq_along(ans@bamfiles))
-  .postprocess_read_data(ans,
-                         data,
-                         ranges,
-                         sequences)
+PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("Pileup", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 
 # aggregation ------------------------------------------------------------------
@@ -215,14 +202,25 @@ PileupSequenceData <- function(bamfiles,
 }
 
 #' @name PileupSequenceData
-#' @importFrom matrixStats rowSds
-#' 
 #' @export
 setMethod("aggregate",
           signature = c(x = "PileupSequenceData"),
-          function(x,
-                   condition = c("Both","Treated","Control")){
+          function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
             .aggregate_data_frame_percentage_mean_sd(x,condition)
           }
+)
+
+
+# data visualization -----------------------------------------------------------
+setMethod(
+  f = ".dataTracks",
+  signature = signature(x = "PileupSequenceData",
+                        data = "missing",
+                        seqdata = "GRanges",
+                        sequence = "XString"),
+  definition = function(x, seqdata, sequence,  args) {
+    requireNamespace("Gviz")
+    browser()
+  }
 )

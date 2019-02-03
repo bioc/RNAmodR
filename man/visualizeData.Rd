@@ -38,7 +38,7 @@ visualizeData(x, name, from = 1L, to = 30L, type, ...)
 \arguments{
 \item{x}{a \code{Modifier} or \code{ModifierSet} object.}
 
-\item{coord}{coordinates of a single position to subset to as a 
+\item{coord}{coordinates of a positions to subset to as a 
 \code{GRanges} object. The Parent column is expected to match the gene or 
 transcript name.}
 

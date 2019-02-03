@@ -11,7 +11,6 @@ NULL
 #' title
 NULL
 
-
 #' @rdname NormEndSequenceData
 #' @export
 setClass(Class = "NormEnd5SequenceData",
@@ -27,29 +26,24 @@ setClass(Class = "NormEnd3SequenceData",
 # End5SequenceData ------------------------------------------------------------------
 
 #'@importFrom reshape2 acast
-.get_position_data_of_transcript_ends_norm <- function(bamFile,
-                                                       ranges,
-                                                       param,
+.get_position_data_of_transcript_ends_norm <- function(bamFile, grl, param,
                                                        type = c("5prime",
                                                                 "3prime"),
                                                        args = list()){
   type <- match.arg(type)
-  parentRanges <- RNAmodR:::.get_parent_annotations(ranges)
-  data <- .load_bam_alignment_data(bamFile,param,parentRanges,args)
+  strands_u <- .get_strand_u_GRangesList(grl)
+  data <- .load_bam_alignment_data(bamFile, param, grl, args)
   # factor for found and non found transcripts
-  f <- as.integer(names(data))
-  f_not_found <- as.integer(
-    seq_along(parentRanges)[!(seq_along(parentRanges) %in% 
-                                unique(names(data)))])
+  f <- names(data)
+  f_not_found <- names(grl)[!(names(grl) %in% names(data))]
   # summarize pos of reads based on type
-  strands <- as.character(BiocGenerics::strand(parentRanges)[f])
-  enddata <- .summarize_to_position_data(data,strands,type)
+  enddata <- .summarize_to_position_data(data, strands_u[f], type)
   # tabulate the counts per position
-  rl <- split(ranges(parentRanges),seq_along(parentRanges))
+  seqs <- .seqs_rl(grl)
   enddata <- IRanges::IntegerList(mapply(
-    function(d,r){
-      bg <- table(start(r):end(r)) - 1
-      d <- d[d >= start(r) & d <= end(r)]
+    function(d,s){
+      bg <- table(s) - 1
+      d <- d[d %in% s]
       d <- table(d)
       d <- d[as.integer(names(d)) > 0L]
       d <- reshape2::acast(data.frame(pos = as.integer(c(names(bg),names(d))),
@@ -60,9 +54,8 @@ setClass(Class = "NormEnd3SequenceData",
       as.integer(d)
     },
     enddata,
-    rl[f],
+    seqs[f],
     SIMPLIFY = FALSE))
-  names(enddata) <- f
   # noralize against total number transcript or against the overlap per position
   normTranscript <- (enddata / BiocGenerics::lengths(data)) * 1000
   normTranscript <- IRanges::NumericList(lapply(normTranscript,unname))
@@ -78,104 +71,88 @@ setClass(Class = "NormEnd3SequenceData",
     SIMPLIFY = FALSE))
   # calculate tables and add empty positions
   data_not_found <- IRanges::IntegerList(mapply(
-    function(r){
-      d <- table(start(r):end(r)) - 1
+    function(s){
+      d <- table(s) - 1
       as.integer(d)
     },
-    rl[f_not_found],SIMPLIFY = FALSE))
-  names(data_not_found) <- f_not_found
+    seqs[f_not_found],
+    SIMPLIFY = FALSE))
   # merge data with empty data and order based on factor numbers
   enddata <- c(enddata,data_not_found)
-  enddata[is.na(enddata)] <- 0
-  enddata <- enddata[order(as.integer(names(enddata))),]
+  enddata@unlistData[is.na(enddata@unlistData)] <- 0L
+  enddata <- enddata[match(names(grl),names(enddata))]
   normTranscript <- c(normTranscript,data_not_found)
-  normTranscript[is.na(normTranscript)] <- 0
-  normTranscript <- normTranscript[order(as.integer(names(normTranscript))),]
+  normTranscript@unlistData[is.na(normTranscript@unlistData)] <- 0
+  normTranscript <- normTranscript[match(names(grl),names(normTranscript))]
   normOverlap <- c(normOverlap,data_not_found)
-  normOverlap[is.na(normOverlap)] <- 0
-  normOverlap <- normOverlap[order(as.integer(names(normOverlap))),]
+  normOverlap@unlistData[is.na(normOverlap@unlistData)] <- 0
+  normOverlap <- normOverlap[match(names(grl),names(normOverlap))]
   # name results based on transcript ID
-  names(enddata) <- parentRanges$ID
-  names(normTranscript) <- parentRanges$ID
-  names(normOverlap) <- parentRanges$ID
   data <- IRanges::SplitDataFrameList(
     S4Vectors::DataFrame(ends = unlist(enddata),
                          norm.tx = unlist(normTranscript),
                          norm.ol = unlist(normOverlap)))
-  data@partitioning <- normTranscript@partitioning
+  data@partitioning <- enddata@partitioning
   data
 }
 
-#' @rdname NormEndSequenceData
-#' @export
-NormEnd5SequenceData <- function(bamfiles,
-                                 fasta,
-                                 gff,
-                                 ...){
-  args <- .get_mod_data_args(...)
-  ans <- new("NormEnd5SequenceData",
-             bamfiles,
-             fasta,
-             gff,
-             args)
-  ranges <- .load_annotation(ans@gff)
-  sequences <- .load_transcript_sequences(ans@fasta,
-                                          ranges)
-  param <- .assemble_scanBamParam(ranges,
-                                  ans@minQuality,
-                                  ans@chromosomes)
-  message("Loading normalized 5'-end position data from BAM files...")
-  data <- lapply(ans@bamfiles,
-                 FUN = .get_position_data_of_transcript_ends_norm,
-                 ranges = ranges,
-                 param = param,
-                 type = "5prime",
-                 args = args)
-  
-  
-  names(data) <- paste0("norm.end5.",
-                        names(ans@bamfiles),
-                        ".",
-                        seq_along(ans@bamfiles))
-  .postprocess_read_data(ans,
-                         data,
-                         ranges,
-                         sequences)
-}
+setMethod(".get_Data",
+          signature = c(x = "NormEnd5SequenceData",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x, grl, sequences, param, args){
+            message("Loading normalized 5'-end position data from BAM files ",
+                    "... ", appendLF = FALSE)
+            files <- bamfiles(x)
+            data <- lapply(files,
+                           FUN = .get_position_data_of_transcript_ends_norm,
+                           grl = grl,
+                           param = param,
+                           type = "5prime",
+                           args = args)
+            names(data) <- paste0("norm.end5.",
+                                  names(files),
+                                  ".",
+                                  seq_along(files))
+            data
+          }
+)
+
+setMethod(".get_Data",
+          signature = c(x = "NormEnd3SequenceData",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x, grl, sequences, param, args){
+            message("Loading normalized 3'-end position data from BAM files ",
+                    "... ", appendLF = FALSE)
+            files <- bamfiles(x)
+            data <- lapply(files,
+                           FUN = .get_position_data_of_transcript_ends_norm,
+                           grl = grl,
+                           param = param,
+                           type = "3prime",
+                           args = args)
+            names(data) <- paste0("norm.end3.",
+                                  names(files),
+                                  ".",
+                                  seq_along(files))
+            data
+          }
+)
 
 #' @rdname NormEndSequenceData
 #' @export
-NormEnd3SequenceData <- function(bamfiles,
-                                 fasta,
-                                 gff,
-                                 ...){
-  args <- .get_mod_data_args(...)
-  ans <- new("NormEnd3SequenceData",
-             bamfiles,
-             fasta,
-             gff,
-             args)
-  ranges <- .load_annotation(ans@gff)
-  sequences <- .load_transcript_sequences(ans@fasta,
-                                          ranges)
-  param <- .assemble_scanBamParam(ranges,
-                                  ans@minQuality,
-                                  ans@chromosomes)
-  message("Loading normalized 5'-end position data from BAM files...")
-  data <- lapply(ans@bamfiles,
-                 FUN = .get_position_data_of_transcript_ends_norm,
-                 ranges = ranges,
-                 param = param,
-                 type = "3prime",
-                 args = args)
-  names(data) <- paste0("norm.end3.",
-                        names(ans@bamfiles),
-                        ".",
-                        seq_along(ans@bamfiles))
-  .postprocess_read_data(ans,
-                         data,
-                         ranges,
-                         sequences)
+NormEnd5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("NormEnd5", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
+}
+#' @rdname NormEndSequenceData
+#' @export
+NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("NormEnd3", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 
 # aggregation ------------------------------------------------------------------
@@ -220,8 +197,7 @@ NormEnd3SequenceData <- function(bamfiles,
 #' @export
 setMethod("aggregate",
           signature = c(x = "NormEnd5SequenceData"),
-          function(x,
-                   condition = c("Both","Treated","Control")){
+          function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
             .aggregate_data_frame_mean_sd(x,condition)
           }
@@ -231,9 +207,33 @@ setMethod("aggregate",
 #' @export
 setMethod("aggregate",
           signature = c(x = "NormEnd3SequenceData"),
-          function(x,
-                   condition = c("Both","Treated","Control")){
+          function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
             .aggregate_data_frame_mean_sd(x,condition)
           }
+)
+
+# data visualization -----------------------------------------------------------
+setMethod(
+  f = ".dataTracks",
+  signature = signature(x = "NormEnd5SequenceData",
+                        data = "missing",
+                        seqdata = "GRanges",
+                        sequence = "XString"),
+  definition = function(x, seqdata, sequence,  args) {
+    requireNamespace("Gviz")
+    browser()
+  }
+)
+
+setMethod(
+  f = ".dataTracks",
+  signature = signature(x = "NormEnd3SequenceData",
+                        data = "missing",
+                        seqdata = "GRanges",
+                        sequence = "XString"),
+  definition = function(x, seqdata, sequence,  args) {
+    requireNamespace("Gviz")
+    browser()
+  }
 )

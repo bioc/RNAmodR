@@ -5,16 +5,46 @@
 \alias{plotROC}
 \alias{plotROC,Modifier-method}
 \alias{plotROC,ModifierSet-method}
-\title{Performance}
+\title{ROCR functions for \code{Modifier} and \code{ModifierSet} objects}
 \usage{
 plotROC(x, coord, redo = FALSE, ...)
 
-\S4method{plotROC}{Modifier}(x, coord, redo, redo.args, prediction.args,
-  performance.args, plot.args)
+\S4method{plotROC}{Modifier}(x, coord, prediction.args, performance.args,
+  plot.args)
 
-\S4method{plotROC}{ModifierSet}(x, coord, redo, redo.args, prediction.args,
+\S4method{plotROC}{ModifierSet}(x, coord, prediction.args,
   performance.args, plot.args)
 }
+\arguments{
+\item{x}{a \code{Modifier} or a \code{ModifierSet} object}
+
+\item{coord}{coordinates of position to label as positive. Either a 
+\code{GRanges} or a \code{GRangesList} object. For both types the Parent 
+column is expected to match the gene or transcript name.}
+
+\item{prediction.args}{arguments which will be used for calling 
+\code{\link[ROCR:prediction]{prediction}} form the \code{ROCR} package}
+
+\item{performance.args}{arguments which will be used for calling 
+\code{\link[ROCR:performance]{performance}} form the \code{ROCR} package}
+
+\item{plot.args}{arguments which will be used for calling \code{plot} on the
+performance object of the \code{ROCR} package}
+}
 \description{
-title
+\code{plotROC} streamlines labeling, prediction, performance and plotting
+to test the peformance of a \code{Modifier} object and the data analyzed via
+the functionallity from the \code{ROCR} package.
+
+The data from \code{x} will be labeled as positive using the \code{coord}
+arguments. The other arguments will be passed on to the specific \code{ROCR}
+functions.
+
+By default the \code{prediction.args} include three values:
+\itemize{
+\item{\code{measure = "tpr"}}
+\item{\code{x.measure = "fpr"}}
+\item{\code{score = mainScore(x)}}
+}
+The remaining arguments are not predefined.
 }

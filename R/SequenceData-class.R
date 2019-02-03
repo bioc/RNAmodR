@@ -1,18 +1,42 @@
 #' @include RNAmodR.R
+#' @include normalization.R
 #' @include SequenceDataFrame-class.R
 NULL
 
 #' @name SequenceData
+#' 
 #' @title SequenceData
+#' 
 #' @description 
-#' title
+#' The \code{SequenceData} class is a virtual class. It contains data on each
+#' position alongside transcripts defined in the \code{ranges} slot.
 #' 
+#' It also holds the nucleotide sequence of these transcripts.
 #' 
+#' @param dataType The prefix for construction the class name of the 
+#' \code{SequenceData} subclass to be constructed.
+#' @param bamfiles the input which can be of the following types
+#' \itemize{
+#' \item{\code{BamFileList}:} {a named \code{BamFileList}}
+#' \item{\code{character}:} {a \code{character} vector, which must be coercible
+#' to a named \code{BamFileList} referencing existing bam files. Valid names are
+#' \code{control} and \code{treated} to define conditions and replicates}
+#' }
+#' @param annotation annotation data, which must match the information contained
+#' in the BAM files.
+#' @param sequences sequences matching the target sequences the reads were 
+#' mapped onto. This must match the information contained in the BAM files.
+#' @param seqinfo optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
+#' subset the transcripts analyzed on a chromosome basis.
 #' @param ... Optional arguments overwriting default values, which are
 #' \itemize{
 #' \item{minQuality}{class dependent}
 #' }
 #' 
+#' #' @param conditions The condition of each column or set of columns. Either 
+#' \code{control} or \code{treated}.
+#' @param replicate The replicate of each column or set of columns for the 
+#' individual conditions
 NULL
 
 setClass("SequenceData",
@@ -26,12 +50,23 @@ setClass("SequenceData",
                    minQuality = "integer",
                    chromosomes = "character",
                    unlistType = "character",
-                   replicate = "factor",
-                   conditions = "factor"),
+                   conditions = "factor",
+                   replicate = "factor"),
          prototype = list(ranges = GRangesList(),
                           sequencesType = "RNAStringSet",
                           sequences = RNAStringSet(),
                           unlistType = "SequenceDataFrame"))
+
+# class names must be compatible with this class name generation function
+sequenceDataClass <- function(dataType){
+  ans <- paste0(dataType,"SequenceData")
+  tmp <- try(getClass(ans))
+  if(is(tmp,"try-error")){
+    stop("Class '",ans,"' not found: ",tmp)
+  }
+  
+  ans
+}
 
 # for concat
 #' @name SequenceData
@@ -53,7 +88,6 @@ setMethod("show", "SequenceData",
                                            " metadata columns"),
                 "\n",sep = "")
             out_data <- NULL
-            out_mdata <- NULL
             # data
             if (data_nc > 0) {
               data_col_names <- colnames(object@unlistData)
@@ -65,24 +99,10 @@ setMethod("show", "SequenceData",
                 matrix(unlist(data_col_types, use.names = FALSE), nrow = 1,
                 dimnames = list("", data_col_names))
             }
-            # metadata
-            if (ranges_nmc > 0) {
-              mdata_col_names <- colnames(ranges_mcols)
-              mdata_col_types <- 
-                lapply(ranges_mcols, function(x) {
-                  paste0("<", classNameForDisplay(x)[1],">")
-                })
-              out_mdata <- matrix(unlist(mdata_col_types,
-                                         use.names = FALSE),
-                                  nrow = 1,
-                                  dimnames = list("", mdata_col_names))
-            }
             cat("- Data columns:\n")
             print(out_data, quote = FALSE, right = TRUE)
-            cat("\n- Ranges metadata columns:\n")
-            print(out_mdata, quote = FALSE, right = TRUE)
-            print("Sequence info file:")
-            print(paste0("|    ",capture.output(show(object@seqinfo))))
+            cat("-")
+            cat(paste0(" ",capture.output(show(object@seqinfo)),"\n"))
           }
 )
 # validity ---------------------------------------------------------------------
@@ -242,6 +262,7 @@ setMethod("extractROWS", "SequenceData",
                        ranges = ans_ranges,
                        sequences = ans_sequences,
                        bamfiles = x@bamfiles,
+                       seqinfo = x@seqinfo,
                        unlistData = ans_unlistData,
                        partitioning = ans_partitioning,
                        elementMetadata = ans_elementMetadata)
@@ -250,9 +271,9 @@ setMethod("extractROWS", "SequenceData",
 
 setMethod("getListElement", "SequenceData",
           function(x, i, exact=TRUE){
-            i2 <- normalizeDoubleBracketSubscript(i, x, exact=exact,
-                                                  allow.NA=TRUE,
-                                                  allow.nomatch=TRUE)
+            i2 <- normalizeDoubleBracketSubscript(i, x, exact = exact,
+                                                  allow.NA = TRUE,
+                                                  allow.nomatch = TRUE)
             if (is.na(i2))
               return(NULL)
             unlisted_x <- unlist(x, use.names=FALSE)
@@ -271,7 +292,6 @@ setMethod("getListElement", "SequenceData",
 )
 
 
-
 # Concatenation ----------------------------------------------------------------
 
 setMethod("cbind", "SequenceData",
@@ -288,204 +308,6 @@ setMethod("rbind", "SequenceData",
 )
 
 # object creation --------------------------------------------------------------
-
-.norm_min_quality <- function(input,x){
-  minQuality <- x@minQuality
-  if(!is.null(input[["minQuality"]])){
-    minQuality <- input[["minQuality"]]
-    if(!is.integer(minQuality) | minQuality < 1L){
-      if(!is.na(minQuality)){
-        stop("'minQuality' must be integer with a value higher than 0L.",
-             call. = FALSE)
-      }
-    }
-  }
-  minQuality
-}
-
-setMethod(
-  f = "initialize", 
-  signature = signature(.Object = "SequenceData"),
-  definition = function(.Object,
-                        bamfiles,
-                        seqinfo,
-                        args,
-                        ...){
-    className <- class(.Object)
-    # quality
-    .Object@minQuality <- .norm_min_quality(list(...),.Object)
-    if(!is.integer(.Object@minQuality) | 
-       is.null(.Object@minQuality) | 
-       .Object@minQuality == 0L){
-      stop("Minimum quality is not set for '",class(.Object),"'.",
-           call. = FALSE)
-    }
-    # check bam files
-    bamfiles <- .norm_bamfiles(bamfiles,className)
-    # set clots
-    .Object@bamfiles <- bamfiles
-    .Object@replicate <- factor(seq_along(bamfiles))
-    .Object@conditions <- factor(names(bamfiles))
-    .Object@seqinfo <- .norm_seqinfo(seqinfo)
-    # additional sanity checks
-    .Object <- callNextMethod(.Object,...)
-    .Object
-  }
-)
-
-################################################################################
-# common utility functions -----------------------------------------------------
-
-.norm_files <- function(file){
-  assertive::assert_all_are_existing_files(c(file))
-  file
-}
-
-# try to coerce the input to a Seqinfo object
-.norm_seqinfo <- function(seqinfo){
-  if(!is(seqinfo,"Seqinfo")){
-    tmp <- try(Seqinfo(seqinfo))
-    if(is(tmp,"try-error")){
-      stop("Input is not a Seqinfo object and could not be coerced to ",
-           "one.",
-           call. = FALSE)
-    }
-    seqinfo <- tmp
-  }
-  seqinfo
-}
-
-.norm_gff <- function(gff){
-  if(!is(gff,"GFF3File")){
-    assertive::assert_all_are_existing_files(c(gff))
-    tmp <- try(GFF3File(gff))
-    if(is(tmp,"try-error")){
-      stop("Input is not a GFF3File and could not be coerced to one.",
-           call. = FALSE)
-    }
-    gff <- tmp
-  }
-  gff
-}
-
-# Either return a FaFile or BSgenome object
-.norm_sequences <- function(seq){
-  if(!is(seq,"FaFile") && !is(seq,"BSgenome")){
-    assertive::assert_all_are_existing_files(c(seq))
-    tmp <- try(FaFile(seq))
-    if(is(tmp,"try-error")){
-      stop("Input is not a FaFile and could not be coerced to one.",
-           call. = FALSE)
-    }
-    seq <- tmp
-    Rsamtools::indexFa(seq)
-  } else if(is(seq,"FaFile")) {
-    assertive::assert_all_are_existing_files(c(path(seq)))
-    Rsamtools::indexFa(seq)
-  } else if(is(seq,"BSgenome")) {
-    assertive::assert_all_are_true(validObject(seq))
-  } else {
-    stop("Something went wrong. Unrecognized sequence input.")
-  }
-  seq
-}
-
-# Return a TxDb object
-.norm_annotation <- function(annotation){
-  if(!is(annotation,"GFFFile") && !is(annotation,"TxDb")){
-    annotation <- .norm_gff(annotation)
-  } else if(is(annotation,"GFFFile")) {
-    assertive::assert_all_are_existing_files(c(path(annotation)))
-  } else if(is(annotation,"TxDb")) {
-    assertive::assert_all_are_true(validObject(annotation))
-  } else {
-    stop("Something went wrong. Unrecognized annotation input.")
-  }
-  if(!is(annotation,"TxDb")){
-    annotation <- GenomicFeatures::makeTxDbFromGFF(
-      path(annotation))
-  }
-  annotation
-}
-
-# retrieve a Seqinfo object from the bam headers
-.bam_header_to_seqinfo <- function(bfl){
-  if(is(bfl,"BamFile")){
-    bfl <- BamFileList(bfl)
-  }
-  if(!is(bfl,"BamFileList")){
-    stop("BamFileList required.")
-  }
-  header <- Rsamtools::scanBamHeader(bfl[[1]])
-  targets <- names(header[[1]]$targets)
-  seqinfo <- Seqinfo(targets)
-  seqinfo
-}
-
-# Retrieve the intersection of seqnames in annotation, sequence and seqinfo
-# data
-.norm_seqnames <- function(bamfiles,
-                           annotation,
-                           sequences,
-                           seqinfo){
-  browser()
-  # norm seqinfo
-  if(!is(seqinfo,"Seqinfo") && 
-     (is(seqinfo,"BamFile") | is(seqinfo,"BamFileList"))){
-    seqinfo <- .bam_header_to_seqinfo(seqinfo)
-  }
-  if(!is(seqinfo,"Seqinfo")){
-    seqinfo <- .norm_seqinfo(seqinfo)
-  }
-  # norm annotation
-  if(!is(annotation,"TxDb")){
-    annotation  <- .norm_annotation(annotation)
-  }
-  # norm sequences input
-  if(is(sequences,"FaFile")){
-    seqnames <- names(Rsamtools::scanFa(sequences))
-  } else if(is(sequences,"BSgenome")) {
-    seqnames <- seqnames(sequences)
-  }
-  seqnames <- seqnames[seqnames %in% seqlevels(annotation)]
-  seqnames <- seqnames[seqnames %in% seqnames(seqinfo)]
-  if( length(seqnames) == 0L ) {
-    stop("No intersection between chromosome names in fasta, ",
-         "annotation and seqinfo data.", 
-         call. = FALSE)
-  }
-  return(invisible(seqnames))
-}
-
-################################################################################
-
-# load annotation as GRangesList. one element per transcript
-.load_annotation <- function(annotation, seqinfo){
-  browser()
-  txdb <- .norm_annotation(annotation)
-  ranges <- GenomicFeatures::exonsBy(txdb, by = "tx")
-  ranges <- .subset_by_seqinfo(ranges, seqinfo)
-  ranges
-}
-
-# load the transcript sequence per transcript aka. one sequence per GRangesList
-# element
-.load_transcript_sequences <- function(sequences,
-                                       grl){
-  browser()
-  sequences <- .norm_sequences(sequences)
-  seq <- getSeq(sequences, grl)
-  as(seq,"RNAStringSet")
-}
-
-# remove any elements, which are not in the seqinfo
-.subset_by_seqinfo <- function(grl,seqinfo){
-  grl <- grl[seqnames(grl) %in% seqnames(seqinfo)]
-  grl <- grl[width(grl@partitioning) != 0L]
-  grl
-}
-
-################################################################################
 
 .get_mod_data_args <- function(...){
   input <- list(...)
@@ -543,12 +365,167 @@ setMethod(
   args
 }
 
+.norm_min_quality <- function(input,x){
+  minQuality <- x@minQuality
+  if(!is.null(input[["minQuality"]])){
+    minQuality <- input[["minQuality"]]
+    if(!is.integer(minQuality) | minQuality < 1L){
+      if(!is.na(minQuality)){
+        stop("'minQuality' must be integer with a value higher than 0L.",
+             call. = FALSE)
+      }
+    }
+  }
+  minQuality
+}
+
+.get_replicate_number <- function(bamfiles, conditions){
+  control_rep <- seq_along(bamfiles[conditions == "control"])
+  treated_rep <- seq_along(bamfiles[conditions == "treated"])
+  rep <- c(control_rep,treated_rep)
+  rep <- rep[c(which(conditions == "control"),
+               which(conditions == "treated"))]
+  factor(rep)
+}
+
+setMethod(
+  f = "initialize", 
+  signature = signature(.Object = "SequenceData"),
+  definition = function(.Object, bamfiles, seqinfo, ...){
+    # quality
+    .Object@minQuality <- .norm_min_quality(list(...),.Object)
+    if(!is.integer(.Object@minQuality) | 
+       is.null(.Object@minQuality) | 
+       .Object@minQuality == 0L){
+      stop("Minimum quality is not set for '",class(.Object),"'.",
+           call. = FALSE)
+    }
+    # set slots
+    .Object@bamfiles <- bamfiles
+    .Object@conditions <- factor(names(bamfiles))
+    .Object@replicate <- .get_replicate_number(bamfiles, .Object@conditions)
+    .Object@seqinfo <- .norm_seqinfo(seqinfo)
+    # additional sanity checks
+    .Object <- callNextMethod(.Object,...)
+    .Object
+  }
+)
+
+# internal SequenceData constructor
+.new_SequenceData <- function(dataType, bamfiles, annotation, sequences, seqinfo,
+                              ...){
+  if(is.null(dataType)){
+    stop("Invalid data type.")
+  }
+  args <- .get_mod_data_args(...)
+  className <- sequenceDataClass(dataType)
+  # check bam files
+  bamfiles <- .norm_bamfiles(bamfiles, className)
+  # get annotation and sequence data
+  txdb <- .norm_annotation(annotation, className)
+  sequences <- .norm_sequences(sequences, className)
+  seqinfo <- .norm_seqnames(bamfiles, txdb, sequences, seqinfo, className)
+  # create the class
+  ans <- new(className, bamfiles, seqinfo, args)
+  # load transcript data and sequence data as well as the ScanBamParam
+  grl <- .load_annotation(txdb, ans@seqinfo)
+  sequences <- .load_transcript_sequences(sequences, grl)
+  param <- .assemble_scanBamParam(grl, ans@minQuality, ans@seqinfo)
+  # run the specific data aggregation function
+  data <- .get_Data(ans, grl, sequences, param, args)
+  # post process the data
+  .postprocess_read_data(ans, data, grl, sequences)
+}
+
+setMethod("SequenceData",
+          signature = c(annotation = "character", sequences = "character"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "character", sequences = "BSgenome"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "TxDb", sequences = "character"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "TxDb", sequences = "BSgenome"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GFF3File", sequences = "BSgenome"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GFF3File", sequences = "character"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "character", sequences = "FaFile"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GFF3File", sequences = "FaFile"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "TxDb", sequences = "FaFile"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+
+
+################################################################################
+# common utility functions -----------------------------------------------------
+
+# load annotation as GRangesList. one element per transcript
+.load_annotation <- function(txdb, seqinfo){
+  ranges <- GenomicFeatures::exonsBy(txdb, by = "tx")
+  ranges <- .subset_by_seqinfo(ranges, seqinfo)
+  ranges
+}
+
+# load the transcript sequence per transcript aka. one sequence per GRangesList
+# element
+.load_transcript_sequences <- function(sequences,
+                                       grl){
+  seq <- getSeq(sequences, unlist(grl))
+  seq <- split(seq,grl@partitioning)
+  seq <- Reduce(c,lapply(seq,Biostrings::xscat))
+  names(seq) <- names(grl)
+  as(seq,"RNAStringSet")
+}
+
+# remove any elements, which are not in the seqinfo
+.subset_by_seqinfo <- function(grl,seqinfo){
+  grl <- grl[GenomicRanges::seqnames(grl) %in% GenomeInfoDb::seqnames(seqinfo)]
+  grl <- grl[width(grl@partitioning) != 0L]
+  GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(seqinfo)
+  grl
+}
+
+################################################################################
+
 .norm_postprocess_read_data <- function(data){
   if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
-    data <- lapply(data,
-                   function(d){
-                     d[order(names(d))]
-                   })
     data <- lapply(data, unlist)
     if(length(unique(lengths(data))) != 1L){
       stop("Data is of unequal length and cannot be coerced to a DataFrame.",
@@ -569,13 +546,12 @@ setMethod(
   } else {
     stop("Something went wrong.")
   }
-  rownames(data) <- NULL
   data
 }
 
 .postprocess_read_data <- function(x,
                                    data,
-                                   ranges,
+                                   grl,
                                    sequences){
   conditionsFmultiplier <- length(data)
   # work with the unlisted data and construct a CompressedSplitDataFrameList
@@ -583,33 +559,30 @@ setMethod(
   data <- .norm_postprocess_read_data(data)
   conditionsFmultiplier <- ncol(data) / conditionsFmultiplier 
   # create partitioning object from ranges
-  parentRanges <- .get_parent_annotations(ranges)
-  partitioning <- PartitioningByEnd(parentRanges)
-  f <- Rle(parentRanges$ID,width(parentRanges))
-  if(sum(width(partitioning)) != nrow(data) ||
-     length(f) != nrow(data)){
+  partitioning <- PartitioningByWidth(sum(width(grl)))
+  if(sum(width(partitioning)) != nrow(data)){
     stop("Something went wrong. Length of data and Ranges do not match.")
   }
-  # order data so that is matched the PartitioningByEnd object
-  data <- split(data,f)
-  data <- data[match(names(data),parentRanges$ID)]
-  data <- unlist(data, use.names = FALSE)
+  # order data so that is matched the PartitioningByWidth object
+  data <- IRanges::SplitDataFrameList(data)
+  data@partitioning <- as(partitioning,"PartitioningByEnd")
+  positions <- .seqs_rl(grl)
+  rownames(data) <- IRanges::CharacterList(positions)
   # order sequences
-  sequences <- sequences[match(names(sequences),parentRanges$ID)]
-  x@chromosomes <- x@chromosomes[match(x@chromosomes,
-                                       GenomeInfoDb::seqnames(parentRanges))]
+  sequences <- sequences[match(names(grl),names(sequences))]
   # store data
-  x@unlistData <- data
+  x@unlistData <- data@unlistData
   x@replicate <- rep(x@replicate, each = conditionsFmultiplier)
   x@conditions <- rep(x@conditions, each = conditionsFmultiplier)
-  x@partitioning <- partitioning
-  x@ranges <- ranges
+  x@partitioning <- data@partitioning
+  x@ranges <- grl
   x@sequences <- as(sequences,x@sequencesType)
-  names(x) <- as.character(parentRanges$ID)
+  names(x) <- names(grl)
   if(any(names(x@ranges) != names(x@sequences)) || 
      any(names(x@ranges) != names(x))){
     stop("Something went wrong.")
   }
+  message("OK")
   x
 }
 
@@ -655,7 +628,7 @@ setMethod(f = "bamfiles",
 
 
 # dummy functions --------------------------------------------------------------
-# these need to be implemented by each subclass
+# this needs to be implemented by each subclass
 
 #' @name SequenceData
 #' @export
@@ -666,4 +639,18 @@ setMethod(f = "aggregate",
               stop("This functions needs to be implemented by '",class(x),"'.",
                    call. = FALSE)
             }
+)
+
+# data visualization -----------------------------------------------------------
+# this needs to be implemented by each subclass
+setMethod(
+  f = ".dataTracks",
+  signature = signature(x = "SequenceData",
+                        data = "missing",
+                        seqdata = "GRanges",
+                        sequence = "XString"),
+  definition = function(x, seqdata, sequence,  args) {
+    stop("This functions needs to be implemented by '",class(x),"'.",
+         call. = FALSE)
+  }
 )

@@ -95,7 +95,10 @@ setMethod("initialize",
 #' 
 #' @title RNASequenceTrack
 #' 
-#' @description RNASequenceTrack
+#' @description
+#' A \code{Gviz} compatible 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}} for showing RNA 
+#' sequences.
 #' 
 #' @export
 setClass("RNASequenceTrack",
@@ -112,12 +115,12 @@ setClass("RNASequenceTrack",
 
 #' @rdname RNASequenceTrack
 #' 
-#' @param sequence A \code{character} or \code{RNAString} of length one. The
-#'   sequence to display.
+#' @param sequence A \code{character} vector or \code{RNAString} object of 
+#' length one. The sequence to display.
 #' @param name A \code{character}. The name of the track used in the title panel
-#'   when plotting
+#' when plotting
 #' @param ... Additional items which will all be interpreted as display
-#'   parameters.
+#' parameters.
 #'   
 #' @export
 #'
@@ -146,7 +149,10 @@ RNASequenceTrack <- function(sequence,
 #' 
 #' @title ModRNASequenceTrack
 #' 
-#' @description ModRNASequenceTrack
+#' @description 
+#' A \code{Gviz} compatible 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}} for showing modified 
+#' RNA sequences.
 #' 
 #' @export
 setClass("ModRNASequenceTrack",
@@ -163,12 +169,12 @@ setClass("ModRNASequenceTrack",
 
 #' @rdname ModRNASequenceTrack
 #' 
-#' @param sequence A \code{character} or \code{ModRNAString} of length one. The
-#'   sequence to display.
+#' @param sequence A \code{character} vector or \code{RNAString} object of 
+#' length one. The sequence to display.
 #' @param name A \code{character}. The name of the track used in the title panel
-#'   when plotting
+#' when plotting
 #' @param ... Additional items which will all be interpreted as display
-#'   parameters.
+#' parameters.
 #'   
 #' @export
 #'

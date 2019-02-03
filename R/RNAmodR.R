@@ -3,7 +3,18 @@
 #' @author Felix G M Ernst [aut]
 #' 
 #' @description
-#' todo xczCZXcZZcc cCX 
+#' \code{RNAmodR} implements class and a workflows to detect
+#' post-transcriptional RNA modifications in high throughput sequencing data.
+#' 
+#' From the a basic \code{SequenceData} speficic subclasses are derived
+#' containing specific aspects of aligned reads, e.g. 5'-end positions or pileup
+#' data. From this \code{Modifier} class can be used to detect specific patterns
+#' for individual types of modifications. The \code{SequenceData} classes can be
+#' shared by different \code{Modifier} classes allowing easy adapattion to new
+#' methods.
+#' 
+#' @seealso The \code{RNAmodR.RiboMethSeq} and \code{RNAmodR.AlkAnilineSeq}
+#' package.
 #'
 #' @docType package
 #' @name RNAmodR
@@ -30,54 +41,11 @@ requireNamespace("Rsamtools")
 requireNamespace("rtracklayer")
 requireNamespace("BiocParallel")
 
-
 # constants --------------------------------------------------------------------
 
 SAMPLE_TYPES <- c("treated","control")
 
 # constants for annotation -----------------------------------------------------
-
-GFF_COLNAMES <- c("source",
-                  "type",
-                  "score",
-                  "phase",
-                  "ID",
-                  "Name",
-                  "Parent",
-                  "Alias",
-                  "gene",
-                  "protein_id",
-                  "transcript_id")
-#' @name RNAmodR-internals
-#' @export
-MOD_CONTAINING_FEATURES <- c("transcript",
-                             "gene",
-                             "mRNA",
-                             "rRNA",
-                             "rRNA_gene",
-                             "tRNA",
-                             "tRNA_gene",
-                             "ncRNA",
-                             "ncRNA_gene",
-                             "snoRNA",
-                             "snoRNA_gene",
-                             "snRNA",
-                             "snRNA_gene",
-                             "SRP_RNA")
-MOD_INVALID_FEATURES <- c("chromosome",
-                          "telomere",
-                          "telomeric_repeat")
-MOD_TRANSCRIPT_FEATURES <- c("gene",
-                             "mRNA",
-                             "five_prime_UTR",
-                             "three_prime_UTR",
-                             "CDS",
-                             "noncoding_exon",
-                             "exon",
-                             "intron",
-                             "five_prime_UTR_intron",
-                             "three_prime_UTR_intron")
-
 
 #' @name RNAmodR-internals
 #' @aliases .dataTrack

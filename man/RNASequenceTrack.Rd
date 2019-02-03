@@ -9,8 +9,8 @@
 RNASequenceTrack(sequence, chromosome, genome, ...)
 }
 \arguments{
-\item{sequence}{A \code{character} or \code{RNAString} of length one. The
-sequence to display.}
+\item{sequence}{A \code{character} vector or \code{RNAString} object of 
+length one. The sequence to display.}
 
 \item{...}{Additional items which will all be interpreted as display
 parameters.}
@@ -19,7 +19,9 @@ parameters.}
 when plotting}
 }
 \description{
-RNASequenceTrack
+A \code{Gviz} compatible 
+\code{\link[Gviz:SequenceTrack-class]{SequenceTrack}} for showing RNA 
+sequences.
 }
 \examples{
 

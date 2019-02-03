@@ -35,28 +35,24 @@ NULL
 # ranges a GRanges object containing the ranges for search in the BAM file
 # quality quality argument used for scanBamParam
 #' @importFrom GenomeInfoDb seqnames
-.assemble_scanBamParam <- function(ranges,
+.assemble_scanBamParam <- function(grl,
                                    quality,
-                                   chromosomes){
-  # "subset" to parent ranges aka the transcripts
-  ranges <- .get_parent_annotations(ranges)
-  seqnames <- unique(as.character(GenomeInfoDb::seqnames(ranges)))
-  f <- seqnames %in% chromosomes
-  if(length(seqnames[!f]) > 0){
-    warning("Not matching chromosome identifier in gff and bam file. ",
-            "Skipping data for chromosome '",
-            paste(length(seqnames[!f]), collapse = "', '"),
-            "'.",
-            call. = FALSE)
+                                   seqinfo,
+                                   what = character(0)){
+  if(!is(grl,"GRangesList")){
+    stop("GRangesList expected.")
   }
-  # keep only ranges for which sequences are available
-  ranges <- ranges[as.character(GenomeInfoDb::seqnames(ranges)) %in% seqnames[f],]
-  rangesList <- split(ranges,
-                      GenomeInfoDb::seqnames(ranges))
-  # only retrieve primary alignments
-  flags <- scanBamFlag(isSecondaryAlignment = FALSE)
-  param <- Rsamtools::ScanBamParam(flag = flags,
-                                   which = rangesList,
+  if(is.null(what)){
+    what <- character(0)
+  }
+  # make sure the GRangesList is split by seqlevels
+  grl@unlistData <- unname(grl@unlistData)
+  gr <- unlist(grl)
+  grl <- split(gr,
+               GenomicRanges::seqnames(gr))
+  # assemble param
+  param <- Rsamtools::ScanBamParam(which = grl, 
+                                   what = what, 
                                    mapqFilter = quality)
   return(param)
 }

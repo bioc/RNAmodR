@@ -17,56 +17,71 @@ setClass(Class = "CoverageSequenceData",
          prototype = list(minQuality = 5L))
 
 # CoverageSequenceData ---------------------------------------------------------
-.get_position_data_of_transcript_coverage <- function(bamFile,
-                                                      ranges,
-                                                      param,
+.get_position_data_of_transcript_coverage <- function(bamFile, grl, param,
                                                       args = list()){
-  ranges <- .get_parent_annotations(ranges)
   # get data per chromosome
   coverage <- GenomicAlignments::coverage(bamFile, param = param)
-  coverage <- 
-    coverage[names(coverage) %in% as.character(seqnames(ranges))]
   coverage <- as(coverage,"IntegerList")
-  coverage <- IRanges::IntegerList(
-    lapply(split(ranges,
-                 seq_along(ranges)),
-           function(r){
-             coverage[[seqnames(r)]][start(r):end(r)]
-           }))
-  names(coverage) <- ranges$ID
+  # subset per transcript
+  seqs <- .seqs_rl(grl)
+  coverage <- IRanges::IntegerList(mapply(
+    function(gr,s){
+      coverage[[GenomicRanges::seqnames(gr)]][s]
+    },
+    grl,
+    seqs,
+    SIMPLIFY = FALSE))
   coverage
 }
 
+setMethod(".get_Data",
+          signature = c(x = "CoverageSequenceData",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x, grl, sequences, param, args){
+            message("Loading Coverage data from BAM files ... ",
+                    appendLF = FALSE)
+            files <- bamfiles(x)
+            data <- lapply(files,
+                           FUN = .get_position_data_of_transcript_coverage,
+                           grl = grl,
+                           param = param,
+                           args = args)
+            names(data) <- paste0("coverage.",
+                                  names(files),
+                                  ".",
+                                  seq_along(files))
+            data
+          })
+
 #' @rdname CoverageSequenceData
 #' @export
-CoverageSequenceData <- function(bamfiles,
-                                 annotation,
-                                 sequences,
-                                 seqinfo,
-                                 ...){
-  args <- .get_mod_data_args(...)
-  txdb <- .norm_annotation(annotation)
-  sequences <- .norm_sequences(sequences)
-  seqinfo <- .norm_seqnames(bamfiles, annotation, sequences, seqinfo)
-  ans <- new("CoverageSequenceData",
-             bamfiles,
-             seqinfo,
-             args)
-  ranges <- .load_annotation(txdb, ans@seqinfo)
-  sequences <- .load_transcript_sequences(sequences, ranges)
-  param <- .assemble_scanBamParam(ranges, ans@minQuality, ans@seqinfo)
-  message("Loading Coverage data from BAM files...")
-  data <- lapply(ans@bamfiles,
-                 FUN = .get_position_data_of_transcript_coverage,
-                 ranges = ranges,
-                 param = param,
-                 args = args)
-  names(data) <- paste0("coverage.",
-                        names(ans@bamfiles),
-                        ".",
-                        seq_along(ans@bamfiles))
-  .postprocess_read_data(ans,
-                         data,
-                         ranges,
-                         sequences)
+CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("Coverage", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
+
+# aggregation ------------------------------------------------------------------
+#' @name CoverageSequenceData
+#' @export
+setMethod("aggregate",
+          signature = c(x = "CoverageSequenceData"),
+          function(x, condition = c("Both","Treated","Control")){
+            condition <- tolower(match.arg(condition))
+            .aggregate_list_data_mean_sd(x,condition)
+          }
+)
+
+# data visualization -----------------------------------------------------------
+setMethod(
+  f = ".dataTracks",
+  signature = signature(x = "CoverageSequenceData",
+                        data = "missing",
+                        seqdata = "GRanges",
+                        sequence = "XString"),
+  definition = function(x, seqdata, sequence,  args) {
+    requireNamespace("Gviz")
+    browser()
+  }
+)

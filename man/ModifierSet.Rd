@@ -10,13 +10,17 @@
 \alias{ModifierSet,Modifier-method}
 \title{ModifierSet}
 \usage{
-\S4method{ModifierSet}{list}(modifiertype, x, ...)
+\S4method{ModifierSet}{list}(className, x, annotation = NULL,
+  sequences = NULL, seqinfo = NULL, ...)
 
-\S4method{ModifierSet}{character}(modifiertype, x, fasta, gff, ...)
+\S4method{ModifierSet}{character}(className, x, annotation = NULL,
+  sequences = NULL, seqinfo = NULL, ...)
 
-\S4method{ModifierSet}{BamFileList}(modifiertype, x, fasta, gff, ...)
+\S4method{ModifierSet}{BamFileList}(className, x, annotation = NULL,
+  sequences = NULL, seqinfo = NULL, ...)
 
-\S4method{ModifierSet}{Modifier}(modifiertype, x, ...)
+\S4method{ModifierSet}{Modifier}(className, x, annotation, sequences,
+  seqinfo, ...)
 
 \S4method{modifierType}{ModifierSet}(x)
 
@@ -32,38 +36,50 @@
 \S4method{modifications}{ModifierSet}(x)
 }
 \arguments{
+\item{className}{The name of the class which should be constructed.}
+
 \item{x}{the input which can be of the following types
 \itemize{
-\item{\code{Modifier}}{a single \code{Modifier} or a list containg only 
+\item{\code{Modifier}:} {a single \code{Modifier} or a list containg only 
 \code{Modifier} objects. The input will just be used as elements of the
 \code{ModifierSet}}
-\item{\code{BamFileList}}{a named \code{BamFileList} or a list of 
+\item{\code{BamFileList}:} {a named \code{BamFileList} or a list of 
 named \code{BamFileList}}
-\item{\code{list}}{a list of one or more types of elements: 
+\item{\code{list}:} {a list of one or more types of elements: 
 \code{BamFileList}, a named \code{list} or named \code{character} vector. All
 elements must be or be coercible to a named \code{BamFileList} referencing 
-existing bam files. In case of a \code{character} vector, it is assumed that
-each element should be used for creation of a seperate \code{Modifier}
-object.}
+existing bam files. Valid names are \code{control} and \code{treated}}
 }}
+
+\item{annotation}{annotation data, which must match the information contained
+in the BAM files. This is parameter is only required if \code{x} if not a 
+\code{Modifier} object.}
+
+\item{sequences}{sequences matching the target sequences the reads were 
+mapped onto. This must match the information contained in the BAM files. This
+is parameter is only required if \code{x} if not a \code{Modifier} object.}
+
+\item{seqinfo}{optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
+subset the transcripts analyzed on a chromosome basis.}
 
 \item{...}{Additional otpional parameters:
 \itemize{
-\item{internalBP}{\code{TRUE} or \code{FALSE}: should 
+\item{internalBP }{\code{TRUE} or \code{FALSE}: should 
 parallilazation used internally for creation of each \code{Modifier} or
 should the creation of the \code{Modifier} objects be parallalized? (default:
 \code{internalBP = FALSE})}
 }
 All other arguments will be passed onto the \code{Modifier} objects.}
-
-\item{fasta}{sequences matching the target sequences the reads were mapped 
-onto. This must match the information contained in the BAM files. This is 
-parameter is only required if \code{x} if not a \code{Modifier} object.}
-
-\item{gff}{annotation data, which must match the information contained in the
-BAM files. This is parameter is only required if \code{x} if not a 
-\code{Modifier} object.}
 }
 \description{
-title
+The \code{ModifierSet} class allows multiple \code{\link{Modifier}} objects
+to be created from the same annotation and sequence data varying only the 
+bam input files.
+
+In addition the comparison of samples is also done via calling functions on 
+the \code{ModifierSet} objects.
+
+The \code{ModifierSet} is a virtual class, which derives from the 
+\code{SimpleList} with the slot \code{elementType = "Modifier"}. As 
+the \code{Modifier} tt must be implemented for the specific analysis.
 }

@@ -21,165 +21,176 @@ BiocStyle::markdown(css.files = c('custom.css'))
 
 # Introduction
 
-# Classes
+`RNAmodR` implements class and a workflows to detect post-transcriptional RNA
+modifications in high throughput sequencing data.
 
-# Examples
+From the a basic `SequenceData` speficic subclasses are derived containing
+specific aspects of aligned reads, e.g. 5'-end positions or pileup data. From
+this `Modifier` class can be used to detect specific patterns for individual
+types of modifications. The `SequenceData` classes can be shared by different
+`Modifier` classes allowing easy adapattion to new methods.
 
 ```{r, echo = FALSE}
 suppressPackageStartupMessages({
+  library(rtracklayer)
+  library(Rsamtools)
+  library(GenomicFeatures)
   library(RNAmodR)
 })
 ```
 ```{r, eval = FALSE}
+library(rtracklayer)
+library(Rsamtools)
+library(GenomicFeatures)
 library(RNAmodR)
 ```
 
-## SequenceData
+<!-- ## SequenceData -->
 
-Loading example files
+<!-- Loading example files -->
 
-```{r example_files}
-gff <- system.file("extdata","example1.gff3" ,package = "RNAmodR.Data")
-fasta <- system.file("extdata","example1.fasta" ,package = "RNAmodR.Data")
-files <-  list("one" = c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR.Data")),
-               "two" = c(Treated = system.file("extdata","example2.bam" ,package = "RNAmodR.Data")),
-               "three" = c(Treated = system.file("extdata","example3.bam" ,package = "RNAmodR.Data")))
-```
+<!-- ```{r example_files} -->
+<!-- gff <- GFF3File(system.file("extdata","example1.gff3",package = "RNAmodR.Data")) -->
+<!-- fasta <- FaFile(system.file("extdata","example1.fasta",package = "RNAmodR.Data")) -->
+<!-- files <- c(Treated = system.file("extdata","example1.bam" ,package = "RNAmodR.Data"), -->
+<!--            Treated = system.file("extdata","example2.bam" ,package = "RNAmodR.Data"), -->
+<!--            Treated = system.file("extdata","example3.bam" ,package = "RNAmodR.Data")) -->
+<!-- ``` -->
 
-Each `SequenceData` object is created with a named character vector, which can 
-be coerced to a `BamFileList` or named `BamFileList`. The names must be either
-"treated" or "control" describing the condition of the data file. Multiple 
-files can be given per condition and are used as replicates.
+<!-- Each `SequenceData` object is created with a named character vector, which can  -->
+<!-- be coerced to a `BamFileList` or named `BamFileList`. The names must be either -->
+<!-- "treated" or "control" describing the condition of the data file. Multiple  -->
+<!-- files can be given per condition and are used as replicates. -->
 
-```{r seqdata}
-seqdata <- End5SequenceData(files,fasta,gff)
-seqdata
-```
+<!-- ```{r seqdata} -->
+<!-- seqdata <- End5SequenceData(files, annotation = gff, sequences = fasta) -->
+<!-- seqdata -->
+<!-- ``` -->
 
-Each `SequenceData` contains data per transcript alongside the annotation 
-information and the sequence. Upon subsetting a `SequenceDataFrame` is returned
-independent of the class of `SequenceData`.
+<!-- Each `SequenceData` contains data per transcript alongside the annotation  -->
+<!-- information and the sequence. Upon subsetting a `SequenceDataFrame` is returned -->
+<!-- independent of the class of `SequenceData`. -->
 
-```{r seqdata2}
-seqdata[[1]]
-```
+<!-- ```{r seqdata2} -->
+<!-- seqdata[[1]] -->
+<!-- ``` -->
 
-Currently the following `SequenceData` classes are implemented:
+<!-- Currently the following `SequenceData` classes are implemented: -->
 
- * `End5SequenceData`
- * `End3SequenceData`
- * `EndSequenceData`
- * `ProtectedEndSequenceData`
- * `CoverageSequenceData`
- * `PileupSequenceData`
- * `NormEnd5SequenceData`
- * `NormEnd3SequenceData`
+<!--  * `End5SequenceData` -->
+<!--  * `End3SequenceData` -->
+<!--  * `EndSequenceData` -->
+<!--  * `ProtectedEndSequenceData` -->
+<!--  * `CoverageSequenceData` -->
+<!--  * `PileupSequenceData` -->
+<!--  * `NormEnd5SequenceData` -->
+<!--  * `NormEnd3SequenceData` -->
 
-The data types and names of the columns are different for most of the 
-`SequenceData` classes. As a naming convenction a descriptor is combined with
-the condition as defined in files input and the replicate. For more details
-please have a look at the man pages, e.g. `?End5SequenceData`.
+<!-- The data types and names of the columns are different for most of the  -->
+<!-- `SequenceData` classes. As a naming convenction a descriptor is combined with -->
+<!-- the condition as defined in files input and the replicate. For more details -->
+<!-- please have a look at the man pages, e.g. `?End5SequenceData`. -->
 
-Subsetting of a `SequenceDataFrame` returns a `SequenceDataFrame` or `DataFrame`, 
-if it is subset by a column or row, respectively. The `drop` argument is 
-ignored for column subsetting and is set to `FALSE`.
+<!-- Subsetting of a `SequenceDataFrame` returns a `SequenceDataFrame` or `DataFrame`,  -->
+<!-- if it is subset by a column or row, respectively. The `drop` argument is  -->
+<!-- ignored for column subsetting and is set to `FALSE`. -->
 
-```{r seqdata3}
-sdf <- seqdata[[1]]
-sdf[,2]
-sdf[1:10,]
-```
+<!-- ```{r seqdata3} -->
+<!-- sdf <- seqdata[[1]] -->
+<!-- sdf[,2] -->
+<!-- sdf[1:10,] -->
+<!-- ``` -->
 
-## Modifier
+<!-- ## Modifier -->
 
-The `SequenceData` classes are used to hold the data to detect certain features
-within high throughput sequencing data. To assign the presence of specific
-modifications for an established pattern the `Modifier` class is used. For
-example mapped reads from the AlkAnilineSeq method can analyzed using the
-`ModAlkAnilineSeq` class to reveal the presence of m7G by detecting the
-accumulation of 5'-ends at the N+1 position, since m7G is susceptible cleavage
-by the aniline treatment [@].
+<!-- The `SequenceData` classes are used to hold the data to detect certain features -->
+<!-- within high throughput sequencing data. To assign the presence of specific -->
+<!-- modifications for an established pattern the `Modifier` class is used. For -->
+<!-- example mapped reads from the AlkAnilineSeq method can analyzed using the -->
+<!-- `ModAlkAnilineSeq` class to reveal the presence of m7G by detecting the -->
+<!-- accumulation of 5'-ends at the N+1 position, since m7G is susceptible cleavage -->
+<!-- by the aniline treatment (Marchand et al. 2018). -->
 
-To fixate the data processing and detection strategy, for each type of 
-sequencingmethod a `Modifier` class can be developed to detect specific 
-modifications. For more information on how to develop such a class and maybe a 
-corresponding `SequenceData` class, please have a look at the vignette XXX.
+<!-- To fixate the data processing and detection strategy, for each type of  -->
+<!-- sequencingmethod a `Modifier` class can be developed to detect specific  -->
+<!-- modifications. For more information on how to develop such a class and maybe a  -->
+<!-- corresponding `SequenceData` class, please have a look at the vignette XXX. -->
 
-Initially three `Modifier` classes are available:
+<!-- Initially three `Modifier` classes are available: -->
 
- * `ModInosine`
- * `ModAlkAnilineSeq` from the `RNAmodR.AlkAnilineSeq` package
- * `ModRiboMethSeq` from the `RNAmodR.RiboMethSeq` package
- 
-`Modifier` objects can contain multiple `SequenceData` objects as elements of
-a `SequenceDataList` class. The elements of this class are usually different 
-types of `SequenceData`. However, they are required to contain data for the 
-same annotation and sequence data.
+<!--  * `ModInosine` -->
+<!--  * `ModAlkAnilineSeq` from the `RNAmodR.AlkAnilineSeq` package -->
+<!--  * `ModRiboMethSeq` from the `RNAmodR.RiboMethSeq` package -->
 
-`Modifier` objects are created with the same arguments as `SequenceData` objects
-and will start loading the necessary `SequenceData` objects from these. In 
-addition they will start automatically to search for modifications, if the 
-optional argument `findMod` is not set to `FALSE`. 
+<!-- `Modifier` objects can contain multiple `SequenceData` objects as elements of -->
+<!-- a `SequenceDataList` class. The elements of this class are usually different  -->
+<!-- types of `SequenceData`. However, they are required to contain data for the  -->
+<!-- same annotation and sequence data. -->
 
-```{r modifier1}
-m <- Modifier()
-```
+<!-- `Modifier` objects are created with the same arguments as `SequenceData` objects -->
+<!-- and will start loading the necessary `SequenceData` objects from these. In  -->
+<!-- addition they will start automatically to search for modifications, if the  -->
+<!-- optional argument `findMod` is not set to `FALSE`.  -->
 
-```{r modifier2}
-m <- Modifier()
-```
+<!-- ```{r modifier1} -->
+<!-- m <- Modifier() -->
+<!-- ``` -->
 
-
-## ModifierSet
-
-Each `Modifier` object is able to represent one sample type with multiple 
-replicates of data. To easily compare multiple sample types the `ModifierSet`
-class is implemented.
-
-The `ModifierSet` object is created from a named list of named character vectors
-or `BamFileList` objects. Each element in the list is a sample type with a 
-corresponding name. Each entry in the character vector/`BamFileList` is a 
-replicate.
+<!-- ```{r modifier2} -->
+<!-- m <- Modifier() -->
+<!-- ``` -->
 
 
-```{r modifierset1}
-ms <- ModifierSet()
-```
+<!-- ## ModifierSet -->
 
-## Analysis of detected modifications
+<!-- Each `Modifier` object is able to represent one sample type with multiple  -->
+<!-- replicates of data. To easily compare multiple sample types the `ModifierSet` -->
+<!-- class is implemented. -->
 
-## Compairing results
-
-### Modifications described in the literare
-found modifications to modifications described in the literature
-
-
-### Detecting the loss of a modification
+<!-- The `ModifierSet` object is created from a named list of named character vectors -->
+<!-- or `BamFileList` objects. Each element in the list is a sample type with a  -->
+<!-- corresponding name. Each entry in the character vector/`BamFileList` is a  -->
+<!-- replicate. -->
 
 
+<!-- ```{r modifierset1} -->
+<!-- ms <- ModifierSet() -->
+<!-- ``` -->
+
+<!-- ## Analysis of detected modifications -->
+
+<!-- ## Compairing results -->
+
+<!-- ### Modifications described in the literare -->
+<!-- found modifications to modifications described in the literature -->
+
+
+<!-- ### Detecting the loss of a modification -->
 
 
 
 
-# Additional functions of ...
 
 
-## ... the `SequenceData` classes
-
-### The `SequenceDataList` class
-
-## ... the `Modifier` classes
+<!-- # Additional functions of ... -->
 
 
-## ... the `ModifierSet` classes
+<!-- ## ... the `SequenceData` classes -->
+
+<!-- ### The `SequenceDataList` class -->
+
+<!-- ## ... the `Modifier` classes -->
+
+
+<!-- ## ... the `ModifierSet` classes -->
 
 
 
-# Annotation data
+<!-- # Annotation data -->
 
-```{r}
-library(EnsDb.Hsapiens.v86)
-keys <- keys(edb, keytype = "TXID")
-res <- select(edb, keys=keys, columns = c("TXBIOTYPE"), keytype="TXID")
+<!-- ```{r} -->
+<!-- library(EnsDb.Hsapiens.v86) -->
+<!-- keys <- keys(edb, keytype = "TXID") -->
+<!-- res <- select(edb, keys=keys, columns = c("TXBIOTYPE"), keytype="TXID") -->
 
-```
+<!-- ``` -->

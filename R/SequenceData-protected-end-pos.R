@@ -26,51 +26,50 @@ setClass(Class = "ProtectedEndSequenceData",
 
 # ProtectedEndSequenceData -----------------------------------------------------
 
-#' @rdname ProtectedEndSequenceData
+setMethod(".get_Data",
+          signature = c(x = "ProtectedEndSequenceData",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x, grl, sequences, param, args){
+            message("Loading protected end data from BAM files ... ",
+                    appendLF = FALSE)
+            files <- bamfiles(x)
+            data <- lapply(files,
+                           FUN = .get_position_data_of_transcript_ends,
+                           grl = grl,
+                           param = param,
+                           type = "protected_ends",
+                           args = args)
+            names(data) <- paste0("protectedend.",
+                                  names(files),
+                                  ".",
+                                  seq_along(files))
+            data
+          }
+)
+
+#' @name ProtectedEndSequenceData
 #' @export
-ProtectedEndSequenceData <- function(bamfiles,
-                                     fasta,
-                                     gff,
+ProtectedEndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, 
                                      ...){
-  args <- .get_mod_data_args(...)
-  ans <- new("ProtectedEndSequenceData",
-             bamfiles,
-             fasta,
-             gff,
-             args)
-  ranges <- .load_annotation(ans@gff)
-  sequences <- .load_transcript_sequences(ans@fasta,
-                                          ranges)
-  param <- .assemble_scanBamParam(ranges,
-                                  ans@minQuality,
-                                  ans@chromosomes)
-  message("Loading protected end data from BAM files...")
-  data <- lapply(ans@bamfiles,
-                 FUN = .get_position_data_of_transcript_ends,
-                 ranges = ranges,
-                 param = param,
-                 type = "protected_ends",
-                 args = args)
-  names(data) <- paste0("protectedend.",
-                        names(ans@bamfiles),
-                        ".",
-                        seq_along(ans@bamfiles))
-  .postprocess_read_data(ans,
-                         data,
-                         ranges,
-                         sequences)
+  SequenceData("ProtectedEnd", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
 }
 
-#' @name EndSequenceData
+# aggregation ------------------------------------------------------------------
+
+#' @name ProtectedEndSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "ProtectedEndSequenceData"),
-          function(x,
-                   condition = c("Both","Treated","Control")){
+          function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
             .aggregate_list_data_mean_sd(x,condition)
           }
 )
+
+# data visualization -----------------------------------------------------------
 
 .fix_na_mcols <- function(seqdata){
   mcols(seqdata) <- DataFrame(lapply(mcols(seqdata),
@@ -87,10 +86,7 @@ setMethod(
                         data = "missing",
                         seqdata = "GRanges",
                         sequence = "XString"),
-  definition = function(x,
-                        seqdata,
-                        sequence,
-                        args) {
+  definition = function(x, seqdata, sequence, args) {
     requireNamespace("Gviz")
     seqdata <- .fix_na_mcols(seqdata)
     n <- ncol(mcols(seqdata)) / 2L
