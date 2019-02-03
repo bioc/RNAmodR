@@ -601,7 +601,7 @@ setMethod(f = "aggregate",
 )
 
 .add_positions_as_rownames <- function(x){
-  if(is.null(x@aggregate@unlistData)){
+  if(is.null(rownames(x@aggregate@unlistData))){
     seqs <- IRanges::CharacterList(.seqs_rl(ranges(x)))
     rownames(x@aggregate@unlistData) <- unlist(seqs)
   }
