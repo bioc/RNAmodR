@@ -11,6 +11,8 @@
 \usage{
 NormEnd5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
+NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
+
 \S4method{aggregate}{NormEnd5SequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 
