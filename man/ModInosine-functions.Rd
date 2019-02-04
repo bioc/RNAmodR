@@ -36,7 +36,7 @@
 \code{\link[RNAmodR:ModifierSet]{ModifierSet}} object. For more details see 
 also the man pages for the functions mentioned below.}
 
-\item{value}{See \code{\link{settings}}}
+\item{value}{See \code{\link[=Modifier]{settings}}}
 
 \item{force}{See \code{\link{aggregate}}}
 

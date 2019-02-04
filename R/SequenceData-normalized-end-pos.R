@@ -5,10 +5,32 @@ NULL
 #' @name NormEndSequenceData
 #' @aliases NormEnd5SequenceData NormEnd3SequenceData
 #' 
-#' @title NormEndSequenceData
+#' @title NormEnd5SequenceData/NormEnd3SequenceData
 #' 
 #' @description
-#' title
+#' The \code{NormEnd5SequenceData}/\code{NormEnd3SequenceData}
+#' aggregate the counts of read ends (Either 5' or 3') at each position along 
+#' transcript. In addition the counts are then normalized to the length of the
+#' transcript and to the overlapping reads. Per sample three separate columns
+#' are stored named \code{ends},\code{norm.tx} and \code{norm.ol}.
+#' 
+#' \code{aggregate} calculates the mean and sd for samples in the \code{control}
+#' and \code{treated} condition serparatly. Similar to the stored results for 
+#' each of the two conditions six columns are returned (three for mean and sd 
+#' each) ending in \code{ends}, \code{tx} and \code{ol}.
+#' 
+#' @examples
+#' # Construct a End5SequenceData object
+#' annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+#' sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+#' files <- c(control = system.file("extdata","example_wt_1.bam",
+#'                                  package = "RNAmodR.Data"),
+#'            treated = system.file("extdata","example_wt_2.bam",
+#'                                  package = "RNAmodR.Data"))
+#' ne5sd <- NormEnd5SequenceData(files, annotation = annotation,
+#'                              sequences = sequences)
+#' # aggregate data
+#' aggregate(ne5sd)
 NULL
 
 #' @rdname NormEndSequenceData
@@ -22,6 +44,20 @@ setClass(Class = "NormEnd5SequenceData",
 setClass(Class = "NormEnd3SequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
+
+#' @rdname NormEndSequenceData
+#' @export
+NormEnd5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("NormEnd5", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
+}
+#' @rdname NormEndSequenceData
+#' @export
+NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("NormEnd3", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
+}
+
 
 # End5SequenceData ------------------------------------------------------------------
 
@@ -96,7 +132,8 @@ setClass(Class = "NormEnd3SequenceData",
   data
 }
 
-setMethod(".get_Data",
+#' @rdname RNAmodR-internals
+setMethod(".getData",
           signature = c(x = "NormEnd5SequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -111,15 +148,13 @@ setMethod(".get_Data",
                            param = param,
                            type = "5prime",
                            args = args)
-            names(data) <- paste0("norm.end5.",
-                                  names(files),
-                                  ".",
-                                  seq_along(files))
+            names(data) <- paste0("norm.end5.", x@condition, ".", x@replicate)
             data
           }
 )
 
-setMethod(".get_Data",
+#' @rdname RNAmodR-internals
+setMethod(".getData",
           signature = c(x = "NormEnd3SequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -134,26 +169,11 @@ setMethod(".get_Data",
                            param = param,
                            type = "3prime",
                            args = args)
-            names(data) <- paste0("norm.end3.",
-                                  names(files),
-                                  ".",
-                                  seq_along(files))
+            names(data) <- paste0("norm.end3.", x@condition, ".", x@replicate)
             data
           }
 )
 
-#' @rdname NormEndSequenceData
-#' @export
-NormEnd5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("NormEnd5", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
-}
-#' @rdname NormEndSequenceData
-#' @export
-NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("NormEnd3", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
-}
 
 # aggregation ------------------------------------------------------------------
 
@@ -161,30 +181,32 @@ NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 # - calculate mean per observation
 # - calculate sd per observation
 #' @importFrom matrixStats rowSds
-.aggregate_data_frame_mean_sd <- function(x,
-                                           condition){
-  df <- .subset_to_condition(x@unlistData,
-                             x@conditions,
-                             condition)
+.aggregate_data_frame_mean_sd <- function(x, condition){
+  f <- .subset_to_condition(x@condition, condition)
+  df <- x@unlistData[f]
+  conditions <- x@condition[f]
+  replicates <- x@replicate[f]
   # set up some base values
-  ncol <- ncol(df[,x@replicate == 1L,drop = FALSE])
+  ncol <- ncol(df[,replicates == 1L,drop = FALSE])
   seqAdd <- seq.int(from = 0, to = ncol(df) - 1, by = ncol)
   colNames <- strsplit(colnames(df)[seq_len(ncol)],"\\.")
   colNames <- IRanges::CharacterList(colNames)[as.list(lengths(colNames))]
   # get means
-  means <- IRanges::NumericList(lapply(seq_len(ncol),
-                              function(i){
-                                unname(rowMeans(as.data.frame(df[,i + seqAdd]),
-                                         na.rm = TRUE))
-                              }))
-  names(means) <- paste0("means.",colNames)
+  means <- IRanges::NumericList(
+    lapply(seq_len(ncol),
+           function(i){
+             unname(rowMeans(as.data.frame(df[,i + seqAdd]),
+                             na.rm = TRUE))
+           }))
+  names(means) <- paste0("means.", conditions, ".", colNames)
   # get sds
-  sds <- IRanges::NumericList(lapply(seq_len(ncol),
-                            function(i){
-                              unname(matrixStats::rowSds(as.matrix(df[,i + seqAdd]),
-                                                  na.rm = TRUE))
-                            }))
-  names(sds) <- paste0("sds.",colNames)
+  sds <- IRanges::NumericList(
+    lapply(seq_len(ncol),
+           function(i){
+             unname(matrixStats::rowSds(as.matrix(df[,i + seqAdd]),
+                                        na.rm = TRUE))
+           }))
+  names(sds) <- paste0("sds.", conditions, ".", colNames)
   # merge data
   ans <- cbind(do.call(S4Vectors::DataFrame, means),
                do.call(S4Vectors::DataFrame, sds))
@@ -193,7 +215,7 @@ NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   ans
 }
 
-#' @name NormEndSequenceData
+#' @rdname NormEndSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "NormEnd5SequenceData"),
@@ -203,7 +225,7 @@ setMethod("aggregate",
           }
 )
 
-#' @name NormEndSequenceData
+#' @rdname NormEndSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "NormEnd3SequenceData"),
@@ -214,6 +236,8 @@ setMethod("aggregate",
 )
 
 # data visualization -----------------------------------------------------------
+
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "NormEnd5SequenceData",
@@ -226,6 +250,7 @@ setMethod(
   }
 )
 
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "NormEnd3SequenceData",

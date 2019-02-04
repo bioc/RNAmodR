@@ -50,7 +50,7 @@ setClass("SequenceData",
                    minQuality = "integer",
                    chromosomes = "character",
                    unlistType = "character",
-                   conditions = "factor",
+                   condition = "factor",
                    replicate = "factor"),
          prototype = list(ranges = GRangesList(),
                           sequencesType = "RNAStringSet",
@@ -128,7 +128,7 @@ S4Vectors::setValidity2(Class = "SequenceData",.valid.SequenceData)
       x@ranges[[i]],
       x@sequences[[i]],
       x@replicate,
-      x@conditions)
+      x@condition)
 }
 
 # subsetting
@@ -287,7 +287,7 @@ setMethod("getListElement", "SequenceData",
                 x@ranges[[i2]],
                 x@sequences[[i2]],
                 x@replicate,
-                x@conditions)
+                x@condition)
           }
 )
 
@@ -402,8 +402,8 @@ setMethod(
     }
     # set slots
     .Object@bamfiles <- bamfiles
-    .Object@conditions <- factor(names(bamfiles))
-    .Object@replicate <- .get_replicate_number(bamfiles, .Object@conditions)
+    .Object@condition <- factor(names(bamfiles))
+    .Object@replicate <- .get_replicate_number(bamfiles, .Object@condition)
     .Object@seqinfo <- .norm_seqinfo(seqinfo)
     # additional sanity checks
     .Object <- callNextMethod(.Object,...)
@@ -432,7 +432,7 @@ setMethod(
   sequences <- .load_transcript_sequences(sequences, grl)
   param <- .assemble_scanBamParam(grl, ans@minQuality, ans@seqinfo)
   # run the specific data aggregation function
-  data <- .get_Data(ans, grl, sequences, param, args)
+  data <- .getData(ans, grl, sequences, param, args)
   # post process the data
   .postprocess_read_data(ans, data, grl, sequences)
 }
@@ -573,7 +573,7 @@ setMethod("SequenceData",
   # store data
   x@unlistData <- data@unlistData
   x@replicate <- rep(x@replicate, each = conditionsFmultiplier)
-  x@conditions <- rep(x@conditions, each = conditionsFmultiplier)
+  x@condition <- rep(x@condition, each = conditionsFmultiplier)
   x@partitioning <- data@partitioning
   x@ranges <- grl
   x@sequences <- as(sequences,x@sequencesType)
@@ -587,16 +587,17 @@ setMethod("SequenceData",
 }
 
 # subset to conditions
-.subset_to_condition <- function(data,
-                                 conditions,
+.subset_to_condition <- function(conditions,
                                  condition){
   if(condition != "both"){
-    data <- data[,conditions == condition, drop = FALSE]
-    if(ncol(data) == 0L){
+    f <- conditions == condition
+    if(all(f == FALSE)){
       stop("No data for condition '",condition,"' found.")
     }
+  } else {
+    f <- rep(TRUE,length(conditions))
   }
-  data
+  f
 }
 
 
@@ -643,6 +644,9 @@ setMethod(f = "aggregate",
 
 # data visualization -----------------------------------------------------------
 # this needs to be implemented by each subclass
+
+#' @name RNAmodR-internals
+#' @export
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "SequenceData",

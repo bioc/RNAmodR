@@ -8,7 +8,10 @@
 \alias{End5SequenceData-class}
 \alias{End3SequenceData-class}
 \alias{EndSequenceData-class}
-\title{EndSequenceData}
+\alias{aggregate,End5SequenceData-method}
+\alias{aggregate,End3SequenceData-method}
+\alias{aggregate,EndSequenceData-method}
+\title{End5SequenceData/End3SequenceData/EndSequenceData}
 \usage{
 End5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
@@ -26,5 +29,24 @@ EndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
   "Control"))
 }
 \description{
-title
+The \code{End5SequenceData}/\code{End3SequenceData}/\code{EndSequenceData}
+aggregate the counts of read ends at each position along transcript. Whereas
+the first aggregate either the 5'-end or 3'-end, the \code{EndSequenceData}
+aggregates both.
+
+\code{aggregate} calculates the mean and sd for samples in the \code{control}
+and \code{treated} condition serparatly.
+}
+\examples{
+# Construct a End5SequenceData object
+annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+files <- c(control = system.file("extdata","example_wt_1.bam",
+                                 package = "RNAmodR.Data"),
+           treated = system.file("extdata","example_wt_2.bam",
+                                 package = "RNAmodR.Data"))
+e5sd <- End5SequenceData(files, annotation = annotation,
+                        sequences = sequences)
+# aggregate data
+aggregate(e5sd)
 }

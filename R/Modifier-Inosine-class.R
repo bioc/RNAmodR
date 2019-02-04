@@ -47,7 +47,7 @@ setClass("ModInosine",
 #' @param x a \code{\link[RNAmodR:Modifier]{Modifier}} or a 
 #' \code{\link[RNAmodR:ModifierSet]{ModifierSet}} object. For more details see 
 #' also the man pages for the functions mentioned below.
-#' @param value See \code{\link{settings}}
+#' @param value See \code{\link[=Modifier]{settings}}
 #' @param force See \code{\link{aggregate}}
 #' @param coord,name,from,to,type,window.size,... See 
 #' \code{\link{visualizeData}}

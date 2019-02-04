@@ -16,6 +16,13 @@ setClass(Class = "PileupSequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
+#' @rdname PileupSequenceData
+#' @export
+PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("Pileup", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
+}
+
 # PileupSequenceData ----------------------------------------------------------------
 
 .pileup_colnames <- c("pos","-","G","A","T","C")
@@ -126,7 +133,8 @@ setClass(Class = "PileupSequenceData",
   pileup
 }
 
-setMethod(".get_Data",
+#' @rdname RNAmodR-internals
+setMethod(".getData",
           signature = c(x = "PileupSequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -149,12 +157,6 @@ setMethod(".get_Data",
           }
 )
 
-#' @name PileupSequenceData
-#' @export
-PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("Pileup", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
-}
 
 # aggregation ------------------------------------------------------------------
 
@@ -164,9 +166,8 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 # - calculate sd per observation
 #' @importFrom matrixStats rowSds
 .aggregate_data_frame_percentage_mean_sd <- function(x,condition){
-  df <- .subset_to_condition(x@unlistData,
-                             x@conditions,
-                             condition)
+  f <- .subset_to_condition(x@condition, condition)
+  df <- x@unlistData[f]
   # set up some base values
   replicates <- unique(x@replicate)
   ncol <- ncol(df[,x@replicate == 1L,drop = FALSE])
@@ -201,7 +202,7 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   ans
 }
 
-#' @name PileupSequenceData
+#' @rdname PileupSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "PileupSequenceData"),

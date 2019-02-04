@@ -7,7 +7,24 @@ NULL
 #' @title CoverageSequenceData
 #' 
 #' @description
-#' title
+#' \code{CoverageSequenceData} implements \code{\link{SequenceData}} to contain
+#' and aggregate the coverage of reads per position along the transcripts.
+#' 
+#' \code{aggregate} calculates the mean and sd for samples in the \code{control}
+#' and \code{treated} condition serparatly.
+#' 
+#' @examples
+#' # Construct a CoverageSequenceData object
+#' annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+#' sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+#' files <- c(control = system.file("extdata","example_wt_1.bam",
+#'                                  package = "RNAmodR.Data"),
+#'            treated = system.file("extdata","example_wt_2.bam",
+#'                                  package = "RNAmodR.Data"))
+#' csd <- CoverageSequenceData(files, annotation = annotation,
+#'                             sequences = sequences)
+#' # aggregate data
+#' aggregate(csd)
 NULL
 
 #' @rdname CoverageSequenceData
@@ -15,6 +32,13 @@ NULL
 setClass(Class = "CoverageSequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
+
+#' @rdname CoverageSequenceData
+#' @export
+CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("Coverage", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
+}
 
 # CoverageSequenceData ---------------------------------------------------------
 .get_position_data_of_transcript_coverage <- function(bamFile, grl, param,
@@ -34,7 +58,8 @@ setClass(Class = "CoverageSequenceData",
   coverage
 }
 
-setMethod(".get_Data",
+#' @rdname RNAmodR-internals
+setMethod(".getData",
           signature = c(x = "CoverageSequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -48,23 +73,13 @@ setMethod(".get_Data",
                            grl = grl,
                            param = param,
                            args = args)
-            names(data) <- paste0("coverage.",
-                                  names(files),
-                                  ".",
-                                  seq_along(files))
+            names(data) <- paste0("coverage.", x@condition, ".", x@replicate)
             data
           })
 
-#' @rdname CoverageSequenceData
-#' @export
-CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("Coverage", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
-}
-
 # aggregation ------------------------------------------------------------------
 
-#' @name CoverageSequenceData
+#' @rdname CoverageSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "CoverageSequenceData"),
@@ -75,6 +90,8 @@ setMethod("aggregate",
 )
 
 # data visualization -----------------------------------------------------------
+
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "CoverageSequenceData",

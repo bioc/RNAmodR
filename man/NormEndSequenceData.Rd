@@ -7,7 +7,9 @@
 \alias{NormEnd3SequenceData}
 \alias{NormEnd5SequenceData-class}
 \alias{NormEnd3SequenceData-class}
-\title{NormEndSequenceData}
+\alias{aggregate,NormEnd5SequenceData-method}
+\alias{aggregate,NormEnd3SequenceData-method}
+\title{NormEnd5SequenceData/NormEnd3SequenceData}
 \usage{
 NormEnd5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
@@ -20,5 +22,27 @@ NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
   "Treated", "Control"))
 }
 \description{
-title
+The \code{NormEnd5SequenceData}/\code{NormEnd3SequenceData}
+aggregate the counts of read ends (Either 5' or 3') at each position along 
+transcript. In addition the counts are then normalized to the length of the
+transcript and to the overlapping reads. Per sample three separate columns
+are stored named \code{ends},\code{norm.tx} and \code{norm.ol}.
+
+\code{aggregate} calculates the mean and sd for samples in the \code{control}
+and \code{treated} condition serparatly. Similar to the stored results for 
+each of the two conditions six columns are returned (three for mean and sd 
+each) ending in \code{ends}, \code{tx} and \code{ol}.
+}
+\examples{
+# Construct a End5SequenceData object
+annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+files <- c(control = system.file("extdata","example_wt_1.bam",
+                                 package = "RNAmodR.Data"),
+           treated = system.file("extdata","example_wt_2.bam",
+                                 package = "RNAmodR.Data"))
+ne5sd <- NormEnd5SequenceData(files, annotation = annotation,
+                             sequences = sequences)
+# aggregate data
+aggregate(ne5sd)
 }

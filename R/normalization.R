@@ -133,6 +133,7 @@ NULL
 
 # Retrieve the intersection of seqnames in annotation, sequence and seqinfo
 # data
+#' @importFrom BSgenome seqnames
 .norm_seqnames <- function(bamfiles, annotation, sequences, seqinfo, className){
   # norm seqinfo
   if(missing(seqinfo) || 

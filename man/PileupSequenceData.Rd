@@ -4,6 +4,7 @@
 \name{PileupSequenceData}
 \alias{PileupSequenceData}
 \alias{PileupSequenceData-class}
+\alias{aggregate,PileupSequenceData-method}
 \title{PileupSequenceData}
 \usage{
 PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)

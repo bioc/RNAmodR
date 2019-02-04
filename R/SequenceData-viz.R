@@ -78,6 +78,8 @@ setMethod(
   }
 )
 
+#' @name RNAmodR-internals
+#' @export
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "SequenceData",

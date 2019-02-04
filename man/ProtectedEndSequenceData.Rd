@@ -4,6 +4,7 @@
 \name{ProtectedEndSequenceData}
 \alias{ProtectedEndSequenceData}
 \alias{ProtectedEndSequenceData-class}
+\alias{aggregate,ProtectedEndSequenceData-method}
 \title{ProtectedEndSequenceData}
 \usage{
 ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)

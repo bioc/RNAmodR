@@ -5,12 +5,31 @@ NULL
 #' @name EndSequenceData
 #' @aliases End5SequenceData End3SequenceData EndSequenceData
 #' 
-#' @title EndSequenceData
+#' @title End5SequenceData/End3SequenceData/EndSequenceData
 #' 
 #' @description
-#' title
+#' The \code{End5SequenceData}/\code{End3SequenceData}/\code{EndSequenceData}
+#' aggregate the counts of read ends at each position along transcript. Whereas
+#' the first aggregate either the 5'-end or 3'-end, the \code{EndSequenceData}
+#' aggregates both.
+#' 
+#' \code{aggregate} calculates the mean and sd for samples in the \code{control}
+#' and \code{treated} condition serparatly.
+#' 
+#' 
+#' @examples
+#' # Construct a End5SequenceData object
+#' annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+#' sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+#' files <- c(control = system.file("extdata","example_wt_1.bam",
+#'                                  package = "RNAmodR.Data"),
+#'            treated = system.file("extdata","example_wt_2.bam",
+#'                                  package = "RNAmodR.Data"))
+#' e5sd <- End5SequenceData(files, annotation = annotation,
+#'                         sequences = sequences)
+#' # aggregate data
+#' aggregate(e5sd)
 NULL
-
 
 #' @rdname EndSequenceData
 #' @export
@@ -30,6 +49,24 @@ setClass(Class = "EndSequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
+#' @rdname EndSequenceData
+#' @export
+End5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("End5", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
+}
+#' @rdname EndSequenceData
+#' @export
+End3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("End3", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
+}
+#' @rdname EndSequenceData
+#' @export
+EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  SequenceData("End", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
+}
 
 
 # End5SequenceData ------------------------------------------------------------------
@@ -148,7 +185,8 @@ setClass(Class = "EndSequenceData",
   data
 }
 
-setMethod(".get_Data",
+#' @rdname RNAmodR-internals
+setMethod(".getData",
           signature = c(x = "End5SequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -163,15 +201,13 @@ setMethod(".get_Data",
                            param = param,
                            type = "5prime",
                            args = args)
-            names(data) <- paste0("end5.",
-                                  names(files),
-                                  ".",
-                                  seq_along(files))
+            names(data) <- paste0("end5.", x@condition, ".", x@replicate)
             data
           }
 )
 
-setMethod(".get_Data",
+#' @rdname RNAmodR-internals
+setMethod(".getData",
           signature = c(x = "End3SequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -186,15 +222,13 @@ setMethod(".get_Data",
                            param = param,
                            type = "3prime",
                            args = args)
-            names(data) <- paste0("end3.",
-                                  names(files),
-                                  ".",
-                                  seq_along(files))
+            names(data) <- paste0("end3.", x@condition, ".", x@replicate)
             data
           }
 )
 
-setMethod(".get_Data",
+#' @rdname RNAmodR-internals
+setMethod(".getData",
           signature = c(x = "EndSequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -209,58 +243,36 @@ setMethod(".get_Data",
                            param = param,
                            type = "all",
                            args = args)
-            names(data) <- paste0("end.",
-                                  names(files),
-                                  ".",
-                                  seq_along(files))
+            names(data) <- paste0("end.", x@condition, ".", x@replicate)
             data
           }
 )
 
-#' @rdname EndSequenceData
-#' @export
-End5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("End5", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
-}
-#' @rdname EndSequenceData
-#' @export
-End3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("End3", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
-}
-#' @rdname EndSequenceData
-#' @export
-EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("End", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
-}
-
 # aggregation ------------------------------------------------------------------
 
 #' @importFrom matrixStats rowSds
-.aggregate_list_data_mean_sd <- function(x,
-                                        condition){
-  df <- .subset_to_condition(x@unlistData,
-                             x@conditions,
-                             condition)
+.aggregate_list_data_mean_sd <- function(x, condition){
+  f <- .subset_to_condition(x@condition, condition)
+  df <- x@unlistData[f]
+  conditions <- unique(x@condition[f])
   # set up some base values. replicates is here the same as the number of 
   # columns, since a list per replicate is assumed
-  replicates <- unique(x@replicate)
   # get means
-  means <- NumericList(lapply(replicates,
-                              function(rep){
-                                rowMeans(as.data.frame(df[,x@replicate == rep]),
-                                         na.rm = TRUE)
-                              }))
-  names(means) <- paste0("means.",replicates)
+  means <- IRanges::NumericList(
+    lapply(conditions,
+           function(con){
+             rowMeans(as.data.frame(df[,x@condition[f] == con]),
+                      na.rm = TRUE)
+           }))
+  names(means) <- paste0("means.", conditions)
   # get sds
-  sds <- NumericList(lapply(replicates,
-                            function(rep){
-                              matrixStats::rowSds(as.matrix(df[,x@replicate == rep]),
-                                                  na.rm = TRUE)
-                            }))
-  names(sds) <- paste0("sds.",replicates)
+  sds <- IRanges::NumericList(
+    lapply(conditions,
+           function(con){
+             matrixStats::rowSds(as.matrix(df[,x@condition[f] == con]),
+                                 na.rm = TRUE)
+           }))
+  names(sds) <- paste0("sds.", conditions)
   # assemble data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
@@ -269,7 +281,7 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   ans
 }
 
-#' @name EndSequenceData
+#' @rdname EndSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "End5SequenceData"),
@@ -279,7 +291,7 @@ setMethod("aggregate",
           }
 )
 
-#' @name EndSequenceData
+#' @rdname EndSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "End3SequenceData"),
@@ -289,7 +301,7 @@ setMethod("aggregate",
           }
 )
 
-#' @name EndSequenceData
+#' @rdname EndSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "EndSequenceData"),
@@ -300,6 +312,8 @@ setMethod("aggregate",
 )
 
 # data visualization -----------------------------------------------------------
+
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "EndSequenceData",
@@ -312,6 +326,7 @@ setMethod(
   }
 )
 
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "End5SequenceData",
@@ -324,6 +339,7 @@ setMethod(
   }
 )
 
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "End3SequenceData",

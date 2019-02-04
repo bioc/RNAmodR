@@ -20,8 +20,9 @@ NULL
 #' \item{\code{\link{modify}}: }{used for specific search for modifications}
 #' }
 #' 
-#' Optionally the function \code{\link[settings]{settings<-}} can be implemented
-#' to store additional arguments, which the base class does not recognize.
+#' Optionally the function \code{\link[=Modifier]{settings<-}} can be
+#' implemented to store additional arguments, which the base class does not
+#' recognize.
 #' 
 #' \code{Modifier} objects are constructed centrally by calling 
 #' \code{Modifier()} with a \code{className} matching the specific class to be
@@ -63,7 +64,7 @@ NULL
 #' @slot score the main score identifier used for visualizations
 #' @slot dataType the class name(s) of the \code{SequenceData} class used 
 #' @slot bamfiles the input bam files as \code{BamFileList}
-#' @slot conditions conditions along the \code{BamFileList}: Either 
+#' @slot condition conditions along the \code{BamFileList}: Either 
 #' \code{control} or \code{treated}
 #' @slot replicate replicate number along the \code{BamFileList} for each of the
 #' condition types.
@@ -89,7 +90,7 @@ setClass("Modifier",
                    score = "character", # this have to be populated by subclass
                    dataType = "character", # this have to be populated by subclass
                    bamfiles = "BamFileList",
-                   conditions = "factor",
+                   condition = "factor",
                    replicate = "factor",
                    data = "SequenceData_OR_SequenceDataList",
                    aggregate = "DataFrameList",
@@ -116,8 +117,8 @@ setMethod(
     bamfiles <- .norm_bamfiles(bamfiles,className)
     # set clots
     .Object@bamfiles <- bamfiles
-    .Object@conditions <- factor(names(bamfiles))
-    .Object@replicate <- .get_replicate_number(bamfiles, .Object@conditions)
+    .Object@condition <- factor(names(bamfiles))
+    .Object@replicate <- .get_replicate_number(bamfiles, .Object@condition)
     return(.Object)
   }
 )

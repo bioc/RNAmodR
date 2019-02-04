@@ -40,12 +40,12 @@ setMethod(
                         ranges,
                         sequence,
                         replicate,
-                        conditions){
+                        condition){
     if(!is(df,"DataFrame")){
       stop("Invalid data object: ", class(df), " found, DataFrame expected.")
     }
     if(ncol(df) != length(replicate) ||
-       ncol(df) != length(conditions)){
+       ncol(df) != length(condition)){
       stop("Replicate and Conditions information must match the DataFrame ",
            "dimensions.")
     }
@@ -56,7 +56,7 @@ setMethod(
       stop("Invalid data object: ", class(sequence), " found, XString expected.")
     }
     .Object@replicate <- replicate
-    .Object@conditions <- conditions
+    .Object@condition <- condition
     .Object@rownames <- df@rownames
     .Object@listData <- df@listData
     .Object@nrows <- df@nrows
@@ -146,7 +146,7 @@ setMethod("[", "SequenceDataFrame",
                               ranges = x@ranges,
                               sequence = x@sequence,
                               replicate = x@replicate[j],
-                              conditions = x@conditions[j])
+                              condition = x@condition[j])
               if (anyDuplicated(names(x))){
                 names(x) <- make.unique(names(x))
               }

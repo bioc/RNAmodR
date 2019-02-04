@@ -23,10 +23,18 @@ setClass(Class = "ProtectedEndSequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
+#' @rdname ProtectedEndSequenceData
+#' @export
+ProtectedEndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, 
+                                     ...){
+  SequenceData("ProtectedEnd", bamfiles = bamfiles, annotation = annotation,
+               sequences = sequences, seqinfo = seqinfo, ...)
+}
 
 # ProtectedEndSequenceData -----------------------------------------------------
 
-setMethod(".get_Data",
+#' @rdname RNAmodR-internals
+setMethod(".getData",
           signature = c(x = "ProtectedEndSequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -49,17 +57,10 @@ setMethod(".get_Data",
           }
 )
 
-#' @name ProtectedEndSequenceData
-#' @export
-ProtectedEndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, 
-                                     ...){
-  SequenceData("ProtectedEnd", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
-}
 
 # aggregation ------------------------------------------------------------------
 
-#' @name ProtectedEndSequenceData
+#' @rdname ProtectedEndSequenceData
 #' @export
 setMethod("aggregate",
           signature = c(x = "ProtectedEndSequenceData"),

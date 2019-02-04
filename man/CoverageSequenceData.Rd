@@ -4,6 +4,7 @@
 \name{CoverageSequenceData}
 \alias{CoverageSequenceData}
 \alias{CoverageSequenceData-class}
+\alias{aggregate,CoverageSequenceData-method}
 \title{CoverageSequenceData}
 \usage{
 CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
@@ -12,5 +13,22 @@ CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
   "Treated", "Control"))
 }
 \description{
-title
+\code{CoverageSequenceData} implements \code{\link{SequenceData}} to contain
+and aggregate the coverage of reads per position along the transcripts.
+
+\code{aggregate} calculates the mean and sd for samples in the \code{control}
+and \code{treated} condition serparatly.
+}
+\examples{
+# Construct a CoverageSequenceData object
+annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+files <- c(control = system.file("extdata","example_wt_1.bam",
+                                 package = "RNAmodR.Data"),
+           treated = system.file("extdata","example_wt_2.bam",
+                                 package = "RNAmodR.Data"))
+csd <- CoverageSequenceData(files, annotation = annotation,
+                            sequences = sequences)
+# aggregate data
+aggregate(csd)
 }
