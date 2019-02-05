@@ -175,32 +175,63 @@ setMethod(".getData",
 .aggregate_data_frame_percentage_mean_sd <- function(x,condition){
   f <- .subset_to_condition(x@condition, condition)
   df <- x@unlistData[f]
+  conditions <- unique(x@condition[f])
+  replicates <- x@replicate[f]
   # set up some base values
-  replicates <- unique(x@replicate)
-  ncol <- ncol(df[,x@replicate == 1L,drop = FALSE])
-  seqAdd <- seq.int(from = 0, to = ncol(df) - 1, by = ncol)
-  colNames <- strsplit(colnames(df)[seq_len(ncol)],"\\.")
+  sample_width <- length(replicates[replicates == unique(replicates)[1]])
+  colNames <- strsplit(colnames(df)[seq_len(sample_width)],"\\.")
   colNames <- IRanges::CharacterList(colNames)[as.list(lengths(colNames))]
   # get percentage per replicate
-  for(i in seq_along(replicates)){
-    df[,x@replicate == i] <- 
-      as.data.frame(df[,x@replicate == i]) / 
-      rowSums(as.data.frame(df[,x@replicate == i]))
+  for(con in conditions){
+    ff <- x@condition[f] == con
+    for(i in unique(replicates[ff])){
+      df[,ff][,replicates[ff] == i] <- 
+        as.data.frame(df[,ff,drop = FALSE][,replicates[ff] == i,drop = FALSE]) / 
+        rowSums(as.data.frame(df[,ff,drop = FALSE][,replicates[ff] == i,drop = FALSE]))
+    }
   }
   # get means
-  means <- IRanges::NumericList(lapply(seq_len(ncol),
-                                       function(i){
-                                         rowMeans(as.data.frame(df[,i + seqAdd]),
-                                                  na.rm = TRUE)
-                                       }))
-  names(means) <- paste0("means.",colNames)
+  means <- do.call(
+    c,
+    lapply(conditions,
+           function(con){
+             ff <- x@condition[f] == con
+             ncol <- ncol(df[,ff,drop = FALSE]
+                          [,replicates[ff] == unique(replicates[ff])[1],
+                            drop = FALSE])
+             seqAdd <- seq.int(from = 0, 
+                               to = ncol(df[,ff,drop=FALSE]) - 1, 
+                               by = sample_width)
+             means <- IRanges::NumericList(
+               lapply(seq_len(ncol),
+                      function(i){
+                        unname(rowMeans(as.data.frame(df[,ff,drop=FALSE][,i + seqAdd,drop=FALSE]),
+                                        na.rm = TRUE))
+                      }))
+             names(means) <- paste0("means.", con, ".", colNames)
+             means
+           }))
   # get sds
-  sds <- IRanges::NumericList(lapply(seq_len(ncol),
-                                     function(i){
-                                       matrixStats::rowSds(as.matrix(df[,i + seqAdd]),
-                                                           na.rm = TRUE)
-                                     }))
-  names(sds) <- paste0("sds.",colNames)
+  sds <- do.call(
+    c,
+    lapply(conditions,
+           function(con){
+             ff <- x@condition[f] == con
+             ncol <- ncol(df[,ff,drop = FALSE]
+                          [,replicates[ff] == unique(replicates[ff])[1],
+                            drop = FALSE])
+             seqAdd <- seq.int(from = 0, 
+                               to = ncol(df[,ff,drop=FALSE]) - 1, 
+                               by = sample_width)
+             means <- IRanges::NumericList(
+               lapply(seq_len(ncol),
+                      function(i){
+                        unname(matrixStats::rowSds(as.matrix(df[,ff,drop=FALSE][,i + seqAdd,drop=FALSE]),
+                                                   na.rm = TRUE))
+                      }))
+             names(means) <- paste0("sds.", con, ".", colNames)
+             means
+           }))
   # merge data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))

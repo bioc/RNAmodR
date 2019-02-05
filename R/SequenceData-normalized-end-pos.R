@@ -190,29 +190,56 @@ setMethod(".getData",
 .aggregate_data_frame_mean_sd <- function(x, condition){
   f <- .subset_to_condition(x@condition, condition)
   df <- x@unlistData[f]
-  conditions <- x@condition[f]
+  conditions <- unique(x@condition[f])
   replicates <- x@replicate[f]
   # set up some base values
-  ncol <- ncol(df[,replicates == 1L,drop = FALSE])
-  seqAdd <- seq.int(from = 0, to = ncol(df) - 1, by = ncol)
-  colNames <- strsplit(colnames(df)[seq_len(ncol)],"\\.")
+  sample_width <- length(replicates[replicates == unique(replicates)[1]])
+  colNames <- strsplit(colnames(df)[seq_len(sample_width)],"\\.")
   colNames <- IRanges::CharacterList(colNames)[as.list(lengths(colNames))]
+  # set up some base values. replicates is here the same as the number of 
+  # columns, since a list per replicate is assumed
   # get means
-  means <- IRanges::NumericList(
-    lapply(seq_len(ncol),
-           function(i){
-             unname(rowMeans(as.data.frame(df[,i + seqAdd]),
-                             na.rm = TRUE))
-           }))
-  names(means) <- paste0("means.", conditions, ".", colNames)
-  # get sds
-  sds <- IRanges::NumericList(
-    lapply(seq_len(ncol),
-           function(i){
-             unname(matrixStats::rowSds(as.matrix(df[,i + seqAdd]),
+  means <- do.call(
+    c,
+    lapply(conditions,
+           function(con){
+             ff <- x@condition[f] == con
+             ncol <- ncol(df[,ff,drop = FALSE]
+                          [,replicates[ff] == unique(replicates[ff])[1],
+                             drop = FALSE])
+             seqAdd <- seq.int(from = 0, 
+                               to = ncol(df[,ff,drop=FALSE]) - 1, 
+                               by = sample_width)
+             means <- IRanges::NumericList(
+               lapply(seq_len(ncol),
+                      function(i){
+                        unname(rowMeans(as.data.frame(df[,ff,drop=FALSE][,i + seqAdd,drop=FALSE]),
                                         na.rm = TRUE))
+                      }))
+             names(means) <- paste0("means.", con, ".", colNames)
+             means
            }))
-  names(sds) <- paste0("sds.", conditions, ".", colNames)
+  # get sds
+  sds <- do.call(
+    c,
+    lapply(conditions,
+           function(con){
+             ff <- x@condition[f] == con
+             ncol <- ncol(df[,ff,drop = FALSE]
+                          [,replicates[ff] == unique(replicates[ff])[1],
+                            drop = FALSE])
+             seqAdd <- seq.int(from = 0, 
+                               to = ncol(df[,ff,drop=FALSE]) - 1, 
+                               by = sample_width)
+             means <- IRanges::NumericList(
+               lapply(seq_len(ncol),
+                      function(i){
+                        unname(matrixStats::rowSds(as.matrix(df[,ff,drop=FALSE][,i + seqAdd,drop=FALSE]),
+                                        na.rm = TRUE))
+                      }))
+             names(means) <- paste0("sds.", con, ".", colNames)
+             means
+           }))
   # merge data
   ans <- cbind(do.call(S4Vectors::DataFrame, means),
                do.call(S4Vectors::DataFrame, sds))
