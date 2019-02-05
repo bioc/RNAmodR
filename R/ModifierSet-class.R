@@ -85,8 +85,7 @@ S4Vectors::setValidity2(Class = "ModifierSet",.valid_ModifierSet)
 setMethod(f = "relistToClass",
           signature = c(x = "ModifierSet"),
           function(x) {
-            browser()
-            NULL
+            stop("Relisting not supported.")
           })
 
 # contructor -------------------------------------------------------------------
@@ -134,7 +133,7 @@ setMethod(f = "relistToClass",
   if(!all(vapply(x,is,logical(1),"BamFileList"))){
     return(FALSE)
   }
-  if(!all(file.exists(vapply(x,path,character(1))))){
+  if(!all(unlist(lapply(lapply(x,path),file.exists)))){
     return(FALSE)
   }
   TRUE
