@@ -3,6 +3,8 @@
 #' @include ModifierSet-class.R
 NULL
 
+# documentation /---------------------------------------------------------------
+
 #' @name ModInosine
 #' @aliases Inosine ModifierInosine ICE-Seq
 #' 
@@ -21,33 +23,58 @@ NULL
 #' 1 and 100. It is calculated as \code{min(log2(percent(G) /
 #' (percent(A)+percent(T)+percent(C))) * 10,100)}.
 #' 
+#' @param x the input which can be of the different types depending on whether
+#' a \code{ModRiboMethSeq} or a \code{ModSetRiboMethSeq} object is to be 
+#' constructed. For more information have a look at the documentation of
+#' the \code{\link[RNAmodR:Modifier-class]{Modifier}} and 
+#' \code{\link[RNAmodR:ModifierSet-class]{ModifierSet}} classes.
+#' @param annotation annotation data, which must match the information contained
+#' in the BAM files. This is parameter is only required if \code{x} if not a 
+#' \code{Modifier} object.
+#' @param sequences sequences matching the target sequences the reads were 
+#' mapped onto. This must match the information contained in the BAM files. This
+#' is parameter is only required if \code{x} if not a \code{Modifier} object.
+#' @param seqinfo An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
+#' argument or character vector, which can be coerced to one, to subset the 
+#' sequences to be analyzed on a per chromosome basis.
+#' @param ... Optional arguments overwriting default values, which are
+#' \itemize{
+#' \item{minCoverage:} {The minimal coverage at the position as integer value 
+#' (default: \code{minCoverage = 10L}).}
+#' \item{minReplicate:} {minimum number of replicates needed for the analysis 
+#' (default: \code{minReplicate = 1L}).}
+#' \item{minScore:} {minimum score to identify Inosine positions de novo 
+#' (default: \code{minScore = 10L}).}
+#' }
 NULL
 
-#' @rdname ModInosine
-#' @export
-setClass("ModInosine",
-         contains = c("Modifier"),
-         prototype = list(mod = "I",
-                          score = "score",
-                          dataType = "PileupSequenceData"))
-
-# settings ---------------------------------------------------------------------
+#' @name ModInosine-internals
+#' @aliases .dataTracks,ModInosine,GRanges,GRanges,XString-method
+#' 
+#' @title ModInosine internal functions
+#' 
+#' @description
+#' These functions are not intended for general use, but are used for 
+#' additional package development.
+#' 
+#' @param x,data,seqdata,sequence,args internally used arguments
+NULL
 
 #' @name ModInosine-functions
 #' 
 #' @title Functions for ModInosine
 #' 
 #' @description
-#' All of the functions of \code{\link[RNAmodR:Modifier]{Modifier}} and the
-#' \code{\link[RNAmodR:Modifier]{ModifierSet}} classes are inherited by the 
-#' \code{ModInosine} and \code{ModSetInosine} classes.
+#' All of the functions of \code{\link[RNAmodR:Modifier-class]{Modifier}} and
+#' the \code{\link[RNAmodR:ModifierSet-class]{ModifierSet}} classes are 
+#' inherited by the \code{ModInosine} and \code{ModSetInosine} classes.
 #' 
 #' Check below for the specifically implemented functions.
 #' 
-#' @param x a \code{\link[RNAmodR:Modifier]{Modifier}} or a 
-#' \code{\link[RNAmodR:ModifierSet]{ModifierSet}} object. For more details see 
-#' also the man pages for the functions mentioned below.
-#' @param value See \code{\link[=Modifier]{settings}}
+#' @param x a \code{\link[RNAmodR:Modifier-class]{Modifier}} or a 
+#' \code{\link[RNAmodR:ModifierSet-class]{ModifierSet}} object. For more details
+#' see also the man pages for the functions mentioned below.
+#' @param value See \code{\link[RNAmodR:Modifier-functions]{settings}}
 #' @param force See \code{\link{aggregate}}
 #' @param coord,name,from,to,type,window.size,... See 
 #' \code{\link{visualizeData}}
@@ -60,6 +87,28 @@ setClass("ModInosine",
 #' \code{c("G","A","U","C")}}
 #' }
 NULL
+
+# class ------------------------------------------------------------------------
+
+#' @rdname ModInosine
+#' @export
+setClass("ModInosine",
+         contains = c("Modifier"),
+         prototype = list(mod = "I",
+                          score = "score",
+                          dataType = "PileupSequenceData"))
+
+# constructor ------------------------------------------------------------------
+
+# Create Modifier class from file character, fasta and gff file
+#' @rdname ModInosine
+#' @export
+ModInosine <- function(x, annotation, sequences, seqinfo, ...){
+  Modifier("ModInosine", x = x, annotation = annotation, sequences = sequences,
+           seqinfo = seqinfo, ...)
+}
+
+# settings ---------------------------------------------------------------------
 
 .norm_inosine_args <- function(input){
   minScore <- 10
@@ -86,16 +135,6 @@ setReplaceMethod(f = "settings",
                    x@arguments[names(value)] <- unname(value)
                    x
                  })
-
-# constructor ------------------------------------------------------------------
-
-# Create Modifier class from file character, fasta and gff file
-#' @rdname ModInosine
-#' @export
-ModInosine <- function(x, annotation, sequences, seqinfo, ...){
-  Modifier("ModInosine", x = x, annotation = annotation, sequences = sequences,
-           seqinfo = seqinfo, ...)
-}
 
 # functions --------------------------------------------------------------------
 
@@ -185,6 +224,7 @@ setMethod(f = "aggregate",
   coverage <- split(unname(coverage),mod@partitioning)
   # find inosine positions by looking for A to G conversion at position with 
   # enough coverage
+  grl <- ranges(x)
   modifications <- mapply(
     function(m,c,l,r){
       rownames(m) <- seq_len(width(r))
@@ -203,7 +243,7 @@ setMethod(f = "aggregate",
     mod[,seq_len(2)],
     coverage,
     letters,
-    ranges(x),
+    grl,
     SIMPLIFY = FALSE)
   f <- !vapply(modifications,
                is.null,

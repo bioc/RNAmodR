@@ -32,11 +32,11 @@
   type = "score", ...)
 }
 \arguments{
-\item{x}{a \code{\link[RNAmodR:Modifier]{Modifier}} or a 
-\code{\link[RNAmodR:ModifierSet]{ModifierSet}} object. For more details see 
-also the man pages for the functions mentioned below.}
+\item{x}{a \code{\link[RNAmodR:Modifier-class]{Modifier}} or a 
+\code{\link[RNAmodR:ModifierSet-class]{ModifierSet}} object. For more details
+see also the man pages for the functions mentioned below.}
 
-\item{value}{See \code{\link[=Modifier]{settings}}}
+\item{value}{See \code{\link[RNAmodR:Modifier-functions]{settings}}}
 
 \item{force}{See \code{\link{aggregate}}}
 
@@ -44,9 +44,9 @@ also the man pages for the functions mentioned below.}
 \code{\link{visualizeData}}}
 }
 \description{
-All of the functions of \code{\link[RNAmodR:Modifier]{Modifier}} and the
-\code{\link[RNAmodR:Modifier]{ModifierSet}} classes are inherited by the 
-\code{ModInosine} and \code{ModSetInosine} classes.
+All of the functions of \code{\link[RNAmodR:Modifier-class]{Modifier}} and
+the \code{\link[RNAmodR:ModifierSet-class]{ModifierSet}} classes are 
+inherited by the \code{ModInosine} and \code{ModSetInosine} classes.
 
 Check below for the specifically implemented functions.
 }

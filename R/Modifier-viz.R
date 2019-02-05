@@ -14,6 +14,9 @@ NULL
 #' @param coord coordinates of a positions to subset to as a 
 #' \code{GRanges} object. The Parent column is expected to match the gene or 
 #' transcript name.
+#' @param name Only for \code{visualizeData}: the transcript name
+#' @param from Only for \code{visualizeData}: start position
+#' @param to Only for \code{visualizeData}: end position
 #' @param type the data type of data show as data tracks.
 #' @param window.size integer value for the number of positions on the left and 
 #' right site of the selected positions included in the plotting (default: 
@@ -248,13 +251,8 @@ NULL
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
-  signature = signature(x = "Modifier",
-                        coord = "GRanges"),
-  definition = function(x,
-                        coord,
-                        type = NA,
-                        window.size = 15L,
-                        ...) {
+  signature = signature(x = "Modifier", coord = "GRanges"),
+  definition = function(x, coord, type = NA, window.size = 15L, ...) {
     requireNamespace("Gviz")
     # input check
     args <- .norm_viz_args_Modifier(list(...))
@@ -274,7 +272,7 @@ setMethod(
     seqdata <- .norm_seqdata_for_visualization(
       aggregate(seqData(x)[coord$Parent])[[1]],
       chromosome)
-    coordValues <- .get_viz_window_Modifier(data,coord,window.size)
+    coordValues <- .get_viz_window_Modifier(data, coord, window.size)
     # get tracks
     st <- .get_viz_sequence_track(seq,chromosome,args)
     atm <- .get_viz_annotation_track(modAnnotation,chromosome,args)
@@ -323,49 +321,32 @@ setMethod(
 setMethod(
   f = "visualizeData",
   signature = signature(x = "Modifier"),
-  definition = function(x,
-                        name,
-                        from,
-                        to,
-                        type = NA,
-                        ...) {
-    coord <- .create_coord_for_visualization(x,
-                                             name,
-                                             from,
-                                             to)
-    visualizeDataByCoord(x,
-                         coord,
-                         type = type,
-                         window.size = 0L,
-                         ...)
+  definition = function(x, name, from, to, type = NA, ...) {
+    coord <- .create_coord_for_visualization(x, name, from, to)
+    visualizeDataByCoord(x, coord, type = type,  window.size = 0L, ...)
   }
 )
 
-#' @name RNAmodR-internals
-#' @export
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "Modifier",
                         data = "ANY",
                         seqdata = "ANY",
                         sequence = "ANY"),
-  definition = function(x,
-                        data,
-                        seqdata,
-                        sequence,
-                        args) {
-    stop(".dataTracks needs to be implemented for class '",class(x)[[1]],
-         "'")
+  definition = function(x, data, seqdata, sequence, args) {
+    stop(".dataTracks needs to be implemented for class '", class(x)[[1]], "'")
   }
 )
 
 
 # viz utils --------------------------------------------------------------------
 
+#' @importFrom grDevices col2rgb
 .is_colour <- function(x) {
   vapply(x,
          function(z) {
-           tryCatch(is.matrix(col2rgb(z)), 
+           tryCatch(is.matrix(grDevices::col2rgb(z)), 
                     error = function(e) FALSE)
          },
          logical(1))

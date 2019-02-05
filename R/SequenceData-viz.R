@@ -21,17 +21,14 @@ setMethod(
     args <- .norm_viz_args_SequenceData(list(...))
     coord <- .norm_coord_for_visualization(coord)
     # get plotting data
-    seq <- .get_viz_sequence(sequences(x)[[coord$Parent]],
-                             coord,
-                             args)
+    seq <- .get_viz_sequence(sequences(x)[[coord$Parent]], coord, args)
     range <- .norm_viz_range(ranges(x)[[coord$Parent]])
     chromosome <- .norm_viz_chromosome(range)
     seqdata <- .norm_seqdata_for_visualization(
       aggregate(x[coord$Parent])[[1]],
       chromosome)
-    coordValues <- .get_viz_window(seqdata,coord,window.size)
-    modAnnotation <- .norm_viz_mod_annotation(args[["additional.mod"]],
-                                              coord)
+    coordValues <- .get_viz_window_Modifier(seqdata, coord, window.size)
+    modAnnotation <- .norm_viz_mod_annotation(args[["additional.mod"]], coord)
     # get tracks
     st <- .get_viz_sequence_track(seq,
                                   chromosome,
@@ -39,16 +36,12 @@ setMethod(
     atm <- .get_viz_annotation_track(modAnnotation,
                                      chromosome,
                                      args[["annotation.track.pars"]])
-    dt <- .dataTracks(x,
-                      seqdata = seqdata,
-                      sequence = seq,
-                      args = args)
+    dt <- .dataTracks(x, seqdata = seqdata, sequence = seq, args = args)
     if(!is.list(dt)){
       dt <- list(dt)
     }
     # plot tracks
-    plotTracks(c(dt,
-                 list(st,atm)),
+    plotTracks(c(dt, list(st,atm)),
                from = coordValues$start,
                to = coordValues$end,
                chromosome = chromosome)
@@ -60,36 +53,21 @@ setMethod(
 setMethod(
   f = "visualizeData",
   signature = signature(x = "SequenceData"),
-  definition = function(x,
-                        name,
-                        from,
-                        to,
-                        type = NA,
-                        ...) {
-    coord <- .create_coord_for_visualization(x,
-                                             name,
-                                             from,
-                                             to)
-    visualizeDataByCoord(x,
-                         coord,
-                         type = type,
-                         window.size = 0L,
-                         ...)
+  definition = function(x, name, from, to,type = NA, ...) {
+    coord <- .create_coord_for_visualization(x, name, from, to)
+    visualizeDataByCoord(x, coord, type = type, window.size = 0L, ...)
   }
 )
 
-#' @name RNAmodR-internals
-#' @export
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "SequenceData",
-                        seqdata = "ANY",
-                        sequence = "ANY"),
-  definition = function(x,
-                        seqdata,
-                        sequence,
-                        args) {
-    stop(".dataTracks needs to be implemented for class '",class(x)[[1]],
-         "'")
+                        data = "ANY",
+                        seqdata = "GRanges",
+                        sequence = "XString"),
+  definition = function(x, data, seqdata, sequence, args) {
+    stop("This functions needs to be implemented by '",class(x),"'.",
+         call. = FALSE)
   }
 )

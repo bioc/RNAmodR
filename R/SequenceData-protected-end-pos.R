@@ -15,6 +15,14 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' 
 #' @description
 #' title
+#' 
+#' @param bamfiles,annotation,sequences,seqinfo,... See 
+#' \code{\link[=SequenceData-class]{SequenceData}}
+#' @param x a \code{CoverageSequenceData}
+#' @param condition For \code{\link{aggregate}}: condition for which the data 
+#' should be aggregated.
+#' 
+#' 
 NULL
 
 #' @rdname ProtectedEndSequenceData
@@ -81,6 +89,7 @@ setMethod("aggregate",
   seqdata
 }
 
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "ProtectedEndSequenceData",

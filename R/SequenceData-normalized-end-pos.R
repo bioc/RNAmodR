@@ -19,6 +19,12 @@ NULL
 #' each of the two conditions six columns are returned (three for mean and sd 
 #' each) ending in \code{ends}, \code{tx} and \code{ol}.
 #' 
+#' @param bamfiles,annotation,sequences,seqinfo,... See 
+#' \code{\link[=SequenceData-class]{SequenceData}}
+#' @param x a \code{CoverageSequenceData}
+#' @param condition For \code{\link{aggregate}}: condition for which the data 
+#' should be aggregated.
+#' 
 #' @examples
 #' # Construct a End5SequenceData object
 #' annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")

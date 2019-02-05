@@ -17,7 +17,7 @@ NULL
   args
 }
 
-.get_viz_window_ModifierSet <- function(data,coord,window.size){
+.get_viz_window_ModifierSet <- function(data, coord, window.size){
   window.size <- .norm_viz_windows.size(window.size)
   start <- start(coord) - window.size
   end <- end(coord) + window.size
@@ -110,7 +110,7 @@ setMethod(
                           aggregate(seqData(z)[coord$Parent])[[1]],
                           chromosome)
                       })
-    coordValues <- .get_viz_window_ModifierSet(data,coord,window.size)
+    coordValues <- .get_viz_window_ModifierSet(data, coord, window.size)
     # special stuff for data of a ModifierSet
     args[["ylim"]] <- .norm_viz_ylim(data)
     colours <- .norm_viz_colours(data,args[["colours"]])

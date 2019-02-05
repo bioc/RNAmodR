@@ -191,22 +191,17 @@ NULL
 #' @export
 setMethod("subsetByCoord",
           signature = c("Modifier","GRanges"),
-          function(x,
-                   coord,
-                   ...){
-            coord <- split(coord,
-                           coord$Parent)
-            .subset_Modifier_by_GRangesList(x,coord,...)
+          function(x, coord, ...){
+            coord <- split(coord, coord$Parent)
+            .subset_Modifier_by_GRangesList(x, coord, ...)
           }
 )
 #' @rdname subset
 #' @export
 setMethod("subsetByCoord",
           signature = c("Modifier","GRangesList"),
-          function(x,
-                   coord,
-                   ...){
-            .subset_Modifier_by_GRangesList(x,coord,...)
+          function(x, coord, ...){
+            .subset_Modifier_by_GRangesList(x, coord, ...)
           }
 )
 
@@ -228,21 +223,16 @@ setMethod("subsetByCoord",
 #' @export
 setMethod("subsetByCoord",
           signature = c("ModifierSet","GRanges"),
-          function(x,
-                   coord,
-                   ...){
-            coord <- split(coord,
-                           coord$Parent)
-            .subset_ModifierSet_by_GRangesList(x,coord,...)
+          function(x, coord, ...){
+            coord <- split(coord, coord$Parent)
+            .subset_ModifierSet_by_GRangesList(x, coord, ...)
           }
 )
 #' @rdname subset
 #' @export
 setMethod("subsetByCoord",
           signature = c("ModifierSet","GRangesList"),
-          function(x,
-                   coord,
-                   ...){
-            .subset_ModifierSet_by_GRangesList(x,coord,...)
+          function(x, coord, ...){
+            .subset_ModifierSet_by_GRangesList(x, coord, ...)
           }
 )

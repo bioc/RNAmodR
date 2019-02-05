@@ -31,6 +31,7 @@ setMethod(
   }
 )
 
+#' @name ModInosine-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "ModInosine",

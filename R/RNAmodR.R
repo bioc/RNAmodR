@@ -50,11 +50,14 @@ SAMPLE_TYPES <- c("treated","control")
 # constants for annotation -----------------------------------------------------
 
 #' @name RNAmodR-internals
-#' @aliases .dataTrack
+#' @aliases .getData
 #' 
 #' @title RNAmodR internal functions
 #' 
 #' @description
-#' These functions are not intended for general use, but maybe exported for 
+#' These functions are not intended for general use, but are used for 
 #' additional package development.
+#' 
+#' @param range,data,modType,scoreFun,source,type,x,grl,sequences,param,args,seqdata,sequence,i,exact,value
+#' Internal arguments
 NULL

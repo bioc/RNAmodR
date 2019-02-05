@@ -26,56 +26,56 @@ setGeneric(
 
 # Modifier accessors -----------------------------------------------------------
 
-#' @rdname Modifier
-#' @name Modifier
+#' @rdname Modifier-functions
+#' @title Modifier/ModifierSet functions
 #' @export
 setGeneric( 
   name = "modifierType",
   def = function(x) standardGeneric("modifierType")
 )
-#' @rdname Modifier
+#' @rdname Modifier-functions
 #' @export
 setGeneric( 
   name = "modType",
   def = function(x) standardGeneric("modType")
 )
-#' @rdname Modifier
+#' @rdname Modifier-functions
 #' @export
 setGeneric( 
   name = "mainScore",
   def = function(x) standardGeneric("mainScore")
 )
-#' @rdname Modifier
+#' @rdname Modifier-functions
 #' @export
 setGeneric( 
   name = "settings",
   def = function(x, name = NULL) standardGeneric("settings")
 )
-#' @rdname Modifier
+#' @rdname Modifier-functions
 #' @export
 setGeneric( 
   name = "settings<-",
   def = function(x, name, value) standardGeneric("settings<-")
 )
-#' @rdname Modifier
+#' @rdname Modifier-functions
 #' @export
 setGeneric( 
   name = "seqinfo",
   def = function(x) standardGeneric("seqinfo")
 )
-#' @rdname Modifier
+#' @rdname Modifier-functions
 #' @export
 setGeneric( 
   name = "sequences",
   def = function(x, ...) standardGeneric("sequences")
 )
-#' @rdname Modifier
+#' @rdname Modifier-functions
 #' @export
 setGeneric( 
   name = "bamfiles",
   def = function(x) standardGeneric("bamfiles")
 )
-#' @rdname Modifier
+#' @rdname Modifier-functions
 #' @export
 setGeneric( 
   name = "seqData",
@@ -111,7 +111,7 @@ setGeneric(
 setGeneric( 
   name = "plotROC",
   signature = c("x"),
-  def = function(x, coord, redo = FALSE, ...)
+  def = function(x, coord, ...)
     standardGeneric("plotROC")
 ) 
 

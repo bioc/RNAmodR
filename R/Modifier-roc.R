@@ -34,6 +34,7 @@ NULL
 #' \code{\link[ROCR:performance]{performance}} form the \code{ROCR} package
 #' @param plot.args arguments which will be used for calling \code{plot} on the
 #' performance object of the \code{ROCR} package
+#' @param ... additional arguments
 NULL
 
 .norm_prediction_args <- function(input){
@@ -124,16 +125,17 @@ NULL
   
 }
 
+#' @importFrom graphics par abline title legend plot.new
 #' @importFrom colorRamps matlab.like
 #' @importFrom ROCR prediction performance
 .plot_ROCR <- function(data, prediction.args, performance.args, plot.args){
   # add argument logical vector
   n <- length(data)
   # save mfrow setting
-  mfrow_bak <- par("mfrow")
+  mfrow_bak <- graphics::par("mfrow")
   mfrow_col <- ceiling(sqrt(n))
   mfrow_row <- ceiling(n / mfrow_col)
-  par(mfrow = c(mfrow_row,mfrow_col))
+  graphics::par(mfrow = c(mfrow_row,mfrow_col))
   n_remaining <- (mfrow_row * mfrow_col) - n
   #
   if(is.null(plot.args[["colorize.palette"]])){
@@ -154,21 +156,17 @@ NULL
       perf <- do.call(ROCR::performance,
                       c(list(pred),
                         performance.args))
-      do.call(plot,
+      do.call(graphics::plot,
               c(list(perf,
                      colorize = TRUE,
                      lwd = 3),
                 plot.args))
-      abline(a=0, b= 1)
-      title(main = name)
+      graphics::abline(a = 0, b = 1)
+      graphics::title(main = name)
       auc <- unlist(slot(performance(pred,"auc"),"y.values"))
       auc <- paste(c("AUC = "),round(auc,2L),sep="")
-      legend(0.55,
-             0.25,
-             auc,
-             border="white",
-             cex=1,
-             box.col = "white")
+      graphics::legend(0.55, 0.25, auc, border = "white", cex = 1,
+                       box.col = "white")
     },
     data,
     names(data),
@@ -177,9 +175,9 @@ NULL
                     plot.args = plot.args),
     SIMPLIFY = FALSE)
   for(i in seq_len(n_remaining)){
-    plot.new()
+    graphics::plot.new()
   }
-  par(mfrow = mfrow_bak)
+  graphics::par(mfrow = mfrow_bak)
   invisible(NULL)
   
 }
@@ -190,7 +188,7 @@ setMethod(
   f = "plotROC", 
   signature = signature(x = "Modifier"),
   definition = function(x, coord, prediction.args, performance.args, plot.args){
-    data <- .get_prediction_data(x, coord)
+    data <- .get_prediction_data_Modifier(x, coord)
     .plot_ROCR(data,
                .norm_prediction_args(prediction.args),
                .norm_performance_args(performance.args, x),
@@ -208,7 +206,7 @@ setMethod(
     data <- .get_prediction_data_ModifierSet(x, coord)
     .plot_ROCR(data,
                .norm_prediction_args(prediction.args),
-               .norm_perfomance_args(performance.args),
+               .norm_performance_args(performance.args),
                .norm_plot_args(plot.args))
   }
 )

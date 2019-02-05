@@ -28,6 +28,15 @@ EndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{aggregate}{EndSequenceData}(x, condition = c("Both", "Treated",
   "Control"))
 }
+\arguments{
+\item{bamfiles, annotation, sequences, seqinfo, ...}{See 
+\code{\link[=SequenceData-class]{SequenceData}}}
+
+\item{x}{a \code{CoverageSequenceData}}
+
+\item{condition}{For \code{\link{aggregate}}: condition for which the data 
+should be aggregated.}
+}
 \description{
 The \code{End5SequenceData}/\code{End3SequenceData}/\code{EndSequenceData}
 aggregate the counts of read ends at each position along transcript. Whereas

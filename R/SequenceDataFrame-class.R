@@ -1,29 +1,49 @@
 #' @include RNAmodR.R
 NULL
 
-#' @name SequenceDataFrame
+#' @name SequenceData-functions
+#' @aliases show,SequenceDataFrame-method
 #' 
-#' @title SequenceDataFrame
+#' @title SequenceData/SequenceDataList/SequenceDataFrame functions
+#' 
+#' @description 
+#' The \code{SequenceData},\code{SequenceDataList} and
+#' \code{SequenceDataFrame} share functionality. Have a look at the elements
+#' listed under Usage.
+#' 
+#' @param x,object,value a \code{SequenceData},\code{SequenceDataList},
+#' \code{SequenceDataFrame} object.
+NULL
+
+#' @name SequenceDataFrame-class
+#' 
+#' @title The SequenceDataFrame class
 #' 
 #' @description 
 #' The \code{SequenceDataFrame} class contains data for positions along a 
 #' transcripts. It is used to describe elements from a \code{SequenceData}
 #' object.
 #' 
+#' It is derived from the \code{\link[S4Vectors:DataFrame-class]{DataFrame}} 
+#' class.
+#' 
+#' @param df the data as a \code{DataFrame}.
 #' @param ranges a \code{GRanges} object containing all annotation elements
 #' for a transcript.
 #' @param sequence \code{XString} object describing the nucleotide sequence of 
 #' the transcript.
-#' @param conditions The condition of each column or set of columns. Either 
+#' @param condition The condition of each column or set of columns. Either 
 #' \code{control} or \code{treated}.
 #' @param replicate The replicate of each column or set of columns for the 
 #' individual conditions
+#' @param x,i,j,...,drop arguments used for 
+#' \code{\link[S4Vectors:DataFrame-class]{subsetting}}.
 #' 
 NULL
 
 # SequenceDataFrame ------------------------------------------------------------
 
-#' @rdname SequenceDataFrame
+#' @rdname SequenceDataFrame-class
 #' @export
 setClass(Class = "SequenceDataFrame",
          contains = c("DataFrame"),
@@ -35,12 +55,7 @@ setClass(Class = "SequenceDataFrame",
 setMethod(
   f = "initialize", 
   signature = signature(.Object = "SequenceDataFrame"),
-  definition = function(.Object,
-                        df,
-                        ranges,
-                        sequence,
-                        replicate,
-                        condition){
+  definition = function(.Object, df, ranges, sequence, replicate, condition){
     if(!is(df,"DataFrame")){
       stop("Invalid data object: ", class(df), " found, DataFrame expected.")
     }
@@ -68,15 +83,10 @@ setMethod(
   }
 )
 
-#' @rdname SequenceDataFrame
+#' @rdname SequenceDataFrame-class
 #' @export
-SequenceDataFrame <- function(df,ranges,sequence,replicate,conditions){
-  new("SequenceDataFrame",
-      df,
-      ranges,
-      sequence,
-      replicate,
-      conditions)
+SequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
+  new("SequenceDataFrame", df, ranges, sequence, replicate, condition)
 }
 
 .valid_SequenceDataFrame <-  function(x){
@@ -93,6 +103,8 @@ SequenceDataFrame <- function(df,ranges,sequence,replicate,conditions){
 S4Vectors::setValidity2(Class = "SequenceDataFrame", .valid_SequenceDataFrame)
 
 # show -------------------------------------------------------------------------
+
+#' @rdname SequenceData-functions
 setMethod("show", "SequenceDataFrame",
           function(object){
             callNextMethod(object)
@@ -104,19 +116,22 @@ setMethod("show", "SequenceDataFrame",
 
 # accessors --------------------------------------------------------------------
 
-#' @rdname SequenceDataFrame
+#' @rdname SequenceData-functions
 #' @export
 setMethod(
   f = "sequences", 
   signature = signature(x = "SequenceDataFrame"),
   definition = function(x){x@sequence})
-#' @rdname SequenceDataFrame
+#' @rdname SequenceData-functions
 #' @export
 setMethod(
   f = "ranges", 
   signature = signature(x = "SequenceDataFrame"),
   definition = function(x){x@ranges})
 
+#' @importFrom stats setNames
+#' @rdname SequenceDataFrame-class
+#' @export
 setMethod("[", "SequenceDataFrame",
           function(x, i, j, ..., drop = TRUE){
             if (!isTRUEorFALSE(drop)){
@@ -138,11 +153,10 @@ setMethod("[", "SequenceDataFrame",
                 j <- i
               }
               if (!is(j, "IntegerRanges")) {
-                xstub <- setNames(seq_along(x), names(x))
+                xstub <- stats::setNames(seq_along(x), names(x))
                 j <- normalizeSingleBracketSubscript(j, xstub)
               }
-              x <- initialize(x,
-                              df = as(x,"DataFrame")[, j, drop = FALSE],
+              x <- initialize(x, df = as(x,"DataFrame")[, j, drop = FALSE],
                               ranges = x@ranges,
                               sequence = x@sequence,
                               replicate = x@replicate[j],

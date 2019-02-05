@@ -2,25 +2,27 @@
 #' @include SequenceData-class.R
 NULL
 
-#' @name SequenceDataList
+#' @name SequenceDataList-class
 #' 
-#' @title SequenceDataList
+#' @title The SequenceDataList class
 #' 
 #' @description 
-#' title
+#' The \code{SequenceDataList} class is used to hold \code{SequenceData} objects
+#' as its elements. It is derived from the 
+#' \code{\link[S4Vectors:List-class]{List}}.
 #' 
-#' default names are class names
-#' 
+#' @param ... The elements to be included in the \code{SequenceDataList}.
 NULL
 
-#' @rdname SequenceDataList
+#' @rdname SequenceDataList-class
 #' @export
 setClass("SequenceDataList",
          contains = c("List"),
          slots = c(listData = "list"),
-         prototype = list(elementType="SequenceData"))
+         prototype = list(elementType = "SequenceData"))
 
 # show method ------------------------------------------------------------------
+#' @rdname SequenceData-functions
 setMethod("show", "SequenceDataList",
           function(object)
           {
@@ -66,12 +68,15 @@ setMethod("show", "SequenceDataList",
           })
 
 # parallelSlotNames ------------------------------------------------------------
+#' @rdname RNAmodR-internals
 setMethod("parallelSlotNames", "SequenceDataList",
           function(x) c("listData", callNextMethod())
 )
 
 # accessors --------------------------------------------------------------------
+#' @rdname SequenceData-functions
 setMethod("names", "SequenceDataList", function(x) names(as.list(x)))
+#' @rdname SequenceData-functions
 setReplaceMethod("names", "SequenceDataList",
                  function(x, value) {
                    names(x@listData) <- value
@@ -135,7 +140,7 @@ new_SequenceDataList_from_list <- function(Class, x, ..., mcols){
   new2(Class, listData = x, ..., elementMetadata = mcols, check = FALSE)
 }
 
-#' @rdname SequenceDataList
+#' @rdname SequenceDataList-class
 #' @export
 SequenceDataList <- function(...){
   args <- list(...)
@@ -174,6 +179,7 @@ setMethod("classNameForDisplay", "SequenceDataList",
 
 
 # Subsetting -------------------------------------------------------------------
+#' @rdname RNAmodR-internals
 setMethod("getListElement", "SequenceDataList",
           function(x, i, exact = TRUE)
             getListElement(x@listData, i, exact = exact)
@@ -214,7 +220,7 @@ setAs("ANY", "SequenceDataList", function(from) {
           lapply(x[x_not_NULL],aggregate))
 }
 
-#' @name SequenceDataList
+#' @rdname SequenceData-functions
 #' @export
 setMethod(f = "seqinfo", 
           signature = signature(x = "SequenceDataList"),
@@ -222,7 +228,7 @@ setMethod(f = "seqinfo",
             seqinfo(x[[1]])
           })
 
-#' @name SequenceDataList
+#' @rdname SequenceData-functions
 #' @export
 setMethod(f = "sequences", 
           signature = signature(x = "SequenceDataList"),
@@ -230,7 +236,7 @@ setMethod(f = "sequences",
             sequences(x[[1]])
           })
 
-#' @name SequenceDataList
+#' @rdname SequenceData-functions
 #' @export
 setMethod(f = "ranges", 
           signature = signature(x = "SequenceDataList"),
@@ -238,7 +244,7 @@ setMethod(f = "ranges",
             ranges(x[[1]])
           })
 
-#' @name SequenceDataList
+#' @rdname SequenceData-functions
 #' @export
 setMethod(f = "bamfiles", 
           signature = signature(x = "SequenceDataList"),
@@ -246,14 +252,13 @@ setMethod(f = "bamfiles",
             bamfiles(x[[1]])
           })
 
-#' @name SequenceDataList
+#' @rdname aggregate
 #' @export
 setMethod("aggregate",
           signature = c(x = "SequenceDataList"),
-          function(x,
-                   condition = "Treated"){
+          function(x, condition = "Treated"){
             ans <- do.call(S4Vectors::SimpleList,
-                           lapply(x,aggregate,condition = condition))
+                           lapply(x,aggregate, condition = condition))
             names(ans) <- names(x)
             ans
           })

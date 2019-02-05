@@ -12,6 +12,15 @@ ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{aggregate}{ProtectedEndSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 }
+\arguments{
+\item{bamfiles, annotation, sequences, seqinfo, ...}{See 
+\code{\link[=SequenceData-class]{SequenceData}}}
+
+\item{x}{a \code{CoverageSequenceData}}
+
+\item{condition}{For \code{\link{aggregate}}: condition for which the data 
+should be aggregated.}
+}
 \description{
 title
 }

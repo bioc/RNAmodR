@@ -7,7 +7,7 @@
 \alias{plotROC,ModifierSet-method}
 \title{ROCR functions for \code{Modifier} and \code{ModifierSet} objects}
 \usage{
-plotROC(x, coord, redo = FALSE, ...)
+plotROC(x, coord, ...)
 
 \S4method{plotROC}{Modifier}(x, coord, prediction.args, performance.args,
   plot.args)
@@ -21,6 +21,8 @@ plotROC(x, coord, redo = FALSE, ...)
 \item{coord}{coordinates of position to label as positive. Either a 
 \code{GRanges} or a \code{GRangesList} object. For both types the Parent 
 column is expected to match the gene or transcript name.}
+
+\item{...}{additional arguments}
 
 \item{prediction.args}{arguments which will be used for calling 
 \code{\link[ROCR:prediction]{prediction}} form the \code{ROCR} package}

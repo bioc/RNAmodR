@@ -21,6 +21,15 @@ NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{aggregate}{NormEnd3SequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 }
+\arguments{
+\item{bamfiles, annotation, sequences, seqinfo, ...}{See 
+\code{\link[=SequenceData-class]{SequenceData}}}
+
+\item{x}{a \code{CoverageSequenceData}}
+
+\item{condition}{For \code{\link{aggregate}}: condition for which the data 
+should be aggregated.}
+}
 \description{
 The \code{NormEnd5SequenceData}/\code{NormEnd3SequenceData}
 aggregate the counts of read ends (Either 5' or 3') at each position along 

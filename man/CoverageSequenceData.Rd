@@ -12,9 +12,19 @@ CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{aggregate}{CoverageSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 }
+\arguments{
+\item{bamfiles, annotation, sequences, seqinfo, ...}{See 
+\code{\link[=SequenceData-class]{SequenceData}}}
+
+\item{x}{a \code{CoverageSequenceData}}
+
+\item{condition}{For \code{\link{aggregate}}: condition for which the data 
+should be aggregated.}
+}
 \description{
-\code{CoverageSequenceData} implements \code{\link{SequenceData}} to contain
-and aggregate the coverage of reads per position along the transcripts.
+\code{CoverageSequenceData} implements
+\code{\link[=SequenceData-class]{SequenceData}} to contain and aggregate the
+coverage of reads per position along the transcripts.
 
 \code{aggregate} calculates the mean and sd for samples in the \code{control}
 and \code{treated} condition serparatly.

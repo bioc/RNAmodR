@@ -2,13 +2,15 @@
 #' @include Modifier-class.R
 NULL
 
-#' @name ModifierSet
+#' @name ModifierSet-class
+#' @aliases ModifierSet
 #' 
-#' @title ModifierSet
+#' @title The ModifierSet class
+#' 
 #' @description 
-#' The \code{ModifierSet} class allows multiple \code{\link{Modifier}} objects
-#' to be created from the same annotation and sequence data varying only the 
-#' bam input files.
+#' The \code{ModifierSet} class allows multiple
+#' \code{\link[=Modifier-class]{Modifier}} objects to be created from the same
+#' annotation and sequence data varying only the bam input files.
 #' 
 #' In addition the comparison of samples is also done via calling functions on 
 #' the \code{ModifierSet} objects.
@@ -49,13 +51,12 @@ NULL
 #' 
 NULL
 
-#' @rdname ModifierSet
+#' @rdname ModifierSet-class
 #' @export
 setClass("ModifierSet",
          contains = c("VIRTUAL",
                       "SimpleList"),
          prototype = list(elementType = "Modifier"))
-
 
 setMethod("pcompareRecursively", "ModifierSet", function(x) FALSE)
 
@@ -223,7 +224,7 @@ setMethod(f = "relistToClass",
   new2(className, listData = x)
 }
 
-#' @rdname ModifierSet
+#' @rdname ModifierSet-class
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "list"),
@@ -245,7 +246,7 @@ setMethod(f = "ModifierSet",
                  "referenced must exist. Please note, that the list a",
                  call. = FALSE)
           })
-#' @rdname ModifierSet
+#' @rdname ModifierSet-class
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "character"),
@@ -254,7 +255,7 @@ setMethod(f = "ModifierSet",
             .bamfiles_to_ModifierSet(className, x, annotation, sequences,
                                      seqinfo, ...)
           })
-#' @rdname ModifierSet
+#' @rdname ModifierSet-class
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "BamFileList"),
@@ -263,7 +264,7 @@ setMethod(f = "ModifierSet",
             .bamfiles_to_ModifierSet(className, x, annotation, sequences,
                                      seqinfo, ...)
           })
-#' @rdname ModifierSet
+#' @rdname ModifierSet-class
 #' @export
 setMethod(f = "ModifierSet",
           signature = c(x = "Modifier"),
@@ -273,6 +274,7 @@ setMethod(f = "ModifierSet",
 
 # show -------------------------------------------------------------------------
 
+#' @rdname Modifier-functions
 setMethod(
   f = "show", 
   signature = signature(object = "ModifierSet"),
@@ -332,33 +334,33 @@ setMethod(
 
 # accessors and accessor-like functions ----------------------------------------
 
-#' @name ModifierSet
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "modifierType", 
           signature = signature(x = "ModifierSet"),
           definition = function(x) modifierType(new(elementType(x),NULL))
 )
-#' @name ModifierSet
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "modType", 
           signature = signature(x = "ModifierSet"),
           definition = function(x) modType(new(elementType(x),NULL))
 )
-#' @name ModifierSet
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "mainScore", 
           signature = signature(x = "ModifierSet"),
           definition = function(x) mainScore(new(elementType(x),NULL))
 )
-#' @name ModifierSet
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "sequences", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x, modified = FALSE, with.qualities = FALSE){
+          definition = function(x, modified = FALSE){
               sequences(x[[1]], modified = modified)
             }
 )
-#' @name ModifierSet
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "ranges", 
           signature = signature(x = "ModifierSet"),
@@ -366,11 +368,11 @@ setMethod(f = "ranges",
             ranges(seqData(x[[1]]))
           }
 )
-#' @name ModifierSet
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "modifications", 
           signature = signature(x = "ModifierSet"),
           definition = function(x) {
-            GRangesList(lapply(x,modifications))
+            GenomicRanges::GRangesList(lapply(x,modifications))
           }
 )

@@ -4,9 +4,10 @@
 #' @include Modifier-utils.R
 NULL
 
-#' @name Modifier
+#' @name Modifier-class
+#' @aliases Modifier
 #' 
-#' @title Modifier class
+#' @title The Modifier class
 #' 
 #' @description
 #' The \code{Modifier} class is a virtual class, which provides the central 
@@ -20,7 +21,7 @@ NULL
 #' \item{\code{\link{modify}}: }{used for specific search for modifications}
 #' }
 #' 
-#' Optionally the function \code{\link[=Modifier]{settings<-}} can be
+#' Optionally the function \code{\link[=Modifier-functions]{settings<-}} can be
 #' implemented to store additional arguments, which the base class does not
 #' recognize.
 #' 
@@ -79,10 +80,27 @@ NULL
 #' whether the modifications were found with the current arguments
 NULL
 
+#' @name Modifier-functions
+#' 
+#' @title Modifier/ModifierSet functions
+#' 
+#' @description
+#' For the \code{Modifier} and  \code{ModifierSet} classes a number of functions
+#' are implemented to access the data stored by the object.
+#' 
+#' @param x,object a \code{Modifier} or \code{ModifierSet} class
+#' @param name For \code{settings}: name of the setting to be returned or set
+#' @param value For \code{settings}: value of the setting to be set
+#' @param ...,modified For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
+#' the sequences be returned as a \code{ModRNAString} with the found 
+#' modifications added on top of the \code{RNAString}? See 
+#' \code{\link[Modstrings:modifyNucleotides]{modifyNucleotides}}.
+NULL
+
 setClassUnion("SequenceData_OR_SequenceDataList",
               c("SequenceData", "SequenceDataList"))
 
-#' @rdname Modifier
+#' @rdname Modifier-class
 #' @export
 setClass("Modifier",
          contains = c("VIRTUAL"),
@@ -202,8 +220,7 @@ S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
   }
 }
 
-#' @rdname Modifier
-#' @export
+#' @rdname Modifier-functions
 setMethod(
   f = "show", 
   signature = signature(object = "Modifier"),
@@ -244,17 +261,17 @@ setMethod(
 
 # accessors --------------------------------------------------------------------
 
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "modifierType", 
           signature = signature(x = "Modifier"),
           definition = function(x){class(x)[[1]]})
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "modType", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@mod})
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "mainScore", 
           signature = signature(x = "Modifier"),
@@ -292,7 +309,7 @@ setMethod(f = "mainScore",
   args
 }
 
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "settings", 
           signature = signature(x = "Modifier"),
@@ -306,7 +323,7 @@ setMethod(f = "settings",
             x@arguments[[name]]
           }
 )
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setReplaceMethod(f = "settings", 
           signature = signature(x = "Modifier"),
@@ -324,13 +341,13 @@ setReplaceMethod(f = "settings",
             x
           })
 
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "seqinfo", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@seqinfo})
  
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "sequences", 
           signature = signature(x = "Modifier"),
@@ -354,19 +371,19 @@ setMethod(f = "sequences",
             }
 )
   
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "ranges", 
           signature = signature(x = "Modifier"),
           definition = function(x){ranges(seqData(x))})
 
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "bamfiles", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@bamfiles})
 
-#' @name Modifier
+#' @rdname Modifier-functions
 #' @export
 setMethod(f = "seqData", 
           signature = signature(x = "Modifier"),
@@ -375,7 +392,7 @@ setMethod(f = "seqData",
 # converts the genomic coordinates to transcript based coordinates
 .get_modifications_per_transcript <- function(x){
   browser()
-  ranges <- .get_parent_annotations(ranges(x))
+  grl <- ranges(x)
   modifications <- modifications(x)
   modRanges <- 
     ranges[as.character(ranges$ID) %in% as.character(modifications$Parent),]
@@ -457,7 +474,7 @@ setMethod(f = "modifications",
 
 .check_list_for_SequenceData_elements <- function(ans, list){
   if(is(ans,"character") && extends(ans,"Modifier")){
-    ans <- getclass(ans)@prototype
+    ans <- getClass(ans)@prototype
   } else if(!is(ans,"Modifier")) {
     stop("Something went wrong.")
   }
@@ -494,7 +511,7 @@ setMethod(f = "modifications",
   ans
 }
 
-#' @rdname Modifier
+#' @rdname Modifier-class
 #' @export
 setMethod("Modifier",
           signature = c(x = "SequenceData"),
@@ -502,7 +519,7 @@ setMethod("Modifier",
                    seqinfo = NULL, ...){
             .new_ModFromSequenceData(className, x, ...)
           })
-#' @rdname Modifier
+#' @rdname Modifier-class
 #' @export
 setMethod("Modifier",
           signature = c(x = "character"),
@@ -511,7 +528,7 @@ setMethod("Modifier",
             .new_ModFromCharacter(className, x, annotation, sequences, seqinfo,
                                   ...)
           })
-#' @rdname Modifier
+#' @rdname Modifier-class
 #' @export
 setMethod("Modifier",
           signature = c(x = "BamFileList"),
@@ -529,15 +546,18 @@ setMethod("Modifier",
 #' @title Searching for modifications in \code{SequenceData}
 #' 
 #' @description 
-#' \code{modify} triggers the search for modifications for a \code{Modifier} 
-#' class. Usually this is done automatically during construction of a 
-#' \code{Modifier} object.
+#' \code{modify} triggers the search for modifications for a 
+#' \code{\link[=Modifier-class]{Modifier}} class. Usually this is done 
+#' automatically during construction of a \code{Modifier} object.
 #' 
 #' \code{modifications} is the accessor for the found modifications.
 #' 
 #' @param x a \code{Modifier} object.
-#' @param perTranscript \code{TRUE} or \code{FALSE}: Should the coordinates be
-#' returned as local per transcript coordinates?
+#' @param force force to run \code{aggregate} again, if data is already stored
+#' in \code{x}.
+#' @param perTranscript For \code{modifications>} \code{TRUE} or \code{FALSE}:
+#'   Should the coordinates be returned as local per transcript coordinates?
+#' @param ... additional arguments
 #' 
 #' @return 
 #' \itemize{
@@ -545,7 +565,9 @@ setMethod("Modifier",
 #' \item{\code{modifications}: }{the modifications found as a \code{GRanges}
 #' object.}
 #' }
-#' 
+NULL
+
+#' @rdname modify
 #' @export
 setMethod(f = "modify", 
           signature = signature(x = "Modifier"),
@@ -565,16 +587,22 @@ setMethod(f = "modify",
 #' @title Aggreagte data per positions
 #' 
 #' @description 
-#' The aggregate function is defined per \code{\link{SequenceData}} object and
-#' can be triggered by either using the a \code{\link{SequenceData}} or 
-#' \code{\link{Modifier}}. For the letter it will just redirect to the 
-#' \code{\link{SequenceData}} object, but will store the result. The data
-#' is then used for subsequent tasks, such as search for modifications and 
-#' visualization of the results.
+#' The aggregate function is defined per
+#' \code{\link[=SequenceData-class]{SequenceData}} object and can be triggered
+#' by either using the a \code{\link[=SequenceData-class]{SequenceData}} or
+#' \code{\link[=Modifier-class]{Modifier}}. For the letter it will just redirect
+#' to the \code{\link[=SequenceData-class]{SequenceData}} object, but will store
+#' the result. The data is then used for subsequent tasks, such as search for
+#' modifications and visualization of the results.
 #' 
-#' @param x a \code{\link{SequenceData}} or \code{\link{Modifier}} object.
+#' @param x a \code{\link[=SequenceData-class]{SequenceData}} or
+#'   \code{\link[=Modifier-class]{Modifier}} object.
 #' @param force whether to recreate the aggregated data, if it is already stored
 #' inside the \code{Modifier} object.
+#' @param condition character value, which selects, for which condition the data
+#' should be aggregated. One of the following values: \code{Both}, 
+#' \code{Control}, \code{Treated} 
+#' @param ... additional arguments
 #' 
 #' @return 
 #' \itemize{
@@ -590,7 +618,9 @@ setMethod(f = "modify",
 #' \item{\code{hasAggregateData}: }{TRUE or FALSE. Does the \code{Modifier} 
 #' object already contain aggregated data?}
 #' }
-#' 
+NULL
+
+#' @rdname aggregate
 #' @export
 setMethod(f = "aggregate", 
           signature = signature(x = "Modifier"),

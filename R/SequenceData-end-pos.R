@@ -16,6 +16,11 @@ NULL
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
 #' and \code{treated} condition serparatly.
 #' 
+#' @param bamfiles,annotation,sequences,seqinfo,... See 
+#' \code{\link[=SequenceData-class]{SequenceData}}
+#' @param x a \code{CoverageSequenceData}
+#' @param condition For \code{\link{aggregate}}: condition for which the data 
+#' should be aggregated.
 #' 
 #' @examples
 #' # Construct a End5SequenceData object

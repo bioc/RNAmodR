@@ -5,6 +5,7 @@
 \alias{modify}
 \alias{modifications,Modifier-method}
 \alias{modifications}
+\alias{modify,Modifier-method}
 \title{Searching for modifications in \code{SequenceData}}
 \usage{
 modifications(x, ...)
@@ -18,8 +19,13 @@ modify(x, force = FALSE)
 \arguments{
 \item{x}{a \code{Modifier} object.}
 
-\item{perTranscript}{\code{TRUE} or \code{FALSE}: Should the coordinates be
-returned as local per transcript coordinates?}
+\item{...}{additional arguments}
+
+\item{force}{force to run \code{aggregate} again, if data is already stored
+in \code{x}.}
+
+\item{perTranscript}{For \code{modifications>} \code{TRUE} or \code{FALSE}:
+Should the coordinates be returned as local per transcript coordinates?}
 }
 \value{
 \itemize{
@@ -29,9 +35,9 @@ object.}
 }
 }
 \description{
-\code{modify} triggers the search for modifications for a \code{Modifier} 
-class. Usually this is done automatically during construction of a 
-\code{Modifier} object.
+\code{modify} triggers the search for modifications for a 
+\code{\link[=Modifier-class]{Modifier}} class. Usually this is done 
+automatically during construction of a \code{Modifier} object.
 
 \code{modifications} is the accessor for the found modifications.
 }

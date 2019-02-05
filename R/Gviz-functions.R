@@ -34,7 +34,8 @@ NULL
 setMethod("start", "ModifiedSequenceTrack", function(x) NULL)
 setMethod("end", "ModifiedSequenceTrack", function(x) NULL)
 setMethod("width", "ModifiedSequenceTrack", function(x) NULL)
-setMethod("chromosome", "ModifiedSequenceTrack", function(GdObject) GdObject@chromosome)
+setMethod("chromosome", "ModifiedSequenceTrack",
+          function(GdObject) GdObject@chromosome)
 setReplaceMethod("chromosome",
                  signature = signature("ModifiedSequenceTrack"),
                  function(GdObject, value){
@@ -42,17 +43,17 @@ setReplaceMethod("chromosome",
                    return(GdObject)
                  })
 setMethod("genome", "ModifiedSequenceTrack", function(x) x@genome)
-setMethod("length", 
-          signature = signature("ModifiedSequenceTrack"),
+#' @rdname RNAmodR-internals
+setMethod("length", "ModifiedSequenceTrack",
           function(x){
             if(chromosome(x) %in% seqnames(x)){
               length(x@sequence[[chromosome(x)]]) 
             } else {
-              0
+              0L
             }
           })
 setMethod("consolidateTrack", 
-          signature(GdObject="ModifiedSequenceTrack"),
+          signature(GdObject = "ModifiedSequenceTrack"),
           function(GdObject, chromosome, ...) {
             if(!is.null(chromosome))
               chromosome(GdObject) <- chromosome

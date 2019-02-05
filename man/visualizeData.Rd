@@ -60,6 +60,12 @@ nnotationTrack.}
 \item{\code{sequence.track.pars}}{Parameters passed onto the SequenceTrack.}
 \item{\code{data.track.pars}}{Parameters passed onto the DataTrack(s).}
 }}
+
+\item{name}{Only for \code{visualizeData}: the transcript name}
+
+\item{from}{Only for \code{visualizeData}: start position}
+
+\item{to}{Only for \code{visualizeData}: end position}
 }
 \description{
 title

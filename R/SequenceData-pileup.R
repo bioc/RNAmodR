@@ -8,6 +8,13 @@ NULL
 #' 
 #' @description
 #' title
+#' 
+#' @param bamfiles,annotation,sequences,seqinfo,... See 
+#' \code{\link[=SequenceData-class]{SequenceData}}
+#' @param x a \code{CoverageSequenceData}
+#' @param condition For \code{\link{aggregate}}: condition for which the data 
+#' should be aggregated.
+#' 
 NULL
 
 #' @rdname PileupSequenceData
@@ -214,6 +221,8 @@ setMethod("aggregate",
 
 
 # data visualization -----------------------------------------------------------
+
+#' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
   signature = signature(x = "PileupSequenceData",

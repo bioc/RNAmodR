@@ -116,21 +116,18 @@ setClass("RNASequenceTrack",
 #' @rdname RNASequenceTrack
 #' 
 #' @param sequence A \code{character} vector or \code{RNAString} object of 
-#' length one. The sequence to display.
-#' @param name A \code{character}. The name of the track used in the title panel
-#' when plotting
-#' @param ... Additional items which will all be interpreted as display
-#' parameters.
+#' length one. The sequence to display. See 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
+#' @param chromosome,genome,... See 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
 #'   
 #' @export
 #'
 #' @examples
-#' 
-#'
-RNASequenceTrack <- function(sequence,
-                             chromosome,
-                             genome,
-                             ...){
+#' seq <- RNAStringSet(c(chr1 = "AGCUAGCUAGCUAGCUAGCUAGCU"))
+#' st <- RNASequenceTrack(seq)
+#' Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
+RNASequenceTrack <- function(sequence, chromosome, genome, ...){
   .stringSet_to_ModifiedSequenceTrack("RNASequenceTrack",
                                       "RNAStringSet",
                                       sequence,
@@ -169,22 +166,19 @@ setClass("ModRNASequenceTrack",
 
 #' @rdname ModRNASequenceTrack
 #' 
-#' @param sequence A \code{character} vector or \code{RNAString} object of 
-#' length one. The sequence to display.
-#' @param name A \code{character}. The name of the track used in the title panel
-#' when plotting
-#' @param ... Additional items which will all be interpreted as display
-#' parameters.
+#' @param sequence A \code{character} vector or \code{ModRNAString} object of 
+#' length one. The sequence to display. See 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
+#' @param chromosome,genome,... See 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
 #'   
 #' @export
-#'
-#' @examples
 #' 
-#'
-ModRNASequenceTrack <- function(sequence,
-                                chromosome,
-                                genome,
-                                ...){
+#' @examples
+#' seq <- ModRNAStringSet(c(chr1 = "AGCUAGCUAGCUAGCUAGCUAGCU"))
+#' st <- ModRNASequenceTrack(seq)
+#' Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
+ModRNASequenceTrack <- function(sequence, chromosome, genome, ...){
   .stringSet_to_ModifiedSequenceTrack("ModRNASequenceTrack",
                                       "ModRNAStringSet",
                                       sequence,

@@ -10,13 +10,11 @@ RNASequenceTrack(sequence, chromosome, genome, ...)
 }
 \arguments{
 \item{sequence}{A \code{character} vector or \code{RNAString} object of 
-length one. The sequence to display.}
+length one. The sequence to display. See 
+\code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
 
-\item{...}{Additional items which will all be interpreted as display
-parameters.}
-
-\item{name}{A \code{character}. The name of the track used in the title panel
-when plotting}
+\item{chromosome, genome, ...}{See 
+\code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
 }
 \description{
 A \code{Gviz} compatible 

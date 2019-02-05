@@ -8,17 +8,23 @@ NULL
 #' @title Comparison of Samples
 #' 
 #' @description 
-#' To compare data of different samples, a \code{\link{ModifierSet}} is used.
-#' To select the data alongside the transcripts and their positions a 
-#' \code{GRanges} or a \code{GRangesList} needs to be supplied. In case of a 
-#' \code{GRanges} object, the parent column must match the transcript names
-#' as defined by the out put of \code{ranges(x)}, whereas in case of a 
-#' \code{GRangesList} the element names must match the transcript names.
+#' To compare data of different samples, a
+#' \code{\link[=ModifierSet-class]{ModifierSet}} is used. To select the data
+#' alongside the transcripts and their positions a
+#' \code{\link[GenomicRanges:GRanges-class]{GRanges}} or a
+#' \code{\link[GenomicRanges:GRanges-class]{GRangesList}} needs to be supplied.
+#' In case of a \code{GRanges} object, the parent column must match the
+#' transcript names as defined by the out put of \code{ranges(x)}, whereas in
+#' case of a \code{GRangesList} the element names must match the transcript
+#' names.
 #' 
 #' @param x a \code{Modifier} or \code{ModifierSet} object.
 #' @param coord coordinates of position to subset to. Either a \code{GRanges} or
 #' a \code{GRangesList} object. For both types the Parent column is expected to
 #' match the gene or transcript name.
+#' @param name Only for \code{compare}: the transcript name
+#' @param from Only for \code{compare}: start position
+#' @param to Only for \code{compare}: end position
 #' @param normalize either a single logical or character value. If it is a 
 #' character, it must match one of the names in the \code{ModifierSet}.
 #' @param ... optional parameters:
@@ -27,11 +33,12 @@ NULL
 #' \item{...}{passed on to \code{\link{subsetByCoord}}}
 #' }
 #' 
-#' @return \code{compareByCoord} returns a \code{\link{DataFrameList}} and 
-#' \code{plotCompareByCoord} returns a \code{ggplot} object, which can be 
+#' @return \code{compareByCoord} returns a 
+#' \code{\link[IRanges:DataFrameList-class]{DataFrameList}} and
+#' \code{plotCompareByCoord} returns a \code{ggplot} object, which can be
 #' modified further. The \code{\link{DataFrameList}} contains columns per sample
-#' as well as \code{names}, \code{positions} and \code{mod} incorporated from 
-#' the \code{coord} input. If \code{coord} contains a column \code{Activity} 
+#' as well as \code{names}, \code{positions} and \code{mod} incorporated from
+#' the \code{coord} input. If \code{coord} contains a column \code{Activity}
 #' this is included in the results as well.
 NULL
 
@@ -180,7 +187,7 @@ setMethod("compareByCoord",
   labels <- mapply(paste0, spacer, list, sep, SIMPLIFY = FALSE)
   labels <- Reduce(paste0, rev(labels))
   f <- factor(labels, levels = unique(labels))
-  reorder(f,positions)
+  stats::reorder(f,positions)
 }
 
 .create_sample_labels <- function(labels){

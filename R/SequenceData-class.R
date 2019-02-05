@@ -3,15 +3,19 @@
 #' @include SequenceDataFrame-class.R
 NULL
 
-#' @name SequenceData
+#' @name SequenceData-class
 #' 
-#' @title SequenceData
+#' @title The SequenceData class
 #' 
 #' @description 
 #' The \code{SequenceData} class is a virtual class. It contains data on each
 #' position alongside transcripts defined in the \code{ranges} slot.
 #' 
 #' It also holds the nucleotide sequence of these transcripts.
+#' 
+#' It is derived from the 
+#' \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} 
+#' class.
 #' 
 #' @param dataType The prefix for construction the class name of the 
 #' \code{SequenceData} subclass to be constructed.
@@ -32,11 +36,6 @@ NULL
 #' \itemize{
 #' \item{minQuality}{class dependent}
 #' }
-#' 
-#' #' @param conditions The condition of each column or set of columns. Either 
-#' \code{control} or \code{treated}.
-#' @param replicate The replicate of each column or set of columns for the 
-#' individual conditions
 NULL
 
 setClass("SequenceData",
@@ -69,12 +68,13 @@ sequenceDataClass <- function(dataType){
 }
 
 # for concat
-#' @name SequenceData
-#' @export
+#' @rdname RNAmodR-internals
 setMethod("parallelSlotNames", "SequenceData",
           function(x) c("ranges","sequences", callNextMethod())
 )
 
+#' @importFrom utils capture.output
+#' @rdname SequenceData-functions
 setMethod("show", "SequenceData",
           function(object){
             k <- length(object)
@@ -102,7 +102,7 @@ setMethod("show", "SequenceData",
             cat("- Data columns:\n")
             print(out_data, quote = FALSE, right = TRUE)
             cat("-")
-            cat(paste0(" ",capture.output(show(object@seqinfo)),"\n"))
+            cat(paste0(" ",utils::capture.output(show(object@seqinfo)),"\n"))
           }
 )
 # validity ---------------------------------------------------------------------
@@ -123,22 +123,18 @@ S4Vectors::setValidity2(Class = "SequenceData",.valid.SequenceData)
   df <- S4Vectors:::Vector_window(unlisted_x,
                                   start = window_start,
                                   end = window_end)
-  new(x@unlistType,
-      df,
-      x@ranges[[i]],
-      x@sequences[[i]],
-      x@replicate,
+  new(x@unlistType, df, x@ranges[[i]], x@sequences[[i]], x@replicate, 
       x@condition)
 }
 
 # subsetting
-#' @name SequenceData
-#' @export
+#' @rdname RNAmodR-internals
 setMethod("getListElement", "SequenceData",
           function(x, i, exact=TRUE){
-            i2 <- normalizeDoubleBracketSubscript(i, x, exact=exact,
-                                                  allow.NA=TRUE,
-                                                  allow.nomatch=TRUE)
+            i2 <- S4Vectors:::normalizeDoubleBracketSubscript(
+              i, x, exact=exact,
+              allow.NA = TRUE,
+              allow.nomatch = TRUE)
             if (is.na(i2)){
               return(NULL)
             }
@@ -149,57 +145,24 @@ setMethod("getListElement", "SequenceData",
 
 # replacing --------------------------------------------------------------------
 
-.remove_list_element <- function(x, i){
-  stopifnot(isSingleNumberOrNA(i))
-  if (is.na(i) || i < 1L || i > length(x))
-    return(x)  # no-op
-  ## `[<-.data.frame` does some terrible mangling of the colnames
-  ## if they contain duplicates so we can't use it here.
-  if (is.data.frame(x)) {
-    x[[i]] <- NULL
-    return(x)
-  }
-  x[-i]
-}
-
-.append_list_element <- function(x, value, name = NULL){
-  if (is.null(name) && !is.null(names(x)))
-    name <- ""
-  value <- .wrap_in_length_one_list_like_object(value, name, x)
-  coerce2(c(x, value), x)
-}
-
-.replace_list_element <- function(x, i, value){
-  value <- .wrap_in_length_one_list_like_object(value, names(x)[[i]], x)
-  ## `[<-` propagates the metadata columns from 'value' to 'x' but here
-  ## we don't want that.
-  if (is(x, "Vector"))
-    x_mcols <- mcols(x)
-  x[i] <- value
-  if (is(x, "Vector"))
-    mcols(x) <- x_mcols
-  x
-}
-
-
-#' @name SequenceData
-#' @export
+#' @rdname RNAmodR-internals
 setMethod("setListElement", "SequenceData",
           function(x, i, value){
             browser()
             if(!is(value,"SequenceDataFrame")){
               stop("invalid value. must be 'SequenceDataFrame'.")
             }
-            i2 <- normalizeDoubleBracketSubscript(i, x,
-                                                  allow.append=TRUE,
-                                                  allow.nomatch=TRUE)
+            i2 <- S4Vectors:::normalizeDoubleBracketSubscript(
+              i, x,
+              allow.append = TRUE,
+              allow.nomatch = TRUE)
             if (is.null(value))
-              return(.remove_list_element(x, i2))
+              return(S4Vectors:::.remove_list_element(x, i2))
             if (is.na(i2) || i2 > length(x)) {
               name <- if (is.na(i2)) as.character(i) else NULL
-              return(.append_list_element(x, value, name))
+              return(S4Vectors:::.append_list_element(x, value, name))
             }
-            .replace_list_element(x, i2, value)
+            S4Vectors:::.replace_list_element(x, i2, value)
           }
 )
 
@@ -269,6 +232,7 @@ setMethod("extractROWS", "SequenceData",
           }
 )
 
+#' @rdname RNAmodR-internals
 setMethod("getListElement", "SequenceData",
           function(x, i, exact=TRUE){
             i2 <- normalizeDoubleBracketSubscript(i, x, exact = exact,
@@ -524,6 +488,18 @@ setMethod("SequenceData",
 
 ################################################################################
 
+#' @rdname RNAmodR-internals
+setMethod(".getData",
+          signature = c(x = "SequenceData",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x, grl, sequences, param, args){
+            stop("This functions needs to be implemented by '",class(x),"'.",
+                 call. = FALSE)
+          }
+)
+
 .norm_postprocess_read_data <- function(data){
   if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
     data <- lapply(data, unlist)
@@ -603,25 +579,25 @@ setMethod("SequenceData",
 
 # accessors --------------------------------------------------------------------
 
-#' @name SequenceData
+#' @rdname SequenceData-functions
 #' @export
 setMethod(f = "seqinfo", 
           signature = signature(x = "SequenceData"),
           definition = function(x){x@seqinfo})
 
-#' @name SequenceData
+#' @rdname SequenceData-functions
 #' @export
 setMethod(f = "sequences", 
           signature = signature(x = "SequenceData"),
           definition = function(x){x@sequences})
 
-#' @name SequenceData
+#' @rdname SequenceData-functions
 #' @export
 setMethod(f = "ranges", 
           signature = signature(x = "SequenceData"),
           definition = function(x){x@ranges})
 
-#' @name SequenceData
+#' @rdname SequenceData-functions
 #' @export
 setMethod(f = "bamfiles", 
           signature = signature(x = "SequenceData"),
@@ -631,7 +607,7 @@ setMethod(f = "bamfiles",
 # dummy functions --------------------------------------------------------------
 # this needs to be implemented by each subclass
 
-#' @name SequenceData
+#' @rdname aggregate
 #' @export
 setMethod(f = "aggregate", 
           signature = signature(x = "SequenceData"),
@@ -640,21 +616,4 @@ setMethod(f = "aggregate",
               stop("This functions needs to be implemented by '",class(x),"'.",
                    call. = FALSE)
             }
-)
-
-# data visualization -----------------------------------------------------------
-# this needs to be implemented by each subclass
-
-#' @name RNAmodR-internals
-#' @export
-setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "SequenceData",
-                        data = "missing",
-                        seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, seqdata, sequence,  args) {
-    stop("This functions needs to be implemented by '",class(x),"'.",
-         call. = FALSE)
-  }
 )

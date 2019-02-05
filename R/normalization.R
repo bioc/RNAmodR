@@ -21,10 +21,10 @@ NULL
 }
 
 # Return a TxDb object
-.norm_annotation <- function(annotation, className,
-                             .xname = assertive::get_name_in_parent(x)){
+.norm_annotation <- function(annotation, className, 
+                  .annotationname = assertive::get_name_in_parent(annotation)){
   if(!is(annotation,"GFFFile") && !is(annotation,"TxDb")){
-    annotation <- .norm_gff(annotation, className, .xname)
+    annotation <- .norm_gff(annotation, className, .annotationname)
   } else if(is(annotation,"GFFFile")) {
     assertive::assert_all_are_existing_files(c(path(annotation)))
   } else if(is(annotation,"TxDb")) {
@@ -44,8 +44,7 @@ NULL
 # Sequences --------------------------------------------------------------------
 
 # Either return a FaFile or BSgenome object
-.norm_sequences <- function(seq, className,
-                            .xname = assertive::get_name_in_parent(x)){
+.norm_sequences <- function(seq, className){
   if(!is(seq,"FaFile") && !is(seq,"BSgenome")){
     tmp <- try(Rsamtools::FaFile(seq))
     if(is(tmp,"try-error")){
@@ -205,15 +204,6 @@ NULL
          call. = FALSE)
   }
   mod
-}
-
-.norm_data_type <- function(ans, pd){
-  if(!is(pd,ans@dataType)){
-    stop("Data class '",ans@dataType,"' is required by '",class(.Object),"'.",
-         "\n'",class(pd),"' was provided. Aborting...",
-         call. = FALSE)
-  }
-  pd
 }
 
 .norm_modifications <- function(ans, args){

@@ -36,6 +36,7 @@ Imports:
     RColorBrewer,
     colorRamps,
     ggplot2,
+    utils,
     matrixStats,
     reshape2,
     stringr,
@@ -48,6 +49,8 @@ Suggests:
     BiocStyle,
     knitr,
     rmarkdown,
+    testthat,
+    sessioninfo,
     RNAmodR.Data
 VignetteBuilder: knitr
 Collate:

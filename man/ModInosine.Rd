@@ -15,6 +15,35 @@ ModInosine(x, annotation, sequences, seqinfo, ...)
 
 ModSetInosine(x, annotation, sequences, seqinfo, ...)
 }
+\arguments{
+\item{x}{the input which can be of the different types depending on whether
+a \code{ModRiboMethSeq} or a \code{ModSetRiboMethSeq} object is to be 
+constructed. For more information have a look at the documentation of
+the \code{\link[RNAmodR:Modifier-class]{Modifier}} and 
+\code{\link[RNAmodR:ModifierSet-class]{ModifierSet}} classes.}
+
+\item{annotation}{annotation data, which must match the information contained
+in the BAM files. This is parameter is only required if \code{x} if not a 
+\code{Modifier} object.}
+
+\item{sequences}{sequences matching the target sequences the reads were 
+mapped onto. This must match the information contained in the BAM files. This
+is parameter is only required if \code{x} if not a \code{Modifier} object.}
+
+\item{seqinfo}{An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
+argument or character vector, which can be coerced to one, to subset the 
+sequences to be analyzed on a per chromosome basis.}
+
+\item{...}{Optional arguments overwriting default values, which are
+\itemize{
+\item{minCoverage:} {The minimal coverage at the position as integer value 
+(default: \code{minCoverage = 10L}).}
+\item{minReplicate:} {minimum number of replicates needed for the analysis 
+(default: \code{minReplicate = 1L}).}
+\item{minScore:} {minimum score to identify Inosine positions de novo 
+(default: \code{minScore = 10L}).}
+}}
+}
 \description{
 Inosine can be detected in sequence by the conversion of A positions to G.
 \code{ModInosine} uses to search for Inosine positions.
