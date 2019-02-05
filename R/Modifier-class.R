@@ -229,8 +229,6 @@ setMethod(
         "with",length(object@data),"elements.\n")
     files <- path(object@bamfiles)
     cat("| Input files:\n",paste0("  - ",names(files),": ",files,"\n"))
-    cat("| Sequence file:",path(object@fasta),"\n")
-    cat("| Annotation file:",path(object@gff),"\n")
     cat("| Modification type(s): ",paste0(object@mod, collapse = " / "),"\n")
     cat("| Modifications found:",ifelse(length(object@modifications) != 0L,
                                       paste0("yes (",
