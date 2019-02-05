@@ -22,6 +22,7 @@ A \code{Gviz} compatible
 RNA sequences.
 }
 \examples{
-
-
+seq <- ModRNAStringSet(c(chr1 = paste0(alphabet(ModRNAString()),collapse = "")))
+st <- ModRNASequenceTrack(seq)
+Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
 }

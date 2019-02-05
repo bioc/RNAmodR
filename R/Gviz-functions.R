@@ -114,8 +114,7 @@ setMethod("drawGD",
                                                       "lwd",
                                                       2)))
             } else {
-              sequence <- as.character(as(subseq(GdObject,
-                                                 start = minBase,
+              sequence <- as.character(as(subseq(GdObject, start = minBase,
                                                  end = maxBase - 1),
                                           "Rle"))
               at <- seq((minBase + 0.5), maxBase - 1 + 0.5, by = 1)
@@ -123,7 +122,7 @@ setMethod("drawGD",
               if(perLetter < 0.5 && .dpOrDefault(GdObject, "add53", FALSE)){
                 sequence[c(1, length(sequence))] <- ""
               }
-              col <- fcol[toupper(sequence)]
+              col <- fcol[sequence]
               if(lwidth < perLetter && 
                  !.dpOrDefault(GdObject, "noLetters", FALSE)){
                 grid.text(x = unit(at, "native"),

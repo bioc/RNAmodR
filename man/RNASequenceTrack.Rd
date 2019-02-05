@@ -22,6 +22,7 @@ A \code{Gviz} compatible
 sequences.
 }
 \examples{
-
-
+seq <- RNAStringSet(c(chr1 = "AGCUAGCUAGCUAGCUAGCUAGCU"))
+st <- RNASequenceTrack(seq)
+Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
 }

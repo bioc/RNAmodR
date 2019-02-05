@@ -175,7 +175,7 @@ setClass("ModRNASequenceTrack",
 #' @export
 #' 
 #' @examples
-#' seq <- ModRNAStringSet(c(chr1 = "AGCUAGCUAGCUAGCUAGCUAGCU"))
+#' seq <- ModRNAStringSet(c(chr1 = paste0(alphabet(ModRNAString()),collapse = "")))
 #' st <- ModRNASequenceTrack(seq)
 #' Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
 ModRNASequenceTrack <- function(sequence, chromosome, genome, ...){
