@@ -16,6 +16,11 @@ NULL
 #' Inosine can be detected in sequence by the conversion of A positions to G.
 #' \code{ModInosine} uses to search for Inosine positions.
 #' 
+#' Only samples named \code{treated} are used for this analysis, since the
+#' A to G conversion is common feature among the reverse transcriptases usually
+#' emploied. Let us know, if that is not the case, and the class needs to be
+#' modified.
+#' 
 #' \code{\link{ModInosine-functions}}
 #' 
 #' @details
@@ -140,12 +145,12 @@ setReplaceMethod(f = "settings",
 
 .calculate_inosine_score <- function(x){
   data <- x@unlistData
-  df <- data.frame(x = data$means.G,
-                   y = data$means.A + data$means.T + data$means.C,
-                   dx = data$sds.G,
-                   dy = data$sds.A + data$sds.T + data$sds.C)
-  f <- z ~ log2(x/y) * 10
-  scores <- .mutate_with_error(df,f)
+  df <- data.frame(x = data$means.treated.G,
+                   y = data$means.treated.A + data$means.treated.T + data$means.treated.C,
+                   dx = data$sds.treated.G,
+                   dy = data$sds.treated.A + data$sds.treated.T + data$sds.treated.C)
+  fun <- z ~ log2(x/y) * 10
+  scores <- .mutate_with_error(df,fun)
   scores$z <- vapply(scores$z,min,numeric(1),100)
   scores$z[is.infinite(scores$z) | is.na(scores$z)] <- 0
   scores$dz[is.infinite(scores$dz) | is.na(scores$dz)] <- 0
@@ -171,8 +176,9 @@ setReplaceMethod(f = "settings",
 }
 
 .aggregate_inosine <- function(x){
-  mod <- aggregate(seqData(x))
+  message("Aggregating data and calculating scores...")
   data <- seqData(x)
+  mod <- aggregate(data)
   coverage <- .aggregate_pile_up_to_coverage(data)
   score <- .calculate_inosine_score(mod)
   ans <- cbind(S4Vectors::DataFrame(score = unlist(score)$value,
@@ -207,7 +213,6 @@ setMethod(f = "aggregate",
 }
 
 .find_inosine <- function(x){
-  message("Searching for Inosine ... ", appendLF = FALSE)
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   # get the aggregate data
   mod <- aggregateData(x)
@@ -269,6 +274,7 @@ setMethod("modify",
             x <- aggregate(x, force)
             x@modifications <- .find_inosine(x)
             x@modificationsValidForCurrentArguments <- TRUE
+            message("done.")
             x
           }
 )

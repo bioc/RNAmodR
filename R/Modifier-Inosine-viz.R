@@ -17,8 +17,12 @@ setMethod(
   signature = signature(x = "ModInosine",
                         coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
-    callNextMethod(x = x, coord = coord, type = "score", 
-                   window.size = window.size, ...)
+    if(missing(type)){
+      type <- "score"
+    }
+    type <- match.arg(type, "score")
+    callNextMethod(x = x, coord = coord, type = type, window.size = window.size,
+                   ...)
   }
 )
 #' @rdname ModInosine-functions
@@ -104,7 +108,7 @@ setMethod(
                         coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
     if(missing(type)){
-      type <- "scoreRMS"
+      type <- "score"
     }
     type <- match.arg(type, "score")
     callNextMethod(x = x, coord = coord, type = type, window.size = window.size,
