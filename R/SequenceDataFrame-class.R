@@ -49,7 +49,7 @@ setClass(Class = "SequenceDataFrame",
          contains = c("DataFrame"),
          slots = c(ranges = "GRanges",
                    sequence = "XString",
-                   conditions = "factor",
+                   condition = "factor",
                    replicate = "factor"))
 
 setMethod(
@@ -140,7 +140,6 @@ setMethod("[", "SequenceDataFrame",
             if (length(list(...)) > 0L){
               warning("parameters in '...' not supported")
             }
-            
             ## We do list-style subsetting when [ was called with no ','.
             ## NOTE: matrix-style subsetting by logical matrix not supported.
             list_style_subsetting <- (nargs() - !missing(drop)) < 3L
@@ -170,6 +169,8 @@ setMethod("[", "SequenceDataFrame",
             }
             if (!missing(i)){
               x <- extractROWS(x, i)
+            } else {
+              return(x) # early exit if subset is column-only
             }
             if (missing(drop)){
               drop <- TRUE
