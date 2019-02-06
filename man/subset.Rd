@@ -31,12 +31,14 @@ match the gene or transcript name.}
 
 \item{...}{optional parameters:
 \itemize{
-\item{\code{name}}{Limit results to one specific gene or transcript}
-\item{\code{type}}{the modification type used for subsetting. By default this
+\item{\code{name}} {Limit results to one specific gene or transcript}
+\item{\code{type}} {the modification type used for subsetting. By default this
 is derived from the \code{modType(x)}, but it can be overwritten using 
 \code{type}. It must be a valid shortName for a modification according to
 \code{shortName(ModRNAString())} and of course present in metadata column 
 \code{mod} of \code{coord}}
+\item{\code{perTranscript}} {Returns the positions labeled per transcript
+and not per chromosome (default: \code{perTranscript = FALSE}).}
 }}
 }
 \description{

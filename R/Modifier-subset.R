@@ -17,12 +17,14 @@ NULL
 #' match the gene or transcript name.
 #' @param ... optional parameters:
 #' \itemize{
-#' \item{\code{name}}{Limit results to one specific gene or transcript}
-#' \item{\code{type}}{the modification type used for subsetting. By default this
+#' \item{\code{name}} {Limit results to one specific gene or transcript}
+#' \item{\code{type}} {the modification type used for subsetting. By default this
 #' is derived from the \code{modType(x)}, but it can be overwritten using 
 #' \code{type}. It must be a valid shortName for a modification according to
 #' \code{shortName(ModRNAString())} and of course present in metadata column 
 #' \code{mod} of \code{coord}}
+#' \item{\code{perTranscript}} {Returns the positions labeled per transcript
+#' and not per chromosome (default: \code{perTranscript = FALSE}).}
 #' }
 NULL
 
@@ -30,6 +32,7 @@ NULL
   name <- NULL
   type <- modType(x)
   flank <- 0L
+  perTranscript <- FALSE
   if(!is.null(input[["name"]])){
     name <- input[["name"]]
     if(!is.character(name) || width(name) == 0L){
@@ -55,7 +58,15 @@ NULL
            call. = FALSE)
     }
   }
-  args <- list(name = name, type = type, flank = flank)
+  if(!is.null(input[["perTranscript"]])){
+    perTranscript <- input[["perTranscript"]]
+    if(!assertive::is_a_bool(perTranscript)){
+      stop("'perTranscript' must be a single logical value.",
+           call. = FALSE)
+    }
+  }
+  args <- list(name = name, type = type, flank = flank,
+               perTranscript = perTranscript)
   args
 }
 
@@ -128,18 +139,33 @@ NULL
   stop(message,call. = FALSE)
 }
 
-.perform_subset <- function(data, coord, flank = 0L){
+.perform_subset <- function(data, coord, flank = 0L, perTranscript = FALSE){
   if(!all(names(data) == names(coord))){
     stop("Length and/or order of data and coord do not match.")
   }
   .check_for_invalid_positions(data,coord)
   # construct flanking vector
   flank <- seq.int(from = -flank,to = flank, by = 1L)
-  f <- IntegerList(lapply(start(ranges(coord)),
-                          function(i){
-                            unique(unlist(lapply(i,function(j){j + flank})))
-                          }))
-  return(data[f])
+  f <- IRanges::IntegerList(lapply(start(ranges(coord)),
+                                   function(i){
+                                     unique(unlist(lapply(i,
+                                                          function(j){
+                                                            j + flank
+                                                          })
+                                                   ))
+                                   }))
+  ans <- data[f]
+  if(perTranscript){
+    pos <- IRanges::CharacterList(mapply(
+      function(d,i){
+        which(i == rownames(d))
+      },
+      data,
+      f,
+      SIMPLIFY = FALSE))
+    rownames(ans) <- pos
+  }
+  return(ans)
 }
 
 .subset_Modifier_by_GRangesList <- function(x, coord, ...){
@@ -149,7 +175,7 @@ NULL
   names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
   data <- data[match(names, names(data))]
   coord <- coord[match(names, names(coord))]
-  .perform_subset(data, coord, args[["flank"]])
+  .perform_subset(data, coord, args[["flank"]], args[["perTranscript"]])
 }
 
 ################################################################################
@@ -215,7 +241,8 @@ setMethod("subsetByCoord",
                                        args[["type"]])
            data <- data[match(names, names(data))]
            coord <- coord[match(names, names(coord))]
-           .perform_subset(data, coord, args[["flank"]])
+           .perform_subset(data, coord, args[["flank"]], 
+                           args[["perTranscript"]])
          })
 }
 

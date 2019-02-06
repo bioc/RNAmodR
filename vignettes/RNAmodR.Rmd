@@ -264,12 +264,25 @@ alias <- data.frame(tx_id = names(id2name(txdb)),
                     name = id2name(txdb))
 ```
 
-```{r plot1, fig.cap="Heatmap"}
+```{r plot1, fig.cap="Heatmap for identified Inosine positions"}
 plotCompareByCoord(msi, coord, alias = alias)
 ```
 
+The heatmap is slighlty counterintuitive, since values for different Inosine 
+positions differs. Therefore, a normalization to control sample might be 
+reasonable.
 
+```{r plot2, fig.cap="Heatmap for identified Inosine positions with normalized scores"}
+plotCompareByCoord(msi, coord, alias = alias, normalize = "SampleSet1",
+                   perTranscript = TRUE)
+```
 
+Additionally, the calculated scores and data can be visualized along the 
+transcripts or chunks of the transcript
+
+```{r plot3, fig.cap="Scores and data along a transcript containing a A to G conversion indicating the presence of Inosine"}
+visualizeData(msi, "2", from = 25L, to = 45L)
+```
 
 ### Modifications described in the literare
 found modifications to modifications described in the literature

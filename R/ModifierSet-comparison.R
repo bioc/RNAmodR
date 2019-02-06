@@ -46,6 +46,7 @@ NULL
 
 .norm_compare_args <- function(input, data, x){
   compareType <- mainScore(x)
+  perTranscript <- FALSE
   alias <- NA
   if(!is.null(input[["compareType"]])){
     compareType <- input[["compareType"]]
@@ -80,6 +81,7 @@ NULL
     }
   }
   args <- list(compareType = compareType,
+               perTranscript = perTranscript,
                alias = alias)
   args
 }
