@@ -353,6 +353,14 @@ setMethod(f = "mainScore",
 )
 #' @rdname Modifier-functions
 #' @export
+setMethod(f = "bamfiles", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x){
+            S4Vectors::SimpleList(lapply(x, bamfiles))
+          }
+)
+#' @rdname Modifier-functions
+#' @export
 setMethod(f = "sequences", 
           signature = signature(x = "ModifierSet"),
           definition = function(x, modified = FALSE){
@@ -364,14 +372,22 @@ setMethod(f = "sequences",
 setMethod(f = "ranges", 
           signature = signature(x = "ModifierSet"),
           definition = function(x){
-            ranges(seqData(x[[1]]))
+            ranges(x[[1]])
+          }
+)
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "seqinfo", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x){
+            S4Vectors::SimpleList(lapply(x, seqinfo))
           }
 )
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modifications", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) {
-            GenomicRanges::GRangesList(lapply(x,modifications))
+          definition = function(x, perTranscript = FALSE) {
+            GenomicRanges::GRangesList(lapply(x,modifications,perTranscript))
           }
 )

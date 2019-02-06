@@ -230,6 +230,14 @@ setMethod(f = "seqinfo",
 
 #' @rdname SequenceData-functions
 #' @export
+setMethod(f = "names", 
+          signature = signature(x = "SequenceDataList"),
+          definition = function(x){
+            names(x[[1]])
+          })
+
+#' @rdname SequenceData-functions
+#' @export
 setMethod(f = "sequences", 
           signature = signature(x = "SequenceDataList"),
           definition = function(x){

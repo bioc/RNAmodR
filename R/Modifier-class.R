@@ -341,10 +341,22 @@ setReplaceMethod(f = "settings",
 
 #' @rdname Modifier-functions
 #' @export
+setMethod(f = "seqData", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){x@data})
+
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "names", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){names(seqData(x))})
+
+#' @rdname Modifier-functions
+#' @export
 setMethod(f = "seqinfo", 
           signature = signature(x = "Modifier"),
-          definition = function(x){x@seqinfo})
- 
+          definition = function(x){seqinfo(seqData(x))})
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "sequences", 
@@ -368,7 +380,7 @@ setMethod(f = "sequences",
               ans
             }
 )
-  
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "ranges", 
@@ -381,35 +393,20 @@ setMethod(f = "bamfiles",
           signature = signature(x = "Modifier"),
           definition = function(x){x@bamfiles})
 
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "seqData", 
-          signature = signature(x = "Modifier"),
-          definition = function(x){x@data})
-
 # converts the genomic coordinates to transcript based coordinates
 .get_modifications_per_transcript <- function(x){
-  browser()
   grl <- ranges(x)
+  strand_u <- .get_strand_u_GRangesList(grl)
+  seqs <- .seqs_rl_by(grl, 1L)
+  seqs[strand_u == "-"] <- .seqs_rl_by(grl[strand_u == "-"], -1L)
   modifications <- modifications(x)
-  modRanges <- 
-    ranges[as.character(ranges$ID) %in% as.character(modifications$Parent),]
-  modRanges <- modRanges[match(as.character(modRanges$ID),
-                               as.character(modifications$Parent))]
-  # modify modifcation positions from genome centric to transcript centric
-  start(modifications[strand(modifications) == "+"]) <- 
-    start(modifications[strand(modifications) == "+"]) - 
-    start(modRanges[strand(modRanges) == "+"]) + 1L
-  end(modifications[strand(modifications) == "+"]) <- 
-    end(modifications[strand(modifications) == "+"]) - 
-    start(modRanges[strand(modRanges) == "+"]) + 1L
-  end(modifications[strand(modifications) == "-"]) <- 
-    end(modRanges[strand(modRanges) == "-"]) - 
-    end(modifications[strand(modifications) == "-"]) + 1L
-  start(modifications[strand(modifications) == "-"]) <- 
-    end(modRanges[strand(modRanges) == "-"]) - 
-    start(modifications[strand(modifications) == "-"]) + 1L
-  names(modifications) <- as.character(modifications$Parent)
+  start_mod <- start(modifications)
+  parent_mod <- as.character(modifications$Parent)
+  new_start_mod <- which(seqs[parent_mod] == start_mod)
+  # reset strand since it is now transcipt centric
+  strand(modifications) <- "*"
+  ranges(modifications) <- IRanges::IRanges(start = unlist(new_start_mod),
+                                            end = unlist(new_start_mod))
   modifications
 }
 
