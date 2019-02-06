@@ -43,6 +43,13 @@ setMethod("initialize",
             return(.Object)
 })
 
+#' @rdname RNAmodR-internals
+setMethod("show", "ModifiedSequenceTrack",
+          function(object){
+            cat(Gviz:::.sequenceTrackInfo(object))
+          }
+)
+
 
 # constructor ------------------------------------------------------------------
 
