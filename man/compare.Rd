@@ -41,8 +41,10 @@ plotCompareByCoord(x, coord, normalize, ...)
 
 \item{...}{optional parameters:
 \itemize{
-\item{\code{name}}{Limit results to one specific gene or transcript}
-\item{...}{passed on to \code{\link{subsetByCoord}}}
+\item{\code{alias}} {a data.frame with two columns, \code{tx_id} and 
+\code{name}, to convert transcipt ids to another identifier}
+\item{\code{name}} {Limit results to one specific gene or transcript}
+\item{...} {passed on to \code{\link{subsetByCoord}}}
 }}
 
 \item{coord}{coordinates of position to subset to. Either a \code{GRanges} or

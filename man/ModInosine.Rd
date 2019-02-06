@@ -48,6 +48,11 @@ sequences to be analyzed on a per chromosome basis.}
 Inosine can be detected in sequence by the conversion of A positions to G.
 \code{ModInosine} uses to search for Inosine positions.
 
+Only samples named \code{treated} are used for this analysis, since the
+A to G conversion is common feature among the reverse transcriptases usually
+emploied. Let us know, if that is not the case, and the class needs to be
+modified.
+
 \code{\link{ModInosine-functions}}
 }
 \details{

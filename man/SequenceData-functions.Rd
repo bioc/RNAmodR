@@ -45,6 +45,8 @@
 
 \S4method{seqinfo}{SequenceDataList}(x)
 
+\S4method{names}{SequenceDataList}(x)
+
 \S4method{sequences}{SequenceDataList}(x)
 
 \S4method{ranges}{SequenceDataList}(x)
