@@ -18,6 +18,8 @@ NULL
 #' @param from Only for \code{visualizeData}: start position
 #' @param to Only for \code{visualizeData}: end position
 #' @param type the data type of data show as data tracks.
+#' @param seqdata \code{TRUE} or \code{FALSE}: whould the sequence data be 
+#' shown? (default: \code{seqdata = FALSE})
 #' @param window.size integer value for the number of positions on the left and 
 #' right site of the selected positions included in the plotting (default: 
 #' \code{window.size = 15L})
@@ -34,6 +36,13 @@ NULL
 #' \item{\code{data.track.pars}}{Parameters passed onto the DataTrack(s).}
 #' }
 NULL
+
+.norm_seqdata_show <- function(seqdata){
+  if(missing(seqdata) || !assertive::is_a_bool(seqdata)){
+    seqdata <- FALSE
+  }
+  seqdata
+}
 
 .norm_viz_args_Modifier <- function(input){
   modified.seq <- FALSE
@@ -252,9 +261,12 @@ NULL
 setMethod(
   f = "visualizeDataByCoord",
   signature = signature(x = "Modifier", coord = "GRanges"),
-  definition = function(x, coord, type = NA, window.size = 15L, ...) {
+  definition = function(x, coord, type = NA, seqdata = FALSE, window.size = 15L,
+                        ...) {
+    browser()
     requireNamespace("Gviz")
     # input check
+    seqdata_show <- .norm_seqdata_show(seqdata)
     args <- .norm_viz_args_Modifier(list(...))
     coord <- .norm_coord_for_visualization(coord)
     # get plotting data
@@ -283,6 +295,10 @@ setMethod(
                       args = args)
     if(!is.list(dt)){
       dt <- list(dt)
+    } else {
+      if(!seqdata_show){
+        dt <- dt[names(dt) != "seqdata"]
+      }
     }
     # plot tracks
     plotTracks(c(dt,
@@ -293,10 +309,7 @@ setMethod(
   }
 )
 
-.create_coord_for_visualization <- function(x,
-                                            name,
-                                            from,
-                                            to){
+.create_coord_for_visualization <- function(x, name, from, to){
   if(is(x,"Modifier")){
     if(!(name %in% names(seqData(x)))){
       stop("Element '",name,"' not present in data.", call. = FALSE)
@@ -321,18 +334,17 @@ setMethod(
 setMethod(
   f = "visualizeData",
   signature = signature(x = "Modifier"),
-  definition = function(x, name, from, to, type = NA, ...) {
+  definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
     coord <- .create_coord_for_visualization(x, name, from, to)
-    visualizeDataByCoord(x, coord, type = type,  window.size = 0L, ...)
+    visualizeDataByCoord(x, coord, type = type, seqdata = seqdata,
+                         window.size = 0L, ...)
   }
 )
 
 #' @rdname RNAmodR-internals
 setMethod(
   f = ".dataTracks",
-  signature = signature(x = "Modifier",
-                        data = "ANY",
-                        seqdata = "ANY",
+  signature = signature(x = "Modifier", data = "ANY", seqdata = "ANY",
                         sequence = "ANY"),
   definition = function(x, data, seqdata, sequence, args) {
     stop(".dataTracks needs to be implemented for class '", class(x)[[1]], "'")

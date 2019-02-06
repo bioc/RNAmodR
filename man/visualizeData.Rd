@@ -18,16 +18,16 @@ visualizeDataByCoord(x, coord, type, window.size = 15L, ...)
 visualizeData(x, name, from = 1L, to = 30L, type, ...)
 
 \S4method{visualizeDataByCoord}{Modifier,GRanges}(x, coord, type = NA,
-  window.size = 15L, ...)
+  seqdata = FALSE, window.size = 15L, ...)
 
-\S4method{visualizeData}{Modifier}(x, name, from = 1L, to = 30L,
-  type = NA, ...)
+\S4method{visualizeData}{Modifier}(x, name, from, to, type = NA,
+  seqdata = FALSE, ...)
 
 \S4method{visualizeDataByCoord}{ModifierSet,GRanges}(x, coord, type = NA,
-  window.size = 15L, ...)
+  seqdata = FALSE, window.size = 15L, ...)
 
-\S4method{visualizeData}{ModifierSet}(x, name, from = 1L, to = 30L,
-  type = NA, ...)
+\S4method{visualizeData}{ModifierSet}(x, name, from, to, type = NA,
+  seqdata = FALSE, ...)
 
 \S4method{visualizeDataByCoord}{SequenceData,GRanges}(x, coord,
   type = NA, window.size = 15L, ...)
@@ -66,6 +66,9 @@ nnotationTrack.}
 \item{from}{Only for \code{visualizeData}: start position}
 
 \item{to}{Only for \code{visualizeData}: end position}
+
+\item{seqdata}{\code{TRUE} or \code{FALSE}: whould the sequence data be 
+shown? (default: \code{seqdata = FALSE})}
 }
 \description{
 title

@@ -8,7 +8,8 @@ RNAMODR_I_PLOT_BASES_COLOURS <-
     "U" = biovizBase::getBioColor("RNA_BASES_N")[["U"]],
     "C" = biovizBase::getBioColor("RNA_BASES_N")[["C"]])
 RNAMODR_I_PLOT_DATA_COLOURS <- c("score" = "#ABABAB") 
-RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
+RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine",
+                               bases = "Bases called [%]")
 
 #' @rdname ModInosine-functions
 #' @export
@@ -31,16 +32,14 @@ setMethod(
   f = "visualizeData",
   signature = signature(x = "ModInosine"),
   definition = function(x, name, from, to, type = "score", ...) {
-    callNextMethod(x = x, name, from, to, type = "score", ...)
+    callNextMethod(x = x, name, from, to, type = type, ...)
   }
 )
 
 #' @name ModInosine-internals
 setMethod(
   f = ".dataTracks",
-  signature = signature(x = "ModInosine",
-                        data = "GRanges",
-                        seqdata = "GRanges",
+  signature = signature(x = "ModInosine", data = "GRanges", seqdata = "GRanges",
                         sequence = "XString"),
   definition = function(x, data, seqdata, sequence, args) {
     requireNamespace("Gviz")
@@ -66,7 +65,7 @@ setMethod(
     # DataTrack for sequence data
     mcols(seqdata) <- 
       mcols(seqdata)[,stringr::str_detect(colnames(mcols(seqdata)),"means")]
-    colnames(mcols(seqdata)) <- gsub("means.","",colnames(mcols(seqdata)))
+    colnames(mcols(seqdata)) <- gsub("means.treated.","",colnames(mcols(seqdata)))
     mcols(seqdata) <- 
       DataFrame(as.data.frame(mcols(seqdata)[,colnames(mcols(seqdata)) != "."]) * 100)
     colnames(mcols(seqdata))[colnames(mcols(seqdata)) == "T"] <- "U"
@@ -74,7 +73,7 @@ setMethod(
                                             names(colour.bases))]
     dtbases <- DataTrack(seqdata,
                          groups = colnames(mcols(seqdata)),
-                         name = "Bases called [%]",
+                         name = RNAMODR_I_PLOT_DATA_NAMES["bases"],
                          col = colour.bases[order(names(colour.bases))],
                          type = "histogram",
                          stackedBars = TRUE)
@@ -96,7 +95,7 @@ setMethod(
     displayPars(dtscore)$col.axis <- "#000000"
     # Return as a list
     list(score = dtscore,
-         bases = dtbases)
+         seqdata = dtbases)
   }
 )
 

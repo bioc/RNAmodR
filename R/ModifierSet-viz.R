@@ -79,21 +79,16 @@ setMethod(
   f = "visualizeDataByCoord",
   signature = signature(x = "ModifierSet",
                         coord = "GRanges"),
-  definition = function(x,
-                        coord,
-                        type = NA,
-                        window.size = 15L,
+  definition = function(x, coord, type = NA, seqdata = FALSE, window.size = 15L,
                         ...) {
     requireNamespace("Gviz")
     # input check
+    seqdata_show <- .norm_seqdata_show(seqdata)
     args <- .norm_viz_args_ModifierSet(list(...))
     coord <- .norm_coord_for_visualization(coord)
     # get plotting data
-    modAnnotation <- .norm_viz_mod_annotation(args[["additional.mod"]],
-                                              coord)
-    seq <- .get_viz_sequence(sequences(x)[[coord$Parent]],
-                             coord,
-                             args,
+    modAnnotation <- .norm_viz_mod_annotation(args[["additional.mod"]], coord)
+    seq <- .get_viz_sequence(sequences(x)[[coord$Parent]], coord, args,
                              modAnnotation)
     range <- .norm_viz_range(ranges(x)[[coord$Parent]])
     chromosome <- .norm_viz_chromosome(range)
@@ -122,24 +117,27 @@ setMethod(
                  function(i){
                    a <- args
                    a[["colour"]] <- colours[i]
-                   dt <- .dataTracks(x[[i]],
-                                     data = data[[i]],
-                                     seqdata = seqdata[[i]],
-                                     sequence = seq,
+                   dt <- .dataTracks(x[[i]], data = data[[i]],
+                                     seqdata = seqdata[[i]], sequence = seq,
                                      args = a)
+                   if(seqdata_show){
+                     return(dt[["seqdata"]])
+                   }
                    dt[[1]]
                  })
-    if(!is.list(dtl)){
-      dtl <- list(dtl)
-    }
+    # add sample names
+    dtl <- mapply(function(dt,name){
+                    names(dt) <- paste0(name, "\n", names(dt))
+                    dt
+                  },
+                  dtl,
+                  names(x),
+                  SIMPLIFY = FALSE)
     # based in the width change from histogram to h type of the DataTrack
     dtl <- .norm_data_track_types(dtl,coordValues,args)
     # plot tracks
-    plotTracks(c(dtl,
-                 list(st,atm)),
-               from = coordValues$start,
-               to = coordValues$end,
-               chromosome = chromosome)
+    plotTracks(c(dtl, list(st,atm)), from = coordValues$start, 
+               to = coordValues$end, chromosome = chromosome)
   }
 )
 
@@ -148,20 +146,9 @@ setMethod(
 setMethod(
   f = "visualizeData",
   signature = signature(x = "ModifierSet"),
-  definition = function(x,
-                        name,
-                        from,
-                        to,
-                        type = NA,
-                        ...) {
-    coord <- .create_coord_for_visualization(x,
-                                             name,
-                                             from,
-                                             to)
-    visualizeDataByCoord(x,
-                         coord,
-                         type = type,
-                         window.size = 0L,
-                         ...)
+  definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
+    coord <- .create_coord_for_visualization(x, name, from, to)
+    visualizeDataByCoord(x, coord, type = type, seqdata = seqdata, 
+                         window.size = 0L, ...)
   }
 )

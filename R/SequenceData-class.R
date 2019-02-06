@@ -112,36 +112,6 @@ setMethod("show", "SequenceData",
 }
 S4Vectors::setValidity2(Class = "SequenceData",.valid.SequenceData)
 
-################################################################################
-# list methods -----------------------------------------------------------------
-
-.extractElement <- function(x, i){
-  unlisted_x <- unlist(x, use.names=FALSE)
-  x_partitioning <- PartitioningByEnd(x)
-  window_start <- start(x_partitioning)[i]
-  window_end <- end(x_partitioning)[i]
-  df <- S4Vectors:::Vector_window(unlisted_x,
-                                  start = window_start,
-                                  end = window_end)
-  new(x@unlistType, df, x@ranges[[i]], x@sequences[[i]], x@replicate, 
-      x@condition)
-}
-
-# subsetting
-#' @rdname RNAmodR-internals
-setMethod("getListElement", "SequenceData",
-          function(x, i, exact=TRUE){
-            i2 <- S4Vectors:::normalizeDoubleBracketSubscript(
-              i, x, exact=exact,
-              allow.NA = TRUE,
-              allow.nomatch = TRUE)
-            if (is.na(i2)){
-              return(NULL)
-            }
-            .extractElement(x, i)
-          }
-)
-
 
 # replacing --------------------------------------------------------------------
 
@@ -221,9 +191,11 @@ setMethod("extractROWS", "SequenceData",
             ans_elementMetadata <- extractROWS(x@elementMetadata, i)
             ans_ranges <- extractROWS(x@ranges, i)
             ans_sequences <- extractROWS(x@sequences, i)
-            initialize(x, 
+            initialize(x,
                        ranges = ans_ranges,
                        sequences = ans_sequences,
+                       replicate = x@replicate,
+                       condition = x@condition,
                        bamfiles = x@bamfiles,
                        seqinfo = x@seqinfo,
                        unlistData = ans_unlistData,
@@ -238,8 +210,9 @@ setMethod("getListElement", "SequenceData",
             i2 <- normalizeDoubleBracketSubscript(i, x, exact = exact,
                                                   allow.NA = TRUE,
                                                   allow.nomatch = TRUE)
-            if (is.na(i2))
+            if (is.na(i2)){
               return(NULL)
+            }
             unlisted_x <- unlist(x, use.names=FALSE)
             x_partitioning <- PartitioningByEnd(x)
             window_start <- start(x_partitioning)[i2]

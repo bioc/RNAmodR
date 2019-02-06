@@ -278,10 +278,16 @@ plotCompareByCoord(msi, coord, alias = alias, normalize = "SampleSet1",
 ```
 
 Additionally, the calculated scores and data can be visualized along the 
-transcripts or chunks of the transcript
+transcripts or chunks of the transcript. With the optional argument `seqdata`
+the plotting of the sequence data instead of the score data can be triggered
+by setting it to `TRUE`.
 
-```{r plot3, fig.cap="Scores and data along a transcript containing a A to G conversion indicating the presence of Inosine"}
-visualizeData(msi, "2", from = 25L, to = 45L)
+```{r plot3, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine"}
+visualizeData(msi, "2", from = 25L, to = 45L) # seqdata = FALSE
+```
+
+```{r plot3, fig.cap="Sequence data along a transcript containing a A to G conversion indicating the presence of Inosine"}
+visualizeData(msi, "2", from = 25L, to = 45L, seqdata = TRUE)
 ```
 
 ### Modifications described in the literare
