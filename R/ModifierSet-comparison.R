@@ -29,8 +29,10 @@ NULL
 #' character, it must match one of the names in the \code{ModifierSet}.
 #' @param ... optional parameters:
 #' \itemize{
-#' \item{\code{name}}{Limit results to one specific gene or transcript}
-#' \item{...}{passed on to \code{\link{subsetByCoord}}}
+#' \item{\code{alias}} {a data.frame with two columns, \code{tx_id} and 
+#' \code{name}, to convert transcipt ids to another identifier}
+#' \item{\code{name}} {Limit results to one specific gene or transcript}
+#' \item{...} {passed on to \code{\link{subsetByCoord}}}
 #' }
 #' 
 #' @return \code{compareByCoord} returns a 
@@ -72,8 +74,8 @@ NULL
            call. = FALSE)
     }
     names <- unique(unlist(lapply(data,names)))
-    if(!all(alias$tx_id %in% names)){
-      stop("All values in 'tx_id' have to be valid transcript ids used as",
+    if(!all(names %in% alias$tx_id)){
+      stop("All values in 'tx_id' have to be valid transcript ids used as ",
            "names for the data.", call. = FALSE)
     }
   }
@@ -101,7 +103,7 @@ NULL
   if(!is.na(args["alias"])){
     alias <- args[["alias"]]
     m <- match(names(data),as.character(alias$tx_id))
-    names(data)[m] <- as.character(alias$name)
+    names(data) <- as.character(alias$name)[m]
   }
   # keep rownames/names and unlist data
   positions <- rownames(data)
