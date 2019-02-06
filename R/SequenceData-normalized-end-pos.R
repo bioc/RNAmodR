@@ -193,7 +193,8 @@ setMethod(".getData",
   conditions <- unique(x@condition[f])
   replicates <- x@replicate[f]
   # set up some base values
-  sample_width <- length(replicates[replicates == unique(replicates)[1]])
+  sample_width <- length(replicates[x@condition[f] == conditions[1] & 
+                                      replicates == unique(replicates)[1]])
   colNames <- strsplit(colnames(df)[seq_len(sample_width)],"\\.")
   colNames <- IRanges::CharacterList(colNames)[as.list(lengths(colNames))]
   # set up some base values. replicates is here the same as the number of 
