@@ -90,6 +90,8 @@ NULL
     input <- list()
   }
   colorize.palette <- NULL
+  abline <- TRUE
+  AUC <- TRUE
   if(!is.null(input[["colorize.palette"]])){
     colorize.palette <- input[["colorize.palette"]]
     if(!assertive::is_a_string(colorize.palette)){
@@ -98,14 +100,40 @@ NULL
            call. = FALSE)
     }
   }
-  args <- list(colorize.palette = colorize.palette)
+  if(!is.null(input[["abline"]])){
+    abline <- input[["abline"]]
+    if(!assertive::is_a_bool(abline)){
+      stop("'abline' must a single logical value.",
+           call. = FALSE)
+    }
+  }
+  if(!is.null(input[["AUC"]])){
+    AUC <- input[["AUC"]]
+    if(!assertive::is_a_bool(AUC)){
+      stop("'AUC' must a single logical value.",
+           call. = FALSE)
+    }
+  }
+  args <- list(colorize.palette = colorize.palette,
+               abline = abline,
+               AUC = AUC)
   args
 }
 
-.get_prediction_data_Modifier <- function(x, coord){
-  data <- .label_Modifier_by_GRangesList(x,coord)
+.get_prediction_data_Modifier <- function(x, coord, score){
+  data <- .label_Modifier_by_GRangesList(x, coord)
   colnames <- colnames(data@unlistData)
-  colnames <- colnames[stringr::str_detect(colnames,"score")]
+  if(!is.null(score)){
+    if(!all(score %in% colnames)){
+      stop("Score identifier '",
+           paste(score[!(score %in% colnames)], collapse = "','"),
+           "' not found in the data. Available ",
+           "columns: '",paste(colnames[colnames != "labels"], collapse = "','"),
+           "'.",
+           call. = FALSE)
+    }
+  }
+  colnames <- colnames[colnames != "labels"]
   data <- lapply(seq_along(colnames),
                  function(i){
                    c <- colnames[i]
@@ -120,7 +148,7 @@ NULL
   data
 }
 
-.get_prediction_data_ModifierSet <- function(x, coord){
+.get_prediction_data_ModifierSet <- function(x, coord, score){
   browser()
   
 }
@@ -128,7 +156,11 @@ NULL
 #' @importFrom graphics par abline title legend plot.new
 #' @importFrom colorRamps matlab.like
 #' @importFrom ROCR prediction performance
-.plot_ROCR <- function(data, prediction.args, performance.args, plot.args){
+.plot_ROCR <- function(data, prediction.args, performance.args, plot.args,
+                       score){
+  if(!is.null(score)){
+    data <- data[names(data) %in% score]
+  }
   # add argument logical vector
   n <- length(data)
   # save mfrow setting
@@ -143,12 +175,7 @@ NULL
   }
   #
   mapply(
-    function(d,
-             name,
-             colour,
-             prediction.args,
-             performance.args,
-             plot.args){
+    function(d, name, colour, prediction.args, performance.args, plot.args){
       pred <- do.call(ROCR::prediction,
                       c(list(d$predictions,
                              d$labels),
@@ -156,17 +183,17 @@ NULL
       perf <- do.call(ROCR::performance,
                       c(list(pred),
                         performance.args))
-      do.call(graphics::plot,
-              c(list(perf,
-                     colorize = TRUE,
-                     lwd = 3),
-                plot.args))
-      graphics::abline(a = 0, b = 1)
+      do.call("plot",
+              c(list(perf, colorize = TRUE, lwd = 3), plot.args))
       graphics::title(main = name)
+      if(plot.args[["abline"]] == TRUE){
+        graphics::abline(a = 0, b = 1)
+      }
       auc <- unlist(slot(performance(pred,"auc"),"y.values"))
       auc <- paste(c("AUC = "),round(auc,2L),sep="")
-      graphics::legend(0.55, 0.25, auc, border = "white", cex = 1,
-                       box.col = "white")
+      if(plot.args[["AUC"]] == TRUE){
+        graphics::legend(0.55, 0.25, auc, bty = "n", cex = 1)
+      }
     },
     data,
     names(data),
@@ -179,7 +206,6 @@ NULL
   }
   graphics::par(mfrow = mfrow_bak)
   invisible(NULL)
-  
 }
 
 #' @rdname plotROC
@@ -187,12 +213,17 @@ NULL
 setMethod(
   f = "plotROC", 
   signature = signature(x = "Modifier"),
-  definition = function(x, coord, prediction.args, performance.args, plot.args){
-    data <- .get_prediction_data_Modifier(x, coord)
+  definition = function(x, coord, score = NULL, prediction.args, 
+                        performance.args, plot.args){
+    if(missing(score)){
+      score <- NULL
+    }
+    data <- .get_prediction_data_Modifier(x, coord, score)
     .plot_ROCR(data,
                .norm_prediction_args(prediction.args),
                .norm_performance_args(performance.args, x),
-               .norm_plot_args(plot.args))
+               .norm_plot_args(plot.args),
+               score)
   }
 )
 
@@ -201,12 +232,17 @@ setMethod(
 setMethod(
   f = "plotROC", 
   signature = signature(x = "ModifierSet"),
-  definition = function(x, coord, prediction.args, performance.args, plot.args){
+  definition = function(x, coord, score = NULL, prediction.args,
+                        performance.args, plot.args){
+    if(missing(score)){
+      score <- NULL
+    }
     browser()
-    data <- .get_prediction_data_ModifierSet(x, coord)
+    data <- .get_prediction_data_ModifierSet(x, coord, score)
     .plot_ROCR(data,
                .norm_prediction_args(prediction.args),
                .norm_performance_args(performance.args),
-               .norm_plot_args(plot.args))
+               .norm_plot_args(plot.args),
+               score)
   }
 )

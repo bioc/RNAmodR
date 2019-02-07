@@ -9,10 +9,10 @@
 \usage{
 plotROC(x, coord, ...)
 
-\S4method{plotROC}{Modifier}(x, coord, prediction.args, performance.args,
-  plot.args)
+\S4method{plotROC}{Modifier}(x, coord, score = NULL, prediction.args,
+  performance.args, plot.args)
 
-\S4method{plotROC}{ModifierSet}(x, coord, prediction.args,
+\S4method{plotROC}{ModifierSet}(x, coord, score = NULL, prediction.args,
   performance.args, plot.args)
 }
 \arguments{
