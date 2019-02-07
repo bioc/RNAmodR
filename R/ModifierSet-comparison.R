@@ -197,7 +197,7 @@ setMethod("compareByCoord",
 .create_sample_labels <- function(labels){
   labels <- as.character(labels)
   labels <- gsub("\\.", " ",labels)
-  factor(labels)
+  factor(labels, levels = unique(labels))
 }
 
 #' @importFrom ggplot2 ggplot geom_raster
@@ -266,7 +266,8 @@ setMethod("compareByCoord",
                               position = "top",
                               expand = c(0,0)) +
     ggplot2::theme_minimal() +
-    ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0))
+    ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0),
+                   axis.text.x.top = ggplot2::element_text(angle = 30,vjust = 0.5))
 }
 
 #' @rdname compare
