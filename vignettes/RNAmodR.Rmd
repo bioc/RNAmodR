@@ -314,6 +314,21 @@ found modifications to modifications described in the literature
 <!-- ## ... the `ModifierSet` classes -->
 
 
+# Performance measurements
+
+Since the detection of modifications from high throughput sequencing data relies
+usually on thresholds for calling a modifications, there is considerable
+interest in analyzing the performance of the method based on scores chosen and
+samples available. To analyse the performance the function `plotROC()` is
+implemented, which is a wrapper around the functionality of the `ROCR` package
+[@Sing.2005](#References).
+
+For the example data used in this vignette, the information gained is rather 
+limited and the following figure should be regarded just as a proof of concept.
+
+```{r rocr}
+plotROC(msi[[1]],coord, score = "score")
+```
 
 <!-- # Annotation data -->
 
@@ -323,3 +338,11 @@ found modifications to modifications described in the literature
 <!-- res <- select(edb, keys=keys, columns = c("TXBIOTYPE"), keytype="TXID") -->
 
 <!-- ``` -->
+
+# Sessioninfo
+
+```{r}
+sessioninfo::session_info()
+```
+
+# References<a name="References"></a>

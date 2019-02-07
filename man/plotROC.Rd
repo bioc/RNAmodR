@@ -24,6 +24,9 @@ column is expected to match the gene or transcript name.}
 
 \item{...}{additional arguments}
 
+\item{score}{the score identifier to subset to, if multiple scores are 
+available.}
+
 \item{prediction.args}{arguments which will be used for calling 
 \code{\link[ROCR:prediction]{prediction}} form the \code{ROCR} package}
 
@@ -31,7 +34,9 @@ column is expected to match the gene or transcript name.}
 \code{\link[ROCR:performance]{performance}} form the \code{ROCR} package}
 
 \item{plot.args}{arguments which will be used for calling \code{plot} on the
-performance object of the \code{ROCR} package}
+performance object of the \code{ROCR} package. If multiple scores are plotted
+(for example if the score argument is not explicitly set) \code{add = FALSE}
+will be set.}
 }
 \description{
 \code{plotROC} streamlines labeling, prediction, performance and plotting
@@ -49,4 +54,10 @@ By default the \code{prediction.args} include three values:
 \item{\code{score = mainScore(x)}}
 }
 The remaining arguments are not predefined.
+}
+\references{
+Tobias Sing, Oliver Sander, Niko Beerenwinkel, Thomas Lengauer (2005): "ROCR:
+visualizing classifier performance in R." Bioinformatics 21(20):3940-3941
+DOI:
+\href{https://doi.org/10.1093/bioinformatics/bti623}{10.1093/bioinformatics/bti623}
 }

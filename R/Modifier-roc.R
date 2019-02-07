@@ -28,25 +28,47 @@ NULL
 #' @param coord coordinates of position to label as positive. Either a 
 #' \code{GRanges} or a \code{GRangesList} object. For both types the Parent 
 #' column is expected to match the gene or transcript name.
+#' @param score the score identifier to subset to, if multiple scores are 
+#' available.
 #' @param prediction.args arguments which will be used for calling 
 #' \code{\link[ROCR:prediction]{prediction}} form the \code{ROCR} package
 #' @param performance.args arguments which will be used for calling 
 #' \code{\link[ROCR:performance]{performance}} form the \code{ROCR} package
 #' @param plot.args arguments which will be used for calling \code{plot} on the
-#' performance object of the \code{ROCR} package
+#' performance object of the \code{ROCR} package. If multiple scores are plotted
+#' (for example if the score argument is not explicitly set) \code{add = FALSE}
+#' will be set.
 #' @param ... additional arguments
+#' 
+#' @references 
+#' Tobias Sing, Oliver Sander, Niko Beerenwinkel, Thomas Lengauer (2005): "ROCR:
+#' visualizing classifier performance in R." Bioinformatics 21(20):3940-3941
+#' DOI:
+#' \href{https://doi.org/10.1093/bioinformatics/bti623}{10.1093/bioinformatics/bti623}
+#' 
 NULL
 
 .norm_prediction_args <- function(input){
   if(missing(input)){
     input <- list()
   }
+  if(length(input) > 0L && 
+     (any(is.null(names(input))) || any(names(input) == ""))){
+    warning("Unnamed list for 'prediction.args'. All values will be dropped.")
+    input <- list()
+  }
   args <- input
   args
 }
 
+.rocr_exclusive_functions <- c("rch","auc","prbe","mxe","rmse","ecost")
 .norm_performance_args <- function(input, x){
   if(missing(input)){
+    input <- list()
+  }
+  if(length(input) > 0L && 
+     (any(is.null(names(input))) || any(names(input) == ""))){
+    warning("Unnamed list for 'performance.args'. All values will be dropped.")
     input <- list()
   }
   measure <- "tpr"
@@ -61,12 +83,22 @@ NULL
     }
   }
   if(!is.null(input[["x.measure"]])){
-    x.measure <- input[["x.measure"]]
-    if(!assertive::is_a_string(x.measure)){
-      stop("'x.measure' must a single character compatible with ",
-           "?ROCR::performance.",
-           call. = FALSE)
+    if(length(input[["x.measure"]]) == 0L){
+      x.measure <- "cutoff"
+    } else if(is.na(input[["x.measure"]])){
+      x.measure <- "cutoff"
+    } else if(input[["x.measure"]] == ""){
+      x.measure <- "cutoff"
+    } else {
+      x.measure <- input[["x.measure"]]
+      if(!assertive::is_a_string(x.measure)){
+        stop("'x.measure' must a single character compatible with ",
+             "?ROCR::performance.",
+             call. = FALSE)
+      }
     }
+  } else if(measure %in% .rocr_exclusive_functions){
+    x.measure <- "cutoff"
   }
   if(!is.null(input[["score"]])){
     score <- input[["score"]]
@@ -80,8 +112,7 @@ NULL
   args <- list(measure = measure,
                x.measure = x.measure,
                score = score)
-  args <- c(args,
-            input[!(names(input) %in% names(args))])
+  args <- c(args, input[!(names(input) %in% names(args))])
   args
 }
 
@@ -89,9 +120,16 @@ NULL
   if(missing(input)){
     input <- list()
   }
+  if(length(input) > 0L && 
+     (any(is.null(names(input))) || any(names(input) == ""))){
+    warning("Unnamed list for 'plot.args'. All values will be dropped.")
+    input <- list()
+  }
+  colorize <- TRUE
+  lwd <- 3
   colorize.palette <- NULL
-  abline <- TRUE
-  AUC <- TRUE
+  abline <- FALSE
+  AUC <- FALSE
   if(!is.null(input[["colorize.palette"]])){
     colorize.palette <- input[["colorize.palette"]]
     if(!assertive::is_a_string(colorize.palette)){
@@ -114,10 +152,40 @@ NULL
            call. = FALSE)
     }
   }
-  args <- list(colorize.palette = colorize.palette,
+  if(!is.null(input[["colorize"]])){
+    colorize <- input[["colorize"]]
+    if(!assertive::is_a_bool(colorize)){
+      stop("'colorize' must a single logical value.",
+           call. = FALSE)
+    }
+  }
+  if(!is.null(input[["lwd"]])){
+    lwd <- input[["lwd"]]
+    if(!assertive::is_numeric_string(lwd)){
+      stop("'lwd' must a single logical value.",
+           call. = FALSE)
+    }
+  }
+  args <- list(colorize = colorize,
+               lwd = lwd,
+               colorize.palette = colorize.palette,
                abline = abline,
                AUC = AUC)
+  args <- c(args, input[!(names(input) %in% names(args))])
   args
+}
+
+.readjust_plot_args <- function(data, plot.args, performance.args){
+  if(performance.args[["measure"]] %in% .rocr_exclusive_functions){
+    plot.args[["colorize"]] <- NULL
+  }
+  if(is.null(plot.args[["avg"]])){
+    plot.args[["avg"]] <- "none"
+  }
+  if(is.null(plot.args[["spread.estimate"]])){
+    plot.args[["spread.estimate"]] <- "none"
+  }
+  return(plot.args)
 }
 
 .get_prediction_data_Modifier <- function(x, coord, score){
@@ -149,8 +217,23 @@ NULL
 }
 
 .get_prediction_data_ModifierSet <- function(x, coord, score){
-  browser()
-  
+  data <- lapply(x, .get_prediction_data_Modifier, coord, score)
+  names <- names(data[[1]])
+  data <- lapply(names,
+                 function(name){
+                   lapply(data,"[[",name)
+                 })
+  data <- lapply(data,
+                 function(d){
+                   predictions <- as.data.frame(lapply(d,"[","predictions"))
+                   labels <- as.data.frame(lapply(d,"[","labels"))
+                   colnames(predictions) <- names(d)
+                   colnames(labels) <- names(d)
+                   list(predictions = predictions,
+                        labels = labels)
+                 })
+  names(data) <- names
+  data
 }
 
 #' @importFrom graphics par abline title legend plot.new
@@ -161,6 +244,7 @@ NULL
   if(!is.null(score)){
     data <- data[names(data) %in% score]
   }
+  plot.args <- .readjust_plot_args(data, plot.args, performance.args)
   # add argument logical vector
   n <- length(data)
   # save mfrow setting
@@ -173,25 +257,28 @@ NULL
   if(is.null(plot.args[["colorize.palette"]])){
     plot.args[["colorize.palette"]] <- NULL
   }
+  if(n > 1L){
+    plot.args[["add"]] <- FALSE
+  }
   #
   mapply(
     function(d, name, colour, prediction.args, performance.args, plot.args){
-      pred <- do.call(ROCR::prediction,
-                      c(list(d$predictions,
-                             d$labels),
-                        prediction.args))
-      perf <- do.call(ROCR::performance,
-                      c(list(pred),
-                        performance.args))
-      do.call("plot",
-              c(list(perf, colorize = TRUE, lwd = 3), plot.args))
+      pred <- do.call(ROCR::prediction, c(list(predictions = d$predictions, 
+                                               labels = d$labels), 
+                                          prediction.args))
+      perf <- do.call(ROCR::performance, c(list(prediction.obj = pred),
+                                           performance.args))
+      tmp <- try(do.call("plot", c(list(x = perf), plot.args)),silent = TRUE)
+      if(is(tmp,"try-error")){
+        stop("Error during plotting of performance object: ",tmp)
+      }
       graphics::title(main = name)
       if(plot.args[["abline"]] == TRUE){
         graphics::abline(a = 0, b = 1)
       }
-      auc <- unlist(slot(performance(pred,"auc"),"y.values"))
-      auc <- paste(c("AUC = "),round(auc,2L),sep="")
       if(plot.args[["AUC"]] == TRUE){
+        auc <- unlist(slot(performance(pred,"auc"),"y.values"))
+        auc <- paste(c("AUC = "), round(auc,2L), sep = "")
         graphics::legend(0.55, 0.25, auc, bty = "n", cex = 1)
       }
     },
@@ -237,11 +324,10 @@ setMethod(
     if(missing(score)){
       score <- NULL
     }
-    browser()
     data <- .get_prediction_data_ModifierSet(x, coord, score)
     .plot_ROCR(data,
                .norm_prediction_args(prediction.args),
-               .norm_performance_args(performance.args),
+               .norm_performance_args(performance.args, x),
                .norm_plot_args(plot.args),
                score)
   }
