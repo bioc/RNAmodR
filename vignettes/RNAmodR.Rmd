@@ -163,6 +163,9 @@ sequences <- FaFile(system.file("extdata","example_AAS.fasta",package = "RNAmodR
 mi <- ModInosine(files,annotation = annotation ,sequences = sequences)
 ```
 
+(Hint: If you use an artificial genome, name the chromosomes chr1-chrN. It
+will makes somethings easier further down.)
+
 Since the `Modifier` class wraps a `SequenceData` object the accessor to data
 contained withing work as well.
 

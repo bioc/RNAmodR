@@ -5,12 +5,15 @@
 \alias{ProtectedEndSequenceData}
 \alias{ProtectedEndSequenceData-class}
 \alias{aggregate,ProtectedEndSequenceData-method}
+\alias{getDataTrack,ProtectedEndSequenceData-method}
 \title{ProtectedEndSequenceData}
 \usage{
 ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 \S4method{aggregate}{ProtectedEndSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
+
+\S4method{getDataTrack}{ProtectedEndSequenceData}(x, ...)
 }
 \arguments{
 \item{bamfiles, annotation, sequences, seqinfo, ...}{See 

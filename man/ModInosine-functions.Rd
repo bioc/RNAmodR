@@ -25,6 +25,8 @@
 \S4method{visualizeData}{ModInosine}(x, name, from = 1L, to = 30L,
   type = "score", ...)
 
+\S4method{getDataTrack}{ModInosine}(x, ...)
+
 \S4method{visualizeDataByCoord}{ModSetInosine,GRanges}(x, coord,
   type = "score", window.size = 15L, ...)
 

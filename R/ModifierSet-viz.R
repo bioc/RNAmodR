@@ -2,6 +2,16 @@
 #' @include Modifier-viz.R
 NULL
 
+#' @importFrom grDevices col2rgb
+.is_colour <- function(x) {
+  vapply(x,
+         function(z) {
+           tryCatch(is.matrix(grDevices::col2rgb(z)),
+                    error = function(e) FALSE)
+         },
+         logical(1))
+}
+
 .norm_viz_args_ModifierSet <- function(input){
   colours <- NA
   if(!is.null(input[["colours"]])){
@@ -17,34 +27,9 @@ NULL
   args
 }
 
-.get_viz_window_ModifierSet <- function(data, coord, window.size){
-  window.size <- .norm_viz_windows.size(window.size)
-  start <- start(coord) - window.size
-  end <- end(coord) + window.size
-  pos.min <- as.integer(min(unique(unlist(lapply(data,start)))))
-  pos.max <- as.integer(max(unique(unlist(lapply(data,end)))))
-  if(start < pos.min){
-    start <- pos.min
-  }
-  if(end > pos.max){
-    end <- pos.max
-  }
-  list(start = start,
-       end = end)
-}
-
-.norm_viz_ylim <- function(data){
-  max <- max(vapply(data,
-                function(d){
-                  max(mcols(d)[,1])
-                },
-                numeric(1)))
-  c(0,max)
-}
-
 #' @importFrom RColorBrewer brewer.pal
-.norm_viz_colours <- function(data,colours){
-  n <- length(data)
+.norm_viz_colours <- function(x ,colours){
+  n <- length(x)
   if(!is.na(colours)){
     if(n != length(colours)){
       stop("'colours' must have the same length as 'x'.", call. = FALSE)
@@ -56,21 +41,47 @@ NULL
   ans[seq.int(1,n)]
 }
 
-.norm_data_track_types <- function(dtl,coordValues,args){
-  type <- args[["data.track.pars"]][["type"]]
-  if(is.null(type)){
-    f <- vapply(lapply(lapply(dtl,displayPars),"[[","type"),
-                "==",logical(1),"histogram")
-    if((coordValues$end - coordValues$start) > 60){
-      dtl[f] <- lapply(dtl[f],
-                       function(dt){
-                         displayPars(dt)$type <- "h"
-                         displayPars(dt)$lwd <- 3L
-                         dt
-                       })
-    }
+.add_viz_ylim <- function(dts, chromosome, from_to, ylim){
+  if(is.null(ylim)){
+    max <- max(vapply(dts,
+                      function(dt){
+                        f <- which(seqnames(dt@range) == chromosome & 
+                                     start(dt@range) >= from_to$from & 
+                                     end(dt@range) <= from_to$to)
+                        max(dt@data[,f])
+                      },
+                      numeric(1)))
+    ylim <- c(0,max)
   }
-  dtl
+  dts <- lapply(dts,
+                function(dt){
+                  Gviz::displayPars(dt)$ylim <- ylim
+                  dt
+                })
+  dts
+}
+
+.add_viz_colours <- function(dts, colours){
+  dts <- mapply(
+    function(dt, colour){
+      Gviz::displayPars(dt)$col <- colour
+      Gviz::displayPars(dt)$fill.histogram <- colour
+      dt
+    },
+    dts,
+    colours)
+  dts
+}
+
+.add_viz_names <- function(dts, names){
+  dts <- mapply(
+    function(dt, name){
+      dt@name <- paste0(name,"\n",dt@name)
+      dt
+    },
+    dts,
+    names)
+  dts
 }
 
 #' @rdname visualizeData
@@ -81,63 +92,12 @@ setMethod(
                         coord = "GRanges"),
   definition = function(x, coord, type = NA, seqdata = FALSE, window.size = 15L,
                         ...) {
-    requireNamespace("Gviz")
     # input check
-    seqdata_show <- .norm_seqdata_show(seqdata)
-    args <- .norm_viz_args_ModifierSet(list(...))
-    coord <- .norm_coord_for_visualization(coord)
-    # get plotting data
-    modAnnotation <- .norm_viz_mod_annotation(args[["additional.mod"]], coord)
-    seq <- .get_viz_sequence(sequences(x)[[coord$Parent]], coord, args,
-                             modAnnotation)
-    range <- .norm_viz_range(ranges(x)[[coord$Parent]])
-    chromosome <- .norm_viz_chromosome(range)
-    data <- lapply(x,
-                   function(z){
-                     .norm_data_for_visualization(
-                       aggregateData(z)[[coord$Parent]],
-                       type,
-                       chromosome)
-                   })
-    seqdata <- lapply(x,
-                      function(z){
-                        .norm_seqdata_for_visualization(
-                          aggregate(seqData(z)[coord$Parent])[[1]],
-                          chromosome)
-                      })
-    coordValues <- .get_viz_window_ModifierSet(data, coord, window.size)
-    # special stuff for data of a ModifierSet
-    args[["ylim"]] <- .norm_viz_ylim(data)
-    colours <- .norm_viz_colours(data,args[["colours"]])
-    args[["colours"]] <- NULL
-    # get tracks
-    st <- .get_viz_sequence_track(seq,chromosome,args)
-    atm <- .get_viz_annotation_track(modAnnotation,chromosome,args)
-    dtl <- lapply(seq_along(x),
-                 function(i){
-                   a <- args
-                   a[["colour"]] <- colours[i]
-                   dt <- .dataTracks(x[[i]], data = data[[i]],
-                                     seqdata = seqdata[[i]], sequence = seq,
-                                     args = a)
-                   if(seqdata_show){
-                     return(dt[["seqdata"]])
-                   }
-                   dt[[1]]
-                 })
-    # add sample names
-    dtl <- mapply(function(dt,name){
-                    names(dt) <- paste0(name, "\n", names(dt))
-                    dt
-                  },
-                  dtl,
-                  names(x),
-                  SIMPLIFY = FALSE)
-    # based in the width change from histogram to h type of the DataTrack
-    dtl <- .norm_data_track_types(dtl,coordValues,args)
-    # plot tracks
-    plotTracks(c(dtl, list(st,atm)), from = coordValues$start, 
-               to = coordValues$end, chromosome = chromosome)
+    coord <- .norm_coord_for_visualization(ranges(x), coord)
+    from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
+    visualizeData(x, name = coord$Parent, from = from_to$from,
+                  to = from_to$to, type = type, seqdata = seqdata, ...)
+    
   }
 )
 
@@ -147,8 +107,31 @@ setMethod(
   f = "visualizeData",
   signature = signature(x = "ModifierSet"),
   definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
-    coord <- .create_coord_for_visualization(x, name, from, to)
-    visualizeDataByCoord(x, coord, type = type, seqdata = seqdata, 
-                         window.size = 0L, ...)
+    # get plotting arguments
+    args <- .norm_viz_args_ModifierSet(list(...))
+    chromosome <- .norm_viz_chromosome(ranges(x), name)
+    from_to <- .get_viz_from_to(ranges(x), name, from, to)
+    colours <- .norm_viz_colours(x, args[["colours"]])
+    # get tracks
+    atm <- .get_viz_annotation_track(ranges(x), args[["annotation.track.pars"]],
+                                     args[["alias"]])
+    st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
+                                  args[["sequence.track.pars"]])
+    dts <- lapply(x, getDataTrack, ...)
+    dts <- .add_viz_ylim(dts, chromosome, from_to, args[["ylim"]])
+    dts <- .add_viz_colours(dts, colours)
+    dts <- .add_viz_names(dts, names(x))
+    if(seqdata){
+      sdts <- lapply(x, function(z){getDataTrack(seqData(z), ...)})
+      sdts <- .add_viz_names(sdts, names(x))
+      tracks <- c(dts, sdts, list(st,atm))
+    } else {
+      tracks <- c(dts, list(st,atm))
+    }
+    # plot tracks
+    do.call(Gviz::plotTracks,
+            c(list(tracks, from = from_to$from, to = from_to$to,
+                   chromosome = chromosome),
+              args[["plot.pars"]]))
   }
 )

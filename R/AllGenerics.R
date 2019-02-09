@@ -184,13 +184,13 @@ setGeneric(
   def = function(x, name, from = 1L, to = 30L, type, ...)
     standardGeneric("visualizeData")
 )
-#' @rdname RNAmodR-internals
+#' @rdname visualizeData
 #' @export
 setGeneric(
-  name = ".dataTracks",
-  signature = c("x","data","seqdata","sequence"),
-  def = function(x, data, seqdata, sequence, args)
-    standardGeneric(".dataTracks")
+  name = "getDataTrack",
+  signature = c("x"),
+  def = function(x, ...)
+    standardGeneric("getDataTrack")
 )
 
 # ModifierSet functions --------------------------------------------------------

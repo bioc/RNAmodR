@@ -5,12 +5,15 @@
 \alias{PileupSequenceData}
 \alias{PileupSequenceData-class}
 \alias{aggregate,PileupSequenceData-method}
+\alias{getDataTrack,PileupSequenceData-method}
 \title{PileupSequenceData}
 \usage{
 PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 \S4method{aggregate}{PileupSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
+
+\S4method{getDataTrack}{PileupSequenceData}(x, ...)
 }
 \arguments{
 \item{bamfiles, annotation, sequences, seqinfo, ...}{See 

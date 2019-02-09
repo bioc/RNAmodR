@@ -44,20 +44,8 @@ NULL
 #' this is included in the results as well.
 NULL
 
-.norm_compare_args <- function(input, data, x){
-  compareType <- mainScore(x)
-  perTranscript <- FALSE
+.norm_alias <- function(input){
   alias <- NA
-  if(!is.null(input[["compareType"]])){
-    compareType <- input[["compareType"]]
-    colnames <- unique(unlist(colnames(data[[1]])))
-    if(!is.character(compareType) || width(compareType) == 0L ||
-       !(compareType %in% colnames)){
-      stop("'compareType' must be a character and a valid colname in the 
-           aggregated data of 'x'.",
-           call. = FALSE)
-    }
-  }
   if(!is.null(input[["alias"]])){
     alias <- input[["alias"]]
     if(!is.data.frame(alias)){
@@ -80,9 +68,26 @@ NULL
            "names for the data.", call. = FALSE)
     }
   }
+  list(alias = alias)
+}
+
+.norm_compare_args <- function(input, data, x){
+  compareType <- mainScore(x)
+  perTranscript <- FALSE
+  if(!is.null(input[["compareType"]])){
+    compareType <- input[["compareType"]]
+    colnames <- unique(unlist(colnames(data[[1]])))
+    if(!is.character(compareType) || width(compareType) == 0L ||
+       !(compareType %in% colnames)){
+      stop("'compareType' must be a character and a valid colname in the 
+           aggregated data of 'x'.",
+           call. = FALSE)
+    }
+  }
   args <- list(compareType = compareType,
-               perTranscript = perTranscript,
-               alias = alias)
+               perTranscript = perTranscript)
+  args <- c(args,
+            .norm_alias(input))
   args
 }
 

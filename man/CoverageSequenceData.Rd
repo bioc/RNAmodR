@@ -5,12 +5,15 @@
 \alias{CoverageSequenceData}
 \alias{CoverageSequenceData-class}
 \alias{aggregate,CoverageSequenceData-method}
+\alias{getDataTrack,CoverageSequenceData-method}
 \title{CoverageSequenceData}
 \usage{
 CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 \S4method{aggregate}{CoverageSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
+
+\S4method{getDataTrack}{CoverageSequenceData}(x, ...)
 }
 \arguments{
 \item{bamfiles, annotation, sequences, seqinfo, ...}{See 

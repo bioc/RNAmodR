@@ -2,15 +2,14 @@
 % Please edit documentation in R/RNAmodR.R, R/AllGenerics.R,
 %   R/Gviz-ModifiedSequenceTrack-class.R, R/Gviz-functions.R,
 %   R/Modifier-utils.R, R/SequenceData-class.R, R/SequenceDataList-class.R,
-%   R/Modifier-viz.R, R/SequenceData-coverage.R, R/SequenceData-end-pos.R,
+%   R/SequenceData-coverage.R, R/SequenceData-end-pos.R,
 %   R/SequenceData-normalized-end-pos.R, R/SequenceData-pileup.R,
-%   R/SequenceData-viz.R, R/SequenceData-protected-end-pos.R
+%   R/SequenceData-protected-end-pos.R
 \docType{methods}
 \name{RNAmodR-internals}
 \alias{RNAmodR-internals}
 \alias{.getData}
 \alias{.constructModRanges}
-\alias{.dataTracks}
 \alias{show,ModifiedSequenceTrack-method}
 \alias{length,ModifiedSequenceTrack-method}
 \alias{.constructModRanges,GRanges,DataFrame-method}
@@ -20,31 +19,19 @@
 \alias{.getData,SequenceData,GRangesList,XStringSet,ScanBamParam-method}
 \alias{parallelSlotNames,SequenceDataList-method}
 \alias{getListElement,SequenceDataList-method}
-\alias{.dataTracks,Modifier,ANY,ANY,ANY-method}
 \alias{.getData,CoverageSequenceData,GRangesList,XStringSet,ScanBamParam-method}
-\alias{.dataTracks,CoverageSequenceData,missing,GRanges,XString-method}
 \alias{.getData,End5SequenceData,GRangesList,XStringSet,ScanBamParam-method}
 \alias{.getData,End3SequenceData,GRangesList,XStringSet,ScanBamParam-method}
 \alias{.getData,EndSequenceData,GRangesList,XStringSet,ScanBamParam-method}
-\alias{.dataTracks,EndSequenceData,missing,GRanges,XString-method}
-\alias{.dataTracks,End5SequenceData,missing,GRanges,XString-method}
-\alias{.dataTracks,End3SequenceData,missing,GRanges,XString-method}
 \alias{.getData,NormEnd5SequenceData,GRangesList,XStringSet,ScanBamParam-method}
 \alias{.getData,NormEnd3SequenceData,GRangesList,XStringSet,ScanBamParam-method}
-\alias{.dataTracks,NormEnd5SequenceData,missing,GRanges,XString-method}
-\alias{.dataTracks,NormEnd3SequenceData,missing,GRanges,XString-method}
 \alias{.getData,PileupSequenceData,GRangesList,XStringSet,ScanBamParam-method}
-\alias{.dataTracks,PileupSequenceData,missing,GRanges,XString-method}
-\alias{.dataTracks,SequenceData,ANY,GRanges,XString-method}
 \alias{.getData,ProtectedEndSequenceData,GRangesList,XStringSet,ScanBamParam-method}
-\alias{.dataTracks,ProtectedEndSequenceData,missing,GRanges,XString-method}
 \title{RNAmodR internal functions}
 \usage{
 .constructModRanges(range, data, modType, scoreFun, source, type)
 
 .getData(x, grl, sequences, param, args)
-
-.dataTracks(x, data, seqdata, sequence, args)
 
 \S4method{show}{ModifiedSequenceTrack}(object)
 
@@ -66,15 +53,9 @@
 
 \S4method{getListElement}{SequenceDataList}(x, i, exact = TRUE)
 
-\S4method{.dataTracks}{Modifier,ANY,ANY,ANY}(x, data, seqdata, sequence,
-  args)
-
 
   \S4method{.getData}{CoverageSequenceData,GRangesList,XStringSet,ScanBamParam}(x,
   grl, sequences, param, args)
-
-\S4method{.dataTracks}{CoverageSequenceData,missing,GRanges,XString}(x,
-  seqdata, sequence, args)
 
 
   \S4method{.getData}{End5SequenceData,GRangesList,XStringSet,ScanBamParam}(x,
@@ -88,15 +69,6 @@
   \S4method{.getData}{EndSequenceData,GRangesList,XStringSet,ScanBamParam}(x,
   grl, sequences, param, args)
 
-\S4method{.dataTracks}{EndSequenceData,missing,GRanges,XString}(x, seqdata,
-  sequence, args)
-
-\S4method{.dataTracks}{End5SequenceData,missing,GRanges,XString}(x,
-  seqdata, sequence, args)
-
-\S4method{.dataTracks}{End3SequenceData,missing,GRanges,XString}(x,
-  seqdata, sequence, args)
-
 
   \S4method{.getData}{NormEnd5SequenceData,GRangesList,XStringSet,ScanBamParam}(x,
   grl, sequences, param, args)
@@ -105,29 +77,13 @@
   \S4method{.getData}{NormEnd3SequenceData,GRangesList,XStringSet,ScanBamParam}(x,
   grl, sequences, param, args)
 
-\S4method{.dataTracks}{NormEnd5SequenceData,missing,GRanges,XString}(x,
-  seqdata, sequence, args)
-
-\S4method{.dataTracks}{NormEnd3SequenceData,missing,GRanges,XString}(x,
-  seqdata, sequence, args)
-
 
   \S4method{.getData}{PileupSequenceData,GRangesList,XStringSet,ScanBamParam}(x,
   grl, sequences, param, args)
 
-\S4method{.dataTracks}{PileupSequenceData,missing,GRanges,XString}(x,
-  seqdata, sequence, args)
-
-\S4method{.dataTracks}{SequenceData,ANY,GRanges,XString}(x, data, seqdata,
-  sequence, args)
-
 
   \S4method{.getData}{ProtectedEndSequenceData,GRangesList,XStringSet,ScanBamParam}(x,
   grl, sequences, param, args)
-
-
-  \S4method{.dataTracks}{ProtectedEndSequenceData,missing,GRanges,XString}(x,
-  seqdata, sequence, args)
 }
 \arguments{
 \item{range, data, modType, scoreFun, source, type, x, grl, sequences, param, args, seqdata, sequence, i, exact, value}{Internal arguments}

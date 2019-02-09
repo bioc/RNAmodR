@@ -232,7 +232,6 @@ setMethod(f = "aggregate",
   grl <- ranges(x)
   modifications <- mapply(
     function(m,c,l,r){
-      rownames(m) <- seq_len(width(r))
       m <- m[l == "A" &
                (m$score - m$sd) >= minScore & 
                c,] # coverage check

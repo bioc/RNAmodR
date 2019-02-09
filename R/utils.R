@@ -1,42 +1,6 @@
 #' @include RNAmodR.R
 NULL
 
-# GRangesList ------------------------------------------------------------------
-
-.get_widths_GRangesList <- function(grl){
-  widths <- IRanges::IntegerList(BiocGenerics::width(grl@unlistData))
-  widths@partitioning <- grl@partitioning
-  widths
-}
-.get_starts_GRangesList <- function(grl){
-  starts <- IRanges::IntegerList(BiocGenerics::start(grl@unlistData))
-  starts@partitioning <- grl@partitioning
-  starts
-}
-.get_ends_GRangesList <- function(grl){
-  ends <- IRanges::IntegerList(BiocGenerics::end(grl@unlistData))
-  ends@partitioning <- grl@partitioning
-  ends
-}
-.get_strands_GRangesList <- function(grl){
-  strands <- IRanges::CharacterList(BiocGenerics::strand(grl@unlistData))
-  strands@partitioning <- grl@partitioning
-  strands
-}
-.get_column_GRangesList <- function(grl,column){
-  columns <- IRanges::CharacterList(mcols(grl@unlistData)[,column])
-  columns@partitioning <- grl@partitioning
-  columns
-}
-.get_strand_u_GRangesList <- function(grl){
-  strand_u <- unique(IRanges::CharacterList(strand(grl)))
-  ans <- unlist(strand_u)
-  if(length(strand_u) != length(ans)){
-    stop("Non unqiue strands per GRangesList element.")
-  }
-  ans
-}
-
 # BiocGeneric helper functions -------------------------------------------------
 # strand related functions
 .get_strand <- function(x){
@@ -60,6 +24,58 @@ NULL
 }
 
 # GRanges/GRangesList helper functions -----------------------------------------
+
+# per element entry
+.get_strands_GRangesList <- function(grl){
+  IRanges::CharacterList(strand(grl))
+}
+.get_column_GRangesList <- function(grl,column){
+  columns <- IRanges::CharacterList(mcols(grl@unlistData)[,column])
+  columns@partitioning <- grl@partitioning
+  columns
+}
+
+# per element of GRangesList unique 
+.get_strand_u_GRangesList <- function(grl){
+  strand_u <- unique(IRanges::CharacterList(strand(grl)))
+  ans <- unlist(strand_u)
+  if(length(strand_u) != length(ans)){
+    stop("Non unqiue strands per GRangesList element.")
+  }
+  ans
+}
+
+# per positions of each element
+
+.seqnames_rl <- function(rl){
+  seqnames <- as.character(seqnames(rl@unlistData))
+  width <- as.integer(width(rl@unlistData))
+  seqnames <- mapply(rep,seqnames,width,SIMPLIFY = FALSE)
+  seqnames <- IRanges::CharacterList(lapply(mapply(seq.int,
+                                                   start(rl@partitioning),
+                                                   end(rl@partitioning),
+                                                   SIMPLIFY = FALSE),
+                                            function(i){
+                                              unname(unlist(seqnames[i]))
+                                            }))
+  seqnames
+}
+
+.strands_rl <- function(rl){
+  strands <- as.character(strand(rl@unlistData))
+  width <- as.integer(width(rl@unlistData))
+  strands <- mapply(rep,strands,width,SIMPLIFY = FALSE)
+  strands <- IRanges::CharacterList(lapply(mapply(seq.int,
+                                                  start(rl@partitioning),
+                                                  end(rl@partitioning),
+                                                  SIMPLIFY = FALSE),
+                                           function(i){
+                                             unname(unlist(strands[i]))
+                                           }))
+  strands
+}
+
+
 # Vectorize version of seq specific for start/ends from a RangesList
 .seqs_rl <- function(rl){
   .seqs_rl_by(rl)
