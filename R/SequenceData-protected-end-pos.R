@@ -80,58 +80,57 @@ setMethod("aggregate",
 
 # data visualization -----------------------------------------------------------
 
-.fix_na_mcols <- function(seqdata){
-  mcols(seqdata) <- DataFrame(lapply(mcols(seqdata),
-                                     function(l){
-                                       l[is.na(l)] <- 0
-                                       l
-                                     }))
-  seqdata
-}
+RNAMODR_PLOT_SEQ_PROTEND_NAMES <- c("protend" = "mean")
 
-#' @rdname RNAmodR-internals
+#' @rdname ProtectedEndSequenceData
+#' @export
 setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "ProtectedEndSequenceData",
-                        data = "missing",
-                        seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, seqdata, sequence, args) {
-    requireNamespace("Gviz")
-    seqdata <- .fix_na_mcols(seqdata)
-    n <- ncol(mcols(seqdata)) / 2L
-    names <- RNAMODR_PROT_SEQDATA_PLOT_DATA_NAMES
-    colours <- RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS
-    dts <- lapply(seq_len(n),
-                  function(i){
-                    i <- i * 2L - 1
-                    d <- seqdata[,seq.int(from = i, to = i + 1L)]
-                    colnames(mcols(d)) <- RNAMODR_PROT_SEQDATA_PLOT_DATA
-                    dtmeans <- DataTrack(d,
-                                         data = "means",
-                                         name = names["means"],
-                                         fill = colours["means"],
-                                         type = "histogram")
-                    displayPars(dtmeans)$background.title <- "#FFFFFF"
-                    displayPars(dtmeans)$fontcolor.title <- "#000000"
-                    displayPars(dtmeans)$col.axis <- "#000000"
-                    # mcols(d)$sdm <- mcols(d)$means - mcols(d)$sds
-                    # mcols(d)$sdp <- mcols(d)$means + mcols(d)$sds
-                    # dtsds <- DataTrack(d,
-                    #                    data = c("sdm","sdp"),
-                    #                    name = names["sds"],
-                    #                    fill = colours["sds"],
-                    #                    type = "confint")
-                    # displayPars(dtsds)$background.title <- "#FFFFFF"
-                    # displayPars(dtsds)$fontcolor.title <- "#000000"
-                    # displayPars(dtsds)$col.axis <- "#000000"
-                    # ot <- OverlayTrack(trackList = list(dtmeans,dtsds))
-                    # displayPars(ot)$background.title <- "#FFFFFF"
-                    # displayPars(ot)$fontcolor.title <- "#000000"
-                    # displayPars(ot)$col.axis <- "#000000"
-                    # ot
-                    dtmeans 
-                  })
-    dts
+  f = "getDataTrack",
+  signature = signature(x = "ProtectedEndSequenceData"),
+  definition = function(x, ...) {
+    browser()
+    args <- list(...)
+    name <- .norm_viz_name(args[["name"]])
+    # DataTrack for sequence data
+    seqdata <- .get_data_for_visualization(x, name)
+    # clean meta data columns
+    seqdata <- .clean_mcols_end(seqdata)
+    seqdata <- unlist(seqdata)
+    conditions <- unique(x@condition)
+    if("control" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
+      dt.control <- Gviz::DataTrack(
+        range = d,
+        group = "means",
+        name = paste0(RNAMODR_PLOT_SEQ_PROTEND_NAMES["protend"],
+                      "\ncontrol"),
+        type = "histogram")
+      Gviz::displayPars(dt.control)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control) <- args
+      track <- dt.control
+    }
+    if("treated" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
+      dt.treated <- Gviz::DataTrack(
+        range = d,
+        group = "means",
+        name = paste0(RNAMODR_PLOT_SEQ_PROTEND_NAMES["protend"],
+                      "\ntreated"),
+        type = "histogram")
+      Gviz::displayPars(dt.treated)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated) <- args
+      track <- dt.treated
+    }
+    if(length(conditions) == 2L){
+      track <- list("1" = dt.control,
+                    "1" = dt.treated)
+    }
+    track
   }
 )

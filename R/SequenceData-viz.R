@@ -82,6 +82,9 @@ NULL
   if(end > pos.max){
     end <- pos.max
   }
+  if(start > end){
+    end <- pos.max
+  }
   list(from = start,
        to = end)
 }
@@ -95,6 +98,9 @@ NULL
     start <- pos.min
   }
   if(end > pos.max){
+    end <- pos.max
+  }
+  if(start > end){
     end <- pos.max
   }
   list(from = start,
@@ -183,7 +189,8 @@ NULL
                               collapse = TRUE,
                               background.title = "#FFFFFF",
                               fontcolor.legend = "#000000",
-                              featureAnnotation = "group")
+                              featureAnnotation = "group",
+                              fontsize.group = 10)
   if(!is.null(args$annotation.track.pars)){
     Gviz::displayPars(at) <- args$annotation.track.pars
   }
@@ -314,6 +321,43 @@ NULL
   ans
 }
 
+.add_viz_ylim <- function(dts, chromosome, from_to, ylim){
+  if(is.null(ylim)){
+    max <- max(
+      vapply(dts,
+             function(dt){
+               if(is.list(dt)){
+                 max <- lapply(dt,
+                               function(t){
+                                 f <- which(seqnames(t@range) == chromosome & 
+                                              start(t@range) >= from_to$from & 
+                                              end(t@range) <= from_to$to)
+                                 max(t@data[,f])
+                               })
+                 max <- max(unlist(max))
+               } else {
+                 f <- which(seqnames(dt@range) == chromosome & 
+                              start(dt@range) >= from_to$from & 
+                              end(dt@range) <= from_to$to)
+                 max <- max(dt@data[,f])
+               }
+               max
+             },
+             numeric(1)))
+    if(is.infinite(max)){
+      max <- 0
+    }
+    ylim <- c(0,max)
+  }
+  if(sum(ylim) != 0L){
+    dts <- lapply(dts,
+                  function(dt){
+                    Gviz::displayPars(dt)$ylim <- ylim
+                    dt
+                  })
+  }
+  dts
+}
 
 ################################################################################
 
@@ -341,6 +385,7 @@ setMethod(
   signature = signature(x = "SequenceData"),
   definition = function(x, name, from, to, type = NA, perTranscript = FALSE, 
                         ...) {
+    browser()
     # get plotting arguments
     args <- .norm_viz_args_SequenceData(list(...))
     chromosome <- .norm_viz_chromosome(ranges(x), name)
@@ -351,8 +396,11 @@ setMethod(
     st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
                                   args[["sequence.track.pars"]])
     dt <- getDataTrack(x, ...)
-    Gviz::displayPars(dt)$ylim <- args[["ylim"]]
-    tracks <- list(dt,st,atm)
+    if(!is.list(dt)){
+      dt <- list(dt)
+    }
+    dt <- .add_viz_ylim(dt, chromosome, from_to, args[["ylim"]])
+    tracks <- c(dt,list(st,atm))
     # plot tracks
     do.call(Gviz::plotTracks,
             c(list(tracks, from = from_to$from, to = from_to$to,

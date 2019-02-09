@@ -145,12 +145,19 @@ setMethod(
     st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
                                   args[["sequence.track.pars"]])
     dt <- getDataTrack(x, ...)
-    Gviz::displayPars(dt)$ylim <- args[["ylim"]]
+    if(!is.list(dt)){
+      dt <- list(dt)
+    }
+    dt <- .add_viz_ylim(dt, chromosome, from_to, args[["ylim"]])
     if(seqdata){
       sdt <- getDataTrack(seqData(x), ...)
-      tracks <- list(dt,sdt,st,atm)
+      if(!is.list(sdt)){
+        sdt <- list(sdt)
+      }
+      sdt <- .add_viz_ylim(sdt, chromosome, from_to, args[["ylim"]])
+      tracks <- c(dt,sdt,list(st,atm))
     } else {
-      tracks <- list(dt,st,atm)
+      tracks <- c(dt,list(st,atm))
     }
     # plot tracks
     do.call(Gviz::plotTracks,

@@ -282,13 +282,19 @@ RNAMODR_PLOT_SEQ_PILEUP_NAMES <- c("bases" = "Bases called [%]")
 
 .clean_mcols_pileup <- function(seqdata, colour.bases){
   d <- mcols(seqdata@unlistData)
-  d <- d[,stringr::str_detect(colnames(d),"means")]
-  colnames(d) <- gsub("means.treated.","",colnames(d))
-  d <- d[,colnames(d) != "."]
-  d <- DataFrame(as.data.frame(d) / rowSums(as.data.frame(d)) * 100)
-  # exchange T for U in columns and match colors
-  colnames(d)[colnames(d) == "T"] <- "U"
-  d <- d[,match(colnames(d), names(colour.bases))]
+  d <- d[,!stringr::str_detect(colnames(d),"\\.\\."),drop=FALSE]
+  d <- d[,!stringr::str_detect(colnames(d),"sds."),drop=FALSE]
+  conditions <- c("control","treated")
+  for(con in conditions){
+    f <- stringr::str_detect(colnames(d),con)
+    if(any(f)){
+      f <- f & stringr::str_detect(colnames(d),"means")
+      colnames(d)[f] <- gsub("means.","",colnames(d)[f])
+      d[,f] <- DataFrame(as.data.frame(d[,f]) / rowSums(as.data.frame(d[,f])) * 100)
+      colnames(d)[f][colnames(d[,f]) == paste0(con,".T")] <- paste0(con,".U")
+      d[,f] <- d[,f][,match(colnames(d)[f], paste0(con,".",names(colour.bases)))]
+    }
+  }
   mcols(seqdata@unlistData) <- d
   seqdata
 }
@@ -308,16 +314,43 @@ setMethod(
     # clean meta data columns
     seqdata <- .clean_mcols_pileup(seqdata, colour.bases)
     seqdata <- unlist(seqdata)
-    dt <- Gviz::DataTrack(range = seqdata,
-                          groups = colnames(mcols(seqdata)),
-                          name = RNAMODR_PLOT_SEQ_PILEUP_NAMES["bases"],
-                          col = colour.bases[order(names(colour.bases))],
-                          type = "histogram",
-                          stackedBars = TRUE)
-    Gviz::displayPars(dt)$background.title <- "#FFFFFF"
-    Gviz::displayPars(dt)$fontcolor.title <- "#000000"
-    Gviz::displayPars(dt)$col.axis <- "#000000"
-    Gviz::displayPars(dt) <- args
-    dt
+    conditions <- unique(x@condition)
+    if("control" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub("control.","",colnames(mcols(d)))
+      dt.control <- Gviz::DataTrack(range = d,
+                                    groups = colnames(mcols(d)),
+                                    name = paste0(RNAMODR_PLOT_SEQ_PILEUP_NAMES["bases"],
+                                                  "\ncontrol"),
+                                    col = colour.bases[order(names(colour.bases))],
+                                    type = "histogram",
+                                    stackedBars = TRUE)
+      Gviz::displayPars(dt.control)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control) <- args
+      track <- dt.control
+    }
+    if("treated" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      colnames(mcols(d)) <- gsub("treated.","",colnames(mcols(d)))
+      dt.treated <- Gviz::DataTrack(range = d,
+                                    groups = colnames(mcols(d)),
+                                    name = paste0(RNAMODR_PLOT_SEQ_PILEUP_NAMES["bases"],
+                                                  "\ntreated"),
+                                    col = colour.bases[order(names(colour.bases))],
+                                    type = "histogram",
+                                    stackedBars = TRUE)
+      Gviz::displayPars(dt.treated)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated) <- args
+      track <- dt.treated
+    }
+    if(length(conditions) == 2L){
+      track <- list("1" = dt.control,
+                    "2" = dt.treated)
+    }
+    track
   }
 )

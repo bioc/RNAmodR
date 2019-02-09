@@ -102,14 +102,16 @@ NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   normTranscript <- (enddata / BiocGenerics::lengths(data)) * 1000
   normTranscript <- IRanges::NumericList(lapply(normTranscript,unname))
   normOverlap <- IRanges::NumericList(mapply(
-    function(d,end){
-      gr <- GenomicRanges::GRanges(seqnames = as.character(unique(seqnames(d))),
-                    ranges = ir <- IRanges(seq_along(end),width = 1),
-                    strand = as.character(unique(strand(d))))
+    function(d,end,pos){
+      gr <- GenomicRanges::GRanges(
+        seqnames = as.character(unique(seqnames(d))),
+        ranges = IRanges::IRanges(pos,width = 1),
+        strand = as.character(unique(strand(d))))
       end / GenomicRanges::countOverlaps(gr,d)
     },
     data,
     enddata,
+    seqs[f],
     SIMPLIFY = FALSE))
   # calculate tables and add empty positions
   data_not_found <- IRanges::IntegerList(mapply(
@@ -271,28 +273,172 @@ setMethod("aggregate",
 
 # data visualization -----------------------------------------------------------
 
-#' @rdname RNAmodR-internals
+RNAMODR_PLOT_SEQ_NORMEND_NAMES <- 
+  c("normend5tx" = "mean(5'-ends transcript normalized)",
+    "normend3tx" = "mean(3'-ends transcript normalized)",
+    "normend5ol" = "mean(5'-ends overlap normalized)",
+    "normend3ol" = "mean(3'-ends overlap normalized)")
+
+.clean_mcols_normend <- function(seqdata){
+  d <- mcols(seqdata@unlistData)
+  d <- d[,stringr::str_detect(colnames(d),"means"),drop=FALSE]
+  
+  mcols(seqdata@unlistData) <- d
+  seqdata
+}
+
+#' @rdname EndSequenceData
+#' @export
 setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "NormEnd5SequenceData",
-                        data = "missing",
-                        seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, seqdata, sequence,  args) {
-    requireNamespace("Gviz")
-    browser()
+  f = "getDataTrack",
+  signature = signature(x = "NormEnd5SequenceData"),
+  definition = function(x, ...) {
+    args <- list(...)
+    name <- .norm_viz_name(args[["name"]])
+    # DataTrack for sequence data
+    seqdata <- .get_data_for_visualization(x, name)
+    # clean meta data columns
+    seqdata <- .clean_mcols_normend(seqdata)
+    seqdata <- unlist(seqdata)
+    conditions <- unique(x@condition)
+    if("control" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
+      dt.control.tx <- Gviz::DataTrack(
+        range = d[,"means.tx"],
+        group = "means",
+        name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend5tx"],
+                      "\ncontrol"),
+        type = "histogram")
+      Gviz::displayPars(dt.control.tx)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control.tx)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control.tx)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control.tx) <- args
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
+      dt.control.ol <- Gviz::DataTrack(
+        range = d[,"means.ol"],
+        group = "means",
+        name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend5ol"],
+                      "\ncontrol"),
+        type = "histogram")
+      Gviz::displayPars(dt.control.ol)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control.ol)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control.ol)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control.ol) <- args
+      tracks <- list("1" = dt.control.tx,
+                     "2" = dt.control.ol)
+    }
+    if("treated" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
+      dt.treated.tx <- Gviz::DataTrack(
+        range = d[,"means.tx"],
+        group = "means.tx",
+        name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend5tx"],
+                      "\ntreated"),
+        type = "histogram")
+      Gviz::displayPars(dt.treated.tx)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated.tx)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated.tx)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated.tx) <- args
+      dt.treated.ol <- Gviz::DataTrack(
+        range = d[,"means.ol"],
+        group = "means.ol",
+        name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend5ol"],
+                      "\ntreated"),
+        type = "histogram")
+      Gviz::displayPars(dt.treated.ol)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated.ol)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated.ol)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated.ol) <- args
+      tracks <- list("1" = dt.treated.tx,
+                     "2" = dt.treated.ol)
+    }
+    if(length(conditions) == 2L){
+      tracks <- list("1" = dt.control.tx,
+                     "2" = dt.control.ol,
+                     "1" = dt.treated.tx,
+                     "2" = dt.treated.ol)
+    }
+    tracks
   }
 )
 
-#' @rdname RNAmodR-internals
+#' @rdname EndSequenceData
+#' @export
 setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "NormEnd3SequenceData",
-                        data = "missing",
-                        seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, seqdata, sequence,  args) {
-    requireNamespace("Gviz")
-    browser()
+  f = "getDataTrack",
+  signature = signature(x = "NormEnd3SequenceData"),
+  definition = function(x, ...) {
+    args <- list(...)
+    name <- .norm_viz_name(args[["name"]])
+    # DataTrack for sequence data
+    seqdata <- .get_data_for_visualization(x, name)
+    # clean meta data columns
+    seqdata <- .clean_mcols_normend(seqdata)
+    seqdata <- unlist(seqdata)
+    conditions <- unique(x@condition)
+    if("control" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
+      dt.control.tx <- Gviz::DataTrack(
+        range = d[,"means.tx"],
+        group = "means",
+        name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend3tx"],
+                      "\ncontrol"),
+        type = "histogram")
+      Gviz::displayPars(dt.control.tx)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control.tx)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control.tx)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control.tx) <- args
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
+      dt.control.ol <- Gviz::DataTrack(
+        range = d[,"means.ol"],
+        group = "means",
+        name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend3ol"],
+                      "\ncontrol"),
+        type = "histogram")
+      Gviz::displayPars(dt.control.ol)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control.ol)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control.ol)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control.ol) <- args
+      tracks <- list("1" = dt.control.tx,
+                     "2" = dt.control.ol)
+    }
+    if("treated" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
+      dt.treated.tx <- Gviz::DataTrack(
+        range = d[,"means.tx"],
+        group = "means.tx",
+        name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend3tx"],
+                      "\ntreated"),
+        type = "histogram")
+      Gviz::displayPars(dt.treated.tx)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated.tx)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated.tx)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated.tx) <- args
+      dt.treated.ol <- Gviz::DataTrack(
+        range = d[,"means.ol"],
+        group = "means.ol",
+        name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend3ol"],
+                      "\ntreated"),
+        type = "histogram")
+      Gviz::displayPars(dt.treated.ol)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated.ol)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated.ol)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated.ol) <- args
+      tracks <- list("1" = dt.treated.tx,
+                     "2" = dt.treated.ol)
+    }
+    if(length(conditions) == 2L){
+      tracks <- list("1" = dt.control.tx,
+                     "2" = dt.control.ol,
+                     "1" = dt.treated.tx,
+                     "2" = dt.treated.ol)
+    }
+    tracks
   }
 )

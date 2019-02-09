@@ -318,41 +318,163 @@ setMethod("aggregate",
 
 # data visualization -----------------------------------------------------------
 
-#' @rdname RNAmodR-internals
+RNAMODR_PLOT_SEQ_END_NAMES <- c("end5" = "mean(5'-ends)",
+                                "end3" = "mean(3'-ends)",
+                                "end" = "mean(ends)")
+
+.clean_mcols_end <- function(seqdata){
+  d <- mcols(seqdata@unlistData)
+  d <- d[,stringr::str_detect(colnames(d),"means"),drop=FALSE]
+  mcols(seqdata@unlistData) <- d
+  seqdata
+}
+
+#' @rdname EndSequenceData
+#' @export
 setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "EndSequenceData",
-                        data = "missing",
-                        seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, seqdata, sequence,  args) {
-    requireNamespace("Gviz")
-    browser()
+  f = "getDataTrack",
+  signature = signature(x = "EndSequenceData"),
+  definition = function(x, ...) {
+    args <- list(...)
+    name <- .norm_viz_name(args[["name"]])
+    # DataTrack for sequence data
+    seqdata <- .get_data_for_visualization(x, name)
+    # clean meta data columns
+    seqdata <- .clean_mcols_end(seqdata)
+    seqdata <- unlist(seqdata)
+    conditions <- unique(x@condition)
+    if("control" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
+      dt.control <- Gviz::DataTrack(range = d,
+                                    group = "means",
+                                    name = paste0(RNAMODR_PLOT_SEQ_END_NAMES["end"],
+                                                  "\ncontrol"),
+                                    type = "histogram")
+      Gviz::displayPars(dt.control)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control) <- args
+      track <- dt.control
+    }
+    if("treated" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
+      dt.treated <- Gviz::DataTrack(range = d,
+                                    group = "means",
+                                    name = paste0(RNAMODR_PLOT_SEQ_END_NAMES["end"],
+                                                  "\ntreated"),
+                                    type = "histogram")
+      Gviz::displayPars(dt.treated)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated) <- args
+      track <- dt.treated
+    }
+    if(length(conditions) == 2L){
+      track <- list("1" = dt.control,
+                    "1" = dt.treated)
+    }
+    track
   }
 )
 
-#' @rdname RNAmodR-internals
+#' @rdname EndSequenceData
+#' @export
 setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "End5SequenceData",
-                        data = "missing",
-                        seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, seqdata, sequence,  args) {
-    requireNamespace("Gviz")
-    browser()
+  f = "getDataTrack",
+  signature = signature(x = "End5SequenceData"),
+  definition = function(x, ...) {
+    args <- list(...)
+    name <- .norm_viz_name(args[["name"]])
+    # DataTrack for sequence data
+    seqdata <- .get_data_for_visualization(x, name)
+    # clean meta data columns
+    seqdata <- .clean_mcols_end(seqdata)
+    seqdata <- unlist(seqdata)
+    conditions <- unique(x@condition)
+    if("control" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
+      dt.control <- Gviz::DataTrack(range = d,
+                                    group = "means",
+                                    name = paste0(RNAMODR_PLOT_SEQ_END_NAMES["end5"],
+                                                  "\ncontrol"),
+                                    type = "histogram")
+      Gviz::displayPars(dt.control)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control) <- args
+      track <- dt.control
+    }
+    if("treated" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
+      dt.treated <- Gviz::DataTrack(range = d,
+                                    group = "means",
+                                    name = paste0(RNAMODR_PLOT_SEQ_END_NAMES["end5"],
+                                                  "\ntreated"),
+                                    type = "histogram")
+      Gviz::displayPars(dt.treated)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated) <- args
+      track <- dt.treated
+    }
+    if(length(conditions) == 2L){
+      track <- list("1" = dt.control,
+                    "1" = dt.treated)
+    }
+    track
   }
 )
 
-#' @rdname RNAmodR-internals
+#' @rdname EndSequenceData
+#' @export
 setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "End3SequenceData",
-                        data = "missing",
-                        seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, seqdata, sequence,  args) {
-    requireNamespace("Gviz")
-    browser()
+  f = "getDataTrack",
+  signature = signature(x = "End3SequenceData"),
+  definition = function(x, ...) {
+    args <- list(...)
+    name <- .norm_viz_name(args[["name"]])
+    # DataTrack for sequence data
+    seqdata <- .get_data_for_visualization(x, name)
+    # clean meta data columns
+    seqdata <- .clean_mcols_end(seqdata)
+    seqdata <- unlist(seqdata)
+    conditions <- unique(x@condition)
+    if("control" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
+      dt.control <- Gviz::DataTrack(range = d,
+                                    group = "means",
+                                    name = paste0(RNAMODR_PLOT_SEQ_END_NAMES["end3"],
+                                                  "\ncontrol"),
+                                    type = "histogram")
+      Gviz::displayPars(dt.control)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control) <- args
+      track <- dt.control
+    }
+    if("treated" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
+      dt.treated <- Gviz::DataTrack(range = d,
+                                    group = "means",
+                                    name = paste0(RNAMODR_PLOT_SEQ_END_NAMES["end3"],
+                                                  "\ntreated"),
+                                    type = "histogram")
+      Gviz::displayPars(dt.treated)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated) <- args
+      track <- dt.treated
+    }
+    if(length(conditions) == 2L){
+      track <- list("1" = dt.control,
+                    "1" = dt.treated)
+    }
+    track
   }
 )

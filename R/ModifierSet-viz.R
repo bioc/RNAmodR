@@ -41,31 +41,20 @@ NULL
   ans[seq.int(1,n)]
 }
 
-.add_viz_ylim <- function(dts, chromosome, from_to, ylim){
-  if(is.null(ylim)){
-    max <- max(vapply(dts,
-                      function(dt){
-                        f <- which(seqnames(dt@range) == chromosome & 
-                                     start(dt@range) >= from_to$from & 
-                                     end(dt@range) <= from_to$to)
-                        max(dt@data[,f])
-                      },
-                      numeric(1)))
-    ylim <- c(0,max)
-  }
-  dts <- lapply(dts,
-                function(dt){
-                  Gviz::displayPars(dt)$ylim <- ylim
-                  dt
-                })
-  dts
-}
-
 .add_viz_colours <- function(dts, colours){
   dts <- mapply(
     function(dt, colour){
-      Gviz::displayPars(dt)$col <- colour
-      Gviz::displayPars(dt)$fill.histogram <- colour
+      if(is.list(dt)){
+        dt <- lapply(dt,
+                     function(t){
+                       Gviz::displayPars(t)$col <- colour
+                       Gviz::displayPars(t)$fill <- colour
+                       t
+                     })
+      } else {
+        Gviz::displayPars(dt)$col <- colour
+        Gviz::displayPars(dt)$fill <- colour
+      }
       dt
     },
     dts,
@@ -76,7 +65,15 @@ NULL
 .add_viz_names <- function(dts, names){
   dts <- mapply(
     function(dt, name){
-      dt@name <- paste0(name,"\n",dt@name)
+      if(is.list(dt)){
+        dt <- lapply(dt,
+                     function(t){
+                       t@name <- paste0(name,"\n",t@name)
+                       t
+                     })
+      } else {
+        dt@name <- paste0(name,"\n",dt@name)
+      }
       dt
     },
     dts,
@@ -107,6 +104,7 @@ setMethod(
   f = "visualizeData",
   signature = signature(x = "ModifierSet"),
   definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
+    browser()
     # get plotting arguments
     args <- .norm_viz_args_ModifierSet(list(...))
     chromosome <- .norm_viz_chromosome(ranges(x), name)
@@ -123,10 +121,11 @@ setMethod(
     dts <- .add_viz_names(dts, names(x))
     if(seqdata){
       sdts <- lapply(x, function(z){getDataTrack(seqData(z), ...)})
+      sdts <- .add_viz_ylim(sdts, chromosome, from_to, args[["ylim"]])
       sdts <- .add_viz_names(sdts, names(x))
-      tracks <- c(dts, sdts, list(st,atm))
+      tracks <- c(do.call(c,dts), do.call(c,sdts), list(st,atm))
     } else {
-      tracks <- c(dts, list(st,atm))
+      tracks <- c(do.call(c,dts), list(st,atm))
     }
     # plot tracks
     do.call(Gviz::plotTracks,

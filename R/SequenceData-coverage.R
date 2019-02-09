@@ -98,15 +98,60 @@ setMethod("aggregate",
 
 # data visualization -----------------------------------------------------------
 
-#' @rdname RNAmodR-internals
+RNAMODR_PLOT_SEQ_COVERAGE_NAMES <- c("means" = "mean(coverage)")
+
+.clean_mcols_coverage <- function(seqdata){
+  d <- mcols(seqdata@unlistData)
+  d <- d[,!stringr::str_detect(colnames(d),"sds."),drop=FALSE]
+  mcols(seqdata@unlistData) <- d
+  seqdata
+}
+
+#' @rdname CoverageSequenceData
 setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "CoverageSequenceData",
-                        data = "missing",
-                        seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, seqdata, sequence,  args) {
-    requireNamespace("Gviz")
-    browser()
+  f = "getDataTrack",
+  signature = signature(x = "CoverageSequenceData"),
+  definition = function(x, ...) {
+    args <- list(...)
+    name <- .norm_viz_name(args[["name"]])
+    # DataTrack for sequence data
+    seqdata <- .get_data_for_visualization(x, name)
+    # clean meta data columns
+    seqdata <- .clean_mcols_coverage(seqdata)
+    seqdata <- unlist(seqdata)
+    conditions <- unique(x@condition)
+    if("control" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
+      dt.control <- Gviz::DataTrack(range = d,
+                                    group = "means",
+                                    name = paste0(RNAMODR_PLOT_SEQ_COVERAGE_NAMES["means"],
+                                                  "\ncontrol"),
+                                    type = "histogram")
+      Gviz::displayPars(dt.control)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.control)$col.axis <- "#000000"
+      Gviz::displayPars(dt.control) <- args
+      track <- dt.control
+    }
+    if("treated" %in% conditions){
+      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
+      dt.treated <- Gviz::DataTrack(range = d,
+                                    group = "means",
+                                    name = paste0(RNAMODR_PLOT_SEQ_COVERAGE_NAMES["means"],
+                                                  "\ntreated"),
+                                    type = "histogram")
+      Gviz::displayPars(dt.treated)$background.title <- "#FFFFFF"
+      Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
+      Gviz::displayPars(dt.treated)$col.axis <- "#000000"
+      Gviz::displayPars(dt.treated) <- args
+      track <- dt.treated
+    }
+    if(length(conditions) == 2L){
+      track <- list("1" = dt.control,
+                    "1" = dt.treated)
+    }
+    track
   }
 )
