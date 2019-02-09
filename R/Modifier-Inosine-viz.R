@@ -2,14 +2,8 @@
 #' @include Modifier-Inosine-class.R
 NULL
 
-RNAMODR_I_PLOT_BASES_COLOURS <- 
-  c("G" = biovizBase::getBioColor("RNA_BASES_N")[["G"]],
-    "A" = biovizBase::getBioColor("RNA_BASES_N")[["A"]],
-    "U" = biovizBase::getBioColor("RNA_BASES_N")[["U"]],
-    "C" = biovizBase::getBioColor("RNA_BASES_N")[["C"]])
 RNAMODR_I_PLOT_DATA_COLOURS <- c("score" = "#ABABAB") 
-RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine",
-                               bases = "Bases called [%]")
+RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
 
 #' @rdname ModInosine-functions
 #' @export
@@ -36,66 +30,61 @@ setMethod(
   }
 )
 
-#' @name ModInosine-internals
+.norm_viz_mod_inosine_args <- function(...){
+  input <- list(...)
+  colour <- input[["colour"]]
+  if(is.na(colour) || length(colour) != length(RNAMODR_I_PLOT_DATA_COLOURS)){
+    colour <- RNAMODR_I_PLOT_DATA_COLOURS
+  }
+  input <- list(colour = colour)
+  input
+}
+
+.clean_mcols_mod_inosine <- function(x, data, name){
+  d <- mcols(data@unlistData)
+  seq <- sequences(x)
+  letters <- unlist(unname(strsplit(as.character(seq),"")))
+  f <- d$score < 0
+  d$sd[f] <- 0
+  d$score[f] <- 0
+  d <- d[colnames(d) %in% c("score","sd")]
+  d$score[letters != "A"] <- 0
+  mcols(data@unlistData) <- d
+  data
+}
+
+#' @name ModInosine-functions
 setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "ModInosine", data = "GRanges", seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, data, seqdata, sequence, args) {
-    requireNamespace("Gviz")
-    n <- ncol(mcols(data))
-    colour.bases <- args[["colour.bases"]]
-    if(is.na(colour.bases) || 
-       length(colour.bases) != length(RNAMODR_I_PLOT_BASES_COLOURS)){
-      colour.bases <- RNAMODR_I_PLOT_BASES_COLOURS
-    } else {
-      if(any(!(names(colour.bases) %in% names(RNAMODR_I_PLOT_BASES_COLOURS)))){
-        stop("Unrecognized names for additional argument 'colour.bases'. ",
-             "The names must be ",
-             paste(names(RNAMODR_I_PLOT_BASES_COLOURS),collapse = ","),".",
-             call. = FALSE)
-      }
-      colour.bases <- colour.bases[match(names(colour.bases),
-                                         names(RNAMODR_I_PLOT_BASES_COLOURS))]
-    }
-    colour <- args[["colour"]]
-    if(is.na(colour) || length(colour) != n){
-      colour <- RNAMODR_I_PLOT_DATA_COLOURS
-    }
-    # DataTrack for sequence data
-    mcols(seqdata) <- 
-      mcols(seqdata)[,stringr::str_detect(colnames(mcols(seqdata)),"means")]
-    colnames(mcols(seqdata)) <- gsub("means.treated.","",colnames(mcols(seqdata)))
-    mcols(seqdata) <- 
-      DataFrame(as.data.frame(mcols(seqdata)[,colnames(mcols(seqdata)) != "."]) * 100)
-    colnames(mcols(seqdata))[colnames(mcols(seqdata)) == "T"] <- "U"
-    mcols(seqdata) <- mcols(seqdata)[,match(colnames(mcols(seqdata)),
-                                            names(colour.bases))]
-    dtbases <- DataTrack(seqdata,
-                         groups = colnames(mcols(seqdata)),
-                         name = RNAMODR_I_PLOT_DATA_NAMES["bases"],
-                         col = colour.bases[order(names(colour.bases))],
-                         type = "histogram",
-                         stackedBars = TRUE)
-    displayPars(dtbases)$background.title <- "#FFFFFF"
-    displayPars(dtbases)$fontcolor.title <- "#000000"
-    displayPars(dtbases)$col.axis <- "#000000"
-    # DataTrack for score
-    lim <- c(0,max(mcols(data)$score))
-    mcols(data)$score[mcols(data)$score < 0] <- 0
-    mcols(data)$score[strsplit(as.character(sequence),"")[[1]] == "G"] <- 0
-    dtscore <- DataTrack(data,
-                         data = "score",
-                         name = RNAMODR_I_PLOT_DATA_NAMES["score"],
-                         fill = colour,
-                         type = "histogram",
-                         ylim = lim)
-    displayPars(dtscore)$background.title <- "#FFFFFF"
-    displayPars(dtscore)$fontcolor.title <- "#000000"
-    displayPars(dtscore)$col.axis <- "#000000"
-    # Return as a list
-    list(score = dtscore,
-         seqdata = dtbases)
+  f = "getDataTrack",
+  signature = signature(x = "ModInosine"),
+  definition = function(x, ...) {
+    args <- .norm_viz_mod_inosine_args(...)
+    name <- .norm_viz_name(args[["name"]])
+    data <- .get_data_for_visualization(x, name)
+    data <- .clean_mcols_mod_inosine(x, data, name)
+    data <- unlist(data)
+    lim <- c(min(mcols(data)$score), max(mcols(data)$score))
+    dtscore <- Gviz::DataTrack(range = data[,"score"],
+                               groups = "score",
+                               name = RNAMODR_I_PLOT_DATA_NAMES["score"],
+                               col = args[["colour"]],
+                               type = "histogram",
+                               ylim = lim)
+    Gviz::displayPars(dtscore)$background.title <- "#FFFFFF"
+    Gviz::displayPars(dtscore)$fontcolor.title <- "#000000"
+    Gviz::displayPars(dtscore)$col.axis <- "#000000"
+    Gviz::displayPars(dtscore) <- args
+    # dtsd <- Gviz::DataTrack(range = data[,"sd"],
+    #                            groups = "sd",
+    #                            col = args[["colour"]],
+    #                            type = "histogram",
+    #                            ylim = lim)
+    # Gviz::displayPars(dtsd)$background.title <- "#FFFFFF"
+    # Gviz::displayPars(dtsd)$fontcolor.title <- "#000000"
+    # Gviz::displayPars(dtsd)$col.axis <- "#000000"
+    # Gviz::displayPars(dtsd) <- args
+    # ot <- OverlayTrack(list(dtscore,dtsd))
+    dtscore
   }
 )
 

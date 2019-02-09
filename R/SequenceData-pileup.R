@@ -254,15 +254,70 @@ setMethod("aggregate",
 
 # data visualization -----------------------------------------------------------
 
-#' @rdname RNAmodR-internals
+RNAMODR_PLOT_BASES_COLOURS <- 
+  c("G" = biovizBase::getBioColor("RNA_BASES_N")[["G"]],
+    "A" = biovizBase::getBioColor("RNA_BASES_N")[["A"]],
+    "U" = biovizBase::getBioColor("RNA_BASES_N")[["U"]],
+    "C" = biovizBase::getBioColor("RNA_BASES_N")[["C"]])
+RNAMODR_PLOT_SEQ_PILEUP_NAMES <- c("bases" = "Bases called [%]")
+
+.norm_viz_pileup_args <- function(input){
+  colour.bases <- input[["colour.bases"]]
+  if(is.null(colour.bases) || 
+     length(colour.bases) != length(RNAMODR_PLOT_BASES_COLOURS)){
+    colour.bases <- RNAMODR_PLOT_BASES_COLOURS
+  } else {
+    if(any(!(names(colour.bases) %in% names(RNAMODR_PLOT_BASES_COLOURS)))){
+      stop("Unrecognized names for additional argument 'colour.bases'. ",
+           "The names must be ",
+           paste(names(RNAMODR_PLOT_BASES_COLOURS),collapse = ","),".",
+           call. = FALSE)
+    }
+    colour.bases <- colour.bases[match(names(colour.bases),
+                                       names(RNAMODR_PLOT_BASES_COLOURS))]
+  }
+  input <- list(colour.bases = colour.bases)
+  input
+}
+
+.clean_mcols_pileup <- function(seqdata, colour.bases){
+  d <- mcols(seqdata@unlistData)
+  d <- d[,stringr::str_detect(colnames(d),"means")]
+  colnames(d) <- gsub("means.treated.","",colnames(d))
+  d <- d[,colnames(d) != "."]
+  d <- DataFrame(as.data.frame(d) / rowSums(as.data.frame(d)) * 100)
+  # exchange T for U in columns and match colors
+  colnames(d)[colnames(d) == "T"] <- "U"
+  d <- d[,match(colnames(d), names(colour.bases))]
+  mcols(seqdata@unlistData) <- d
+  seqdata
+}
+
+#' @rdname PileupSequenceData
+#' @importFrom Gviz DataTrack
+#' @export
 setMethod(
-  f = ".dataTracks",
-  signature = signature(x = "PileupSequenceData",
-                        data = "missing",
-                        seqdata = "GRanges",
-                        sequence = "XString"),
-  definition = function(x, seqdata, sequence,  args) {
-    requireNamespace("Gviz")
-    browser()
+  f = "getDataTrack",
+  signature = signature(x = "PileupSequenceData"),
+  definition = function(x, ...) {
+    args <- .norm_viz_pileup_args(list(...))
+    colour.bases <- args[["colour.bases"]]
+    name <- .norm_viz_name(args[["name"]])
+    # DataTrack for sequence data
+    seqdata <- .get_data_for_visualization(x, name)
+    # clean meta data columns
+    seqdata <- .clean_mcols_pileup(seqdata, colour.bases)
+    seqdata <- unlist(seqdata)
+    dt <- Gviz::DataTrack(range = seqdata,
+                          groups = colnames(mcols(seqdata)),
+                          name = RNAMODR_PLOT_SEQ_PILEUP_NAMES["bases"],
+                          col = colour.bases[order(names(colour.bases))],
+                          type = "histogram",
+                          stackedBars = TRUE)
+    Gviz::displayPars(dt)$background.title <- "#FFFFFF"
+    Gviz::displayPars(dt)$fontcolor.title <- "#000000"
+    Gviz::displayPars(dt)$col.axis <- "#000000"
+    Gviz::displayPars(dt) <- args
+    dt
   }
 )
