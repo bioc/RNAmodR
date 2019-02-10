@@ -1,6 +1,10 @@
 #' @include RNAmodR.R
 NULL
 
+#' @name Modifier-functions
+#' @title Modifier/ModifierSet functions
+NULL
+
 # Class constructors -----------------------------------------------------------
 
 setGeneric( 
@@ -27,7 +31,6 @@ setGeneric(
 # Modifier accessors -----------------------------------------------------------
 
 #' @rdname Modifier-functions
-#' @title Modifier/ModifierSet functions
 #' @export
 setGeneric( 
   name = "modifierType",

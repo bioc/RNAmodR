@@ -23,17 +23,20 @@ NULL
 #' @param window.size integer value for the number of positions on the left and 
 #' right site of the selected positions included in the plotting (default: 
 #' \code{window.size = 15L})
+#' @param perTranscript \code{TRUE} or \code{FALSE}: Should the positions shown
+#' per transcript?
 #' @param ... optional parameters:
 #' \itemize{
-#' \item{\code{modified.seq}}{\code{TRUE} or \code{FALSE}. Should the sequence 
+#' \item{\code{modified.seq}} {\code{TRUE} or \code{FALSE}. Should the sequence 
 #' shown with modified nucleotide positions? (default: 
 #' \code{modified.seq = FALSE})}
-#' \item{\code{additional.mod}}{other modifications, which should be shown
-#' in the annotation and sequence track.}
-#' \item{\code{annotation.track.pars}}{Parameters passed onto the A
-#' nnotationTrack.}
-#' \item{\code{sequence.track.pars}}{Parameters passed onto the SequenceTrack.}
-#' \item{\code{data.track.pars}}{Parameters passed onto the DataTrack(s).}
+#' \item{\code{additional.mod}} {other modifications, which should be shown
+#' in the annotation and sequence track. The must be a \code{GRanges} compatible
+#' with \code{\link[Modstrings:separate]{combineIntoModstrings}}.}
+#' \item{\code{annotation.track.pars}} {Parameters passed onto the 
+#' \code{\link[Gviz:AnnotationTrack-class]{AnnotationTrack}}.}
+#' \item{\code{sequence.track.pars}} {Parameters passed onto the 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
 #' }
 NULL
 

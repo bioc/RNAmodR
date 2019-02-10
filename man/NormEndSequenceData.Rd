@@ -9,6 +9,8 @@
 \alias{NormEnd3SequenceData-class}
 \alias{aggregate,NormEnd5SequenceData-method}
 \alias{aggregate,NormEnd3SequenceData-method}
+\alias{getDataTrack,NormEnd5SequenceData-method}
+\alias{getDataTrack,NormEnd3SequenceData-method}
 \title{NormEnd5SequenceData/NormEnd3SequenceData}
 \usage{
 NormEnd5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
@@ -20,6 +22,10 @@ NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 \S4method{aggregate}{NormEnd3SequenceData}(x, condition = c("Both",
   "Treated", "Control"))
+
+\S4method{getDataTrack}{NormEnd5SequenceData}(x, name, ...)
+
+\S4method{getDataTrack}{NormEnd3SequenceData}(x, name, ...)
 }
 \arguments{
 \item{bamfiles, annotation, sequences, seqinfo, ...}{See 
@@ -29,6 +35,9 @@ NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
+
+\item{name}{For \code{getDataTrack}: a valid transcript name. Must be a name
+of \code{ranges(x)}}
 }
 \description{
 The \code{NormEnd5SequenceData}/\code{NormEnd3SequenceData}

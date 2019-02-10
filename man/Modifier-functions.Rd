@@ -2,7 +2,8 @@
 % Please edit documentation in R/AllGenerics.R, R/Modifier-class.R,
 %   R/ModifierSet-class.R
 \docType{methods}
-\name{modifierType}
+\name{Modifier-functions}
+\alias{Modifier-functions}
 \alias{modifierType}
 \alias{modType}
 \alias{mainScore}
@@ -12,7 +13,6 @@
 \alias{sequences}
 \alias{bamfiles}
 \alias{seqData}
-\alias{Modifier-functions}
 \alias{show,Modifier-method}
 \alias{modifierType,Modifier-method}
 \alias{modType,Modifier-method}
@@ -109,10 +109,12 @@ seqData(x)
 
 \item{value}{For \code{settings}: value of the setting to be set}
 
-\item{..., modified}{For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
+\item{...}{Additional arguments.}
+
+\item{modified}{For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
 the sequences be returned as a \code{ModRNAString} with the found 
 modifications added on top of the \code{RNAString}? See 
-\code{\link[Modstrings:modifyNucleotides]{modifyNucleotides}}.}
+\code{\link[Modstrings:separate]{combineIntoModstrings}}.}
 }
 \description{
 For the \code{Modifier} and  \code{ModifierSet} classes a number of functions

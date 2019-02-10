@@ -49,7 +49,7 @@ NULL
 #' \item{minReplicate:} {minimum number of replicates needed for the analysis 
 #' (default: \code{minReplicate = 1L}).}
 #' \item{minScore:} {minimum score to identify Inosine positions de novo 
-#' (default: \code{minScore = 10L}).}
+#' (default: \code{minScore = 0.4}).}
 #' }
 NULL
 
@@ -116,7 +116,7 @@ ModInosine <- function(x, annotation, sequences, seqinfo, ...){
 # settings ---------------------------------------------------------------------
 
 .norm_inosine_args <- function(input){
-  minScore <- 10
+  minScore <- 0.4
   if(!is.null(input[["minScore"]])){
     minScore <- input[["minScore"]]
     if(!is.numeric(minScore) | minScore < 0 | minScore > 100){
@@ -143,24 +143,6 @@ setReplaceMethod(f = "settings",
 
 # functions --------------------------------------------------------------------
 
-.calculate_inosine_score <- function(x){
-  data <- x@unlistData
-  df <- data.frame(x = data$means.treated.G,
-                   y = data$means.treated.A + data$means.treated.T + data$means.treated.C,
-                   dx = data$sds.treated.G,
-                   dy = data$sds.treated.A + data$sds.treated.T + data$sds.treated.C)
-  fun <- z ~ log2(x/y) * 10
-  scores <- .mutate_with_error(df,fun)
-  scores$z <- vapply(scores$z,min,numeric(1),100)
-  scores$z[is.infinite(scores$z) | is.na(scores$z)] <- 0
-  scores$dz[is.infinite(scores$dz) | is.na(scores$dz)] <- 0
-  ans <- S4Vectors::DataFrame(value = scores$z,
-                              sd = scores$dz)
-  ans <- IRanges::SplitDataFrameList(ans)
-  ans@partitioning <- x@partitioning
-  ans
-}
-
 .aggregate_pile_up_to_coverage <- function(data){
   df <- data@unlistData
   replicates <- unique(data@replicate)
@@ -175,16 +157,28 @@ setReplaceMethod(f = "settings",
   ans
 }
 
+.calculate_inosine_score <- function(x, letters){
+  data <- x@unlistData
+  letters <- letters@unlistData
+  scores <- 
+    data$means.treated.G / (data$means.treated.A + data$means.treated.T + 
+                              data$means.treated.C +data$means.treated.G)
+  scores[is.infinite(scores) | is.na(scores)] <- 0
+  scores[letters != "A"] <- 0
+  ans <- S4Vectors::DataFrame(value = scores)
+  ans <- IRanges::SplitDataFrameList(ans)
+  ans@partitioning <- x@partitioning
+  ans
+}
+
 .aggregate_inosine <- function(x){
   message("Aggregating data and calculating scores...")
   data <- seqData(x)
   mod <- aggregate(data)
-  coverage <- .aggregate_pile_up_to_coverage(data)
-  score <- .calculate_inosine_score(mod)
+  letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
+  score <- .calculate_inosine_score(mod, letters)
   ans <- cbind(S4Vectors::DataFrame(score = unlist(score)$value,
-                                    sd = unlist(score)$sd,
-                                    row.names = NULL),
-               unlist(coverage))
+                                    row.names = NULL))
   ans <- IRanges::SplitDataFrameList(ans)
   ans@partitioning <- mod@partitioning
   ans
@@ -208,20 +202,19 @@ setMethod(f = "aggregate",
 )
 
 .get_inosine_score <- function(data){
-  list(score = data$score,
-       sd = data$sd)
+  list(score = data$score)
 }
 
 .find_inosine <- function(x){
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   # get the aggregate data
   mod <- aggregateData(x)
+  coverage <- .aggregate_pile_up_to_coverage(seqData(x))
   # get arguments
   minCoverage <- settings(x,"minCoverage")
   minReplicate <- settings(x,"minReplicate")
   minScore <- settings(x,"minScore")
   # construct logical vector for passing the coverage threshold
-  coverage <- mod[,seq_len(unique(IRanges::ncol(mod)) - 2) + 2,drop = FALSE]
   coverage <- apply(as.matrix(unlist(coverage)),1,
                     function(row){
                       sum(row > minCoverage) >= minReplicate
@@ -233,15 +226,15 @@ setMethod(f = "aggregate",
   modifications <- mapply(
     function(m,c,l,r){
       m <- m[l == "A" &
-               (m$score - m$sd) >= minScore & 
-               c,] # coverage check
+               m$score >= minScore & 
+               c,,drop=FALSE] # coverage check
       if(nrow(m) == 0L) return(NULL)
       ans <- .constructModRanges(r, m, modType = "I",
                                  RNAmodR:::.get_inosine_score, "RNAmodR",
                                  "RNAMOD")
       ans
     },
-    mod[,seq_len(2)],
+    mod,
     coverage,
     letters,
     grl,

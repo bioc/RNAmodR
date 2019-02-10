@@ -2,41 +2,6 @@
 #' @include Modifier-class.R
 NULL
 
-#' @name visualizeData
-#' @aliases visualizeData visualizeDataByCoord
-#'
-#' @title visualizeData
-#'
-#' @description
-#' title
-#'
-#' @param x a \code{Modifier} or \code{ModifierSet} object.
-#' @param coord coordinates of a positions to subset to as a
-#' \code{GRanges} object. The Parent column is expected to match the gene or
-#' transcript name.
-#' @param name Only for \code{visualizeData}: the transcript name
-#' @param from Only for \code{visualizeData}: start position
-#' @param to Only for \code{visualizeData}: end position
-#' @param type the data type of data show as data tracks.
-#' @param seqdata \code{TRUE} or \code{FALSE}: whould the sequence data be
-#' shown? (default: \code{seqdata = FALSE})
-#' @param window.size integer value for the number of positions on the left and
-#' right site of the selected positions included in the plotting (default:
-#' \code{window.size = 15L})
-#' @param ... optional parameters:
-#' \itemize{
-#' \item{\code{modified.seq}}{\code{TRUE} or \code{FALSE}. Should the sequence
-#' shown with modified nucleotide positions? (default:
-#' \code{modified.seq = FALSE})}
-#' \item{\code{additional.mod}}{other modifications, which should be shown
-#' in the annotation and sequence track.}
-#' \item{\code{annotation.track.pars}}{Parameters passed onto the A
-#' nnotationTrack.}
-#' \item{\code{sequence.track.pars}}{Parameters passed onto the SequenceTrack.}
-#' \item{\code{data.track.pars}}{Parameters passed onto the DataTrack(s).}
-#' }
-NULL
-
 .norm_seqdata_show <- function(seqdata){
   if(missing(seqdata) || !assertive::is_a_bool(seqdata)){
     seqdata <- FALSE
@@ -51,7 +16,7 @@ NULL
   type
 }
 
-.norm_viz_args_Modifier <- function(input){
+.norm_viz_args_Modifier <- function(input, x){
   modified.seq <- FALSE
   additional.mod <- GRanges()
   if(!is.null(input[["modified.seq"]])){
@@ -69,7 +34,7 @@ NULL
            call. = FALSE)
     }
   }
-  args <- c(.norm_viz_args_SequenceData(input),
+  args <- c(.norm_viz_args_SequenceData(input, x),
             list(modified.seq = modified.seq,
                  additional.mod = additional.mod))
   args
@@ -123,7 +88,7 @@ setMethod(
   signature = signature(x = "Modifier"),
   definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
     # get plotting arguments
-    args <- .norm_viz_args_Modifier(list(...))
+    args <- .norm_viz_args_Modifier(list(...), x)
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
     seqdata <- .norm_seqdata_show(seqdata)

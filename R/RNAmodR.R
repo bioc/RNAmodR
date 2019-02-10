@@ -58,6 +58,6 @@ SAMPLE_TYPES <- c("treated","control")
 #' These functions are not intended for general use, but are used for 
 #' additional package development.
 #' 
-#' @param range,data,modType,scoreFun,source,type,x,grl,sequences,param,args,seqdata,sequence,i,exact,value
+#' @param object,range,data,modType,scoreFun,source,type,x,grl,sequences,param,args,i,exact,value
 #' Internal arguments
 NULL

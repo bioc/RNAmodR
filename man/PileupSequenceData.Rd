@@ -19,10 +19,13 @@ PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \item{bamfiles, annotation, sequences, seqinfo, ...}{See 
 \code{\link[=SequenceData-class]{SequenceData}}}
 
-\item{x}{a \code{CoverageSequenceData}}
+\item{x}{a \code{PileupSequenceData}}
 
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
+
+\item{name}{For \code{getDataTrack}: a valid transcript name. Must be a name
+of \code{ranges(x)}}
 }
 \description{
 title

@@ -86,7 +86,7 @@
   grl, sequences, param, args)
 }
 \arguments{
-\item{range, data, modType, scoreFun, source, type, x, grl, sequences, param, args, seqdata, sequence, i, exact, value}{Internal arguments}
+\item{object, range, data, modType, scoreFun, source, type, x, grl, sequences, param, args, i, exact, value}{Internal arguments}
 }
 \description{
 These functions are not intended for general use, but are used for 

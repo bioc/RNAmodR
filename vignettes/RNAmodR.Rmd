@@ -1,6 +1,6 @@
 ---
 title: "RNAmodR: analyzing high throughput sequencing data for post-transcriptional RNA modification footprints"
-author: "Felix G.M. Ernst"
+author: "Felix G.M. Ernst and Denis L.J. Lafontaine"
 date: "`r Sys.Date()`"
 package: RNAmodR
 output:
@@ -194,10 +194,10 @@ replicate.
 files <- list("SampleSet1" = c(treated = system.file("extdata","example_wt_1.bam",package = "RNAmodR.Data"),
                                treated = system.file("extdata","example_wt_2.bam",package = "RNAmodR.Data"),
                                treated = system.file("extdata","example_wt_3.bam",package = "RNAmodR.Data")),
-              "SampleSet2" = c(treated = system.file("extdata","example_Bud23_1.bam",package = "RNAmodR.Data"),
-                               treated = system.file("extdata","example_Bud23_2.bam",package = "RNAmodR.Data")),
-              "SampleSet3" = c(treated = system.file("extdata","example_Trm8_1.bam",package = "RNAmodR.Data"),
-                               treated = system.file("extdata","example_Trm8_2.bam",package = "RNAmodR.Data")))
+              "SampleSet2" = c(treated = system.file("extdata","example_bud23_1.bam",package = "RNAmodR.Data"),
+                               treated = system.file("extdata","example_bud23_2.bam",package = "RNAmodR.Data")),
+              "SampleSet3" = c(treated = system.file("extdata","example_trm8_1.bam",package = "RNAmodR.Data"),
+                               treated = system.file("extdata","example_trm8_2.bam",package = "RNAmodR.Data")))
 msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
 ```
 
@@ -272,12 +272,11 @@ alias <- data.frame(tx_id = names(id2name(txdb)),
 plotCompareByCoord(msi, coord, alias = alias)
 ```
 
-The heatmap is slighlty counterintuitive, since values for different Inosine 
-positions differs. Therefore, a normalization to control sample might be 
-reasonable.
+Additionally, the order of sample sets can be adjusted, normalized to 
+any of the sample sets and the numbering of positions shown per transcript.
 
 ```{r plot2, fig.cap="Heatmap for identified Inosine positions with normalized scores.", fig.asp=1}
-plotCompareByCoord(msi, coord, alias = alias, normalize = "SampleSet1",
+plotCompareByCoord(msi[c(3,1,2)], coord, alias = alias, normalize = "SampleSet3",
                    perTranscript = TRUE)
 ```
 
@@ -305,9 +304,12 @@ implemented, which is a wrapper around the functionality of the `ROCR` package
 
 For the example data used in this vignette, the information gained is rather 
 limited and the following figure should be regarded just as a proof of concept.
+In addition, the use of found modifications sites as an input for plotROC is
+strongly discouraged, since it is missing the point of this test. Please regard
+this aspect of the next chunk as proof of concept as well.
 
 ```{r plot5, fig.cap="TPR vs. FPR plot.", fig.asp=1}
-plotROC(msi[[1]],coord, score = "score")
+plotROC(msi[[1]],coord)
 ```
 
 Please have a look at `?plotROC` for additional details. Most of the

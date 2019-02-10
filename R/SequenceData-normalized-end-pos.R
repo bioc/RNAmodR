@@ -22,6 +22,8 @@ NULL
 #' @param bamfiles,annotation,sequences,seqinfo,... See 
 #' \code{\link[=SequenceData-class]{SequenceData}}
 #' @param x a \code{CoverageSequenceData}
+#' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
+#' of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 
@@ -99,7 +101,7 @@ NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
     seqs[f],
     SIMPLIFY = FALSE))
   # noralize against total number transcript or against the overlap per position
-  normTranscript <- (enddata / BiocGenerics::lengths(data)) * 1000
+  normTranscript <- (enddata / lengths(data)) * 1000
   normTranscript <- IRanges::NumericList(lapply(normTranscript,unname))
   normOverlap <- IRanges::NumericList(mapply(
     function(d,end,pos){
@@ -287,7 +289,7 @@ RNAMODR_PLOT_SEQ_NORMEND_NAMES <-
   seqdata
 }
 
-#' @rdname EndSequenceData
+#' @rdname NormEndSequenceData
 #' @export
 setMethod(
   f = "getDataTrack",
@@ -364,7 +366,7 @@ setMethod(
   }
 )
 
-#' @rdname EndSequenceData
+#' @rdname NormEndSequenceData
 #' @export
 setMethod(
   f = "getDataTrack",

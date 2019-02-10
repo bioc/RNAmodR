@@ -41,7 +41,7 @@ sequences to be analyzed on a per chromosome basis.}
 \item{minReplicate:} {minimum number of replicates needed for the analysis 
 (default: \code{minReplicate = 1L}).}
 \item{minScore:} {minimum score to identify Inosine positions de novo 
-(default: \code{minScore = 10L}).}
+(default: \code{minScore = 0.4}).}
 }}
 }
 \description{

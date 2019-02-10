@@ -18,7 +18,9 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' 
 #' @param bamfiles,annotation,sequences,seqinfo,... See 
 #' \code{\link[=SequenceData-class]{SequenceData}}
-#' @param x a \code{CoverageSequenceData}
+#' @param x a \code{ProtectedEndSequenceData}
+#' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
+#' of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 

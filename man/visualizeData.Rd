@@ -58,54 +58,11 @@ getDataTrack(x, name, ...)
 \arguments{
 \item{x}{a \code{Modifier} or \code{ModifierSet} object.}
 
-\item{coord}{coordinates of a positions to subset to as a
-\code{GRanges} object. The Parent column is expected to match the gene or
-transcript name.}
-
-\item{type}{the data type of data show as data tracks.}
-
-\item{window.size}{integer value for the number of positions on the left and
-right site of the selected positions included in the plotting (default:
-\code{window.size = 15L})}
-
-\item{...}{optional parameters:
-\itemize{
-\item{\code{modified.seq}}{\code{TRUE} or \code{FALSE}. Should the sequence
-shown with modified nucleotide positions? (default:
-\code{modified.seq = FALSE})}
-\item{\code{additional.mod}}{other modifications, which should be shown
-in the annotation and sequence track.}
-\item{\code{annotation.track.pars}}{Parameters passed onto the A
-nnotationTrack.}
-\item{\code{sequence.track.pars}}{Parameters passed onto the SequenceTrack.}
-\item{\code{data.track.pars}}{Parameters passed onto the DataTrack(s).}
-}}
-
-\item{name}{Only for \code{visualizeData}: the transcript name}
-
-\item{from}{Only for \code{visualizeData}: start position}
-
-\item{to}{Only for \code{visualizeData}: end position}
-
-\item{seqdata}{\code{TRUE} or \code{FALSE}: whould the sequence data be
-shown? (default: \code{seqdata = FALSE})}
-
-\item{x}{a \code{Modifier} or \code{ModifierSet} object.}
-
 \item{coord}{coordinates of a positions to subset to as a 
 \code{GRanges} object. The Parent column is expected to match the gene or 
 transcript name.}
 
-\item{name}{Only for \code{visualizeData}: the transcript name}
-
-\item{from}{Only for \code{visualizeData}: start position}
-
-\item{to}{Only for \code{visualizeData}: end position}
-
 \item{type}{the data type of data show as data tracks.}
-
-\item{seqdata}{\code{TRUE} or \code{FALSE}: whould the sequence data be 
-shown? (default: \code{seqdata = FALSE})}
 
 \item{window.size}{integer value for the number of positions on the left and 
 right site of the selected positions included in the plotting (default: 
@@ -113,19 +70,30 @@ right site of the selected positions included in the plotting (default:
 
 \item{...}{optional parameters:
 \itemize{
-\item{\code{modified.seq}}{\code{TRUE} or \code{FALSE}. Should the sequence 
+\item{\code{modified.seq}} {\code{TRUE} or \code{FALSE}. Should the sequence 
 shown with modified nucleotide positions? (default: 
 \code{modified.seq = FALSE})}
-\item{\code{additional.mod}}{other modifications, which should be shown
-in the annotation and sequence track.}
-\item{\code{annotation.track.pars}}{Parameters passed onto the A
-nnotationTrack.}
-\item{\code{sequence.track.pars}}{Parameters passed onto the SequenceTrack.}
-\item{\code{data.track.pars}}{Parameters passed onto the DataTrack(s).}
+\item{\code{additional.mod}} {other modifications, which should be shown
+in the annotation and sequence track. The must be a \code{GRanges} compatible
+with \code{\link[Modstrings:separate]{combineIntoModstrings}}.}
+\item{\code{annotation.track.pars}} {Parameters passed onto the 
+\code{\link[Gviz:AnnotationTrack-class]{AnnotationTrack}}.}
+\item{\code{sequence.track.pars}} {Parameters passed onto the 
+\code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
 }}
+
+\item{name}{Only for \code{visualizeData}: the transcript name}
+
+\item{from}{Only for \code{visualizeData}: start position}
+
+\item{to}{Only for \code{visualizeData}: end position}
+
+\item{seqdata}{\code{TRUE} or \code{FALSE}: whould the sequence data be 
+shown? (default: \code{seqdata = FALSE})}
+
+\item{perTranscript}{\code{TRUE} or \code{FALSE}: Should the positions shown
+per transcript?}
 }
 \description{
-title
-
 title
 }

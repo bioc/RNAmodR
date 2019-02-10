@@ -38,7 +38,8 @@ RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
   data
 }
 
-#' @name ModInosine-functions
+#' @rdname ModInosine-functions
+#' @export
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "ModInosine"),

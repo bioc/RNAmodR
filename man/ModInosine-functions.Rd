@@ -7,6 +7,7 @@
 \alias{settings<-,ModInosine-method}
 \alias{aggregate,ModInosine-method}
 \alias{modify,ModInosine-method}
+\alias{getDataTrack,ModInosine-method}
 \alias{visualizeDataByCoord,ModInosine,GRanges-method}
 \alias{visualizeData,ModInosine-method}
 \alias{visualizeDataByCoord,ModSetInosine,GRanges-method}

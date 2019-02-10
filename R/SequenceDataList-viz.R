@@ -42,7 +42,7 @@ setMethod(
   definition = function(x, name, from, to, perTranscript = FALSE, 
                         ...) {
     # get plotting arguments
-    args <- .norm_viz_args_SequenceData(list(...))
+    args <- .norm_viz_args_SequenceData(list(...), x)
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
     # get tracks

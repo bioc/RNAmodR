@@ -44,7 +44,7 @@ NULL
 #' this is included in the results as well.
 NULL
 
-.norm_alias <- function(input, data){
+.norm_alias <- function(input, x){
   alias <- NULL
   if(!is.null(input[["alias"]])){
     alias <- input[["alias"]]
@@ -62,7 +62,7 @@ NULL
       stop("Values in 'tx_id' have to be unique.",
            call. = FALSE)
     }
-    names <- names(ranges(data))
+    names <- names(ranges(x))
     if(!all(names %in% alias$tx_id)){
       stop("All values in 'tx_id' have to be valid transcript ids used as ",
            "names for the data.", call. = FALSE)
@@ -84,10 +84,9 @@ NULL
            call. = FALSE)
     }
   }
-  args <- list(compareType = compareType,
-               perTranscript = perTranscript)
-  args <- c(args,
-            .norm_alias(input, x))
+  args <- c(.norm_alias(input, x),
+            list(compareType = compareType,
+                 perTranscript = perTranscript))
   args
 }
 

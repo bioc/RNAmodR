@@ -2,7 +2,7 @@
 #' @include Modifier-viz.R
 NULL
 
-.norm_viz_args_ModifierSet <- function(input){
+.norm_viz_args_ModifierSet <- function(input, x){
   colours <- NA
   if(!is.null(input[["colours"]])){
     colours <- input[["colours"]]
@@ -12,7 +12,7 @@ NULL
            call. = FALSE)
     }
   }
-  args <- c(.norm_viz_args_Modifier(input),
+  args <- c(.norm_viz_args_Modifier(input, x),
             list(colours = colours))
   args
 }
@@ -109,8 +109,7 @@ NULL
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
-  signature = signature(x = "ModifierSet",
-                        coord = "GRanges"),
+  signature = signature(x = "ModifierSet", coord = "GRanges"),
   definition = function(x, coord, type = NA, seqdata = FALSE, window.size = 15L,
                         ...) {
     # input check
@@ -129,7 +128,7 @@ setMethod(
   signature = signature(x = "ModifierSet"),
   definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
     # get plotting arguments
-    args <- .norm_viz_args_ModifierSet(list(...))
+    args <- .norm_viz_args_ModifierSet(list(...), x)
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
     seqdata <- .norm_seqdata_show(seqdata)

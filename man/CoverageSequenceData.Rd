@@ -23,6 +23,9 @@ CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
+
+\item{name}{For \code{getDataTrack}: a valid transcript name. Must be a name
+of \code{ranges(x)}}
 }
 \description{
 \code{CoverageSequenceData} implements

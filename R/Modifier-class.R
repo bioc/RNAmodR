@@ -91,10 +91,11 @@ NULL
 #' @param x,object a \code{Modifier} or \code{ModifierSet} class
 #' @param name For \code{settings}: name of the setting to be returned or set
 #' @param value For \code{settings}: value of the setting to be set
-#' @param ...,modified For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
+#' @param modified For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
 #' the sequences be returned as a \code{ModRNAString} with the found 
 #' modifications added on top of the \code{RNAString}? See 
-#' \code{\link[Modstrings:modifyNucleotides]{modifyNucleotides}}.
+#' \code{\link[Modstrings:separate]{combineIntoModstrings}}.
+#' @param ... Additional arguments. 
 NULL
 
 setClassUnion("SequenceData_OR_SequenceDataList",
