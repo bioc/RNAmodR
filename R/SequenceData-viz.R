@@ -24,7 +24,7 @@ NULL
 #' right site of the selected positions included in the plotting (default: 
 #' \code{window.size = 15L})
 #' @param perTranscript \code{TRUE} or \code{FALSE}: Should the positions shown
-#' per transcript?
+#' per transcript? (default: \code{perTranscript = FALSE})
 #' @param ... optional parameters:
 #' \itemize{
 #' \item{\code{modified.seq}} {\code{TRUE} or \code{FALSE}. Should the sequence 

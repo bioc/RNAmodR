@@ -95,6 +95,8 @@ NULL
 #' the sequences be returned as a \code{ModRNAString} with the found 
 #' modifications added on top of the \code{RNAString}? See 
 #' \code{\link[Modstrings:separate]{combineIntoModstrings}}.
+#' @param perTranscript \code{TRUE} or \code{FALSE}: Should the positions shown
+#' per transcript? (default: \code{perTranscript = FALSE})
 #' @param ... Additional arguments. 
 NULL
 

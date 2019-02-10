@@ -23,8 +23,9 @@ NULL
 #' \code{type}. It must be a valid shortName for a modification according to
 #' \code{shortName(ModRNAString())} and of course present in metadata column 
 #' \code{mod} of \code{coord}}
-#' \item{\code{perTranscript}} {Returns the positions labeled per transcript
-#' and not per chromosome (default: \code{perTranscript = FALSE}).}
+#' \item{\code{perTranscript}} {\code{TRUE} or \code{FALSE}: Should the 
+#' positions labeled per transcript and not per chromosome?
+#' (default: \code{perTranscript = FALSE}).}
 #' }
 NULL
 
