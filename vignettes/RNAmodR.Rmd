@@ -24,9 +24,9 @@ BiocStyle::markdown(css.files = c('custom.css'))
 `RNAmodR` implements class and a workflows to detect post-transcriptional RNA
 modifications in high throughput sequencing data.
 
-From the a basic `SequenceData` speficic subclasses are derived containing
+From the a basic `SequenceData`, specific subclasses are derived for accessing
 specific aspects of aligned reads, e.g. 5'-end positions or pileup data. From
-this `Modifier` class can be used to detect specific patterns for individual
+this a `Modifier` class can be used to detect specific patterns for individual
 types of modifications. The `SequenceData` classes can be shared by different
 `Modifier` classes allowing easy adapattion to new methods.
 
@@ -58,9 +58,9 @@ files <- c(Treated = system.file("extdata","example_wt_1.bam" ,package = "RNAmod
 ```
 
 Each `SequenceData` object is created with a named character vector, which can
-be coerced to a `BamFileList` or named `BamFileList`. The names must be either
-"treated" or "control" describing the condition of the data file. Multiple
-files can be given per condition and are used as replicates.
+be coerced to a `BamFileList`, or named `BamFileList`. The names must be either
+"treated" or "control" describing the condition the data file belongs to. 
+Multiple files can be given per condition and are used as replicates.
 
 ```{r seqdata}
 seqdata <- End5SequenceData(files, 
@@ -107,7 +107,7 @@ sdf <- seqdata[[1]]
 sdf
 ```
 
-It retains some accessor functions from the `SequenceData`
+It retains some accessor functions from the `SequenceData`.
 
 ```{r seqdata2_functions,include=FALSE}
 names(sdf) # this returns the columns names of the data
@@ -117,7 +117,7 @@ sequences(sdf)
 
 Subsetting of a `SequenceDataFrame` returns a `SequenceDataFrame` or 
 `DataFrame`, if it is subset by a column or row, respectively. The `drop`
-argument is ignored for column subsetting and is set to `FALSE`.
+argument is ignored for column subsetting.
 
 ```{r seqdata2_subset}
 sdf[,1:2]
@@ -126,14 +126,15 @@ sdf[1:3,]
 
 ## Modifier
 
-The `SequenceData` classes are used to hold the data to detect certain features
-within high throughput sequencing data. To assign the presence of specific
-modifications for an established pattern the virtual `Modifier` class is used.
-For example mapped reads from the AlkAnilineSeq method can analyzed using the
-`ModAlkAnilineSeq` class to reveal the presence of m7G by detecting the
-accumulation of 5'-ends at the N+1 position, since m7G is susceptible cleavage
-by the aniline treatment (Marchand et al. 2018). `ModAlkAnilineSeq` inherits
-from `Modifier`.
+Whereas, the `SequenceData` classes are used to hold the data, `Modifier`
+classes are used to detect certain features within high throughput sequencing
+data to assign the presence of specific modifications for an established
+pattern. The `Modifier` class is virtual and can be addapted to individual
+methods. For example mapped reads from the AlkAnilineSeq
+[@Marchand.2018](#References) method can analyzed using the `ModAlkAnilineSeq`
+class to reveal the presence of m7G by detecting the accumulation of 5'-ends at
+the N+1 position, since m7G is susceptible cleavage by the aniline treatment
+(Marchand et al. 2018). Therefore, `ModAlkAnilineSeq` inherits from `Modifier`.
 
 To fix the data processing and detection strategy, for each type of sequencing
 method a `Modifier` class can be developed alongside to detect modifications.
@@ -146,11 +147,10 @@ Initially three `Modifier` classes are available:
  * `ModRiboMethSeq` from the `RNAmodR.RiboMethSeq` package
  * `ModAlkAnilineSeq` from the `RNAmodR.AlkAnilineSeq` package
 
-`Modifier` objects can use and wrap multiple `SequenceData` objects as
-elements of a `SequenceDataList` class. The elements of this class are usually
-different types of `SequenceData`, which are needed for the specific `Modifier`
-class. However, they are required to contain data for the same annotation and
-sequence data.
+`Modifier` objects can use and wrap multiple `SequenceData` objects as elements
+of a `SequenceDataList` class. The elements of this class are different types of
+`SequenceData`, which are needed for the specific `Modifier` class. However,
+they are required to contain data for the same annotation and sequence data.
 
 `Modifier` objects are created with the same arguments as `SequenceData` objects
 and will start loading the necessary `SequenceData` objects from these. In
@@ -164,7 +164,8 @@ mi <- ModInosine(files,annotation = annotation ,sequences = sequences)
 ```
 
 (Hint: If you use an artificial genome, name the chromosomes chr1-chrN. It
-will makes somethings easier further down.)
+will makes somethings easier later on during visualization using the `Gviz`
+package)
 
 Since the `Modifier` class wraps a `SequenceData` object the accessor to data
 contained withing work as well.
@@ -180,8 +181,8 @@ seqData(mi) # returns the SequenceData
 
 ## ModifierSet
 
-Each `Modifier` object is able to represent one sample type with multiple
-replicates of data. To easily compare multiple sample types the `ModifierSet`
+Each `Modifier` object is able to represent one sample set with multiple
+replicates of data. To easily compare multiple sample sets the `ModifierSet`
 class is implemented.
 
 The `ModifierSet` object is created from a named list of named character vectors
@@ -200,10 +201,10 @@ files <- list("SampleSet1" = c(treated = system.file("extdata","example_wt_1.bam
 msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
 ```
 
-The creation of the `ModifierSet` will itself trigger the creation of a 
+The creation of the `ModifierSet` will itself trigger the creation of a
 `Modifier` object each containing from one sample set.
 
-```{r modifierset1}
+```{r modifierset2}
 names(msi)
 msi[[1]]
 ```
@@ -243,7 +244,7 @@ mod[[1]]
 
 ## Compairing results
 
-To compare results between samples a `ModifierSet` is required as well as 
+To compare results between samples, a `ModifierSet` is required as well as 
 positions to compare. To construct a set of positions, we will use the
 intersection of all modifications found.
 
@@ -267,7 +268,7 @@ alias <- data.frame(tx_id = names(id2name(txdb)),
                     name = id2name(txdb))
 ```
 
-```{r plot1, fig.cap="Heatmap for identified Inosine positions"}
+```{r plot1, fig.cap="Heatmap for identified Inosine positions.", fig.asp=1}
 plotCompareByCoord(msi, coord, alias = alias)
 ```
 
@@ -275,7 +276,7 @@ The heatmap is slighlty counterintuitive, since values for different Inosine
 positions differs. Therefore, a normalization to control sample might be 
 reasonable.
 
-```{r plot2, fig.cap="Heatmap for identified Inosine positions with normalized scores"}
+```{r plot2, fig.cap="Heatmap for identified Inosine positions with normalized scores.", fig.asp=1}
 plotCompareByCoord(msi, coord, alias = alias, normalize = "SampleSet1",
                    perTranscript = TRUE)
 ```
@@ -285,37 +286,13 @@ transcripts or chunks of the transcript. With the optional argument `seqdata`
 the plotting of the sequence data instead of the score data can be triggered
 by setting it to `TRUE`.
 
-```{r plot3, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine"}
-visualizeData(msi, "2", from = 25L, to = 45L) # seqdata = FALSE
+```{r plot3, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine.", fig.asp=1}
+visualizeData(msi, "2", from = 10L, to = 45L, alias = alias) # seqdata = FALSE
 ```
 
-```{r plot3, fig.cap="Sequence data along a transcript containing a A to G conversion indicating the presence of Inosine"}
-visualizeData(msi, "2", from = 25L, to = 45L, seqdata = TRUE)
+```{r plot4, fig.cap="Sequence data along a transcript containing a A to G conversion indicating the presence of Inosine. This figure includes the detailed pileup sequence data.", fig.asp=1}
+visualizeData(msi[1:2], "2", from = 10L, to = 45L, seqdata = TRUE, alias = alias)
 ```
-
-### Modifications described in the literare
-found modifications to modifications described in the literature
-
-
-### Detecting the loss of a modification
-
-
-
-
-
-
-<!-- # Additional functions of ... -->
-
-
-<!-- ## ... the `SequenceData` classes -->
-
-<!-- ### The `SequenceDataList` class -->
-
-<!-- ## ... the `Modifier` classes -->
-
-
-<!-- ## ... the `ModifierSet` classes -->
-
 
 # Performance measurements
 
@@ -329,18 +306,13 @@ implemented, which is a wrapper around the functionality of the `ROCR` package
 For the example data used in this vignette, the information gained is rather 
 limited and the following figure should be regarded just as a proof of concept.
 
-```{r rocr}
+```{r plot5, fig.cap="TPR vs. FPR plot.", fig.asp=1}
 plotROC(msi[[1]],coord, score = "score")
 ```
 
-<!-- # Annotation data -->
-
-<!-- ```{r} -->
-<!-- library(EnsDb.Hsapiens.v86) -->
-<!-- keys <- keys(edb, keytype = "TXID") -->
-<!-- res <- select(edb, keys=keys, columns = c("TXBIOTYPE"), keytype="TXID") -->
-
-<!-- ``` -->
+Please have a look at `?plotROC` for additional details. Most of the
+functionality from the `ROCR` package is available via additional arguments,
+thus the output of `plotROC` can be heavily customized.
 
 # Sessioninfo
 
