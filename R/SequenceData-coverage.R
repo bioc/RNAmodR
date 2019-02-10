@@ -22,6 +22,8 @@ NULL
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 
+#' @return a \code{CoverageSequenceData} object
+#' 
 #' @examples
 #' # Construct a CoverageSequenceData object
 #' annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")

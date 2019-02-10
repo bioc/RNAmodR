@@ -92,8 +92,15 @@ with \code{\link[Modstrings:separate]{combineIntoModstrings}}.}
 shown? (default: \code{seqdata = FALSE})}
 
 \item{perTranscript}{\code{TRUE} or \code{FALSE}: Should the positions shown
-per transcript?}
+per transcript? (default: \code{perTranscript = FALSE})}
+}
+\value{
+a plot send to the active graphic device
 }
 \description{
 title
+}
+\examples{
+data(msi,package="RNAmodR")
+visualizeData(msi, "2", from = 10L, to = 45L)
 }

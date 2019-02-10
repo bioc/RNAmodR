@@ -59,6 +59,14 @@ does not persist}
 \item{\code{hasAggregateData}: }{TRUE or FALSE. Does the \code{Modifier} 
 object already contain aggregated data?}
 }
+
+If 'x' is a
+\itemize{
+\item{\code{\link[=SequenceData-class]{SequenceData}}} {a 
+\code{SplitDataFrameList} with elments per transcript.}
+\item{\code{\link[=Modifier-class]{Modifier}}} {an updated \code{Modifier}
+object. The data can be accessed by using the \code{aggregateData} function.}
+}
 }
 \description{
 The aggregate function is defined per
@@ -68,4 +76,13 @@ by either using the a \code{\link[=SequenceData-class]{SequenceData}} or
 to the \code{\link[=SequenceData-class]{SequenceData}} object, but will store
 the result. The data is then used for subsequent tasks, such as search for
 modifications and visualization of the results.
+}
+\examples{
+data(e5sd,package="RNAmodR")
+data(msi,package="RNAmodR")
+# modify() triggers the search for modifications in the data contained in
+# the Modifier or ModifierSet object
+sdfl <- aggregate(e5sd)
+mi <- aggregate(msi[[1]])
+msi <- aggregate(msi)
 }

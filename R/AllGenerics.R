@@ -95,7 +95,6 @@ setGeneric(
 # Modifier functions -----------------------------------------------------------
 
 #' @rdname RNAmodR-internals
-#' @export
 setGeneric( 
   name = ".constructModRanges",
   signature = c("range","data"),
@@ -120,8 +119,7 @@ setGeneric(
 
 # SequenceData functions -------------------------------------------------------
 
-#' @name RNAmodR-internals
-#' @export
+#' @rdname RNAmodR-internals
 setGeneric( 
   name = ".getData",
   signature = c("x","grl","sequences","param"),
@@ -155,7 +153,7 @@ setGeneric(
 
 # SequenceData/Modifier/ModifierSet functions ----------------------------------
 
-#' @rdname subset
+#' @rdname subsetByCoord
 #' @export
 setGeneric( 
   name = "subsetByCoord",
@@ -190,7 +188,7 @@ setGeneric(
 
 # ModifierSet functions --------------------------------------------------------
 
-#' @rdname compare
+#' @rdname compareByCoord
 #' @export
 setGeneric( 
   name = "compare",
@@ -198,7 +196,7 @@ setGeneric(
   def = function(x, name, from = 1L, to = 30L, ...)
     standardGeneric("compare")
 ) 
-#' @rdname compare
+#' @rdname compareByCoord
 #' @export
 setGeneric( 
   name = "compareByCoord",
@@ -206,7 +204,7 @@ setGeneric(
   def = function(x, coord, ...)
     standardGeneric("compareByCoord")
 ) 
-#' @rdname compare
+#' @rdname compareByCoord
 #' @export
 setGeneric( 
   name = "plotCompare",
@@ -214,7 +212,7 @@ setGeneric(
   def = function(x, name, from = 1L, to = 30L, normalize, ...)
     standardGeneric("plotCompare")
 ) 
-#' @rdname compare
+#' @rdname compareByCoord
 #' @export
 setGeneric( 
   name = "plotCompareByCoord",

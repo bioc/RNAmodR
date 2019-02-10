@@ -18,14 +18,15 @@ NULL
     deparse(f[[3]]),
     # expression to compute new variable errors
     sprintf('sqrt(%s)',
-            paste(sapply(all.vars(f[[3]]),
+            paste(vapply(all.vars(f[[3]]),
                          function(v) {
                            dfdp = deparse(stats::D(f[[3]], 
                                                    v))
                            sprintf('(d%s*(%s))^2', 
                                    v,
                                    dfdp)
-                         }),
+                         },
+                         character(1)),
                   collapse = '+'))
   )
   names(exprs) = c(
@@ -42,7 +43,6 @@ NULL
 # construct GRanges object from found modifications ----------------------------
 
 #' @rdname RNAmodR-internals
-#' @export
 setMethod(f = ".constructModRanges",
           signature = c(range = "GRanges",
                         data = "DataFrame"),

@@ -44,6 +44,9 @@ sequences to be analyzed on a per chromosome basis.}
 (default: \code{minScore = 0.4}).}
 }}
 }
+\value{
+a \code{ModInosine} or \code{ModSetInosine} object
+}
 \description{
 Inosine can be detected in sequence by the conversion of A positions to G.
 \code{ModInosine} uses to search for Inosine positions.
@@ -59,6 +62,24 @@ modified.
 \code{ModInosine} score: the score for reported Inosine positions are between
 1 and 100. It is calculated as \code{min(log2(percent(G) /
 (percent(A)+percent(T)+percent(C))) * 10,100)}.
+}
+\examples{
+# construction of ModInosine object
+annotation <- rtracklayer::GFF3File(system.file("extdata","example_AAS.gff3",package = "RNAmodR.Data"))
+sequences <- Rsamtools::FaFile(system.file("extdata","example_AAS.fasta",package = "RNAmodR.Data"))
+files <- c(Treated = system.file("extdata","example_wt_1.bam" ,package = "RNAmodR.Data"),
+           Treated = system.file("extdata","example_wt_2.bam" ,package = "RNAmodR.Data"),
+           Treated = system.file("extdata","example_wt_3.bam" ,package = "RNAmodR.Data"))
+mi <- ModInosine(files,annotation = annotation ,sequences = sequences)
+# construction of ModSetInosine object
+files <- list("SampleSet1" = c(treated = system.file("extdata","example_wt_1.bam",package = "RNAmodR.Data"),
+                               treated = system.file("extdata","example_wt_2.bam",package = "RNAmodR.Data"),
+                               treated = system.file("extdata","example_wt_3.bam",package = "RNAmodR.Data")),
+              "SampleSet2" = c(treated = system.file("extdata","example_bud23_1.bam",package = "RNAmodR.Data"),
+                               treated = system.file("extdata","example_bud23_2.bam",package = "RNAmodR.Data")),
+               "SampleSet3" = c(treated = system.file("extdata","example_trm8_1.bam",package = "RNAmodR.Data"),
+                               treated = system.file("extdata","example_trm8_2.bam",package = "RNAmodR.Data")))
+msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
 }
 \author{
 Felix G.M. Ernst [aut]

@@ -13,9 +13,27 @@ NULL
 #' 
 #' @param x,object,value a \code{SequenceData},\code{SequenceDataList},
 #' \code{SequenceDataFrame} object.
+#' 
+#' @return 
+#' \itemize{
+#' \item{\code{seqinfo}} {a \code{Seqinfo} object}
+#' \item{\code{sequences}} {a \code{RNAStingSet} object}
+#' \item{\code{ranges}} {a \code{GRangesList} object with each element per 
+#' transcript}
+#' \item{\code{bamfiles}} {a \code{BamFileList} object}
+#' }
+#' 
+#' @examples 
+#' data(e5sd,package="RNAmodR")
+#' # general accessors
+#' seqinfo(e5sd)
+#' sequences(e5sd)
+#' ranges(e5sd)
+#' bamfiles(e5sd)
 NULL
 
 #' @name SequenceDataFrame-class
+#' @aliases SequenceDataFrame
 #' 
 #' @title The SequenceDataFrame class
 #' 
@@ -39,6 +57,13 @@ NULL
 #' @param x,i,j,...,drop arguments used for 
 #' \code{\link[S4Vectors:DataFrame-class]{subsetting}}.
 #' 
+#' @return a \code{SequenceDataFrame} object
+#' 
+#' @examples 
+#' data(e5sd,package="RNAmodR")
+#' # A SequenceDataFrame can is usually constructed by subsetting from 
+#' # a SequenceData object
+#' sdf <- e5sd[[1]]
 NULL
 
 # SequenceDataFrame ------------------------------------------------------------

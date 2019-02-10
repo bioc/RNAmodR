@@ -78,6 +78,8 @@ NULL
 #' the aggregate data was constructed with the current arguments
 #' @slot modificationsValidForCurrentArguments \code{TRUE} or \code{FALSE} 
 #' whether the modifications were found with the current arguments
+#' 
+#' @return a \code{Modifier} object of type 'className'
 NULL
 
 #' @name Modifier-functions
@@ -98,6 +100,38 @@ NULL
 #' @param perTranscript \code{TRUE} or \code{FALSE}: Should the positions shown
 #' per transcript? (default: \code{perTranscript = FALSE})
 #' @param ... Additional arguments. 
+#' 
+#' @return
+#' \itemize{
+#' \item{\code{modifierType}} {a character vector with the appropriate class
+#' Name of a \code{\link[=Modifier-class]{Modifier}}. Works for both 
+#' \code{Modifier} and \code{ModifierSet} objects.}
+#' \item{\code{mainScore}} {a character vector}
+#' \item{\code{settings}} {a \code{Seqinfo} object}
+#' \item{\code{seqData}} {a \code{SequenceData} object}
+#' \item{\code{modifications}} {a \code{GRanges} or \code{GRangesList} object
+#' describing the found modifications.}
+#' \item{\code{seqinfo}} {a \code{Seqinfo} object}
+#' \item{\code{sequences}} {a \code{RNAStingSet} object}
+#' \item{\code{ranges}} {a \code{GRangesList} object with each element per 
+#' transcript}
+#' \item{\code{bamfiles}} {a \code{BamFileList} object}
+#' }
+#' 
+#' @examples
+#' data(msi,package="RNAmodR")
+#' mi <- msi[[1]]
+#' modifierType(mi) # The class name of the Modifier object
+#' modifierType(msi) #
+#' mainScore(mi)
+#' settings(mi)
+#' seqData(mi)
+#' modifications(mi)
+#' # general accessors
+#' seqinfo(mi)
+#' sequences(mi)
+#' ranges(mi)
+#' bamfiles(mi)
 NULL
 
 setClassUnion("SequenceData_OR_SequenceDataList",
@@ -151,7 +185,6 @@ setMethod(
     list <- list(list)
   } else {
     if(is(list,"list")){
-      browser()
       elementTypeMatch <- !vapply(list,is,logical(1),"SequenceData")
       if(any(elementTypeMatch)){
         stop("Not all elements are 'SequenceData' objects.", call. = FALSE)
@@ -487,7 +520,6 @@ setMethod(f = "modifications",
 }
 
 .new_ModFromSequenceData <- function(className, x, ...){
-  browser()
   ans <- new(className, bamfiles(x))
   # settings
   settings(ans) <- list(...)
@@ -563,6 +595,13 @@ setMethod("Modifier",
 #' \item{\code{modifications}: }{the modifications found as a \code{GRanges}
 #' object.}
 #' }
+#' 
+#' @examples 
+#' data(msi,package="RNAmodR")
+#' # modify() triggers the search for modifications in the data contained in
+#' # the Modifier or ModifierSet object
+#' msi <- modify(msi)
+#' mi <- modify(msi[[1]])
 NULL
 
 #' @rdname modify
@@ -616,6 +655,24 @@ setMethod(f = "modify",
 #' \item{\code{hasAggregateData}: }{TRUE or FALSE. Does the \code{Modifier} 
 #' object already contain aggregated data?}
 #' }
+#' 
+#' @return 
+#' If 'x' is a
+#' \itemize{
+#' \item{\code{\link[=SequenceData-class]{SequenceData}}} {a 
+#' \code{SplitDataFrameList} with elments per transcript.}
+#' \item{\code{\link[=Modifier-class]{Modifier}}} {an updated \code{Modifier}
+#' object. The data can be accessed by using the \code{aggregateData} function.}
+#' }
+#' 
+#' @examples 
+#' data(e5sd,package="RNAmodR")
+#' data(msi,package="RNAmodR")
+#' # modify() triggers the search for modifications in the data contained in
+#' # the Modifier or ModifierSet object
+#' sdfl <- aggregate(e5sd)
+#' mi <- aggregate(msi[[1]])
+#' msi <- aggregate(msi)
 NULL
 
 #' @rdname aggregate

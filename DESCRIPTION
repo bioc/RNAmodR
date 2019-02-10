@@ -12,11 +12,13 @@ Authors@R: c(person("Felix G.M.",
 Description: Loading/aggregation of data and other utilites to detect and 
     compare post-transcriptional modifications within high througput sequencing
     data.
+biocViews: 
+    Software, Infrastructure, WorkflowStep, Visualization
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: true
 Depends:
-    R (>= 3.5),
+    R (>= 3.6),
     IRanges,
     GenomicRanges,
     Modstrings
@@ -36,6 +38,9 @@ Imports:
     RColorBrewer,
     colorRamps,
     ggplot2,
+    grid, 
+    grDevices, 
+    graphics,
     utils,
     matrixStats,
     reshape2,

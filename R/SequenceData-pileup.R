@@ -17,6 +17,20 @@ NULL
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 
+#' @return a \code{PileupSequenceData} object
+#' 
+#' @examples
+#' # Construct a End5SequenceData object
+#' annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+#' sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+#' files <- c(control = system.file("extdata","example_wt_1.bam",
+#'                                  package = "RNAmodR.Data"),
+#'            treated = system.file("extdata","example_wt_2.bam",
+#'                                  package = "RNAmodR.Data"))
+#' psd <- PileupSequenceData(files, annotation = annotation,
+#'                           sequences = sequences)
+#' # aggregate data
+#' aggregate(psd)
 NULL
 
 #' @rdname PileupSequenceData

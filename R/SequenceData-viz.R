@@ -38,6 +38,12 @@ NULL
 #' \item{\code{sequence.track.pars}} {Parameters passed onto the 
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
 #' }
+#' 
+#' @return a plot send to the active graphic device
+#' 
+#' @examples 
+#' data(msi,package="RNAmodR")
+#' visualizeData(msi, "2", from = 10L, to = 45L)
 NULL
 
 # normalization functions for visualizations -----------------------------------

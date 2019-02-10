@@ -309,7 +309,7 @@ strongly discouraged, since it is missing the point of this test. Please regard
 this aspect of the next chunk as proof of concept as well.
 
 ```{r plot5, fig.cap="TPR vs. FPR plot.", fig.asp=1}
-plotROC(msi[[1]],coord)
+plotROC(msi,coord)
 ```
 
 Please have a look at `?plotROC` for additional details. Most of the

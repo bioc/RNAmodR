@@ -29,6 +29,9 @@ individual conditions}
 \item{x, i, j, ..., drop}{arguments used for 
 \code{\link[S4Vectors:DataFrame-class]{subsetting}}.}
 }
+\value{
+a \code{SequenceDataFrame} object
+}
 \description{
 The \code{SequenceDataFrame} class contains data for positions along a 
 transcripts. It is used to describe elements from a \code{SequenceData}
@@ -36,4 +39,10 @@ object.
 
 It is derived from the \code{\link[S4Vectors:DataFrame-class]{DataFrame}} 
 class.
+}
+\examples{
+data(e5sd,package="RNAmodR")
+# A SequenceDataFrame can is usually constructed by subsetting from 
+# a SequenceData object
+sdf <- e5sd[[1]]
 }

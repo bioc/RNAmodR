@@ -115,8 +115,43 @@ seqData(x)
 the sequences be returned as a \code{ModRNAString} with the found 
 modifications added on top of the \code{RNAString}? See 
 \code{\link[Modstrings:separate]{combineIntoModstrings}}.}
+
+\item{perTranscript}{\code{TRUE} or \code{FALSE}: Should the positions shown
+per transcript? (default: \code{perTranscript = FALSE})}
+}
+\value{
+\itemize{
+\item{\code{modifierType}} {a character vector with the appropriate class
+Name of a \code{\link[=Modifier-class]{Modifier}}. Works for both 
+\code{Modifier} and \code{ModifierSet} objects.}
+\item{\code{mainScore}} {a character vector}
+\item{\code{settings}} {a \code{Seqinfo} object}
+\item{\code{seqData}} {a \code{SequenceData} object}
+\item{\code{modifications}} {a \code{GRanges} or \code{GRangesList} object
+describing the found modifications.}
+\item{\code{seqinfo}} {a \code{Seqinfo} object}
+\item{\code{sequences}} {a \code{RNAStingSet} object}
+\item{\code{ranges}} {a \code{GRangesList} object with each element per 
+transcript}
+\item{\code{bamfiles}} {a \code{BamFileList} object}
+}
 }
 \description{
 For the \code{Modifier} and  \code{ModifierSet} classes a number of functions
 are implemented to access the data stored by the object.
+}
+\examples{
+data(msi,package="RNAmodR")
+mi <- msi[[1]]
+modifierType(mi) # The class name of the Modifier object
+modifierType(msi) #
+mainScore(mi)
+settings(mi)
+seqData(mi)
+modifications(mi)
+# general accessors
+seqinfo(mi)
+sequences(mi)
+ranges(mi)
+bamfiles(mi)
 }

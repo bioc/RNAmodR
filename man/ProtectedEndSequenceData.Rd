@@ -27,6 +27,22 @@ should be aggregated.}
 \item{name}{For \code{getDataTrack}: a valid transcript name. Must be a name
 of \code{ranges(x)}}
 }
+\value{
+a \code{ProtectedEndSequenceData} object
+}
 \description{
 title
+}
+\examples{
+# Construct a End5SequenceData object
+annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+files <- c(control = system.file("extdata","example_wt_1.bam",
+                                 package = "RNAmodR.Data"),
+           treated = system.file("extdata","example_wt_2.bam",
+                                 package = "RNAmodR.Data"))
+pesd <- ProtectedEndSequenceData(files, annotation = annotation,
+                                 sequences = sequences)
+# aggregate data
+aggregate(pesd)
 }

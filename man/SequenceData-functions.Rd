@@ -57,8 +57,25 @@
 \item{x, object, value}{a \code{SequenceData},\code{SequenceDataList},
 \code{SequenceDataFrame} object.}
 }
+\value{
+\itemize{
+\item{\code{seqinfo}} {a \code{Seqinfo} object}
+\item{\code{sequences}} {a \code{RNAStingSet} object}
+\item{\code{ranges}} {a \code{GRangesList} object with each element per 
+transcript}
+\item{\code{bamfiles}} {a \code{BamFileList} object}
+}
+}
 \description{
 The \code{SequenceData},\code{SequenceDataList} and
 \code{SequenceDataFrame} share functionality. Have a look at the elements
 listed under Usage.
+}
+\examples{
+data(e5sd,package="RNAmodR")
+# general accessors
+seqinfo(e5sd)
+sequences(e5sd)
+ranges(e5sd)
+bamfiles(e5sd)
 }

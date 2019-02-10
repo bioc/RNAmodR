@@ -49,6 +49,10 @@ should be aggregated.}
 \item{name}{For \code{getDataTrack}: a valid transcript name. Must be a name
 of \code{ranges(x)}}
 }
+\value{
+a \code{End5SequenceData}, a \code{End3SequenceData} or a 
+\code{EndSequenceData} object
+}
 \description{
 The \code{End5SequenceData}/\code{End3SequenceData}/\code{EndSequenceData}
 aggregate the counts of read ends at each position along transcript. Whereas

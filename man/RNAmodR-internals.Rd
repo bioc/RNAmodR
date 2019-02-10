@@ -88,6 +88,9 @@
 \arguments{
 \item{object, range, data, modType, scoreFun, source, type, x, grl, sequences, param, args, i, exact, value}{Internal arguments}
 }
+\value{
+internally used values
+}
 \description{
 These functions are not intended for general use, but are used for 
 additional package development.

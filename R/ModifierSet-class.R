@@ -49,6 +49,7 @@ NULL
 #' }
 #' All other arguments will be passed onto the \code{Modifier} objects.
 #' 
+#' @return a \code{ModifierSet} object of type 'className'
 NULL
 
 #' @rdname ModifierSet-class

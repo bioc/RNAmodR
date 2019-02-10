@@ -127,6 +127,8 @@ setClass("RNASequenceTrack",
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
 #' @param chromosome,genome,... See 
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
+#' 
+#' @return a \code{RNASequenceTrack} object
 #'   
 #' @export
 #'
@@ -178,6 +180,8 @@ setClass("ModRNASequenceTrack",
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
 #' @param chromosome,genome,... See 
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
+#' 
+#' @return a \code{ModRNASequenceTrack} object
 #'   
 #' @export
 #' 

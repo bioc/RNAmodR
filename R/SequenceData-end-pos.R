@@ -24,6 +24,9 @@ NULL
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 
+#' @return a \code{End5SequenceData}, a \code{End3SequenceData} or a 
+#' \code{EndSequenceData} object
+#' 
 #' @examples
 #' # Construct a End5SequenceData object
 #' annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")

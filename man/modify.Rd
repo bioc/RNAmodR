@@ -45,3 +45,10 @@ automatically during construction of a \code{Modifier} object.
 
 \code{modifications} is the accessor for the found modifications.
 }
+\examples{
+data(msi,package="RNAmodR")
+# modify() triggers the search for modifications in the data contained in
+# the Modifier or ModifierSet object
+msi <- modify(msi)
+mi <- modify(msi[[1]])
+}

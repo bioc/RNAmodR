@@ -58,6 +58,9 @@ should the creation of the \code{Modifier} objects be parallalized? (default:
 }
 All other arguments will be passed onto the \code{Modifier} objects.}
 }
+\value{
+a \code{ModifierSet} object of type 'className'
+}
 \description{
 The \code{ModifierSet} class allows multiple
 \code{\link[=Modifier-class]{Modifier}} objects to be created from the same

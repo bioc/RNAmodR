@@ -51,6 +51,26 @@ NULL
 #' \item{minScore:} {minimum score to identify Inosine positions de novo 
 #' (default: \code{minScore = 0.4}).}
 #' }
+#' 
+#' @return a \code{ModInosine} or \code{ModSetInosine} object
+#' 
+#' @examples
+#' # construction of ModInosine object
+#' annotation <- rtracklayer::GFF3File(system.file("extdata","example_AAS.gff3",package = "RNAmodR.Data"))
+#' sequences <- Rsamtools::FaFile(system.file("extdata","example_AAS.fasta",package = "RNAmodR.Data"))
+#' files <- c(Treated = system.file("extdata","example_wt_1.bam" ,package = "RNAmodR.Data"),
+#'            Treated = system.file("extdata","example_wt_2.bam" ,package = "RNAmodR.Data"),
+#'            Treated = system.file("extdata","example_wt_3.bam" ,package = "RNAmodR.Data"))
+#' mi <- ModInosine(files,annotation = annotation ,sequences = sequences)
+#' # construction of ModSetInosine object
+#' files <- list("SampleSet1" = c(treated = system.file("extdata","example_wt_1.bam",package = "RNAmodR.Data"),
+#'                                treated = system.file("extdata","example_wt_2.bam",package = "RNAmodR.Data"),
+#'                                treated = system.file("extdata","example_wt_3.bam",package = "RNAmodR.Data")),
+#'               "SampleSet2" = c(treated = system.file("extdata","example_bud23_1.bam",package = "RNAmodR.Data"),
+#'                                treated = system.file("extdata","example_bud23_2.bam",package = "RNAmodR.Data")),
+#'                "SampleSet3" = c(treated = system.file("extdata","example_trm8_1.bam",package = "RNAmodR.Data"),
+#'                                treated = system.file("extdata","example_trm8_2.bam",package = "RNAmodR.Data")))
+#' msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
 NULL
 
 #' @name ModInosine-internals
@@ -91,6 +111,25 @@ NULL
 #' for the colours of the individual bases. The names are expected to be 
 #' \code{c("G","A","U","C")}}
 #' }
+#' 
+#' @return 
+#' \itemize{
+#' \item{\code{settings}} {See \code{\link[=Modifier-functions]{settings}}.}
+#' \item{\code{aggregate}} {See \code{\link{aggregate}}.}
+#' \item{\code{modify}} {See \code{\link{modify}}.}
+#' \item{\code{getDataTrack}} {a list of 
+#' \code{\link[gviz:DataTrack-class]{DataTrack}} object.}
+#' \item{\code{visualizeData}} {See \code{\link{visualizeDataByCoord}}.}
+#' \item{\code{visualizeDataByCoord}} {See \code{\link{visualizeDataByCoord}}.}
+#' }
+#' 
+#' @examples 
+#' data(msi,package="RNAmodR")
+#' mi <- msi[[1]]
+#' settings(mi)
+#' aggregate(mi)
+#' modify(mi)
+#' getDataTrack(mi, "1", mainScore(mi))
 NULL
 
 # class ------------------------------------------------------------------------

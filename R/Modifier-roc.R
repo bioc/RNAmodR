@@ -40,12 +40,25 @@ NULL
 #' will be set.
 #' @param ... additional arguments
 #' 
+#' @return a plot send to the active graphic device
+#' 
 #' @references 
 #' Tobias Sing, Oliver Sander, Niko Beerenwinkel, Thomas Lengauer (2005): "ROCR:
 #' visualizing classifier performance in R." Bioinformatics 21(20):3940-3941
 #' DOI:
 #' \href{https://doi.org/10.1093/bioinformatics/bti623}{10.1093/bioinformatics/bti623}
 #' 
+#' @examples 
+#' data(msi,package="RNAmodR")
+#' # constructing a GRanges obejct to mark positive positions
+#' mod <- modifications(msi)
+#' coord <- unique(unlist(mod))
+#' coord$score <- NULL
+#' coord$sd <- NULL
+#' # plotting a TPR vs. FPR plot per ModInosine object
+#' plotROC(msi[[1]],coord)
+#' # plotting a TPR vs. FPR plot per ModSetInosine object
+#' plotROC(msi,coord)
 NULL
 
 .norm_prediction_args <- function(input){

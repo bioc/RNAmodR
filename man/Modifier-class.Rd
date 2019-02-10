@@ -52,6 +52,9 @@ started by calling the \code{modify()} function.}
 }
 All other arguments will be passed onto the \code{SequenceData} objects.}
 }
+\value{
+a \code{Modifier} object of type 'className'
+}
 \description{
 The \code{Modifier} class is a virtual class, which provides the central 
 functionality for searching for patterns of post-transcriptional RNA 

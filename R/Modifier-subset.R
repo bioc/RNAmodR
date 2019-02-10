@@ -2,7 +2,7 @@
 #' @include Modifier-class.R
 NULL
 
-#' @name subset
+#' @name subsetByCoord
 #' @aliases subsetByCoord
 #' 
 #' @title Subsetting data from a \code{Modifier} or \code{ModifierSet} object.
@@ -27,6 +27,23 @@ NULL
 #' positions labeled per transcript and not per chromosome?
 #' (default: \code{perTranscript = FALSE}).}
 #' }
+#' 
+#' @return 
+#' If 'x' is a
+#' \itemize{
+#' \item{\code{\link[=Modifier-class]{Modifier}}} {a \code{SplitDataFrameList}
+#' with elments per transcript.}
+#' \item{\code{\link[=ModifierSet-class]{ModifierSet}}} {a \code{SimpleList} of
+#' \code{SplitDataFrameList} with elments per transcript.}
+#' }
+#' 
+#' @examples
+#' data(msi,package="RNAmodR")
+#' mod <- modifications(msi)
+#' coord <- unique(unlist(mod))
+#' coord$score <- NULL
+#' coord$sd <- NULL
+#' subsetByCoord(msi,coord)
 NULL
 
 .norm_subset_args <- function(input,x){
@@ -234,7 +251,7 @@ NULL
          })
 }
 
-#' @rdname subset
+#' @rdname subsetByCoord
 #' @export
 setMethod("subsetByCoord",
           signature = c(x = "Modifier", coord = "GRanges"),
@@ -242,7 +259,7 @@ setMethod("subsetByCoord",
             .subset_Modifier_by_GRangesList(x, coord, ...)
           }
 )
-#' @rdname subset
+#' @rdname subsetByCoord
 #' @export
 setMethod("subsetByCoord",
           signature = c(x = "Modifier", coord = "GRangesList"),
@@ -250,7 +267,7 @@ setMethod("subsetByCoord",
             .subset_Modifier_by_GRangesList(x, coord, ...)
           }
 )
-#' @rdname subset
+#' @rdname subsetByCoord
 #' @export
 setMethod("subsetByCoord",
           signature = c(x = "ModifierSet", coord = "GRanges"),
@@ -258,7 +275,7 @@ setMethod("subsetByCoord",
             .subset_ModifierSet_by_GRangesList(x, coord, ...)
           }
 )
-#' @rdname subset
+#' @rdname subsetByCoord
 #' @export
 setMethod("subsetByCoord",
           signature = c(x = "ModifierSet", coord = "GRangesList"),

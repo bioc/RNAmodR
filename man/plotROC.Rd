@@ -38,6 +38,9 @@ performance object of the \code{ROCR} package. If multiple scores are plotted
 (for example if the score argument is not explicitly set) \code{add = FALSE}
 will be set.}
 }
+\value{
+a plot send to the active graphic device
+}
 \description{
 \code{plotROC} streamlines labeling, prediction, performance and plotting
 to test the peformance of a \code{Modifier} object and the data analyzed via
@@ -54,6 +57,18 @@ By default the \code{prediction.args} include three values:
 \item{\code{score = mainScore(x)}}
 }
 The remaining arguments are not predefined.
+}
+\examples{
+data(msi,package="RNAmodR")
+# constructing a GRanges obejct to mark positive positions
+mod <- modifications(msi)
+coord <- unique(unlist(mod))
+coord$score <- NULL
+coord$sd <- NULL
+# plotting a TPR vs. FPR plot per ModInosine object
+plotROC(msi[[1]],coord)
+# plotting a TPR vs. FPR plot per ModSetInosine object
+plotROC(msi,coord)
 }
 \references{
 Tobias Sing, Oliver Sander, Niko Beerenwinkel, Thomas Lengauer (2005): "ROCR:

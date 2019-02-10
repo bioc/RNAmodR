@@ -27,6 +27,9 @@ should be aggregated.}
 \item{name}{For \code{getDataTrack}: a valid transcript name. Must be a name
 of \code{ranges(x)}}
 }
+\value{
+a \code{CoverageSequenceData} object
+}
 \description{
 \code{CoverageSequenceData} implements
 \code{\link[=SequenceData-class]{SequenceData}} to contain and aggregate the

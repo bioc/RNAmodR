@@ -2,8 +2,8 @@
 #' @include ModifierSet-class.R
 NULL
 
-#' @name compare
-#' @aliases compareByCoord
+#' @name compareByCoord
+#' @aliases compare compareByCoord plotCompare plotCompareByCoord 
 #' 
 #' @title Comparison of Samples
 #' 
@@ -42,6 +42,18 @@ NULL
 #' as well as \code{names}, \code{positions} and \code{mod} incorporated from
 #' the \code{coord} input. If \code{coord} contains a column \code{Activity}
 #' this is included in the results as well.
+#' 
+#' @examples
+#' data(msi,package="RNAmodR")
+#' # constructing a GRanges obejct to mark positive positions
+#' mod <- modifications(msi)
+#' coord <- unique(unlist(mod))
+#' coord$score <- NULL
+#' coord$sd <- NULL
+#' # return a DataFrame
+#' compareByCoord(msi,coord)
+#' # plot the comparison as a heatmap
+#' plotCompareByCoord(msi,coord)
 NULL
 
 .norm_alias <- function(input, x){
@@ -91,6 +103,7 @@ NULL
 }
 
 .compare_ModifierSet_by_GRangesList <- function(x, coord, ...){
+  coord <- .norm_coord(coord, modType(x))
   data <- subsetByCoord(x, coord, ...)
   args <- .norm_compare_args(list(...), data, x)
   # subset to compare type
@@ -106,7 +119,7 @@ NULL
   colnames(data) <- sampleNames
   coord <- coord[match(names(data), names(coord))]
   # convert ids to names for labeling if present
-  if(!is.na(args["alias"])){
+  if(!is.null(args[["alias"]])){
     alias <- args[["alias"]]
     m <- match(names(data),as.character(alias$tx_id))
     names(data) <- as.character(alias$name)[m]
@@ -133,17 +146,16 @@ NULL
 }
 
 
-#' @rdname compare
+#' @rdname compareByCoord
 #' @export
 setMethod("compareByCoord",
           signature = c("ModifierSet","GRanges"),
           function(x, coord, ...){
-            coord <- split(coord, coord$Parent)
             .compare_ModifierSet_by_GRangesList(x, coord, ...)
           }
 )
 
-#' @rdname compare
+#' @rdname compareByCoord
 #' @export
 setMethod("compareByCoord",
           signature = c("ModifierSet","GRangesList"),
@@ -274,17 +286,16 @@ setMethod("compareByCoord",
                    axis.text.x.top = ggplot2::element_text(angle = 30,vjust = 0.5))
 }
 
-#' @rdname compare
+#' @rdname compareByCoord
 #' @export
 setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRanges"),
           function(x, coord, normalize, ...){
-            coord <- split(coord, coord$Parent)
             .plot_compare_ModifierSet_by_GRangesList(x, coord, normalize, ...)
           }
 )
 
-#' @rdname compare
+#' @rdname compareByCoord
 #' @export
 setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRangesList"),

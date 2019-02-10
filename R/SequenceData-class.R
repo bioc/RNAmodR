@@ -4,6 +4,7 @@
 NULL
 
 #' @name SequenceData-class
+#' @aliases SequenceData
 #' 
 #' @title The SequenceData class
 #' 
@@ -118,7 +119,6 @@ S4Vectors::setValidity2(Class = "SequenceData",.valid.SequenceData)
 #' @rdname RNAmodR-internals
 setMethod("setListElement", "SequenceData",
           function(x, i, value){
-            browser()
             if(!is(value,"SequenceDataFrame")){
               stop("invalid value. must be 'SequenceDataFrame'.")
             }

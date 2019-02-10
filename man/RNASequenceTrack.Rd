@@ -16,6 +16,9 @@ length one. The sequence to display. See
 \item{chromosome, genome, ...}{See 
 \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
 }
+\value{
+a \code{RNASequenceTrack} object
+}
 \description{
 A \code{Gviz} compatible 
 \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}} for showing RNA 

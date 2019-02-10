@@ -46,6 +46,17 @@ see also the man pages for the functions mentioned below.}
 \item{coord, name, from, to, type, window.size, ...}{See 
 \code{\link{visualizeData}}}
 }
+\value{
+\itemize{
+\item{\code{settings}} {See \code{\link[=Modifier-functions]{settings}}.}
+\item{\code{aggregate}} {See \code{\link{aggregate}}.}
+\item{\code{modify}} {See \code{\link{modify}}.}
+\item{\code{getDataTrack}} {a list of 
+\code{\link[gviz:DataTrack-class]{DataTrack}} object.}
+\item{\code{visualizeData}} {See \code{\link{visualizeDataByCoord}}.}
+\item{\code{visualizeDataByCoord}} {See \code{\link{visualizeDataByCoord}}.}
+}
+}
 \description{
 All of the functions of \code{\link[RNAmodR:Modifier-class]{Modifier}} and
 the \code{\link[RNAmodR:ModifierSet-class]{ModifierSet}} classes are 
@@ -60,4 +71,12 @@ Check below for the specifically implemented functions.
 for the colours of the individual bases. The names are expected to be 
 \code{c("G","A","U","C")}}
 }
+}
+\examples{
+data(msi,package="RNAmodR")
+mi <- msi[[1]]
+settings(mi)
+aggregate(mi)
+modify(mi)
+getDataTrack(mi, "1", mainScore(mi))
 }

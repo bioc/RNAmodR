@@ -3,6 +3,7 @@
 NULL
 
 #' @name SequenceDataList-class
+#' @aliases SequenceDataList
 #' 
 #' @title The SequenceDataList class
 #' 
@@ -12,6 +13,13 @@ NULL
 #' \code{\link[S4Vectors:List-class]{List}}.
 #' 
 #' @param ... The elements to be included in the \code{SequenceDataList}.
+#' 
+#' @return a \code{SequenceDataList}
+#' 
+#' @examples
+#' data(psd,package="RNAmodR")
+#' data(e5sd,package="RNAmodR")
+#' sdl <- SequenceDataList(psd,e5sd)
 NULL
 
 #' @rdname SequenceDataList-class

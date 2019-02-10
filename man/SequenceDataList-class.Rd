@@ -11,8 +11,16 @@ SequenceDataList(...)
 \arguments{
 \item{...}{The elements to be included in the \code{SequenceDataList}.}
 }
+\value{
+a \code{SequenceDataList}
+}
 \description{
 The \code{SequenceDataList} class is used to hold \code{SequenceData} objects
 as its elements. It is derived from the 
 \code{\link[S4Vectors:List-class]{List}}.
+}
+\examples{
+data(psd,package="RNAmodR")
+data(e5sd,package="RNAmodR")
+sdl <- SequenceDataList(psd,e5sd)
 }

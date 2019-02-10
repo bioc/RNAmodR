@@ -60,4 +60,23 @@ SAMPLE_TYPES <- c("treated","control")
 #' 
 #' @param object,range,data,modType,scoreFun,source,type,x,grl,sequences,param,args,i,exact,value
 #' Internal arguments
+#' 
+#' @return internally used values
 NULL
+
+#' @name RNAmodR-datasets
+#' @title Example data in the RNAmodR package
+#' @description 
+#' This contains an example ModifierSet object
+#' @docType data
+#' @usage msi
+#' @usage psd
+#' @format a \code{ModSetInosine} instance
+#' @keywords datasets
+"msi"
+#' @rdname RNAmodR-datasets
+#' @format a \code{PileupSequenceData} instance
+"psd"
+#' @rdname RNAmodR-datasets
+#' @format a \code{End5SequenceData} instance
+"e5sd"

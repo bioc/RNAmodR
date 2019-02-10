@@ -2,6 +2,7 @@
 % Please edit documentation in R/SequenceData-class.R
 \name{SequenceData-class}
 \alias{SequenceData-class}
+\alias{SequenceData}
 \title{The SequenceData class}
 \arguments{
 \item{dataType}{The prefix for construction the class name of the 
