@@ -292,9 +292,8 @@ RNAMODR_PLOT_SEQ_NORMEND_NAMES <-
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "NormEnd5SequenceData"),
-  definition = function(x, ...) {
+  definition = function(x, name, ...) {
     args <- list(...)
-    name <- .norm_viz_name(args[["name"]])
     # DataTrack for sequence data
     seqdata <- .get_data_for_visualization(x, name)
     # clean meta data columns
@@ -326,8 +325,8 @@ setMethod(
       Gviz::displayPars(dt.control.ol)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.control.ol)$col.axis <- "#000000"
       Gviz::displayPars(dt.control.ol) <- args
-      tracks <- list("1" = dt.control.tx,
-                     "2" = dt.control.ol)
+      tracks <- list("NormEnd5tx" = dt.control.tx,
+                     "NormEnd5ol" = dt.control.ol)
     }
     if("treated" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
@@ -352,14 +351,14 @@ setMethod(
       Gviz::displayPars(dt.treated.ol)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.treated.ol)$col.axis <- "#000000"
       Gviz::displayPars(dt.treated.ol) <- args
-      tracks <- list("1" = dt.treated.tx,
-                     "2" = dt.treated.ol)
+      tracks <- list("NormEnd5tx" = dt.treated.tx,
+                     "NormEnd5ol" = dt.treated.ol)
     }
     if(length(conditions) == 2L){
-      tracks <- list("1" = dt.control.tx,
-                     "2" = dt.control.ol,
-                     "1" = dt.treated.tx,
-                     "2" = dt.treated.ol)
+      tracks <- list("NormEnd5tx" = dt.control.tx,
+                     "NormEnd5ol" = dt.control.ol,
+                     "NormEnd5tx" = dt.treated.tx,
+                     "NormEnd5ol" = dt.treated.ol)
     }
     tracks
   }
@@ -370,9 +369,8 @@ setMethod(
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "NormEnd3SequenceData"),
-  definition = function(x, ...) {
+  definition = function(x, name, ...) {
     args <- list(...)
-    name <- .norm_viz_name(args[["name"]])
     # DataTrack for sequence data
     seqdata <- .get_data_for_visualization(x, name)
     # clean meta data columns
@@ -404,8 +402,8 @@ setMethod(
       Gviz::displayPars(dt.control.ol)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.control.ol)$col.axis <- "#000000"
       Gviz::displayPars(dt.control.ol) <- args
-      tracks <- list("1" = dt.control.tx,
-                     "2" = dt.control.ol)
+      tracks <- list("NormEnd3tx" = dt.control.tx,
+                     "NormEnd3ol" = dt.control.ol)
     }
     if("treated" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
@@ -430,14 +428,14 @@ setMethod(
       Gviz::displayPars(dt.treated.ol)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.treated.ol)$col.axis <- "#000000"
       Gviz::displayPars(dt.treated.ol) <- args
-      tracks <- list("1" = dt.treated.tx,
-                     "2" = dt.treated.ol)
+      tracks <- list("NormEnd3tx" = dt.treated.tx,
+                     "NormEnd3ol" = dt.treated.ol)
     }
     if(length(conditions) == 2L){
-      tracks <- list("1" = dt.control.tx,
-                     "2" = dt.control.ol,
-                     "1" = dt.treated.tx,
-                     "2" = dt.treated.ol)
+      tracks <- list("NormEnd3tx" = dt.control.tx,
+                     "NormEnd3ol" = dt.control.ol,
+                     "NormEnd3tx" = dt.treated.tx,
+                     "NormEnd3ol" = dt.treated.ol)
     }
     tracks
   }

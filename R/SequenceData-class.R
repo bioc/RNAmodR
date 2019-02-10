@@ -590,14 +590,3 @@ setMethod(f = "aggregate",
                    call. = FALSE)
             }
 )
-
-#' @rdname visualizeData
-#' @export
-setMethod(
-  f = "getDataTrack",
-  signature = signature(x = "SequenceData"),
-  definition = function(x, ...) {
-    stop("This functions needs to be implemented by '",class(x),"'.",
-         call. = FALSE)
-  }
-)

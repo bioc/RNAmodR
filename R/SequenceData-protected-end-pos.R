@@ -87,10 +87,8 @@ RNAMODR_PLOT_SEQ_PROTEND_NAMES <- c("protend" = "mean")
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "ProtectedEndSequenceData"),
-  definition = function(x, ...) {
-    browser()
+  definition = function(x, name, ...) {
     args <- list(...)
-    name <- .norm_viz_name(args[["name"]])
     # DataTrack for sequence data
     seqdata <- .get_data_for_visualization(x, name)
     # clean meta data columns
@@ -110,7 +108,7 @@ setMethod(
       Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.control)$col.axis <- "#000000"
       Gviz::displayPars(dt.control) <- args
-      track <- dt.control
+      track <- list("ProtectedEnd" = dt.control)
     }
     if("treated" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
@@ -125,11 +123,11 @@ setMethod(
       Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.treated)$col.axis <- "#000000"
       Gviz::displayPars(dt.treated) <- args
-      track <- dt.treated
+      track <- list("ProtectedEnd" = dt.treated)
     }
     if(length(conditions) == 2L){
-      track <- list("1" = dt.control,
-                    "1" = dt.treated)
+      track <- list("ProtectedEnd" = dt.control,
+                    "ProtectedEnd" = dt.treated)
     }
     track
   }

@@ -13,7 +13,7 @@ ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{aggregate}{ProtectedEndSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 
-\S4method{getDataTrack}{ProtectedEndSequenceData}(x, ...)
+\S4method{getDataTrack}{ProtectedEndSequenceData}(x, name, ...)
 }
 \arguments{
 \item{bamfiles, annotation, sequences, seqinfo, ...}{See 

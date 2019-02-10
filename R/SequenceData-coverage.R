@@ -111,9 +111,8 @@ RNAMODR_PLOT_SEQ_COVERAGE_NAMES <- c("means" = "mean(coverage)")
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "CoverageSequenceData"),
-  definition = function(x, ...) {
+  definition = function(x, name, ...) {
     args <- list(...)
-    name <- .norm_viz_name(args[["name"]])
     # DataTrack for sequence data
     seqdata <- .get_data_for_visualization(x, name)
     # clean meta data columns
@@ -132,7 +131,7 @@ setMethod(
       Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.control)$col.axis <- "#000000"
       Gviz::displayPars(dt.control) <- args
-      track <- dt.control
+      track <- list("Coverage" = dt.control)
     }
     if("treated" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
@@ -146,11 +145,11 @@ setMethod(
       Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.treated)$col.axis <- "#000000"
       Gviz::displayPars(dt.treated) <- args
-      track <- dt.treated
+      track <- list("Coverage" = dt.treated)
     }
     if(length(conditions) == 2L){
-      track <- list("1" = dt.control,
-                    "1" = dt.treated)
+      track <- list("Coverage" = dt.control,
+                    "Coverage" = dt.treated)
     }
     track
   }

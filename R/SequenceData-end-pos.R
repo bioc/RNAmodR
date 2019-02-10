@@ -334,9 +334,8 @@ RNAMODR_PLOT_SEQ_END_NAMES <- c("end5" = "mean(5'-ends)",
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "EndSequenceData"),
-  definition = function(x, ...) {
+  definition = function(x, name, ...) {
     args <- list(...)
-    name <- .norm_viz_name(args[["name"]])
     # DataTrack for sequence data
     seqdata <- .get_data_for_visualization(x, name)
     # clean meta data columns
@@ -355,7 +354,7 @@ setMethod(
       Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.control)$col.axis <- "#000000"
       Gviz::displayPars(dt.control) <- args
-      track <- dt.control
+      track <- list("End" = dt.control)
     }
     if("treated" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
@@ -369,11 +368,11 @@ setMethod(
       Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.treated)$col.axis <- "#000000"
       Gviz::displayPars(dt.treated) <- args
-      track <- dt.treated
+      track <- list("End" = dt.treated)
     }
     if(length(conditions) == 2L){
-      track <- list("1" = dt.control,
-                    "1" = dt.treated)
+      track <- list("End" = dt.control,
+                    "End" = dt.treated)
     }
     track
   }
@@ -384,9 +383,8 @@ setMethod(
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "End5SequenceData"),
-  definition = function(x, ...) {
+  definition = function(x, name, ...) {
     args <- list(...)
-    name <- .norm_viz_name(args[["name"]])
     # DataTrack for sequence data
     seqdata <- .get_data_for_visualization(x, name)
     # clean meta data columns
@@ -405,7 +403,7 @@ setMethod(
       Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.control)$col.axis <- "#000000"
       Gviz::displayPars(dt.control) <- args
-      track <- dt.control
+      track <- list("End5" = dt.control)
     }
     if("treated" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
@@ -419,11 +417,11 @@ setMethod(
       Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.treated)$col.axis <- "#000000"
       Gviz::displayPars(dt.treated) <- args
-      track <- dt.treated
+      track <- list("End5" = dt.treated)
     }
     if(length(conditions) == 2L){
-      track <- list("1" = dt.control,
-                    "1" = dt.treated)
+      track <- list("End5" = dt.control,
+                    "End5" = dt.treated)
     }
     track
   }
@@ -434,9 +432,8 @@ setMethod(
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "End3SequenceData"),
-  definition = function(x, ...) {
+  definition = function(x, name, ...) {
     args <- list(...)
-    name <- .norm_viz_name(args[["name"]])
     # DataTrack for sequence data
     seqdata <- .get_data_for_visualization(x, name)
     # clean meta data columns
@@ -455,7 +452,7 @@ setMethod(
       Gviz::displayPars(dt.control)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.control)$col.axis <- "#000000"
       Gviz::displayPars(dt.control) <- args
-      track <- dt.control
+      track <- list("End3" = dt.control)
     }
     if("treated" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
@@ -469,11 +466,11 @@ setMethod(
       Gviz::displayPars(dt.treated)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.treated)$col.axis <- "#000000"
       Gviz::displayPars(dt.treated) <- args
-      track <- dt.treated
+      track <- list("End3" = dt.treated)
     }
     if(length(conditions) == 2L){
-      track <- list("1" = dt.control,
-                    "1" = dt.treated)
+      track <- list("End3" = dt.control,
+                    "End3" = dt.treated)
     }
     track
   }

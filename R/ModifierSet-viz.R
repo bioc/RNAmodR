@@ -2,16 +2,6 @@
 #' @include Modifier-viz.R
 NULL
 
-#' @importFrom grDevices col2rgb
-.is_colour <- function(x) {
-  vapply(x,
-         function(z) {
-           tryCatch(is.matrix(grDevices::col2rgb(z)),
-                    error = function(e) FALSE)
-         },
-         logical(1))
-}
-
 .norm_viz_args_ModifierSet <- function(input){
   colours <- NA
   if(!is.null(input[["colours"]])){
@@ -58,7 +48,8 @@ NULL
       dt
     },
     dts,
-    colours)
+    colours,
+    SIMPLIFY = FALSE)
   dts
 }
 
@@ -77,7 +68,40 @@ NULL
       dt
     },
     dts,
-    names)
+    names,
+    SIMPLIFY = FALSE)
+  dts
+}
+
+.add_viz_ylim <- function(dts, chromosome, from_to){
+  types <- unique(names(dts))
+  max <- lapply(types,
+                function(t){
+                  max <- vapply(dts[t],
+                                function(dt){
+                                  f <- which(seqnames(dt@range) == chromosome & 
+                                               start(dt@range) >= from_to$from & 
+                                               end(dt@range) <= from_to$to)
+                                  max(colSums(dt@data[,f,drop=FALSE]))
+                                },
+                                numeric(1))
+                  max <- max(max)
+                  if(is.infinite(max)){
+                    max <- 0
+                  }
+                  max
+                })
+  names(max) <- types
+  dts <- mapply(
+    function(dt,t){
+      ylim <- c(0,max[[t]])
+      if(sum(ylim) != 0L){
+        Gviz::displayPars(dt)$ylim <- ylim
+      }
+      dt
+    },
+    dts,
+    names(dts))
   dts
 }
 
@@ -104,28 +128,31 @@ setMethod(
   f = "visualizeData",
   signature = signature(x = "ModifierSet"),
   definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
-    browser()
     # get plotting arguments
     args <- .norm_viz_args_ModifierSet(list(...))
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
+    seqdata <- .norm_seqdata_show(seqdata)
+    type <- .norm_type(type)
     colours <- .norm_viz_colours(x, args[["colours"]])
     # get tracks
     atm <- .get_viz_annotation_track(ranges(x), args[["annotation.track.pars"]],
                                      args[["alias"]])
     st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
                                   args[["sequence.track.pars"]])
-    dts <- lapply(x, getDataTrack, ...)
-    dts <- .add_viz_ylim(dts, chromosome, from_to, args[["ylim"]])
-    dts <- .add_viz_colours(dts, colours)
+    dts <- lapply(x, getDataTrack, name = name, type = type, ...)
     dts <- .add_viz_names(dts, names(x))
+    dts <- .add_viz_colours(dts, colours)
+    dts <- do.call(c,unname(dts))
+    dts <- .add_viz_ylim(dts, chromosome, from_to)
     if(seqdata){
-      sdts <- lapply(x, function(z){getDataTrack(seqData(z), ...)})
-      sdts <- .add_viz_ylim(sdts, chromosome, from_to, args[["ylim"]])
+      sdts <- lapply(x, function(z){getDataTrack(seqData(z), name = name, ...)})
       sdts <- .add_viz_names(sdts, names(x))
-      tracks <- c(do.call(c,dts), do.call(c,sdts), list(st,atm))
+      sdts <- do.call(c,unname(sdts))
+      sdts <- .add_viz_ylim(sdts, chromosome, from_to)
+      tracks <- c(dts, sdts, list(st,atm))
     } else {
-      tracks <- c(do.call(c,dts), list(st,atm))
+      tracks <- c(dts, list(st,atm))
     }
     # plot tracks
     do.call(Gviz::plotTracks,

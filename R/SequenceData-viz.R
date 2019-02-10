@@ -107,28 +107,41 @@ NULL
        to = end)
 }
 
+
+#' @importFrom grDevices col2rgb
+.is_colour <- function(x) {
+  vapply(x,
+         function(z) {
+           tryCatch(is.matrix(grDevices::col2rgb(z)),
+                    error = function(e) FALSE)
+         },
+         logical(1))
+}
+
+.norm_viz_colour <- function(colour, type = NA){
+  if(!is.character(colour) || !.is_colour(colour)){
+    stop("'colour' must be a character vector and contain valid colours, which",
+         "can be interpreted by col2rgb().",
+         call. = FALSE)
+  }
+  if(!is.na(type)){
+    if(length(colour) != 1 && !all(names(colour) %in% type)){
+      stop("'colour' must be a named character vector parallel to 'type' ",
+           "or of length = 1.",
+           call. = FALSE)
+    }
+    if(length(colour) == 1){
+      colour <- rep(colour,length(type))
+      names(colour) <- type
+    }
+  }
+  colour
+}
+
 .norm_viz_args_SequenceData <- function(input){
-  ylim <- NULL
-  colour <- NA
   sequence.track.pars <- list(add53 = FALSE)
   annotation.track.pars <- list()
   plot.pars <- list()
-  if(!is.null(input[["colour"]])){
-    colour <- input[["colour"]]
-    if(!is.character(colour) || !.is_colour(colour)){
-      stop("'colour' must be a character vector parallel to the types selected",
-           "or of length = 1, if no type selection is available. 'colour' must",
-           " also be valid colour representation, which can be interpreted by ",
-           "col2rgb().",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["ylim"]])){
-    ylim <- input[["ylim"]]
-    if(length(ylim) != 2L || !is.numeric(ylim)){
-      stop("'ylim' must contain two numeric values.", call. = FALSE)
-    }
-  }
   if(!is.null(input[["sequence.track.pars"]])){
     sequence.track.pars <- input[["sequence.track.pars"]]
     sequence.track.pars <- 
@@ -145,9 +158,7 @@ NULL
       plot.pars[!(names(plot.pars) %in% c("tracks","from","to","chromosome"))]
   }
   args <- c(.norm_alias(input),
-            list(ylim = ylim,
-                 colour = colour,
-                 sequence.track.pars = sequence.track.pars,
+            list(sequence.track.pars = sequence.track.pars,
                  annotation.track.pars = annotation.track.pars,
                  plot.pars = plot.pars))
   args
@@ -293,13 +304,14 @@ NULL
 
 .get_data_for_visualization <- function(x, name){
   ranges <- ranges(x)
-  if(!is.null(name)){
-    x <- x[name]
-    ranges <- ranges[name]
+  if(!(name %in% names(ranges))){
+    stop("Transcript name '",name,"' not found in 'x'", call. = FALSE)
   }
+  ranges <- ranges[name]
   if(is(x,"Modifier")){
-    data <- aggregateData(x)
+    data <- aggregateData(x)[name]
   } else if(is(x,"SequenceData")){
+    x <- x[name]
     data <- aggregate(x)
   } else {
     stop("Something went wrong.")
@@ -316,47 +328,8 @@ NULL
                  data@unlistData)
   ans <- GRangesList(ans)
   ans@partitioning <- data@partitioning
-  seqinfo(ans) <- seqinfo(ranges)
   ans@metadata <- ranges@metadata
   ans
-}
-
-.add_viz_ylim <- function(dts, chromosome, from_to, ylim){
-  if(is.null(ylim)){
-    max <- max(
-      vapply(dts,
-             function(dt){
-               if(is.list(dt)){
-                 max <- lapply(dt,
-                               function(t){
-                                 f <- which(seqnames(t@range) == chromosome & 
-                                              start(t@range) >= from_to$from & 
-                                              end(t@range) <= from_to$to)
-                                 max(t@data[,f])
-                               })
-                 max <- max(unlist(max))
-               } else {
-                 f <- which(seqnames(dt@range) == chromosome & 
-                              start(dt@range) >= from_to$from & 
-                              end(dt@range) <= from_to$to)
-                 max <- max(dt@data[,f])
-               }
-               max
-             },
-             numeric(1)))
-    if(is.infinite(max)){
-      max <- 0
-    }
-    ylim <- c(0,max)
-  }
-  if(sum(ylim) != 0L){
-    dts <- lapply(dts,
-                  function(dt){
-                    Gviz::displayPars(dt)$ylim <- ylim
-                    dt
-                  })
-  }
-  dts
 }
 
 ################################################################################
@@ -368,7 +341,6 @@ setMethod(
   signature = signature(x = "SequenceData", coord = "GRanges"),
   definition = function(x, coord, type = NA, window.size = 15L,
                         perTranscript = FALSE, ...) {
-    browser()
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
     from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
@@ -383,9 +355,8 @@ setMethod(
 setMethod(
   f = "visualizeData",
   signature = signature(x = "SequenceData"),
-  definition = function(x, name, from, to, type = NA, perTranscript = FALSE, 
+  definition = function(x, name, from, to, perTranscript = FALSE, 
                         ...) {
-    browser()
     # get plotting arguments
     args <- .norm_viz_args_SequenceData(list(...))
     chromosome <- .norm_viz_chromosome(ranges(x), name)
@@ -395,16 +366,26 @@ setMethod(
                                      args[["alias"]])
     st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
                                   args[["sequence.track.pars"]])
-    dt <- getDataTrack(x, ...)
+    dt <- getDataTrack(x, name = name, ...)
     if(!is.list(dt)){
       dt <- list(dt)
     }
-    dt <- .add_viz_ylim(dt, chromosome, from_to, args[["ylim"]])
     tracks <- c(dt,list(st,atm))
     # plot tracks
     do.call(Gviz::plotTracks,
             c(list(tracks, from = from_to$from, to = from_to$to,
                    chromosome = chromosome),
               args[["plot.pars"]]))
+  }
+)
+
+#' @rdname visualizeData
+#' @export
+setMethod(
+  f = "getDataTrack",
+  signature = signature(x = "SequenceData"),
+  definition = function(x, name = name, ...) {
+    stop("This functions needs to be implemented by '",class(x),"'.",
+         call. = FALSE)
   }
 )

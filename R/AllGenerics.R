@@ -156,15 +156,7 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "subsetByCoord",
-  signature = c("x","coord"),
-  def = function(x, coord, ...)
-    standardGeneric("subsetByCoord")
-)
-#' @rdname subset
-#' @export
-setGeneric( 
-  name = "subsetByCoord",
-  signature = c("x","coord"),
+  signature = c("x", "coord"),
   def = function(x, coord, ...)
     standardGeneric("subsetByCoord")
 )
@@ -189,7 +181,7 @@ setGeneric(
 setGeneric(
   name = "getDataTrack",
   signature = c("x"),
-  def = function(x, ...)
+  def = function(x, name, ...)
     standardGeneric("getDataTrack")
 )
 

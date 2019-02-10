@@ -78,6 +78,7 @@ Collate:
     'SequenceData-pileup.R'
     'SequenceData-viz.R'
     'SequenceData-protected-end-pos.R'
+    'SequenceDataList-viz.R'
     'utils-bam.R'
     'utils.R'
 RoxygenNote: 6.1.1

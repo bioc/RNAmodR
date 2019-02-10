@@ -34,15 +34,15 @@ EndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{aggregate}{EndSequenceData}(x, condition = c("Both", "Treated",
   "Control"))
 
-\S4method{getDataTrack}{EndSequenceData}(x, ...)
+\S4method{getDataTrack}{EndSequenceData}(x, name, ...)
 
-\S4method{getDataTrack}{End5SequenceData}(x, ...)
+\S4method{getDataTrack}{End5SequenceData}(x, name, ...)
 
-\S4method{getDataTrack}{End3SequenceData}(x, ...)
+\S4method{getDataTrack}{End3SequenceData}(x, name, ...)
 
-\S4method{getDataTrack}{NormEnd5SequenceData}(x, ...)
+\S4method{getDataTrack}{NormEnd5SequenceData}(x, name, ...)
 
-\S4method{getDataTrack}{NormEnd3SequenceData}(x, ...)
+\S4method{getDataTrack}{NormEnd3SequenceData}(x, name, ...)
 }
 \arguments{
 \item{bamfiles, annotation, sequences, seqinfo, ...}{See 

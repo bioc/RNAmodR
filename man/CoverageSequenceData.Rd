@@ -13,7 +13,7 @@ CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{aggregate}{CoverageSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 
-\S4method{getDataTrack}{CoverageSequenceData}(x, ...)
+\S4method{getDataTrack}{CoverageSequenceData}(x, name, ...)
 }
 \arguments{
 \item{bamfiles, annotation, sequences, seqinfo, ...}{See 

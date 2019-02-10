@@ -44,13 +44,16 @@ NULL
   seqdata
 }
 
+.norm_type <- function(type){
+  if(is.na(type) || !is.character(type)){
+    stop("'type' must be a character vector.", call. = FALSE)
+  }
+  type
+}
+
 .norm_viz_args_Modifier <- function(input){
   modified.seq <- FALSE
   additional.mod <- GRanges()
-  colour <- NA
-  sequence.track.pars <- list(add53 = FALSE)
-  annotation.track.pars <- list()
-  data.track.pars <- NULL
   if(!is.null(input[["modified.seq"]])){
     modified.seq <- input[["modified.seq"]]
     if(!assertive::is_a_bool(modified.seq)){
@@ -99,27 +102,12 @@ NULL
 
 # ------------------------------------------------------------------------------
 
-# .get_data_for_visualization <- function(x, name){
-#   ranges <- ranges(x)
-#   if(!is.null(name)){
-#     x <- x[name]
-#     ranges <- ranges[name]
-#   }
-#   data <- aggregate(x)
-#   
-#   
-# }
-
-# ------------------------------------------------------------------------------
-
 #' @rdname visualizeData
-#' @export
 setMethod(
   f = "visualizeDataByCoord",
   signature = signature(x = "Modifier", coord = "GRanges"),
   definition = function(x, coord, type = NA, seqdata = FALSE, window.size = 15L,
                         ...) {
-    browser()
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
     from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
@@ -134,27 +122,26 @@ setMethod(
   f = "visualizeData",
   signature = signature(x = "Modifier"),
   definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
-    browser()
     # get plotting arguments
     args <- .norm_viz_args_Modifier(list(...))
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
+    seqdata <- .norm_seqdata_show(seqdata)
+    type <- .norm_type(type)
     # get tracks
     atm <- .get_viz_annotation_track(ranges(x), args[["annotation.track.pars"]],
                                      args[["alias"]])
     st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
                                   args[["sequence.track.pars"]])
-    dt <- getDataTrack(x, ...)
+    dt <- getDataTrack(x, name = name, type = type, ...)
     if(!is.list(dt)){
       dt <- list(dt)
     }
-    dt <- .add_viz_ylim(dt, chromosome, from_to, args[["ylim"]])
     if(seqdata){
-      sdt <- getDataTrack(seqData(x), ...)
+      sdt <- getDataTrack(seqData(x), name = name,...)
       if(!is.list(sdt)){
         sdt <- list(sdt)
       }
-      sdt <- .add_viz_ylim(sdt, chromosome, from_to, args[["ylim"]])
       tracks <- c(dt,sdt,list(st,atm))
     } else {
       tracks <- c(dt,list(st,atm))
@@ -172,7 +159,7 @@ setMethod(
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "Modifier"),
-  definition = function(x, ...) {
-    stop(".dataTracks needs to be implemented for class '", class(x)[[1]], "'")
+  definition = function(x, name = name, ...) {
+    stop("'getDataTrack' needs to be implemented for class '", class(x)[[1]], "'")
   }
 )

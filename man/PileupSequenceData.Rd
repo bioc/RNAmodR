@@ -13,7 +13,7 @@ PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{aggregate}{PileupSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 
-\S4method{getDataTrack}{PileupSequenceData}(x, ...)
+\S4method{getDataTrack}{PileupSequenceData}(x, name, ...)
 }
 \arguments{
 \item{bamfiles, annotation, sequences, seqinfo, ...}{See 

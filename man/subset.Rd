@@ -12,8 +12,6 @@
 \usage{
 subsetByCoord(x, coord, ...)
 
-subsetByCoord(x, coord, ...)
-
 \S4method{subsetByCoord}{Modifier,GRanges}(x, coord, ...)
 
 \S4method{subsetByCoord}{Modifier,GRangesList}(x, coord, ...)
