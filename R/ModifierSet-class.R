@@ -209,6 +209,7 @@ setMethod(f = "relistToClass",
 }
 
 .Modifer_to_ModifierSet <- function(x, ...){
+  browser()
   if(!is.list(x)){
     x <- list(x)
   }
@@ -229,6 +230,7 @@ setMethod(f = "ModifierSet",
           signature = c(x = "list"),
           function(className, x, annotation = NULL, sequences = NULL, 
                    seqinfo = NULL, ...) {
+            browser()
             if(.contains_only_Modifier(x)){
               return(.Modifer_to_ModifierSet(x, ...))
             }
@@ -351,6 +353,27 @@ setMethod(f = "mainScore",
           signature = signature(x = "ModifierSet"),
           definition = function(x) mainScore(new(elementType(x),NULL))
 )
+
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "settings", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x, name){
+            ans <- lapply(x,settings,name)
+            names(ans) <- names(x)
+            ans
+          }
+)
+#' @rdname Modifier-functions
+#' @export
+setReplaceMethod(f = "settings", 
+                 signature = signature(x = "ModifierSet"),
+                 definition = function(x, value){
+                   for(i in seq_along(x)){
+                     settings(x[[i]]) <- value
+                   }
+                   x
+                 })
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "bamfiles", 
@@ -390,4 +413,27 @@ setMethod(f = "modifications",
           definition = function(x, perTranscript = FALSE) {
             GenomicRanges::GRangesList(lapply(x,modifications,perTranscript))
           }
+)
+
+#' @rdname aggregate
+#' @export
+setMethod(f = "aggregate", 
+          signature = signature(x = "ModifierSet"),
+          definition = 
+            function(x, force = FALSE){
+              ans <- BiocParallel::bplapply(x,aggregate,force)
+              ans <- RNAmodR::ModifierSet(class(x),ans)
+              ans
+            }
+)
+#' @rdname modify
+#' @export
+setMethod(f = "modify", 
+          signature = signature(x = "ModifierSet"),
+          definition = 
+            function(x, force = FALSE){
+              ans <- BiocParallel::bplapply(x,modify,force)
+              ans <- RNAmodR::ModifierSet(class(x),ans)
+              ans
+            }
 )

@@ -21,3 +21,13 @@ BiocStyle::markdown(css.files = c('custom.css'))
 
 # Introduction
 
+Two classes have to be considered to establish a new analysis pipeline using
+`RNAmodR`. 
+
+# A new `SequenceData` class
+
+First, the `SequenceData` class has to be considered.
+
+# A new `Modifier` class
+
+Secondly, a new `Modifier` has to be 

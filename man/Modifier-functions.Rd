@@ -29,6 +29,8 @@
 \alias{modifierType,ModifierSet-method}
 \alias{modType,ModifierSet-method}
 \alias{mainScore,ModifierSet-method}
+\alias{settings,ModifierSet-method}
+\alias{settings<-,ModifierSet-method}
 \alias{bamfiles,ModifierSet-method}
 \alias{sequences,ModifierSet-method}
 \alias{ranges,ModifierSet-method}
@@ -85,6 +87,10 @@ seqData(x)
 \S4method{modType}{ModifierSet}(x)
 
 \S4method{mainScore}{ModifierSet}(x)
+
+\S4method{settings}{ModifierSet}(x, name = NULL)
+
+\S4method{settings}{ModifierSet}(x) <- value
 
 \S4method{bamfiles}{ModifierSet}(x)
 
