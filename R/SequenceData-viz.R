@@ -138,7 +138,7 @@ NULL
   colour
 }
 
-.norm_viz_args_SequenceData <- function(input){
+.norm_viz_args_SequenceData <- function(input, x){
   sequence.track.pars <- list(add53 = FALSE)
   annotation.track.pars <- list()
   plot.pars <- list()
@@ -157,7 +157,7 @@ NULL
     plot.pars <- 
       plot.pars[!(names(plot.pars) %in% c("tracks","from","to","chromosome"))]
   }
-  args <- c(.norm_alias(input),
+  args <- c(.norm_alias(input, x),
             list(sequence.track.pars = sequence.track.pars,
                  annotation.track.pars = annotation.track.pars,
                  plot.pars = plot.pars))
@@ -358,7 +358,7 @@ setMethod(
   definition = function(x, name, from, to, perTranscript = FALSE, 
                         ...) {
     # get plotting arguments
-    args <- .norm_viz_args_SequenceData(list(...))
+    args <- .norm_viz_args_SequenceData(list(...), x)
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
     # get tracks

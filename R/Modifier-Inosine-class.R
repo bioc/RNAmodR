@@ -265,7 +265,7 @@ setMethod(f = "aggregate",
 #' @export
 setMethod("modify",
           signature = c(x = "ModInosine"),
-          function(x, force){
+          function(x, force = FALSE){
             # get the aggregate data
             x <- aggregate(x, force)
             x@modifications <- .find_inosine(x)

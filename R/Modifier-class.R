@@ -196,7 +196,7 @@ S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
                        f <- seq.int(from = (i * nc) - nc + 1L,
                                     to = i * nc)
                        f <- f[f <= l]
-                       settings[,f]
+                       settings[,f,drop = FALSE]
                      })
   if(is.null(rownames(settings[[1]]))){
     names <- rep(" ",nrow(settings[[1]]))
@@ -567,7 +567,7 @@ NULL
 setMethod(f = "modify", 
           signature = signature(x = "Modifier"),
           definition = 
-            function(x){
+            function(x, force){
               stop("This functions needs to be implemented by '",class(x),"'.",
                    call. = FALSE)
             }
