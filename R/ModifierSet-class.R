@@ -209,7 +209,6 @@ setMethod(f = "relistToClass",
 }
 
 .Modifer_to_ModifierSet <- function(x, ...){
-  browser()
   if(!is.list(x)){
     x <- list(x)
   }
@@ -230,7 +229,6 @@ setMethod(f = "ModifierSet",
           signature = c(x = "list"),
           function(className, x, annotation = NULL, sequences = NULL, 
                    seqinfo = NULL, ...) {
-            browser()
             if(.contains_only_Modifier(x)){
               return(.Modifer_to_ModifierSet(x, ...))
             }
