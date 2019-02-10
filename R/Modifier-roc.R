@@ -305,6 +305,7 @@ setMethod(
     if(missing(score)){
       score <- NULL
     }
+    coord <- .norm_coord(coord, modType(x))
     data <- .get_prediction_data_Modifier(x, coord, score)
     .plot_ROCR(data,
                .norm_prediction_args(prediction.args),
@@ -324,6 +325,7 @@ setMethod(
     if(missing(score)){
       score <- NULL
     }
+    coord <- .norm_coord(coord, modType(x))
     data <- .get_prediction_data_ModifierSet(x, coord, score)
     .plot_ROCR(data,
                .norm_prediction_args(prediction.args),

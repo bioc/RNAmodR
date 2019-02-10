@@ -45,7 +45,7 @@ NULL
 NULL
 
 .norm_alias <- function(input){
-  alias <- NA
+  alias <- NULL
   if(!is.null(input[["alias"]])){
     alias <- input[["alias"]]
     if(!is.data.frame(alias)){

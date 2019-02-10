@@ -70,15 +70,20 @@ NULL
   args
 }
 
-.norm_coord <- function(coord,
-                        type){
-  f <- LogicalList(lapply(coord,function(c){c$type == "RNAMOD"}))
+.norm_coord <- function(coord, type){
+  if(is(coord,"GRanges")){
+    if(is.null(coord$Parent)){
+      stop("Parent column must be present.", call. = FALSE)
+    }
+    coord <- split(coord, coord$Parent)
+  }
+  f <- IRanges::LogicalList(lapply(coord,function(c){c$type == "RNAMOD"}))
   coord <- coord[f]
   if(unique(unlist(width(ranges(coord)))) != 1L){
     stop("Elements of type 'RNAMOD' with a width != 1L are not supported.",
          call. = "FALSE")
   }
-  f <- LogicalList(lapply(coord,function(c){c$mod %in% type}))
+  f <- IRanges::LogicalList(lapply(coord,function(c){c$mod %in% type}))
   coord <- coord[f]
   coord <- coord[vapply(coord,function(c){length(c) > 0L},logical(1))]
   if(length(coord) == 0L){
@@ -213,24 +218,6 @@ NULL
 }
 ################################################################################
 
-#' @rdname subset
-#' @export
-setMethod("subsetByCoord",
-          signature = c("Modifier","GRanges"),
-          function(x, coord, ...){
-            coord <- split(coord, coord$Parent)
-            .subset_Modifier_by_GRangesList(x, coord, ...)
-          }
-)
-#' @rdname subset
-#' @export
-setMethod("subsetByCoord",
-          signature = c("Modifier","GRangesList"),
-          function(x, coord, ...){
-            .subset_Modifier_by_GRangesList(x, coord, ...)
-          }
-)
-
 .subset_ModifierSet_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...),x)
   coord <- .norm_coord(coord,args[["type"]])
@@ -249,16 +236,31 @@ setMethod("subsetByCoord",
 #' @rdname subset
 #' @export
 setMethod("subsetByCoord",
-          signature = c("ModifierSet","GRanges"),
+          signature = c(x = "Modifier", coord = "GRanges"),
           function(x, coord, ...){
-            coord <- split(coord, coord$Parent)
+            .subset_Modifier_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subset
+#' @export
+setMethod("subsetByCoord",
+          signature = c(x = "Modifier", coord = "GRangesList"),
+          function(x, coord, ...){
+            .subset_Modifier_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subset
+#' @export
+setMethod("subsetByCoord",
+          signature = c(x = "ModifierSet", coord = "GRanges"),
+          function(x, coord, ...){
             .subset_ModifierSet_by_GRangesList(x, coord, ...)
           }
 )
 #' @rdname subset
 #' @export
 setMethod("subsetByCoord",
-          signature = c("ModifierSet","GRangesList"),
+          signature = c(x = "ModifierSet", coord = "GRangesList"),
           function(x, coord, ...){
             .subset_ModifierSet_by_GRangesList(x, coord, ...)
           }

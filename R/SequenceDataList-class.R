@@ -267,6 +267,6 @@ setMethod("aggregate",
           function(x, condition = "Treated"){
             ans <- do.call(S4Vectors::SimpleList,
                            lapply(x,aggregate, condition = condition))
-            names(ans) <- names(x)
+            names(ans) <- names(x@listData)
             ans
           })
