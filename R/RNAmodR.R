@@ -1,6 +1,6 @@
 #' @title RNAmodR
 #' 
-#' @author Felix G M Ernst [aut]
+#' @author Felix G M Ernst [aut], Denis L.J. Lafontaine [ctb]
 #' 
 #' @description
 #' \code{RNAmodR} implements class and a workflows to detect

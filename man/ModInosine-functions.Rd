@@ -52,7 +52,7 @@ see also the man pages for the functions mentioned below.}
 \item{\code{aggregate}} {See \code{\link{aggregate}}.}
 \item{\code{modify}} {See \code{\link{modify}}.}
 \item{\code{getDataTrack}} {a list of 
-\code{\link[gviz:DataTrack-class]{DataTrack}} object.}
+\code{\link[Gviz:DataTrack-class]{DataTrack}} object.}
 \item{\code{visualizeData}} {See \code{\link{visualizeDataByCoord}}.}
 \item{\code{visualizeDataByCoord}} {See \code{\link{visualizeDataByCoord}}.}
 }

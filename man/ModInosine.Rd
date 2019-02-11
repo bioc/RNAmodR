@@ -65,20 +65,21 @@ modified.
 }
 \examples{
 # construction of ModInosine object
-annotation <- rtracklayer::GFF3File(system.file("extdata","example_AAS.gff3",package = "RNAmodR.Data"))
-sequences <- Rsamtools::FaFile(system.file("extdata","example_AAS.fasta",package = "RNAmodR.Data"))
-files <- c(Treated = system.file("extdata","example_wt_1.bam" ,package = "RNAmodR.Data"),
-           Treated = system.file("extdata","example_wt_2.bam" ,package = "RNAmodR.Data"),
-           Treated = system.file("extdata","example_wt_3.bam" ,package = "RNAmodR.Data"))
+RNAmodR.files <- RNAmodR.Data::RNAmodR.files
+annotation <- rtracklayer::GFF3File(RNAmodR.files[["example1.gff3"]])
+sequences <- Rsamtools::FaFile(RNAmodR.files[["example1.fasta"]])
+files <- c(Treated = RNAmodR.files[["example_wt_1.bam"]],
+           Treated = RNAmodR.files[["example_wt_2.bam"]],
+           Treated = RNAmodR.files[["example_wt_3.bam"]])
 mi <- ModInosine(files,annotation = annotation ,sequences = sequences)
 # construction of ModSetInosine object
-files <- list("SampleSet1" = c(treated = system.file("extdata","example_wt_1.bam",package = "RNAmodR.Data"),
-                               treated = system.file("extdata","example_wt_2.bam",package = "RNAmodR.Data"),
-                               treated = system.file("extdata","example_wt_3.bam",package = "RNAmodR.Data")),
-              "SampleSet2" = c(treated = system.file("extdata","example_bud23_1.bam",package = "RNAmodR.Data"),
-                               treated = system.file("extdata","example_bud23_2.bam",package = "RNAmodR.Data")),
-               "SampleSet3" = c(treated = system.file("extdata","example_trm8_1.bam",package = "RNAmodR.Data"),
-                               treated = system.file("extdata","example_trm8_2.bam",package = "RNAmodR.Data")))
+files <- list("SampleSet1" = c(treated = RNAmodR.files[["example_wt_1.bam"]],
+                               treated = RNAmodR.files[["example_wt_2.bam"]],
+                               treated = RNAmodR.files[["example_wt_3.bam"]]),
+              "SampleSet2" = c(treated = RNAmodR.files[["example_bud23_1.bam"]],
+                               treated = RNAmodR.files[["example_bud23_2.bam"]]),
+              "SampleSet3" = c(treated = RNAmodR.files[["example_trm8_1.bam"]],
+                               treated = RNAmodR.files[["example_trm8_2.bam"]]))
 msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
 }
 \author{

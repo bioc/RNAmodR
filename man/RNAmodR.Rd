@@ -21,5 +21,5 @@ The \code{RNAmodR.RiboMethSeq} and \code{RNAmodR.AlkAnilineSeq}
 package.
 }
 \author{
-Felix G M Ernst [aut]
+Felix G M Ernst [aut], Denis L.J. Lafontaine [ctb]
 }
