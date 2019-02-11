@@ -36,16 +36,15 @@ a \code{CoverageSequenceData} object
 coverage of reads per position along the transcripts.
 
 \code{aggregate} calculates the mean and sd for samples in the \code{control}
-and \code{treated} condition serparatly.
+and \code{treated} condition separatly.
 }
 \examples{
 # Construct a CoverageSequenceData object
-annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
-sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
-files <- c(control = system.file("extdata","example_wt_1.bam",
-                                 package = "RNAmodR.Data"),
-           treated = system.file("extdata","example_wt_2.bam",
-                                 package = "RNAmodR.Data"))
+RNAmodR.files <- RNAmodR.Data::RNAmodR.files
+annotation <- rtracklayer::GFF3File(RNAmodR.files[["example1.gff3"]])
+sequences <- Rsamtools::FaFile(RNAmodR.files[["example1.fasta"]])
+files <- c(control = RNAmodR.files[["example_wt_1.bam"]],
+           treated = RNAmodR.files[["example_wt_2.bam"]])
 csd <- CoverageSequenceData(files, annotation = annotation,
                             sequences = sequences)
 # aggregate data

@@ -11,8 +11,7 @@ NULL
 
 #' @importFrom dplyr mutate_
 #' @importFrom stats D
-.mutate_with_error <- function(.data, 
-                               f){
+.mutate_with_error <- function(.data, f){
   exprs = list(
     # expression to compute new variable values
     deparse(f[[3]]),
@@ -44,14 +43,8 @@ NULL
 
 #' @rdname RNAmodR-internals
 setMethod(f = ".constructModRanges",
-          signature = c(range = "GRanges",
-                        data = "DataFrame"),
-          function(range,
-                   data,
-                   modType,
-                   scoreFun,
-                   source,
-                   type) {
+          signature = c(range = "GRanges", data = "DataFrame"),
+          function(range, data, modType, scoreFun, source, type) {
             if(nrow(data) == 0L) {
               return(GenomicRanges::GRanges()) 
             }

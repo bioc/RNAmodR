@@ -31,16 +31,25 @@ of \code{ranges(x)}}
 a \code{ProtectedEndSequenceData} object
 }
 \description{
+\code{ProtectedEndSequenceData} implements
+\code{\link[=SequenceData-class]{SequenceData}} to contain and aggregate the
+start and ends of reads per position along the transcripts. 
+\code{ProtectedEndSequenceData} behaves specially and offsets the start 
+position by -1 to align the information on the 5'-3'-phosphate bonds to one
+position. The \code{ProtectedEndSequenceData} class is specifically used
+for the RiboMethSeq method.
+
+\code{aggregate} calculates the mean and sd for samples in the \code{control}
+and \code{treated} condition separatly.
 title
 }
 \examples{
-# Construct a End5SequenceData object
-annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
-sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
-files <- c(control = system.file("extdata","example_wt_1.bam",
-                                 package = "RNAmodR.Data"),
-           treated = system.file("extdata","example_wt_2.bam",
-                                 package = "RNAmodR.Data"))
+# Construct a ProtectedEndSequenceData object
+RNAmodR.files <- RNAmodR.Data::RNAmodR.files
+annotation <- rtracklayer::GFF3File(RNAmodR.files[["example_RMS.gff3"]])
+sequences <- Rsamtools::FaFile(RNAmodR.files[["example_RMS.fasta"]])
+files <- c(control = RNAmodR.files[["example_RMS1.bam"]],
+           treated = RNAmodR.files[["example_RMS2.bam"]])
 pesd <- ProtectedEndSequenceData(files, annotation = annotation,
                                  sequences = sequences)
 # aggregate data

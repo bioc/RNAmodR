@@ -267,7 +267,7 @@ setMethod("compareByCoord",
     max <- round(max,1) + 0.1
     limits <- c(-max,max)
   } else {
-    limits <- c(0,round(max(data$value)))
+    limits <- c(0,ceiling(max(data$value)))
   }
   if(!is.na(args[["limits"]])){
     limits <- args[["limits"]]

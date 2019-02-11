@@ -60,16 +60,15 @@ the first aggregate either the 5'-end or 3'-end, the \code{EndSequenceData}
 aggregates both.
 
 \code{aggregate} calculates the mean and sd for samples in the \code{control}
-and \code{treated} condition serparatly.
+and \code{treated} condition separatly.
 }
 \examples{
 # Construct a End5SequenceData object
-annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
-sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
-files <- c(control = system.file("extdata","example_wt_1.bam",
-                                 package = "RNAmodR.Data"),
-           treated = system.file("extdata","example_wt_2.bam",
-                                 package = "RNAmodR.Data"))
+RNAmodR.files <- RNAmodR.Data::RNAmodR.files
+annotation <- rtracklayer::GFF3File(RNAmodR.files[["example1.gff3"]])
+sequences <- Rsamtools::FaFile(RNAmodR.files[["example1.fasta"]])
+files <- c(control = RNAmodR.files[["example_wt_1.bam"]],
+           treated = RNAmodR.files[["example_wt_2.bam"]])
 e5sd <- End5SequenceData(files, annotation = annotation,
                         sequences = sequences)
 # aggregate data

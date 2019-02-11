@@ -15,7 +15,7 @@ NULL
 #' are stored named \code{ends},\code{norm.tx} and \code{norm.ol}.
 #' 
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
-#' and \code{treated} condition serparatly. Similar to the stored results for 
+#' and \code{treated} condition separatly. Similar to the stored results for 
 #' each of the two conditions six columns are returned (three for mean and sd 
 #' each) ending in \code{ends}, \code{tx} and \code{ol}.
 #' 
@@ -31,12 +31,11 @@ NULL
 #' 
 #' @examples
 #' # Construct a End5SequenceData object
-#' annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
-#' sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
-#' files <- c(control = system.file("extdata","example_wt_1.bam",
-#'                                  package = "RNAmodR.Data"),
-#'            treated = system.file("extdata","example_wt_2.bam",
-#'                                  package = "RNAmodR.Data"))
+#' RNAmodR.files <- RNAmodR.Data::RNAmodR.files
+#' annotation <- rtracklayer::GFF3File(RNAmodR.files[["example1.gff3"]])
+#' sequences <- Rsamtools::FaFile(RNAmodR.files[["example1.fasta"]])
+#' files <- c(control = RNAmodR.files[["example_wt_1.bam"]],
+#'            treated = RNAmodR.files[["example_wt_2.bam"]])
 #' ne5sd <- NormEnd5SequenceData(files, annotation = annotation,
 #'                              sequences = sequences)
 #' # aggregate data
@@ -153,8 +152,7 @@ setMethod(".getData",
           definition = function(x, grl, sequences, param, args){
             message("Loading normalized 5'-end position data from BAM files ",
                     "... ", appendLF = FALSE)
-            files <- bamfiles(x)
-            data <- lapply(files,
+            data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_ends_norm,
                            grl = grl,
                            param = param,
@@ -174,8 +172,7 @@ setMethod(".getData",
           definition = function(x, grl, sequences, param, args){
             message("Loading normalized 3'-end position data from BAM files ",
                     "... ", appendLF = FALSE)
-            files <- bamfiles(x)
-            data <- lapply(files,
+            data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_ends_norm,
                            grl = grl,
                            param = param,

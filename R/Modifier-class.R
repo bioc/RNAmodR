@@ -203,6 +203,7 @@ setMethod(
          class(x),". '",paste(x@dataType, collapse = "','"),"' are ",
          "required", call. = FALSE)
   }
+  browser()
 }
 
 .valid_SequenceData <- function(x){

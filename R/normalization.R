@@ -35,8 +35,7 @@ NULL
          call. = FALSE)
   }
   if(!is(annotation,"TxDb")){
-    annotation <- GenomicFeatures::makeTxDbFromGFF(
-      path(annotation))
+    annotation <- GenomicFeatures::makeTxDbFromGFF(annotation)
   }
   annotation
 }
