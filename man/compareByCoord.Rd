@@ -20,9 +20,10 @@ plotCompare(x, name, from = 1L, to = 30L, normalize, ...)
 
 plotCompareByCoord(x, coord, normalize, ...)
 
-\S4method{compareByCoord}{ModifierSet,GRanges}(x, coord, ...)
+\S4method{compareByCoord}{ModifierSet,GRanges}(x, coord, normalize, ...)
 
-\S4method{compareByCoord}{ModifierSet,GRangesList}(x, coord, ...)
+\S4method{compareByCoord}{ModifierSet,GRangesList}(x, coord, normalize,
+  ...)
 
 \S4method{plotCompareByCoord}{ModifierSet,GRanges}(x, coord, normalize,
   ...)

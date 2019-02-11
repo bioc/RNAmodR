@@ -75,7 +75,7 @@ NULL
            call. = FALSE)
     }
     names <- names(ranges(x))
-    if(!all(names %in% alias$tx_id)){
+    if(!all(alias$tx_id %in% names)){
       stop("All values in 'tx_id' have to be valid transcript ids used as ",
            "names for the data.", call. = FALSE)
     }
@@ -102,7 +102,7 @@ NULL
   args
 }
 
-.compare_ModifierSet_by_GRangesList <- function(x, coord, ...){
+.compare_ModifierSet_by_GRangesList <- function(x, coord, normalize, ...){
   coord <- .norm_coord(coord, modType(x))
   data <- subsetByCoord(x, coord, ...)
   args <- .norm_compare_args(list(...), data, x)
@@ -121,8 +121,8 @@ NULL
   # convert ids to names for labeling if present
   if(!is.null(args[["alias"]])){
     alias <- args[["alias"]]
-    m <- match(names(data),as.character(alias$tx_id))
-    names(data) <- as.character(alias$name)[m]
+    m <- match(as.character(alias$tx_id),names(data))
+    names(data)[m[!is.na(m)]] <- as.character(alias$name)[!is.na(m)]
   }
   # keep rownames/names and unlist data
   positions <- rownames(data)
@@ -142,6 +142,7 @@ NULL
     data$mod <- unlist(coord$mod)
   }
   #
+  data <- .normlize_data_against_one_sample(data, normalize)
   data
 }
 
@@ -150,8 +151,8 @@ NULL
 #' @export
 setMethod("compareByCoord",
           signature = c("ModifierSet","GRanges"),
-          function(x, coord, ...){
-            .compare_ModifierSet_by_GRangesList(x, coord, ...)
+          function(x, coord, normalize, ...){
+            .compare_ModifierSet_by_GRangesList(x, coord, normalize, ...)
           }
 )
 
@@ -159,10 +160,38 @@ setMethod("compareByCoord",
 #' @export
 setMethod("compareByCoord",
           signature = c("ModifierSet","GRangesList"),
-          function(x, coord, ...){
-            .compare_ModifierSet_by_GRangesList(x, coord, ...)
+          function(x, coord, normalize, ...){
+            .compare_ModifierSet_by_GRangesList(x, coord, normalize, ...)
           }
 )
+
+.normlize_data_against_one_sample <- function(data, normalize){
+  
+  if(!missing(normalize)){
+    colnames <- colnames(data)
+    colnames <- colnames[!(colnames %in% c("positions","names","mod","Activity"))]
+    if(is.character(normalize)){
+      assertive::assert_is_a_string(normalize)
+      if(!(normalize %in% colnames)){
+        stop("Data column '",normalize,"' not found in data. Available columns",
+             " are '",paste(colnames, collapse = "','"),"'.",
+             call. = FALSE)
+      }
+      data[,colnames] <- as.data.frame(data[,colnames,drop = FALSE]) - 
+        data[,normalize]
+    } else if(is.logical(normalize)){
+      assertive::assert_is_a_bool(normalize)
+      if(normalize == TRUE){
+        data[,colnames] <- as.data.frame(data[,colnames,drop = FALSE]) - 
+          apply(data[,colnames],1,max)
+      }
+    } else {
+      stop("'normalize' must be a single character or a logical value.",
+           call. = FALSE)
+    }
+  }
+  data
+}
 
 .norm_compare_plot_args <- function(input){
   limits <- NA
@@ -220,31 +249,7 @@ setMethod("compareByCoord",
 #' @importFrom reshape2 melt
 .plot_compare_ModifierSet_by_GRangesList <- function(x, coord, normalize,  ...){
   args <- .norm_compare_plot_args(list(...))
-  data <- .compare_ModifierSet_by_GRangesList(x, coord, ...)
-  if(!missing(normalize)){
-    colnames <- colnames(data)
-    colnames <- colnames[!(colnames %in% c("positions","names","mod","Activity"))]
-    if(is.character(normalize)){
-      assertive::assert_is_a_string(normalize)
-      if(!(normalize %in% colnames)){
-        stop("Data column '",normalize,"' not found in data. Available columns",
-             " are '",paste(colnames, collapse = "','"),"'.",
-             call. = FALSE)
-      }
-      data[,colnames] <- as.data.frame(data[,colnames,drop = FALSE]) - 
-        data[,normalize]
-    } else if(is.logical(normalize)){
-      assertive::assert_is_a_bool(normalize)
-      if(normalize == TRUE){
-        data[,colnames] <- as.data.frame(data[,colnames,drop = FALSE]) - 
-          apply(data[,colnames],1,max)
-      }
-    } else {
-      stop("'normalize' must be a single character or a logical value.",
-           call. = FALSE)
-    }
-    
-  }
+  data <- .compare_ModifierSet_by_GRangesList(x, coord, normalize, ...)
   data$labels <- .create_position_labels(data$positions,
                                          data$mod,
                                          data$Activity)
