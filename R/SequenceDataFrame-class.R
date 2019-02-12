@@ -115,10 +115,10 @@ SequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
 }
 
 .valid_SequenceDataFrame <-  function(x){
-  if(nrow(x) != width(ranges(x))){
+  if(nrow(x) != sum(width(ranges(x)))){
     return("data length and ranges width do not match.")
   }
-  if(nrow(x) != length(getSeq(x))){
+  if(nrow(x) != length(sequences(x))){
     return("data length and sequence length do not match.")
   }
   S4Vectors::.valid.DataFrame(x)
