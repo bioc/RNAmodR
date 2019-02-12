@@ -176,7 +176,8 @@ SequenceDataList <- function(...){
   NULL
 }
 .valid.SequenceDataList <- function(x){
-  c(.valid.SequenceDataList.listData(x))
+  c(.valid.SequenceDataList.listData(x),
+    unlist(lapply(x,validObject)))
 }
 S4Vectors::setValidity2("SequenceDataList", .valid.SequenceDataList)
 

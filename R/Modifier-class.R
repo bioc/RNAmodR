@@ -203,7 +203,7 @@ setMethod(
          class(x),". '",paste(x@dataType, collapse = "','"),"' are ",
          "required", call. = FALSE)
   }
-  browser()
+  NULL
 }
 
 .valid_SequenceData <- function(x){
@@ -215,7 +215,11 @@ setMethod(
 }
 
 .valid_Modifier <- function(x){
-  c(.valid_SequenceData(x))
+  seqdata <- x@data
+  if(is(seqdata,"SequenceData")){
+    seqdata <- list(seqdata)
+  }
+  c(.valid_SequenceData(x), unlist(lapply(seqdata,.valid.SequenceData)))
 }
 S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
 
@@ -258,13 +262,14 @@ S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
 }
 
 #' @rdname Modifier-functions
+#' @importFrom BiocGenerics path
 setMethod(
   f = "show", 
   signature = signature(object = "Modifier"),
   definition = function(object) {
     cat("A", class(object), "object containing",object@dataType,
         "with",length(object@data),"elements.\n")
-    files <- path(object@bamfiles)
+    files <- BiocGenerics::path(object@bamfiles)
     cat("| Input files:\n",paste0("  - ",names(files),": ",files,"\n"))
     cat("| Modification type(s): ",paste0(object@mod, collapse = " / "),"\n")
     cat("| Modifications found:",ifelse(length(object@modifications) != 0L,
@@ -412,8 +417,7 @@ setMethod(f = "sequences",
               modSeqList <- ans[names(ans) %in% names(mod)]
               mod <- mod[match(names(mod),names(modSeqList))]
               ans[names(ans) %in% names(mod)] <- 
-                combineIntoModstrings(modSeqList,
-                                      mod)
+                Modstrings::combineIntoModstrings(modSeqList, mod)
               ans
             }
 )
@@ -490,7 +494,7 @@ setMethod(f = "modifications",
     ans@data <- data[[1]]
   }
   #
-  f <- which(shortName(ModRNAString()) %in% ans@mod)
+  f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
   modName <- fullName(ModRNAString())[f]
   message("Starting to search for '", paste(tools::toTitleCase(modName), 
                                             collapse = "', '"),
@@ -529,7 +533,7 @@ setMethod(f = "modifications",
   # validate
   validObject(ans)
   #
-  f <- which(shortName(ModRNAString()) %in% ans@mod)
+  f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
   modName <- fullName(ModRNAString())[f]
   message("Starting to search for '", paste(tools::toTitleCase(modName),
                                             collapse = "', '"),

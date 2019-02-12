@@ -48,7 +48,6 @@ setClass("SequenceData",
                    bamfiles = "BamFileList",
                    seqinfo = "Seqinfo",
                    minQuality = "integer",
-                   chromosomes = "character",
                    unlistType = "character",
                    condition = "factor",
                    replicate = "factor"),
@@ -109,10 +108,25 @@ setMethod("show", "SequenceData",
 # validity ---------------------------------------------------------------------
 
 .valid.SequenceData <- function(x){
+  nrow <- sum(unlist(width(ranges(x))))
+  if(nrow != nrow(x@unlistData)){
+    return("row number of data does not match position covered by annotation.")
+  }
+  if(nrow != sum(width(x@sequences))){
+    return("Length of sequences does not match position covered by annotation.")
+  }
+  if(is.null(rownames(x@unlistData))){
+    return("rownames of data is not set.")
+  } else {
+    seqs <- .seqs_rl(ranges(x))
+    if(any(any(seqs != IRanges::IntegerList(rownames(x))))){
+      return(paste0("Out of range rownames of data. The rownames do not match ",
+                    "the ranges covered by the annotation data."))
+    }
+  }
   NULL
 }
 S4Vectors::setValidity2(Class = "SequenceData",.valid.SequenceData)
-
 
 # replacing --------------------------------------------------------------------
 
@@ -138,11 +152,12 @@ setMethod("setListElement", "SequenceData",
 
 # looping ----------------------------------------------------------------------
 
+#' @importFrom IRanges PartitioningByEnd
 lapply_SequenceData <- function(X, FUN, ...){
   FUN <- match.fun(FUN)
   ans <- vector(mode = "list", length = length(X))
   unlisted_X <- unlist(X, use.names = FALSE)
-  X_partitioning <- PartitioningByEnd(X)
+  X_partitioning <- IRanges::PartitioningByEnd(X)
   X_elt_width <- width(X_partitioning)
   empty_idx <- which(X_elt_width == 0L)
   if (length(empty_idx) != 0L) 
@@ -169,6 +184,8 @@ setMethod("lapply", "SequenceData",
           }
 )
 
+#' @importClassesFrom IRanges PartitioningByEnd
+#' @importFrom IRanges PartitioningByEnd
 setMethod("extractROWS", "SequenceData",
           function(x, i){
             i <- normalizeSingleBracketSubscript(i, x, as.NSBS = TRUE)
@@ -198,6 +215,7 @@ setMethod("extractROWS", "SequenceData",
                        condition = x@condition,
                        bamfiles = x@bamfiles,
                        seqinfo = x@seqinfo,
+                       minQuality = x@minQuality,
                        unlistData = ans_unlistData,
                        partitioning = ans_partitioning,
                        elementMetadata = ans_elementMetadata)
@@ -205,6 +223,7 @@ setMethod("extractROWS", "SequenceData",
 )
 
 #' @rdname RNAmodR-internals
+#' @importFrom IRanges PartitioningByEnd
 setMethod("getListElement", "SequenceData",
           function(x, i, exact=TRUE){
             i2 <- normalizeDoubleBracketSubscript(i, x, exact = exact,
@@ -214,7 +233,7 @@ setMethod("getListElement", "SequenceData",
               return(NULL)
             }
             unlisted_x <- unlist(x, use.names=FALSE)
-            x_partitioning <- PartitioningByEnd(x)
+            x_partitioning <- IRanges::PartitioningByEnd(x)
             window_start <- start(x_partitioning)[i2]
             window_end <- end(x_partitioning)[i2]
             new(x@unlistType,
@@ -246,8 +265,8 @@ setMethod("rbind", "SequenceData",
 
 # object creation --------------------------------------------------------------
 
-.get_mod_data_args <- function(...){
-  input <- list(...)
+.get_sequence_data_args <- function(input){
+  minQuality <- .norm_min_quality(input, NULL)
   max_depth <- 10000L # the default is 250, which is to small
   minLength <- NA
   maxLength <- NA
@@ -295,20 +314,20 @@ setMethod("rbind", "SequenceData",
     }
   }
   #
-  args <- list(max_depth = max_depth,
+  args <- list(minQuality = minQuality,
+               max_depth = max_depth,
                minLength = minLength,
                maxLength = maxLength,
                minCoverage = minCoverage)
   args
 }
 
-.norm_min_quality <- function(input,x){
-  minQuality <- x@minQuality
+.norm_min_quality <- function(input,minQuality){
   if(!is.null(input[["minQuality"]])){
     minQuality <- input[["minQuality"]]
-    if(!is.integer(minQuality) | minQuality < 1L){
+    if(!is.integer(minQuality) | minQuality <= 1L){
       if(!is.na(minQuality)){
-        stop("'minQuality' must be integer with a value higher than 0L.",
+        stop("'minQuality' must be integer with a value higher than 1L.",
              call. = FALSE)
       }
     }
@@ -328,12 +347,10 @@ setMethod("rbind", "SequenceData",
 setMethod(
   f = "initialize", 
   signature = signature(.Object = "SequenceData"),
-  definition = function(.Object, bamfiles, seqinfo, ...){
+  definition = function(.Object, bamfiles, seqinfo, args, ...){
     # quality
-    .Object@minQuality <- .norm_min_quality(list(...),.Object)
-    if(!is.integer(.Object@minQuality) | 
-       is.null(.Object@minQuality) | 
-       .Object@minQuality == 0L){
+    .Object@minQuality <- .norm_min_quality(args,.Object@minQuality)
+    if(is.null(.Object@minQuality)){
       stop("Minimum quality is not set for '",class(.Object),"'.",
            call. = FALSE)
     }
@@ -354,7 +371,7 @@ setMethod(
   if(is.null(dataType)){
     stop("Invalid data type.")
   }
-  args <- .get_mod_data_args(...)
+  args <- .get_sequence_data_args(list(...))
   className <- sequenceDataClass(dataType)
   # check bam files
   bamfiles <- .norm_bamfiles(bamfiles, className)
@@ -440,11 +457,12 @@ setMethod("SequenceData",
   ranges
 }
 
+#' @importFrom Biostrings xscat
 # load the transcript sequence per transcript aka. one sequence per GRangesList
 # element
 .load_transcript_sequences <- function(sequences,
                                        grl){
-  seq <- getSeq(sequences, unlist(grl))
+  seq <- Biostrings::getSeq(sequences, unlist(grl))
   seq <- split(seq,grl@partitioning)
   seq <- Reduce(c,lapply(seq,Biostrings::xscat))
   names(seq) <- names(grl)
@@ -498,6 +516,8 @@ setMethod(".getData",
   data
 }
 
+#' @importFrom IRanges PartitioningByWidth PartitioningByEnd
+#' @importClassesFrom IRanges PartitioningByWidth PartitioningByEnd
 .postprocess_read_data <- function(x,
                                    data,
                                    grl,
@@ -508,7 +528,7 @@ setMethod(".getData",
   data <- .norm_postprocess_read_data(data)
   conditionsFmultiplier <- ncol(data) / conditionsFmultiplier 
   # create partitioning object from ranges
-  partitioning <- PartitioningByWidth(sum(width(grl)))
+  partitioning <- IRanges::PartitioningByWidth(sum(width(grl)))
   if(sum(width(partitioning)) != nrow(data)){
     stop("Something went wrong. Length of data and Ranges do not match.")
   }
@@ -531,6 +551,7 @@ setMethod(".getData",
      any(names(x@ranges) != names(x))){
     stop("Something went wrong.")
   }
+  validObject(x)
   message("OK")
   x
 }
