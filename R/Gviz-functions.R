@@ -168,10 +168,7 @@ setMethod("drawGD",
 
 setMethod("subseq",
           signature = signature("ModifiedSequenceTrack"),
-          definition = function(x,
-                                start = NA,
-                                end = NA,
-                                width = NA) {
+          definition = function(x, start = NA, end = NA, width = NA) {
             padding <- "-"
             if(!is.na(start[1] + end[1] + width[1])){
               warning("All 'start', 'stop' and 'width' are provided, ignoring ",
@@ -222,11 +219,11 @@ setMethod("subseq",
               chrSeq <- x@sequence[[chromosome(x)]]
               seq <- subseq(chrSeq, start=rstart, end=rend)
               subseq(finalSeq,
-                     ifelse(start<1, abs(start)+2, 1),
-                     width=rend-rstart+1) <- seq
+                              ifelse(start<1, abs(start)+2, 1),
+                              width=rend-rstart+1) <- seq
             }
             if(.dpOrDefault(x, "complement", FALSE)){
-              finalSeq <- complement(finalSeq)
+              finalSeq <- Biostrings::complement(finalSeq)
             }
             return(finalSeq)
           }

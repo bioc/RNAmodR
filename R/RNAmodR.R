@@ -22,13 +22,15 @@ NULL
 
 #' @import methods
 #' @import assertive
+#' @import XVector
 #' @import S4Vectors
 #' @import GenomicRanges
 #' @importFrom BiocGenerics which
 #' @importFrom Biostrings DNAString RNAString DNAStringSet RNAStringSet getSeq
 #' @importFrom Modstrings ModRNAString ModRNAStringSet combineIntoModstrings
 #' shortName fullName
-#' @importClassesFrom IRanges IntegerList CharacterList LogicalList
+#' @importClassesFrom IRanges IntegerList CharacterList LogicalList IRanges
+#' SplitDataFrameList
 NULL
 
 # constants for annotation -----------------------------------------------------

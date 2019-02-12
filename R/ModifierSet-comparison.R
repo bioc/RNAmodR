@@ -114,7 +114,7 @@ NULL
                  })
   data <- do.call(cbind, data)
   if(!is(data,"CompressedSplitDataFrameList")){
-    data <- SplitDataFrameList(data)
+    data <- IRanges::SplitDataFrameList(data)
   }
   colnames(data) <- sampleNames
   coord <- coord[match(names(data), names(coord))]
@@ -126,7 +126,7 @@ NULL
   }
   # keep rownames/names and unlist data
   positions <- rownames(data)
-  names <- as.character(Rle(names(data), lengths(data)))
+  names <- as.character(S4Vectors::Rle(names(data), lengths(data)))
   data <- unlist(data)
   # add names and positions column as factors
   data$names <- factor(names)

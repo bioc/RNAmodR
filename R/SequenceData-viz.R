@@ -227,16 +227,16 @@ NULL
   hits <- findOverlaps(ranges)
   if(length(hits) > length(ranges)){
     h <- split(subjectHits(hits),
-                      queryHits(hits))
+               queryHits(hits))
     f <- lengths(h) > 1L
     ranges <- c(list(ranges[!f]),
                 lapply(h[f],
                        function(i){
                          r <- ranges[i]
-                         GenomicRanges::GRanges(seqnames = unique(seqnames(r)),
-                                                ranges = IRanges::IRanges(min(start(r)),
-                                                                          max(end(r))),
-                                                strand = "+")
+                         GRanges(seqnames = unique(seqnames(r)),
+                                 ranges = IRanges::IRanges(min(start(r)),
+                                                           max(end(r))),
+                                 strand = "+")
                        }))
     ranges <- ranges[!duplicated(ranges)]
     ranges <- unlist(GRangesList(ranges))
@@ -263,7 +263,7 @@ NULL
   ends <- ends[!f]
   N <- paste0(rep("N",max_end),collapse = "")
   N <- unlist(do.call(class(seq),list(unlist(N))))
-  Ns <- as(Views(N,starts,ends),class(seq))
+  Ns <- as(IRanges::Views(N,starts,ends),class(seq))
   common_length <- min(length(seq),length(Ns))
   common_seq <- seq_len(common_length)
   if(start_N){
@@ -331,12 +331,12 @@ NULL
   seqs[strand_u == "-"] <- rev(seqs[strand_u == "-"])
   seqnames <- .seqnames_rl(ranges)
   strands <- .strands_rl(ranges)
-  ans <- GRanges(seqnames = unlist(seqnames),
-                 ranges = IRanges(start = unlist(seqs),
-                                  width = 1),
-                 strand = unlist(strands),
-                 data@unlistData)
-  ans <- GRangesList(ans)
+  ans <- GenomicRanges::GRanges(seqnames = unlist(seqnames),
+                                ranges = IRanges::IRanges(start = unlist(seqs),
+                                                          width = 1),
+                                strand = unlist(strands),
+                                data@unlistData)
+  ans <- GenomicRanges::GRangesList(ans)
   ans@partitioning <- data@partitioning
   ans@metadata <- ranges@metadata
   ans

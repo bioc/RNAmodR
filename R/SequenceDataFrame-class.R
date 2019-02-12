@@ -121,7 +121,7 @@ SequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
   if(nrow(x) != length(sequences(x))){
     return("data length and sequence length do not match.")
   }
-  S4Vectors::.valid.DataFrame(x)
+  S4Vectors:::.valid.DataFrame(x)
   NULL
 }
 

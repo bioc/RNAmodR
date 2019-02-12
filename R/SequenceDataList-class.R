@@ -41,8 +41,8 @@ setMethod("show", "SequenceDataList",
               cat(S4Vectors:::labeledLine("names", names(object)))
             ranges_mcols <- mcols(object@listData[[1]]@ranges@unlistData,
                                   use.names = FALSE)
-            nhead <- S4Vectors:::get_showHeadLines()
-            ntail <- S4Vectors:::get_showTailLines()
+            nhead <- S4Vectors::get_showHeadLines()
+            ntail <- S4Vectors::get_showTailLines()
             nc <- if (is.null(ranges_mcols)) 0L else ncol(ranges_mcols)
             nr <- if (is.null(ranges_mcols)) 0L else nrow(ranges_mcols)
             nms <- rownames(ranges_mcols)
@@ -120,7 +120,7 @@ new_SequenceDataList_from_list <- function(Class, x, ..., mcols){
   proto <- new(Class)
   ans_elementType <- elementType(proto)
   if (is(S4Vectors::mcols(proto, use.names = FALSE), "DataFrame")){
-    mcols <- S4Vectors::make_zero_col_DataFrame(length(x))
+    mcols <- S4Vectors:::make_zero_col_DataFrame(length(x))
   }
   extends_elementType <- vapply(x,
                                 function(xi){

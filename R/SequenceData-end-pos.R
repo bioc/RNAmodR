@@ -283,7 +283,7 @@ setMethod(".getData",
   # assemble data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
-  ans <- SplitDataFrameList(ans)
+  ans <- IRanges::SplitDataFrameList(ans)
   ans@partitioning <- x@partitioning
   ans
 }

@@ -137,10 +137,10 @@ NULL
 .check_for_invalid_positions <- function(data,coord){
   lengths <- lengths(data)
   positions <- start(ranges(coord))
-  f <- LogicalList(mapply(function(i,j){i >= j},
-                          positions,
-                          lengths,
-                          SIMPLIFY = FALSE))
+  f <- IRanges::LogicalList(mapply(function(i,j){i >= j},
+                                   positions,
+                                   lengths,
+                                   SIMPLIFY = FALSE))
   if(!any(lengths(BiocGenerics::which(f)) > 0L )){
     return(NULL)
   }

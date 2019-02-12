@@ -136,7 +136,7 @@ setMethod("setListElement", "SequenceData",
             if(!is(value,"SequenceDataFrame")){
               stop("invalid value. must be 'SequenceDataFrame'.")
             }
-            i2 <- S4Vectors:::normalizeDoubleBracketSubscript(
+            i2 <- S4Vectors::normalizeDoubleBracketSubscript(
               i, x,
               allow.append = TRUE,
               allow.nomatch = TRUE)
@@ -198,8 +198,8 @@ setMethod("extractROWS", "SequenceData",
                    "represented as a CompressedList object. ",
                    "This is not implemented, yet.")
             }
-            idx_on_unlisted_x <- IRanges(end = extractROWS(end(x@partitioning), i),
-                                         width = ans_eltNROWS)
+            idx_on_unlisted_x <- IRanges::IRanges(end = extractROWS(end(x@partitioning), i),
+                                                  width = ans_eltNROWS)
             ans_unlistData <- extractROWS(x@unlistData, idx_on_unlisted_x)
             ans_partitioning <- new2("PartitioningByEnd",
                                      end = ans_breakpoints,

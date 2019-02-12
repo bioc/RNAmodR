@@ -3,7 +3,3 @@
 .RData
 *.Rproj
 inst/doc
-GenomicRanges
-IRanges
-S4Vectors
-XVector
