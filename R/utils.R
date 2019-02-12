@@ -89,6 +89,8 @@ NULL
   .seqs_l_by(starts, ends, by)
 }
 
+#' @importFrom IRanges PartitioningByWidth PartitioningByEnd
+#' @importClassesFrom IRanges PartitioningByWidth PartitioningByEnd
 # Vectorize version of seq using to input lists
 .seqs_l_by <- function(from, to, by = 1L){
   if(is.null(names(from)) || is.null(names(to))){

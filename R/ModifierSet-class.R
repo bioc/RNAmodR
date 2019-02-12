@@ -116,6 +116,8 @@ setMethod(f = "relistToClass",
   TRUE
 }
 
+#' @importFrom Rsamtools BamFileList 
+#' @importFrom BiocGenerics path
 .contains_only_bamfiles <- function(x){
   x <- unname(x)
   classNames <- vapply(x, function(z){class(z)[[1]]},character(1))
@@ -134,7 +136,7 @@ setMethod(f = "relistToClass",
   if(!all(vapply(x,is,logical(1),"BamFileList"))){
     return(FALSE)
   }
-  if(!all(unlist(lapply(lapply(x,path),file.exists)))){
+  if(!all(unlist(lapply(lapply(x,BiocGenerics::path),file.exists)))){
     return(FALSE)
   }
   TRUE
@@ -144,6 +146,8 @@ setMethod(f = "relistToClass",
   gsub("Mod","ModSet",modifiertype)
 }
 
+
+#' @importFrom BiocParallel SerialParam register bpmapply bplapply
 .bamfiles_to_ModifierSet <- function(className, x, annotation, sequences,
                                      seqinfo, ...){
   # check and normalize input

@@ -98,6 +98,7 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   df
 }
 
+#' @importFrom Rsamtools pileup PileupParam
 #' @importFrom reshape2 dcast
 .get_position_data_of_transcript_pileup <- function(bamFile, grl, sequences,
                                                     param, args = list()){

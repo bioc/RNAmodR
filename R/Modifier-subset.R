@@ -64,7 +64,7 @@ NULL
       stop("'type' must be a character with a width > 0L.",
            call. = FALSE)
     }
-    if(!(type %in% shortName(ModRNAString()))){
+    if(!(type %in% Modstrings::shortName(Modstrings::ModRNAString()))){
       stop("'type' must be one or more elements of shortName(ModRNAString()).",
            call. = FALSE)
     }
@@ -141,7 +141,7 @@ NULL
                           positions,
                           lengths,
                           SIMPLIFY = FALSE))
-  if(!any(lengths(which(f)) > 0L )){
+  if(!any(lengths(BiocGenerics::which(f)) > 0L )){
     return(NULL)
   }
   invalidPositions <- unlist(lapply(coord[f],as.character),
@@ -181,7 +181,7 @@ NULL
   if(perTranscript){
     pos <- IRanges::CharacterList(mapply(
       function(d,i){
-        which(i == rownames(d))
+        BiocGenerics::which(i == rownames(d))
       },
       data,
       f,

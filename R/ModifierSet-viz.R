@@ -75,22 +75,24 @@ NULL
 
 .add_viz_ylim <- function(dts, chromosome, from_to){
   types <- unique(names(dts))
-  max <- lapply(types,
-                function(t){
-                  max <- vapply(dts[t],
-                                function(dt){
-                                  f <- which(seqnames(dt@range) == chromosome & 
-                                               start(dt@range) >= from_to$from & 
-                                               end(dt@range) <= from_to$to)
-                                  max(colSums(dt@data[,f,drop=FALSE]))
-                                },
-                                numeric(1))
-                  max <- max(max)
-                  if(is.infinite(max)){
-                    max <- 0
-                  }
-                  max
-                })
+  max <- lapply(
+    types,
+    function(t){
+      max <- vapply(
+        dts[t],
+        function(dt){
+          f <- BiocGenerics::which(seqnames(dt@range) == chromosome & 
+                                     start(dt@range) >= from_to$from & 
+                                     end(dt@range) <= from_to$to)
+          max(colSums(dt@data[,f,drop=FALSE]))
+        },
+        numeric(1))
+      max <- max(max)
+      if(is.infinite(max)){
+        max <- 0
+      }
+      max
+    })
   names(max) <- types
   dts <- mapply(
     function(dt,t){

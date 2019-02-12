@@ -23,29 +23,13 @@ NULL
 #' @import methods
 #' @import assertive
 #' @import S4Vectors
-#' @import IRanges
-#' @import BiocGenerics
-#' @import BiocParallel
 #' @import GenomicRanges
-#' @import GenomicFeatures
-#' @import GenomicAlignments
-#' @import Biostrings
-#' @import Modstrings
-#' @import rtracklayer
-#' @import Rsamtools
+#' @importFrom BiocGenerics which
+#' @importFrom Biostrings DNAString RNAString DNAStringSet RNAStringSet getSeq
+#' @importFrom Modstrings ModRNAString ModRNAStringSet combineIntoModstrings
+#' shortName fullName
+#' @importClassesFrom IRanges IntegerList CharacterList LogicalList
 NULL
-requireNamespace("S4Vectors")
-requireNamespace("IRanges")
-requireNamespace("GenomicRanges")
-requireNamespace("GenomicAlignments")
-requireNamespace("Modstrings")
-requireNamespace("Rsamtools")
-requireNamespace("rtracklayer")
-requireNamespace("BiocParallel")
-
-# constants --------------------------------------------------------------------
-
-SAMPLE_TYPES <- c("treated","control")
 
 # constants for annotation -----------------------------------------------------
 

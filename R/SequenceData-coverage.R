@@ -51,6 +51,7 @@ CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 }
 
 # CoverageSequenceData ---------------------------------------------------------
+#' @importFrom GenomicAlignments coverage
 .get_position_data_of_transcript_coverage <- function(bamFile, grl, param,
                                                       args = list()){
   # get data per chromosome

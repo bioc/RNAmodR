@@ -217,6 +217,7 @@ NULL
   at
 }
 
+#' @importFrom Biostrings xscat
 .stitch_chromosome <- function(seq, ranges, chromosome){
   ranges <- ranges[seqnames(ranges) == chromosome]
   ranges <- ranges[!vapply(ranges,function(r){length(r) == 0L},logical(1))]

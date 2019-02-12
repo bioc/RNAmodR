@@ -3,8 +3,9 @@ NULL
 
 # Annotation -------------------------------------------------------------------
 
-.norm_gff <- function(x, className,
-                      .xname = assertive::get_name_in_parent(x)){
+#' @importFrom rtracklayer GFF3File 
+#' @importFrom BiocGenerics path
+.norm_gff <- function(x, className, .xname = assertive::get_name_in_parent(x)){
   if(!is(x,"GFF3File")){
     x <- try(rtracklayer::GFF3File(x), silent = TRUE)
     if (is(x, "try-error")){
@@ -13,20 +14,22 @@ NULL
            call. = FALSE)
     }
   }
-  if(!all(file.exists(path(x)))){
+  if(!all(file.exists(BiocGenerics::path(x)))){
     stop("The gff3 file does not exist at the given location.",
          call. = FALSE)
   }
   x
 }
 
+#' @importFrom GenomicFeatures makeTxDbFromGFF
+#' @importFrom BiocGenerics path
 # Return a TxDb object
 .norm_annotation <- function(annotation, className, 
                   .annotationname = assertive::get_name_in_parent(annotation)){
   if(!is(annotation,"GFFFile") && !is(annotation,"TxDb")){
     annotation <- .norm_gff(annotation, className, .annotationname)
   } else if(is(annotation,"GFFFile")) {
-    assertive::assert_all_are_existing_files(c(path(annotation)))
+    assertive::assert_all_are_existing_files(c(BiocGenerics::path(annotation)))
   } else if(is(annotation,"TxDb")) {
     assertive::assert_all_are_true(validObject(annotation))
   } else {
@@ -42,6 +45,8 @@ NULL
 
 # Sequences --------------------------------------------------------------------
 
+#' @importFrom Rsamtools FaFile
+#' @importFrom BiocGenerics path
 # Either return a FaFile or BSgenome object
 .norm_sequences <- function(seq, className){
   if(!is(seq,"FaFile") && !is(seq,"BSgenome")){
@@ -52,9 +57,9 @@ NULL
            call. = FALSE)
     }
     seq <- tmp
-    assertive::assert_all_are_existing_files(c(path(seq)))
+    assertive::assert_all_are_existing_files(c(BiocGenerics::path(seq)))
   } else if(is(seq,"FaFile")) {
-    assertive::assert_all_are_existing_files(c(path(seq)))
+    assertive::assert_all_are_existing_files(c(BiocGenerics::path(seq)))
   } else if(is(seq,"BSgenome")) {
     assertive::assert_all_are_true(validObject(seq))
   } else {
@@ -67,7 +72,10 @@ NULL
 
 # BamFiles ---------------------------------------------------------------------
 
+SAMPLE_TYPES <- c("treated","control")
 
+#' @importFrom Rsamtools BamFileList
+#' @importFrom BiocGenerics path
 .norm_bamfiles <- function(x, className,
                            .xname = assertive::get_name_in_parent(x)){
   if(!is(x,"BamFileList")){
@@ -83,7 +91,7 @@ NULL
     stop("BamFileList is empty.",
          call. = FALSE)
   }
-  if(!all(file.exists(path(x)))){
+  if(!all(file.exists(BiocGenerics::path(x)))){
     stop("Some Bam files do not exists at the given locations.",
          call. = FALSE)
   }
@@ -97,6 +105,7 @@ NULL
   x
 }
 
+#' @importFrom Rsamtools BamFileList scanBamHeader
 # retrieve a Seqinfo object from the bam headers
 .bam_header_to_seqinfo <- function(bfl){
   if(is(bfl,"BamFile")){
@@ -132,6 +141,7 @@ NULL
 # Retrieve the intersection of seqnames in annotation, sequence and seqinfo
 # data
 #' @importFrom BSgenome seqnames
+#' @importFrom Rsamtools scanFa
 .norm_seqnames <- function(bamfiles, annotation, sequences, seqinfo, className){
   # norm seqinfo
   if(missing(seqinfo) || 
@@ -196,7 +206,7 @@ NULL
 }
 
 .norm_mod <- function(mod, className){
-  f <- mod %in% shortName(Modstrings::ModRNAString())
+  f <- mod %in% Modstrings::shortName(Modstrings::ModRNAString())
   if(length(which(f)) != length(mod)){
     stop("Modification '",mod[!f],"' as defined for ",className," does not ",
          "exist in the Modstrings dictionary for modified RNA sequences.",

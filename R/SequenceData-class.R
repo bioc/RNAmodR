@@ -232,7 +232,7 @@ setMethod("getListElement", "SequenceData",
             if (is.na(i2)){
               return(NULL)
             }
-            unlisted_x <- unlist(x, use.names=FALSE)
+            unlisted_x <- unlist(x, use.names = FALSE)
             x_partitioning <- IRanges::PartitioningByEnd(x)
             window_start <- start(x_partitioning)[i2]
             window_end <- end(x_partitioning)[i2]
@@ -348,6 +348,9 @@ setMethod(
   f = "initialize", 
   signature = signature(.Object = "SequenceData"),
   definition = function(.Object, bamfiles, seqinfo, args, ...){
+    if(missing(args) || !is.list(args)){
+      args <- list()
+    }
     # quality
     .Object@minQuality <- .norm_min_quality(args,.Object@minQuality)
     if(is.null(.Object@minQuality)){

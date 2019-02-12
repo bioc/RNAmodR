@@ -49,10 +49,10 @@ setMethod(f = ".constructModRanges",
               return(GenomicRanges::GRanges()) 
             }
             positions <- as.integer(rownames(data))
-            if(as.character(BiocGenerics::strand(range)) == "-"){
-              positions <- BiocGenerics::end(range) - positions + 1L
+            if(as.character(GenomicRanges::strand(range)) == "-"){
+              positions <- GenomicRanges::end(range) - positions + 1L
             } else {
-              positions <- BiocGenerics::start(range) + positions - 1L
+              positions <- GenomicRanges::start(range) + positions - 1L
             }
             mranges <- do.call(
               GenomicRanges::GRanges,
@@ -60,7 +60,7 @@ setMethod(f = ".constructModRanges",
                                     nrow(data)),
                      ranges = IRanges::IRanges(start = positions,
                                                width = 1L),
-                     strand = BiocGenerics::strand(range),
+                     strand = GenomicRanges::strand(range),
                      seqinfo = GenomeInfoDb::seqinfo(range),
                      mod = rep(modType,nrow(data))),
                 source = source,

@@ -443,7 +443,7 @@ setMethod(f = "bamfiles",
   modifications <- modifications(x)
   start_mod <- start(modifications)
   parent_mod <- as.character(modifications$Parent)
-  new_start_mod <- which(seqs[parent_mod] == start_mod)
+  new_start_mod <- BiocGenerics::which(seqs[parent_mod] == start_mod)
   # reset strand since it is now transcipt centric
   strand(modifications) <- "*"
   ranges(modifications) <- IRanges::IRanges(start = unlist(new_start_mod),
@@ -495,7 +495,7 @@ setMethod(f = "modifications",
   }
   #
   f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
-  modName <- fullName(ModRNAString())[f]
+  modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
   message("Starting to search for '", paste(tools::toTitleCase(modName), 
                                             collapse = "', '"),
           "' ... ", appendLF = FALSE)
@@ -534,7 +534,7 @@ setMethod(f = "modifications",
   validObject(ans)
   #
   f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
-  modName <- fullName(ModRNAString())[f]
+  modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
   message("Starting to search for '", paste(tools::toTitleCase(modName),
                                             collapse = "', '"),
           "' ... ", appendLF = FALSE)

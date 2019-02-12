@@ -9,7 +9,6 @@
 \alias{mainScore}
 \alias{settings}
 \alias{settings<-}
-\alias{seqinfo}
 \alias{sequences}
 \alias{bamfiles}
 \alias{seqData}
@@ -47,8 +46,6 @@ mainScore(x)
 settings(x, name = NULL)
 
 settings(x, name) <- value
-
-seqinfo(x)
 
 sequences(x, ...)
 
