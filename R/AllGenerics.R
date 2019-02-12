@@ -63,12 +63,6 @@ setGeneric(
 #' @rdname Modifier-functions
 #' @export
 setGeneric( 
-  name = "seqinfo",
-  def = function(x) standardGeneric("seqinfo")
-)
-#' @rdname Modifier-functions
-#' @export
-setGeneric( 
   name = "sequences",
   def = function(x, ...) standardGeneric("sequences")
 )
