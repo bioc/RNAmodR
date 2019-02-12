@@ -1,6 +1,6 @@
 
-context("End5SequenceData")
-test_that("End5SequenceData:",{
+context("EndSequenceData")
+test_that("EndSequenceData:",{
   # SequenceData using CoverageSequenceData as test case
   annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
   sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")

@@ -1,6 +1,6 @@
 
-context("SequenceData")
-test_that("SequenceData:",{
+context("CoverageSequenceData")
+test_that("CoverageSequenceData:",{
   # SequenceData using CoverageSequenceData as test case
   annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
   sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
@@ -48,4 +48,74 @@ test_that("SequenceData:",{
   expect_equal(colnames(actual)[[1]],c("means.treated","sds.treated"))
   expect_s4_class(seqinfo(csd),"Seqinfo")
   expect_equal(length(seqinfo(csd)),11)
+})
+context("PileupSequenceData")
+test_that("PileupSequenceData:",{
+  annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+  sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+  files <- c(control = system.file("extdata","example_wt_1.bam",
+                                   package = "RNAmodR.Data"),
+             treated = system.file("extdata","example_wt_2.bam",
+                                   package = "RNAmodR.Data"))
+  #
+  psd <- PileupSequenceData(files, annotation = annotation,
+                            sequences = sequences)
+  expect_s4_class(psd,"PileupSequenceData")
+  expect_named(psd,c("1","2"))
+  expect_s4_class(colnames(psd),"CharacterList")
+  expect_length(colnames(psd),2)
+  expect_equal(lengths(colnames(psd)),c(10,10))
+  expect_equal(colnames(psd)[[1]],colnames(psd)[[2]])
+  expect_equal(colnames(psd)[[1]],c("pileup.control.1.-","pileup.control.1.G",
+                                    "pileup.control.1.A","pileup.control.1.T",
+                                    "pileup.control.1.C","pileup.treated.1.-",
+                                    "pileup.treated.1.G","pileup.treated.1.A",
+                                    "pileup.treated.1.T","pileup.treated.1.C"))
+  actual <- aggregate(psd)
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_s4_class(actual,"SplitDataFrameList")
+  expect_equal(length(actual),2)
+  expect_length(colnames(actual),2)
+  expect_equal(lengths(colnames(actual)),c(20,20))
+  expect_equal(colnames(actual)[[1]],colnames(actual)[[2]])
+  expect_equal(colnames(actual)[[1]],c("means.control..","means.control.G",
+                                       "means.control.A","means.control.T",
+                                       "means.control.C","means.treated..",
+                                       "means.treated.G","means.treated.A",
+                                       "means.treated.T","means.treated.C",
+                                       "sds.control..","sds.control.G",
+                                       "sds.control.A","sds.control.T",
+                                       "sds.control.C","sds.treated..",
+                                       "sds.treated.G","sds.treated.A",
+                                       "sds.treated.T","sds.treated.C"))
+  expect_s4_class(seqinfo(psd),"Seqinfo")
+  expect_equal(length(seqinfo(psd)),11)
+  actual <- aggregate(psd, condition = "Control")
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_s4_class(actual,"SplitDataFrameList")
+  expect_equal(length(actual),2)
+  expect_length(colnames(actual),2)
+  expect_equal(lengths(colnames(actual)),c(10,10))
+  expect_equal(colnames(actual)[[1]],colnames(actual)[[2]])
+  expect_equal(colnames(actual)[[1]],c("means.control..","means.control.G",
+                                       "means.control.A","means.control.T",
+                                       "means.control.C","sds.control..",
+                                       "sds.control.G","sds.control.A",
+                                       "sds.control.T","sds.control.C"))
+  expect_s4_class(seqinfo(psd),"Seqinfo")
+  expect_equal(length(seqinfo(psd)),11)
+  actual <- aggregate(psd, condition = "Treated")
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_s4_class(actual,"SplitDataFrameList")
+  expect_equal(length(actual),2)
+  expect_length(colnames(actual),2)
+  expect_equal(lengths(colnames(actual)),c(10,10))
+  expect_equal(colnames(actual)[[1]],colnames(actual)[[2]])
+  expect_equal(colnames(actual)[[1]],c("means.treated..","means.treated.G",
+                                       "means.treated.A","means.treated.T",
+                                       "means.treated.C","sds.treated..",
+                                       "sds.treated.G","sds.treated.A",
+                                       "sds.treated.T","sds.treated.C"))
+  expect_s4_class(seqinfo(psd),"Seqinfo")
+  expect_equal(length(seqinfo(psd)),11)
 })
