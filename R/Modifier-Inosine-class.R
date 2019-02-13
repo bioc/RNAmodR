@@ -229,7 +229,6 @@ setMethod(f = "aggregate",
               }
               if(!hasAggregateData(x) || force){
                 x@aggregate <- .aggregate_inosine(x)
-                x@aggregateValidForCurrentArguments <- TRUE
               }
               x <- callNextMethod()
               x
@@ -297,7 +296,7 @@ setMethod("modify",
           function(x, force = FALSE){
             # get the aggregate data
             x@modifications <- .find_inosine(x)
-            x@modificationsValidForCurrentArguments <- TRUE
+            x <- callNextMethod()
             x
           }
 )

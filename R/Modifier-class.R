@@ -576,58 +576,6 @@ setMethod("Modifier",
                                   ...)
           })
 
-# modify -----------------------------------------------------------------------
-
-#' @name modify
-#' @aliases modifications
-#' 
-#' @title Searching for modifications in \code{SequenceData}
-#' 
-#' @description 
-#' \code{modify} triggers the search for modifications for a 
-#' \code{\link[=Modifier-class]{Modifier}} class. Usually this is done 
-#' automatically during construction of a \code{Modifier} object.
-#' 
-#' \code{modifications} is the accessor for the found modifications.
-#' 
-#' @param x a \code{Modifier} object.
-#' @param force force to run \code{aggregate} again, if data is already stored
-#' in \code{x}.
-#' @param perTranscript For \code{modifications>} \code{TRUE} or \code{FALSE}:
-#'   Should the coordinates be returned as local per transcript coordinates?
-#' @param ... additional arguments
-#' 
-#' @return 
-#' \itemize{
-#' \item{\code{modify}: }{the updated \code{Modifier} object.}
-#' \item{\code{modifications}: }{the modifications found as a \code{GRanges}
-#' object.}
-#' }
-#' 
-#' @examples 
-#' data(msi,package="RNAmodR")
-#' # modify() triggers the search for modifications in the data contained in
-#' # the Modifier or ModifierSet object
-#' msi <- modify(msi)
-#' mi <- modify(msi[[1]])
-NULL
-
-#' @rdname modify
-#' @export
-setMethod(f = "modify", 
-          signature = signature(x = "Modifier"),
-          definition = 
-            function(x, force){
-              if(is.null(x@modifications)){
-                stop("This functions needs to be implemented by '",class(x),
-                     "'.",call. = FALSE)
-              }
-              x@modificationsValidForCurrentArguments <- TRUE
-              x
-            }
-)
-
-
 # aggregate --------------------------------------------------------------------
 
 #' @name aggregate
@@ -743,5 +691,56 @@ setMethod(f = "hasAggregateData",
                 return(FALSE)
               }
               return(TRUE)
+            }
+)
+
+# modify -----------------------------------------------------------------------
+
+#' @name modify
+#' @aliases modifications
+#' 
+#' @title Searching for modifications in \code{SequenceData}
+#' 
+#' @description 
+#' \code{modify} triggers the search for modifications for a 
+#' \code{\link[=Modifier-class]{Modifier}} class. Usually this is done 
+#' automatically during construction of a \code{Modifier} object.
+#' 
+#' \code{modifications} is the accessor for the found modifications.
+#' 
+#' @param x a \code{Modifier} object.
+#' @param force force to run \code{aggregate} again, if data is already stored
+#' in \code{x}.
+#' @param perTranscript For \code{modifications>} \code{TRUE} or \code{FALSE}:
+#'   Should the coordinates be returned as local per transcript coordinates?
+#' @param ... additional arguments
+#' 
+#' @return 
+#' \itemize{
+#' \item{\code{modify}: }{the updated \code{Modifier} object.}
+#' \item{\code{modifications}: }{the modifications found as a \code{GRanges}
+#' object.}
+#' }
+#' 
+#' @examples 
+#' data(msi,package="RNAmodR")
+#' # modify() triggers the search for modifications in the data contained in
+#' # the Modifier or ModifierSet object
+#' msi <- modify(msi)
+#' mi <- modify(msi[[1]])
+NULL
+
+#' @rdname modify
+#' @export
+setMethod(f = "modify", 
+          signature = signature(x = "Modifier"),
+          definition = 
+            function(x, force){
+              if(is.null(x@modifications)){
+                stop("This functions needs to be implemented by '",class(x),
+                     "'.",call. = FALSE)
+              }
+              x@modificationsValidForCurrentArguments <- TRUE
+              x
             }
 )
