@@ -20,14 +20,216 @@ BiocStyle::markdown(css.files = c('custom.css'))
 ```
 
 # Introduction
+```{r, echo=FALSE}
+suppressPackageStartupMessages({
+  library(RNAmodR)
+})
+```
+```{r, eval=FALSE}
+library(RNAmodR)
+```
 
 Two classes have to be considered to establish a new analysis pipeline using
-`RNAmodR`. 
+`RNAmodR`. These are the `SequenceData` and the `Modifier` class.
 
 # A new `SequenceData` class
 
-First, the `SequenceData` class has to be considered.
+First, the `SequenceData` class has to be considered. Several classes are 
+already implemented, which are:
+
+ * `End5SequenceData`
+ * `End3SequenceData`
+ * `EndSequenceData`
+ * `ProtectedEndSequenceData`
+ * `CoverageSequenceData`
+ * `PileupSequenceData`
+ * `NormEnd5SequenceData`
+ * `NormEnd3SequenceData`
+
+If these cannot be reused, a new class can be implemented quite easily. First
+the class and a constructor has to defined. The only value to be provided is
+a default `minQuality` integer value.
+
+```{r}
+setClass(Class = "ExampleSequenceData",
+         contains = "SequenceData",
+         prototype = list(minQuality = 5L))
+ExampleSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  RNAmodR:::SequenceData("Example", bamfiles = bamfiles, 
+                         annotation = annotation, sequences = sequences,
+                         seqinfo = seqinfo, ...)
+}
+```
+
+Second, the `.getData` function has to be implemented. This is used to load
+the data from a bam file and must return a named list of `IntegerList`,
+`NumericList` or `DataFrame` per file.
+
+```{r}
+setMethod("getData",
+          signature = c(x = "ExampleSequenceData",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x, grl, sequences, param, args){
+            ###
+          }
+)
+```
+
+Third, the `aggregate` function has to be implemented. This function is used to
+aggregate data over replicates for all or one of the conditions. The resulting 
+data is passed on to the `Modifier` class.
+
+```{r}
+setMethod("aggregate",
+          signature = c(x = "ExampleSequenceData"),
+          function(x, condition = c("Both","Treated","Control")){
+            ###
+          }
+)
+```
 
 # A new `Modifier` class
 
-Secondly, a new `Modifier` has to be 
+A new `Modifier` class is probably the main class, which needs to be 
+implemented. Three variable have to be set. `mod` must be a single element from
+the `Modstrings::shortName(Modstrings::ModRNAString())`. `score` is the default
+score, which is used for several function. A column with this name should be 
+returned from the `aggregate` function. `dataType` defines the `SequenceData`
+class to be used.
+
+```{r}
+setClass("ModExample",
+         contains = c("Modifier"),
+         prototype = list(mod = "X",
+                          score = "score",
+                          dataType = "ExampleSequenceData"))
+ModExample <- function(x, annotation, sequences, seqinfo, ...){
+  RNAmodR:::Modifier("ModExample", x = x, annotation = annotation,
+                     sequences = sequences, seqinfo = seqinfo, ...)
+}
+
+```
+
+The `settings<-` function can be used to save specifc settings.
+
+```{r}
+setReplaceMethod(f = "settings", 
+                 signature = signature(x = "ModExample"),
+                 definition = function(x, value){
+                   x <- callNextMethod()
+                   # validate special setting here
+                   x@arguments[names(value)] <- unname(.norm_example_args(value))
+                   x
+                 })
+
+```
+
+The `aggregate` function is used to take the aggregated data from the 
+`SequenceData` object and is used to calculate the specific scores, which are
+then stored in the `aggregate` slot.
+
+```{r}
+setMethod(f = "aggregate", 
+          signature = signature(x = "ModExample"),
+          definition = 
+            function(x, force = FALSE){
+              some_data <- FUN(aggregate(seqData(x)))
+              x@aggregate <- SplitDataFrameList(some_data) # Some data with element per transcript
+              x <- callNextMethod()
+              x
+            }
+)
+
+```
+
+The `modify` function takes the aggregate data and searches for modifications,
+which are then returned as a GRanges object.
+
+```{r}
+setMethod("modify",
+          signature = c(x = "ModExample"),
+          function(x, force = FALSE){
+            some_data <- FUN(aggregateData(x))
+            x@modifications <- GRanges() # an element per modification found.
+            x <- callNextMethod()
+            x
+          }
+)
+
+```
+
+## A new `ModifierSet` class
+
+The `ModifierSet` class is implemented very easily by defining the class and
+the constructor. The functionality is defined by the `Modifier` class.
+
+```{r}
+setClass("ModSetExample",
+         contains = "ModifierSet",
+         prototype = list(elementType = "ModExample"))
+ModSetExample <- function(x, annotation, sequences, seqinfo, ...){
+  RNAmodR:::ModifierSet("ModExample", x = x, annotation = annotation,
+                        sequences = sequences, seqinfo = seqinfo, ...)
+}
+```
+
+# Visualization functions
+
+Additional functions, which need to be implemented, are `getDataTrack` for the 
+new `SequenceData` and new `Modifier` classes and 
+`visualizeData`/`visualizeDataByCoord` for the new `Modifier` and `ModifierSet`
+classes. `name` defines a transcript name found in `names(ranges(x))` and
+`type` is the data type typically found as a column in the `aggregate` slot.
+
+```{r}
+setMethod(
+  f = "getDataTrack",
+  signature = signature(x = "ExampleSequenceData"),
+  definition = function(x, name, ...) {
+    ###
+  }
+)
+setMethod(
+  f = "getDataTrack",
+  signature = signature(x = "ModExample"),
+  definition = function(x, name, type, ...) {
+  }
+)
+setMethod(
+  f = "visualizeDataByCoord",
+  signature = signature(x = "ModExample", coord = "GRanges"),
+  definition = function(x, coord, type = "score", window.size = 15L, ...) {
+  }
+)
+setMethod(
+  f = "visualizeData",
+  signature = signature(x = "ModExample"),
+  definition = function(x, name, from, to, type = "score", ...) {
+  }
+)
+setMethod(
+  f = "visualizeDataByCoord",
+  signature = signature(x = "ModSetExample", coord = "GRanges"),
+  definition = function(x, coord, type = "score", window.size = 15L, ...) {
+  }
+)
+setMethod(
+  f = "visualizeData",
+  signature = signature(x = "ModSetExample"),
+  definition = function(x, name, from, to, type = "score", ...) {
+  }
+)
+```
+
+# Summary
+
+For a more detailed example have a look at the `ModInosine` class source code.
+
+# Sessioninfo
+
+```{r}
+sessioninfo::session_info()
+```
+

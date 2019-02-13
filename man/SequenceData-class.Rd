@@ -31,14 +31,29 @@ subset the transcripts analyzed on a chromosome basis.}
 }}
 }
 \description{
-The \code{SequenceData} class is a virtual class. It contains data on each
-position alongside transcripts and holds the nucleotide sequence of these 
-transcripts. To access this data several 
-\code{\link[=SequenceData-functions]{functions}} are available.
+The \code{SequenceData} class is implemented to contain data on each position
+along a transcripts and holds the corresponding annotation data and
+nucleotide sequence of these transcripts. To access this data several
+\code{\link[=SequenceData-functions]{functions}} are available. The
+\code{SequenceData} class is a virtual class, from which specific class can
+be extended. Currently the following classes are implemented:
 
-It is derived from the 
-\code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} 
-class.
+\itemize{
+\item{\code{\link[=CoverageSequenceData-class]{CoverageSequenceData}}} 
+\item{\code{\link[=EndSequenceData-class]{End5SequenceData}}, 
+\code{\link[=EndSequenceData-class]{End3SequenceData}}, 
+\code{\link[=EndSequenceData-class]{EndSequenceData}}}
+\item{\code{\link[=NormEndSequenceData-class]{NormEnd5SequenceData}}, 
+\code{\link[=NormEndSequenceData-class]{NormEnd5SequenceData}}}
+\item{\code{\link[=PileupSequenceData-class]{PileupSequenceData}}}
+\item{\code{\link[=ProtectedEndSequenceData-class]{ProtectedEndSequenceData}}}
+}
+
+It is derived from the
+\code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} class
+with additional slots for annotation and sequence data. Some functionality is
+not inherited and not available, e.g. \code{cbind}, \code{rbind} amd
+\code{relist}.
 }
 \section{Slots}{
 
@@ -46,7 +61,7 @@ class.
 \item{\code{ranges}}{a \code{\link[GenomicRanges:GRangesList-class]{GRangesList}} 
 object each element describing a transcript including its element. The 
 \code{GRangesList} is constructed from the 
-\code{\link[GenomicFeatures:transcriptsBy]{transcriptsBy(x, by="tx")}}.}
+\code{\link[GenomicFeatures:transcriptsBy]{exonsBy(x, by="tx")}}.}
 
 \item{\code{sequences}}{a \code{\link[Biostrings:XStringSet-class]{XStringSet}} of 
 type \code{sequencesType}.}

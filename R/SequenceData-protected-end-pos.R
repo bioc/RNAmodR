@@ -9,7 +9,8 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_NAMES <- c(means = "5'- & 3'-ends",
 RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
                                             sds = "#808080")
 
-#' @name ProtectedEndSequenceData
+#' @name ProtectedEndSequenceData-class
+#' @aliases ProtectedEndSequenceData
 #' 
 #' @title ProtectedEndSequenceData
 #' 
@@ -26,8 +27,9 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' and \code{treated} condition separatly.
 #' title
 #' 
-#' @param bamfiles,annotation,sequences,seqinfo,... See 
-#' \code{\link[=SequenceData-class]{SequenceData}}
+#' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
+#' \code{\link[=SequenceData-class]{SequenceData}} and
+#' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{ProtectedEndSequenceData}
 #' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
 #' of \code{ranges(x)}
@@ -49,13 +51,13 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' aggregate(pesd)
 NULL
 
-#' @rdname ProtectedEndSequenceData
+#' @rdname ProtectedEndSequenceData-class
 #' @export
 setClass(Class = "ProtectedEndSequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname ProtectedEndSequenceData
+#' @rdname ProtectedEndSequenceData-class
 #' @export
 ProtectedEndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, 
                                      ...){
@@ -65,8 +67,9 @@ ProtectedEndSequenceData <- function(bamfiles, annotation, sequences, seqinfo,
 
 # ProtectedEndSequenceData -----------------------------------------------------
 
-#' @rdname RNAmodR-internals
-setMethod(".getData",
+#' @rdname ProtectedEndSequenceData-class
+#' @export
+setMethod("getData",
           signature = c(x = "ProtectedEndSequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -88,7 +91,7 @@ setMethod(".getData",
 
 # aggregation ------------------------------------------------------------------
 
-#' @rdname ProtectedEndSequenceData
+#' @rdname ProtectedEndSequenceData-class
 #' @export
 setMethod("aggregate",
           signature = c(x = "ProtectedEndSequenceData"),
@@ -102,7 +105,7 @@ setMethod("aggregate",
 
 RNAMODR_PLOT_SEQ_PROTEND_NAMES <- c("protend" = "mean")
 
-#' @rdname ProtectedEndSequenceData
+#' @rdname ProtectedEndSequenceData-class
 #' @export
 setMethod(
   f = "getDataTrack",

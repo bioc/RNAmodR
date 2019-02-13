@@ -2,7 +2,8 @@
 #' @include SequenceData-class.R
 NULL
 
-#' @name CoverageSequenceData
+#' @name CoverageSequenceData-class
+#' @aliases CoverageSequenceData
 #' 
 #' @title CoverageSequenceData
 #' 
@@ -14,7 +15,7 @@ NULL
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
 #' and \code{treated} condition separatly.
 #' 
-#' @param bamfiles,annotation,sequences,seqinfo,... See 
+#' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
 #' \code{\link[=SequenceData-class]{SequenceData}}
 #' @param x a \code{CoverageSequenceData}
 #' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
@@ -37,13 +38,13 @@ NULL
 #' aggregate(csd)
 NULL
 
-#' @rdname CoverageSequenceData
+#' @rdname CoverageSequenceData-class
 #' @export
 setClass(Class = "CoverageSequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname CoverageSequenceData
+#' @rdname CoverageSequenceData-class
 #' @export
 CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   SequenceData("Coverage", bamfiles = bamfiles, annotation = annotation,
@@ -69,8 +70,9 @@ CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   coverage
 }
 
-#' @rdname RNAmodR-internals
-setMethod(".getData",
+#' @rdname CoverageSequenceData-class
+#' @export
+setMethod("getData",
           signature = c(x = "CoverageSequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -89,7 +91,7 @@ setMethod(".getData",
 
 # aggregation ------------------------------------------------------------------
 
-#' @rdname CoverageSequenceData
+#' @rdname CoverageSequenceData-class
 #' @export
 setMethod("aggregate",
           signature = c(x = "CoverageSequenceData"),
@@ -110,7 +112,7 @@ RNAMODR_PLOT_SEQ_COVERAGE_NAMES <- c("means" = "mean(coverage)")
   seqdata
 }
 
-#' @rdname CoverageSequenceData
+#' @rdname CoverageSequenceData-class
 setMethod(
   f = "getDataTrack",
   signature = signature(x = "CoverageSequenceData"),

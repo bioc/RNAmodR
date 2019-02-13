@@ -13,6 +13,11 @@ NULL
 #' 
 #' @param x,object,value a \code{SequenceData}, \code{SequenceDataList},
 #' \code{SequenceDataFrame} object.
+#' @param grl a \code{GRangesList} from \code{exonsBy(..., by = "tx")}
+#' @param sequences a \code{XStringSet} of type \code{RNAStringSet} or 
+#' \code{ModRNAStringSet}
+#' @param param a \code{\link[Rsamtools:ScanBamParam]{ScanBamParam}} object
+#' @param args a list of addition arguments
 #' 
 #' @return 
 #' \itemize{

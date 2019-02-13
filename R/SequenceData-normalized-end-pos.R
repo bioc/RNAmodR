@@ -2,7 +2,7 @@
 #' @include SequenceData-class.R
 NULL
 
-#' @name NormEndSequenceData
+#' @name NormEndSequenceData-class
 #' @aliases NormEnd5SequenceData NormEnd3SequenceData
 #' 
 #' @title NormEnd5SequenceData/NormEnd3SequenceData
@@ -19,8 +19,9 @@ NULL
 #' each of the two conditions six columns are returned (three for mean and sd 
 #' each) ending in \code{ends}, \code{tx} and \code{ol}.
 #' 
-#' @param bamfiles,annotation,sequences,seqinfo,... See 
-#' \code{\link[=SequenceData-class]{SequenceData}}
+#' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
+#' \code{\link[=SequenceData-class]{SequenceData}} and
+#' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{CoverageSequenceData}
 #' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
 #' of \code{ranges(x)}
@@ -42,25 +43,25 @@ NULL
 #' aggregate(ne5sd)
 NULL
 
-#' @rdname NormEndSequenceData
+#' @rdname NormEndSequenceData-class
 #' @export
 setClass(Class = "NormEnd5SequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname NormEndSequenceData
+#' @rdname NormEndSequenceData-class
 #' @export
 setClass(Class = "NormEnd3SequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname NormEndSequenceData
+#' @rdname NormEndSequenceData-class
 #' @export
 NormEnd5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   SequenceData("NormEnd5", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
-#' @rdname NormEndSequenceData
+#' @rdname NormEndSequenceData-class
 #' @export
 NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   SequenceData("NormEnd3", bamfiles = bamfiles, annotation = annotation,
@@ -141,8 +142,9 @@ NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   relist(df, enddata@partitioning)
 }
 
-#' @rdname RNAmodR-internals
-setMethod(".getData",
+#' @rdname NormEndSequenceData-class
+#' @export
+setMethod("getData",
           signature = c(x = "NormEnd5SequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -161,8 +163,9 @@ setMethod(".getData",
           }
 )
 
-#' @rdname RNAmodR-internals
-setMethod(".getData",
+#' @rdname NormEndSequenceData-class
+#' @export
+setMethod("getData",
           signature = c(x = "NormEnd3SequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -248,7 +251,7 @@ setMethod(".getData",
   relist(ans, x@partitioning)
 }
 
-#' @rdname NormEndSequenceData
+#' @rdname NormEndSequenceData-class
 #' @export
 setMethod("aggregate",
           signature = c(x = "NormEnd5SequenceData"),
@@ -258,7 +261,7 @@ setMethod("aggregate",
           }
 )
 
-#' @rdname NormEndSequenceData
+#' @rdname NormEndSequenceData-class
 #' @export
 setMethod("aggregate",
           signature = c(x = "NormEnd3SequenceData"),
@@ -284,7 +287,7 @@ RNAMODR_PLOT_SEQ_NORMEND_NAMES <-
   seqdata
 }
 
-#' @rdname NormEndSequenceData
+#' @rdname NormEndSequenceData-class
 #' @export
 setMethod(
   f = "getDataTrack",
@@ -361,7 +364,7 @@ setMethod(
   }
 )
 
-#' @rdname NormEndSequenceData
+#' @rdname NormEndSequenceData-class
 #' @export
 setMethod(
   f = "getDataTrack",

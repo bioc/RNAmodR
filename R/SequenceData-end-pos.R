@@ -2,7 +2,7 @@
 #' @include SequenceData-class.R
 NULL
 
-#' @name EndSequenceData
+#' @name EndSequenceData-class
 #' @aliases End5SequenceData End3SequenceData EndSequenceData
 #' 
 #' @title End5SequenceData/End3SequenceData/EndSequenceData
@@ -16,8 +16,9 @@ NULL
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
 #' and \code{treated} condition separatly.
 #' 
-#' @param bamfiles,annotation,sequences,seqinfo,... See 
-#' \code{\link[=SequenceData-class]{SequenceData}}
+#' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
+#' \code{\link[=SequenceData-class]{SequenceData}} and 
+#' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{CoverageSequenceData}
 #' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
 #' of \code{ranges(x)}
@@ -40,37 +41,37 @@ NULL
 #' aggregate(e5sd)
 NULL
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 setClass(Class = "End5SequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 setClass(Class = "End3SequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 setClass(Class = "EndSequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 End5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   SequenceData("End5", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 End3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   SequenceData("End3", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   SequenceData("End", bamfiles = bamfiles, annotation = annotation,
@@ -195,8 +196,9 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   data
 }
 
-#' @rdname RNAmodR-internals
-setMethod(".getData",
+#' @rdname EndSequenceData-class
+#' @export
+setMethod("getData",
           signature = c(x = "End5SequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -215,8 +217,9 @@ setMethod(".getData",
           }
 )
 
-#' @rdname RNAmodR-internals
-setMethod(".getData",
+#' @rdname EndSequenceData-class
+#' @export
+setMethod("getData",
           signature = c(x = "End3SequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -235,8 +238,9 @@ setMethod(".getData",
           }
 )
 
-#' @rdname RNAmodR-internals
-setMethod(".getData",
+#' @rdname EndSequenceData-class
+#' @export
+setMethod("getData",
           signature = c(x = "EndSequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -286,7 +290,7 @@ setMethod(".getData",
   relist(ans, x@partitioning)
 }
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 setMethod("aggregate",
           signature = c(x = "End5SequenceData"),
@@ -296,7 +300,7 @@ setMethod("aggregate",
           }
 )
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 setMethod("aggregate",
           signature = c(x = "End3SequenceData"),
@@ -306,7 +310,7 @@ setMethod("aggregate",
           }
 )
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 setMethod("aggregate",
           signature = c(x = "EndSequenceData"),
@@ -329,7 +333,7 @@ RNAMODR_PLOT_SEQ_END_NAMES <- c("end5" = "mean(5'-ends)",
   seqdata
 }
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 setMethod(
   f = "getDataTrack",
@@ -378,7 +382,7 @@ setMethod(
   }
 )
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 setMethod(
   f = "getDataTrack",
@@ -427,7 +431,7 @@ setMethod(
   }
 )
 
-#' @rdname EndSequenceData
+#' @rdname EndSequenceData-class
 #' @export
 setMethod(
   f = "getDataTrack",

@@ -2,15 +2,17 @@
 #' @include SequenceData-class.R
 NULL
 
-#' @name PileupSequenceData
+#' @name PileupSequenceData-class
+#' @aliases PileupSequenceData
 #' 
 #' @title PileupSequenceData
 #' 
 #' @description
 #' title
 #' 
-#' @param bamfiles,annotation,sequences,seqinfo,... See 
-#' \code{\link[=SequenceData-class]{SequenceData}}
+#' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
+#' \code{\link[=SequenceData-class]{SequenceData}} and
+#' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{PileupSequenceData}
 #' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
 #' of \code{ranges(x)}
@@ -32,13 +34,13 @@ NULL
 #' aggregate(psd)
 NULL
 
-#' @rdname PileupSequenceData
+#' @rdname PileupSequenceData-class
 #' @export
 setClass(Class = "PileupSequenceData",
          contains = "SequenceData",
          prototype = list(minQuality = 5L))
 
-#' @rdname PileupSequenceData
+#' @rdname PileupSequenceData-class
 #' @export
 PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   SequenceData("Pileup", bamfiles = bamfiles, annotation = annotation,
@@ -156,8 +158,9 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   pileup
 }
 
-#' @rdname RNAmodR-internals
-setMethod(".getData",
+#' @rdname PileupSequenceData-class
+#' @export
+setMethod("getData",
           signature = c(x = "PileupSequenceData",
                         grl = "GRangesList",
                         sequences = "XStringSet",
@@ -251,7 +254,7 @@ setMethod(".getData",
   relist(ans, x@partitioning)
 }
 
-#' @rdname PileupSequenceData
+#' @rdname PileupSequenceData-class
 #' @export
 setMethod("aggregate",
           signature = c(x = "PileupSequenceData"),
@@ -309,7 +312,7 @@ RNAMODR_PLOT_SEQ_PILEUP_NAMES <- c("bases" = "Bases called [%]")
   seqdata
 }
 
-#' @rdname PileupSequenceData
+#' @rdname PileupSequenceData-class
 #' @importFrom Gviz DataTrack
 #' @export
 setMethod(

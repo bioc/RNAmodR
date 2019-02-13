@@ -113,12 +113,13 @@ setGeneric(
 
 # SequenceData functions -------------------------------------------------------
 
-#' @rdname RNAmodR-internals
+#' @rdname SequenceData-functions
+#' @export
 setGeneric( 
-  name = ".getData",
+  name = "getData",
   signature = c("x","grl","sequences","param"),
   def = function(x, grl, sequences, param, args)
-    standardGeneric(".getData")
+    standardGeneric("getData")
 ) 
 
 # Modifier/SequenceData functions ----------------------------------------------

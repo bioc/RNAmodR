@@ -139,7 +139,8 @@ the N+1 position, since m7G is susceptible cleavage by the aniline treatment
 To fix the data processing and detection strategy, for each type of sequencing
 method a `Modifier` class can be developed alongside to detect modifications.
 For more information on how to develop such a class and potentially a new
-corresponding `SequenceData` class, please have a look at the vignette XXX.
+corresponding `SequenceData` class, please have a look at the 
+[vignette for creating a new analysis](RNAmodR.create.html).
 
 Initially three `Modifier` classes are available:
 
