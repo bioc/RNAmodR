@@ -283,9 +283,7 @@ setMethod(".getData",
   # assemble data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
-  ans <- IRanges::SplitDataFrameList(ans)
-  ans@partitioning <- x@partitioning
-  ans
+  relist(ans, x@partitioning)
 }
 
 #' @rdname EndSequenceData

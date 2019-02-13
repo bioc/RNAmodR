@@ -135,12 +135,10 @@ NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   normOverlap@unlistData[is.na(normOverlap@unlistData)] <- 0
   normOverlap <- normOverlap[match(names(grl),names(normOverlap))]
   # name results based on transcript ID
-  data <- IRanges::SplitDataFrameList(
-    S4Vectors::DataFrame(ends = unlist(enddata),
-                         norm.tx = unlist(normTranscript),
-                         norm.ol = unlist(normOverlap)))
-  data@partitioning <- enddata@partitioning
-  data
+  df <- S4Vectors::DataFrame(ends = unlist(enddata),
+                             norm.tx = unlist(normTranscript),
+                             norm.ol = unlist(normOverlap))
+  relist(df, enddata@partitioning)
 }
 
 #' @rdname RNAmodR-internals
@@ -247,9 +245,7 @@ setMethod(".getData",
   # merge data
   ans <- cbind(do.call(S4Vectors::DataFrame, means),
                do.call(S4Vectors::DataFrame, sds))
-  ans <- IRanges::SplitDataFrameList(ans)
-  ans@partitioning <- x@partitioning
-  ans
+  relist(ans, x@partitioning)
 }
 
 #' @rdname NormEndSequenceData

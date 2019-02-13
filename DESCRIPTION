@@ -25,7 +25,6 @@ Depends:
     Modstrings
 Imports:
     methods,
-    utils,
     stats,
     graphics,
     grDevices, 

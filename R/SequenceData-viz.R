@@ -335,10 +335,9 @@ NULL
                                 ranges = IRanges::IRanges(start = unlist(seqs),
                                                           width = 1),
                                 strand = unlist(strands),
-                                data@unlistData)
-  ans <- GenomicRanges::GRangesList(ans)
-  ans@partitioning <- data@partitioning
-  ans@metadata <- ranges@metadata
+                                unlist(data, use.names = FALSE))
+  ans <- relist(ans, data@partitioning)
+  metadata(ans) <- metadata(ranges)
   ans
 }
 

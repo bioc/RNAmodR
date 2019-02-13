@@ -54,7 +54,7 @@
 \S4method{bamfiles}{SequenceDataList}(x)
 }
 \arguments{
-\item{x, object, value}{a \code{SequenceData},\code{SequenceDataList},
+\item{x, object, value}{a \code{SequenceData}, \code{SequenceDataList},
 \code{SequenceDataFrame} object.}
 }
 \value{
@@ -67,7 +67,7 @@ transcript}
 }
 }
 \description{
-The \code{SequenceData},\code{SequenceDataList} and
+The \code{SequenceData}, \code{SequenceDataList} and
 \code{SequenceDataFrame} share functionality. Have a look at the elements
 listed under Usage.
 }

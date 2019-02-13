@@ -192,9 +192,7 @@ setReplaceMethod(f = "settings",
                                       }))
   names(ans) <- paste0("replicate.",replicates)
   ans <- do.call(S4Vectors::DataFrame,ans)
-  ans <- IRanges::SplitDataFrameList(ans)
-  ans@partitioning <- data@partitioning
-  ans
+  relist(ans, data@partitioning)
 }
 
 .calculate_inosine_score <- function(x, letters){
@@ -206,9 +204,7 @@ setReplaceMethod(f = "settings",
   scores[is.infinite(scores) | is.na(scores)] <- 0
   scores[letters != "A"] <- 0
   ans <- S4Vectors::DataFrame(value = scores)
-  ans <- IRanges::SplitDataFrameList(ans)
-  ans@partitioning <- x@partitioning
-  ans
+  relist(ans, x@partitioning)
 }
 
 .aggregate_inosine <- function(x){
@@ -219,9 +215,7 @@ setReplaceMethod(f = "settings",
   score <- .calculate_inosine_score(mod, letters)
   ans <- cbind(S4Vectors::DataFrame(score = unlist(score)$value,
                                     row.names = NULL))
-  ans <- IRanges::SplitDataFrameList(ans)
-  ans@partitioning <- mod@partitioning
-  ans
+  relist(ans, mod@partitioning)
 }
 
 #' @rdname ModInosine-functions
@@ -255,11 +249,8 @@ setMethod(f = "aggregate",
   minReplicate <- settings(x,"minReplicate")
   minScore <- settings(x,"minScore")
   # construct logical vector for passing the coverage threshold
-  coverage <- apply(as.matrix(unlist(coverage)),1,
-                    function(row){
-                      sum(row > minCoverage) >= minReplicate
-                    })
-  coverage <- split(unname(coverage),mod@partitioning)
+  coverage <- rowSums(as.data.frame(unlist(coverage))) >= minReplicate
+  coverage <- relist(unname(coverage),mod@partitioning)
   # find inosine positions by looking for A to G conversion at position with 
   # enough coverage
   grl <- ranges(x)

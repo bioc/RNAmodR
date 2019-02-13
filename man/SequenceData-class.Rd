@@ -27,16 +27,47 @@ subset the transcripts analyzed on a chromosome basis.}
 
 \item{...}{Optional arguments overwriting default values, which are
 \itemize{
-\item{minQuality}{class dependent}
+\item{minQuality} {class dependent}
 }}
 }
 \description{
 The \code{SequenceData} class is a virtual class. It contains data on each
-position alongside transcripts defined in the \code{ranges} slot.
-
-It also holds the nucleotide sequence of these transcripts.
+position alongside transcripts and holds the nucleotide sequence of these 
+transcripts. To access this data several 
+\code{\link[=SequenceData-functions]{functions}} are available.
 
 It is derived from the 
 \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} 
 class.
 }
+\section{Slots}{
+
+\describe{
+\item{\code{ranges}}{a \code{\link[GenomicRanges:GRangesList-class]{GRangesList}} 
+object each element describing a transcript including its element. The 
+\code{GRangesList} is constructed from the 
+\code{\link[GenomicFeatures:transcriptsBy]{transcriptsBy(x, by="tx")}}.}
+
+\item{\code{sequences}}{a \code{\link[Biostrings:XStringSet-class]{XStringSet}} of 
+type \code{sequencesType}.}
+
+\item{\code{sequencesType}}{a \code{character} value for the class name of 
+\code{sequences}. Either \code{RNAStringSet} or \code{ModRNAStringSet}.}
+
+\item{\code{bamfiles}}{the input bam files as 
+\code{\link[Rsamtools:BamFileList]{BamFileList}}}
+
+\item{\code{condition}}{conditions along the 
+\code{\link[Rsamtools:BamFileList]{BamFileList}}: Either \code{control} or 
+\code{treated}}
+
+\item{\code{replicate}}{replicate number along the \code{BamFileList} for each of the
+condition types.}
+
+\item{\code{seqinfo}}{a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
+the avialable chromosomes. This is an intersection of}
+
+\item{\code{minQuality}}{a \code{integer} value describing a threshold of the minimum
+quality of reads to be used.}
+}}
+

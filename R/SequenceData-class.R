@@ -10,9 +10,9 @@ NULL
 #' 
 #' @description 
 #' The \code{SequenceData} class is a virtual class. It contains data on each
-#' position alongside transcripts defined in the \code{ranges} slot.
-#' 
-#' It also holds the nucleotide sequence of these transcripts.
+#' position alongside transcripts and holds the nucleotide sequence of these 
+#' transcripts. To access this data several 
+#' \code{\link[=SequenceData-functions]{functions}} are available.
 #' 
 #' It is derived from the 
 #' \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} 
@@ -35,26 +35,45 @@ NULL
 #' subset the transcripts analyzed on a chromosome basis.
 #' @param ... Optional arguments overwriting default values, which are
 #' \itemize{
-#' \item{minQuality}{class dependent}
+#' \item{minQuality} {class dependent}
 #' }
+#' 
+#' @slot ranges a \code{\link[GenomicRanges:GRangesList-class]{GRangesList}} 
+#' object each element describing a transcript including its element. The 
+#' \code{GRangesList} is constructed from the 
+#' \code{\link[GenomicFeatures:transcriptsBy]{transcriptsBy(x, by="tx")}}.
+#' @slot sequences a \code{\link[Biostrings:XStringSet-class]{XStringSet}} of 
+#' type \code{sequencesType}.
+#' @slot sequencesType a \code{character} value for the class name of 
+#' \code{sequences}. Either \code{RNAStringSet} or \code{ModRNAStringSet}.
+#' @slot bamfiles the input bam files as 
+#' \code{\link[Rsamtools:BamFileList]{BamFileList}}
+#' @slot condition conditions along the 
+#' \code{\link[Rsamtools:BamFileList]{BamFileList}}: Either \code{control} or 
+#' \code{treated}
+#' @slot replicate replicate number along the \code{BamFileList} for each of the
+#' condition types.
+#' @slot seqinfo a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
+#' the avialable chromosomes. This is an intersection of 
+#' @slot minQuality a \code{integer} value describing a threshold of the minimum
+#' quality of reads to be used.
 NULL
 
 setClass("SequenceData",
-         contains = c("VIRTUAL",
-                      "CompressedSplitDataFrameList"),
+         contains = c("VIRTUAL", "CompressedSplitDataFrameList"),
          slots = c(ranges = "GRangesList",
                    sequences = "XStringSet",
                    sequencesType = "character",
                    bamfiles = "BamFileList",
+                   condition = "factor",
+                   replicate = "factor",
                    seqinfo = "Seqinfo",
                    minQuality = "integer",
-                   unlistType = "character",
-                   condition = "factor",
-                   replicate = "factor"),
-         prototype = list(ranges = GRangesList(),
-                          sequencesType = "RNAStringSet",
-                          sequences = RNAStringSet(),
-                          unlistType = "SequenceDataFrame"))
+                   unlistType = "character"),
+prototype = list(ranges = GRangesList(),
+                 sequencesType = "RNAStringSet",
+                 sequences = RNAStringSet(),
+                 unlistType = "SequenceDataFrame"))
 
 # class names must be compatible with this class name generation function
 sequenceDataClass <- function(dataType){
@@ -73,41 +92,40 @@ setMethod("parallelSlotNames", "SequenceData",
           function(x) c("ranges","sequences", callNextMethod())
 )
 
-#' @importFrom utils capture.output
 #' @rdname SequenceData-functions
 setMethod("show", "SequenceData",
-          function(object){
-            k <- length(object)
-            data_nc <- ncol(object@unlistData)
-            ranges_mcols <- mcols(object@ranges@unlistData, use.names = FALSE)
-            ranges_nmc <- if (is.null(ranges_mcols)) 0L else ncol(ranges_mcols)
-            cat(classNameForDisplay(object), " with ", k, " elements ",
-                "containing ",sep = "")
-            cat(data_nc, ifelse(data_nc == 1L, " data column", " data columns"),
-                " and ",ranges_nmc, ifelse(ranges_nmc == 1L, " metadata column",
-                                           " metadata columns"),
-                "\n",sep = "")
-            out_data <- NULL
-            # data
-            if (data_nc > 0) {
-              data_col_names <- colnames(object@unlistData)
-              data_col_types <- 
-                lapply(object@unlistData, function(x) {
-                  paste0("<", classNameForDisplay(x)[1],">")
-                })
-              out_data <- 
-                matrix(unlist(data_col_types, use.names = FALSE), nrow = 1,
-                dimnames = list("", data_col_names))
-            }
-            cat("- Data columns:\n")
-            print(out_data, quote = FALSE, right = TRUE)
-            cat("-")
-            cat(paste0(" ",utils::capture.output(show(object@seqinfo)),"\n"))
-          }
+  function(object){
+    k <- length(object)
+    data_nc <- ncol(object@unlistData)
+    ranges_mcols <- mcols(object@ranges@unlistData, use.names = FALSE)
+    ranges_nmc <- if (is.null(ranges_mcols)) 0L else ncol(ranges_mcols)
+    cat(classNameForDisplay(object), " with ", k, " elements ",
+        "containing ",sep = "")
+    cat(data_nc, ifelse(data_nc == 1L, " data column", " data columns"),
+        " and ",ranges_nmc, ifelse(ranges_nmc == 1L, " metadata column",
+                                   " metadata columns"),
+        "\n",sep = "")
+    out_data <- NULL
+    # data
+    if (data_nc > 0) {
+      data_col_names <- colnames(object@unlistData)
+      data_col_types <- 
+        lapply(object@unlistData, function(x) {
+          paste0("<", classNameForDisplay(x)[1],">")
+        })
+      out_data <- 
+        matrix(unlist(data_col_types, use.names = FALSE), nrow = 1,
+        dimnames = list("", data_col_names))
+    }
+    cat("- Data columns:\n")
+    print(out_data, quote = FALSE, right = TRUE)
+    cat("-  ",class(object@seqinfo), " object with ", 
+        summary(object@seqinfo), ":\n", sep = "")
+  }
 )
 # validity ---------------------------------------------------------------------
 
-.valid.SequenceData <- function(x){
+.valid.SequenceData_elements <- function(x){
   nrow <- sum(unlist(width(ranges(x))))
   if(nrow != nrow(x@unlistData)){
     return("row number of data does not match position covered by annotation.")
@@ -126,28 +144,77 @@ setMethod("show", "SequenceData",
   }
   NULL
 }
+
+.valid.SequenceData <- function(x){
+  c(.valid.SequenceData_elements(x),
+    IRanges:::.valid.SimpleSplitDataFrameList(x))
+}
 S4Vectors::setValidity2(Class = "SequenceData",.valid.SequenceData)
 
 # replacing --------------------------------------------------------------------
 
 #' @rdname RNAmodR-internals
+setReplaceMethod("[", "SequenceData",
+  function(x, i, j, ..., value) {
+    if (length(list(...)) > 0L){
+      stop("invalid replacement")
+    }
+    if(!missing(j)){
+      stop("replacement of columns not supported")
+    }
+    if(class(x) != class(value)){
+      stop("replacement 'value' must be of the same class than 'x'")
+    }
+    if (missing(i)){
+      x <- value
+    } else {
+      if(length(i) != length(value)){
+        warning("number of items to replace is not a multiple of replacement ",
+                "length")
+        value <- value[seq_along(i)]
+      }
+      x@ranges[i] <- ranges(value)
+      names(x@ranges)[i] <- names(ranges(value)) # must be set explicitly
+      x@sequences[i] <- sequences(value)
+      names(x@sequences)[i] <- names(sequences(value)) # must be set explicitly
+      # rownames needs to be savid since a replace removes them
+      rownames <- rownames(x)
+      rownames[i] <- rownames(value)
+      tmp <- callNextMethod(x = as(x,"SplitDataFrameList"), i = i,
+                            value = as(value,"SplitDataFrameList"))
+      x@unlistData <- tmp@unlistData
+      x@partitioning <- tmp@partitioning
+      rownames(x) <- rownames
+    }
+    validObject(x)
+    return(x)
+  }
+)
+
+#' @rdname RNAmodR-internals
 setMethod("setListElement", "SequenceData",
-          function(x, i, value){
-            if(!is(value,"SequenceDataFrame")){
-              stop("invalid value. must be 'SequenceDataFrame'.")
-            }
-            i2 <- S4Vectors::normalizeDoubleBracketSubscript(
-              i, x,
-              allow.append = TRUE,
-              allow.nomatch = TRUE)
-            if (is.null(value))
-              return(S4Vectors:::.remove_list_element(x, i2))
-            if (is.na(i2) || i2 > length(x)) {
-              name <- if (is.na(i2)) as.character(i) else NULL
-              return(S4Vectors:::.append_list_element(x, value, name))
-            }
-            S4Vectors:::.replace_list_element(x, i2, value)
-          }
+  function(x, i, value){
+    if(!is(value,"SequenceDataFrame")){
+      stop("invalid value. must be 'SequenceDataFrame'.")
+    }
+    i2 <- S4Vectors::normalizeDoubleBracketSubscript(i, x, allow.append = TRUE,
+                                                     allow.nomatch = TRUE)
+    if(any(colnames(value) != colnames(unlist(x, use.names=FALSE)))){
+      stop("'value' does not have matching colnames.")
+    }
+    x@ranges[[i2]] <- ranges(value)
+    x@sequences[[i2]] <- sequences(value)
+    # rownames needs to be savid since a replace removes them
+    rownames <- rownames(x)
+    rownames[[i2]] <- rownames(value)
+    tmp <- callNextMethod(x = as(x,"SplitDataFrameList"), i = i,
+                          value = as(value,"DataFrame"))
+    x@unlistData <- tmp@unlistData
+    x@partitioning <- tmp@partitioning
+    rownames(x) <- rownames
+    validObject(x)
+    x
+  }
 )
 
 # looping ----------------------------------------------------------------------
@@ -160,91 +227,81 @@ lapply_SequenceData <- function(X, FUN, ...){
   X_partitioning <- IRanges::PartitioningByEnd(X)
   X_elt_width <- width(X_partitioning)
   empty_idx <- which(X_elt_width == 0L)
-  if (length(empty_idx) != 0L) 
-    ans[empty_idx] <- list(FUN(extractROWS(unlisted_X, integer(0)), ...))
+  if (length(empty_idx) != 0L){
+    ans[empty_idx] <- NULL
+  }
   non_empty_idx <- which(X_elt_width != 0L)
-  if (length(non_empty_idx) == 0L)
+  if (length(non_empty_idx) == 0L){
     return(ans)
-  ans[non_empty_idx] <-
-    lapply(non_empty_idx,
-           function(i){
-             df <- getListElement(X,i)
-             FUN(df,
-                 ...)
-           })
+  }
+  ans[non_empty_idx] <- 
+    lapply(non_empty_idx, function(i){ FUN(getListElement(X,i), ...) })
   ans
 }
 
 setMethod("lapply", "SequenceData",
-          function(X, FUN, ...)
-          {
-            ans <- lapply_SequenceData(X, FUN, ...)
-            names(ans) <- names(X)
-            ans
-          }
+  function(X, FUN, ...){
+    ans <- lapply_SequenceData(X, FUN, ...)
+    names(ans) <- names(X)
+    ans
+  }
 )
 
 #' @importClassesFrom IRanges PartitioningByEnd
 #' @importFrom IRanges PartitioningByEnd
 setMethod("extractROWS", "SequenceData",
-          function(x, i){
-            i <- normalizeSingleBracketSubscript(i, x, as.NSBS = TRUE)
-            ans_eltNROWS <- extractROWS(width(x@partitioning), i)
-            ans_breakpoints <- suppressWarnings(cumsum(ans_eltNROWS))
-            nbreakpoints <- length(ans_breakpoints)
-            if (nbreakpoints != 0L && is.na(ans_breakpoints[[nbreakpoints]])){
-              stop("Subsetting operation on ", class(x), " object 'x' ",
-                   "produces a result that is too big to be ",
-                   "represented as a CompressedList object. ",
-                   "This is not implemented, yet.")
-            }
-            idx_on_unlisted_x <- IRanges::IRanges(end = extractROWS(end(x@partitioning), i),
-                                                  width = ans_eltNROWS)
-            ans_unlistData <- extractROWS(x@unlistData, idx_on_unlisted_x)
-            ans_partitioning <- new2("PartitioningByEnd",
-                                     end = ans_breakpoints,
-                                     NAMES = extractROWS(names(x), i),
-                                     check = FALSE)
-            ans_elementMetadata <- extractROWS(x@elementMetadata, i)
-            ans_ranges <- extractROWS(x@ranges, i)
-            ans_sequences <- extractROWS(x@sequences, i)
-            initialize(x,
-                       ranges = ans_ranges,
-                       sequences = ans_sequences,
-                       replicate = x@replicate,
-                       condition = x@condition,
-                       bamfiles = x@bamfiles,
-                       seqinfo = x@seqinfo,
-                       minQuality = x@minQuality,
-                       unlistData = ans_unlistData,
-                       partitioning = ans_partitioning,
-                       elementMetadata = ans_elementMetadata)
-          }
+  function(x, i){
+    i <- normalizeSingleBracketSubscript(i, x, as.NSBS = TRUE)
+    ans_eltNROWS <- extractROWS(width(x@partitioning), i)
+    ans_breakpoints <- suppressWarnings(cumsum(ans_eltNROWS))
+    nbreakpoints <- length(ans_breakpoints)
+    if (nbreakpoints != 0L && is.na(ans_breakpoints[[nbreakpoints]])){
+      stop("Subsetting operation on ", class(x), " object 'x' ",
+           "produces a result that is too big to be ",
+           "represented as a CompressedList object. ",
+           "This is not implemented, yet.")
+    }
+    idx_on_unlisted_x <- 
+      IRanges::IRanges(end = extractROWS(end(x@partitioning), i),
+                       width = ans_eltNROWS)
+    ans_unlistData <- extractROWS(x@unlistData, idx_on_unlisted_x)
+    ans_partitioning <- new2("PartitioningByEnd", end = ans_breakpoints,
+                             NAMES = extractROWS(names(x), i), check = FALSE)
+    ans_elementMetadata <- extractROWS(x@elementMetadata, i)
+    ans_ranges <- extractROWS(x@ranges, i)
+    ans_sequences <- extractROWS(x@sequences, i)
+    initialize(x, ranges = ans_ranges, sequences = ans_sequences,
+               replicate = x@replicate, condition = x@condition,
+               bamfiles = x@bamfiles, seqinfo = x@seqinfo, 
+               minQuality = x@minQuality, unlistData = ans_unlistData,
+               partitioning = ans_partitioning, 
+               elementMetadata = ans_elementMetadata)
+  }
 )
 
 #' @rdname RNAmodR-internals
 #' @importFrom IRanges PartitioningByEnd
 setMethod("getListElement", "SequenceData",
-          function(x, i, exact=TRUE){
-            i2 <- normalizeDoubleBracketSubscript(i, x, exact = exact,
-                                                  allow.NA = TRUE,
-                                                  allow.nomatch = TRUE)
-            if (is.na(i2)){
-              return(NULL)
-            }
-            unlisted_x <- unlist(x, use.names = FALSE)
-            x_partitioning <- IRanges::PartitioningByEnd(x)
-            window_start <- start(x_partitioning)[i2]
-            window_end <- end(x_partitioning)[i2]
-            new(x@unlistType,
-                S4Vectors:::Vector_window(unlisted_x,
-                                          start = window_start,
-                                          end = window_end),
-                x@ranges[[i2]],
-                x@sequences[[i2]],
-                x@replicate,
-                x@condition)
-          }
+  function(x, i, exact=TRUE){
+    i2 <- normalizeDoubleBracketSubscript(i, x, exact = exact,
+                                          allow.NA = TRUE,
+                                          allow.nomatch = TRUE)
+    if (is.na(i2)){
+      return(NULL)
+    }
+    unlisted_x <- unlist(x, use.names = FALSE)
+    x_partitioning <- IRanges::PartitioningByEnd(x)
+    window_start <- start(x_partitioning)[i2]
+    window_end <- end(x_partitioning)[i2]
+    new(x@unlistType,
+        S4Vectors:::Vector_window(unlisted_x,
+                                  start = window_start,
+                                  end = window_end),
+        x@ranges[[i2]],
+        x@sequences[[i2]],
+        x@replicate,
+        x@condition)
+  }
 )
 
 
@@ -260,6 +317,34 @@ setMethod("rbind", "SequenceData",
           function(...){
             arg1 <- list(...)[[1L]]
             stop("'rbind' is not supported for ",class(arg1),".")
+          }
+)
+
+# unlisting --------------------------------------------------------------------
+
+setMethod("unlist", "SequenceData",
+          function(x, recursive=TRUE, use.names=TRUE){
+            if (!isTRUEorFALSE(use.names)){
+              stop("'use.names' must be TRUE or FALSE")
+            }
+            unlisted_x <- x@unlistData
+            if (use.names){
+              unlisted_x <- S4Vectors:::set_unlisted_names(unlisted_x, x)
+            }
+            new(x@unlistType,
+                unlisted_x,
+                unlist(ranges(x), use.names = use.names),
+                unlist(sequences(x)),
+                x@replicate,
+                x@condition)
+          }
+)
+
+# accessors --------------------------------------------------------------------
+
+setMethod("rownames", "SequenceData",
+          function(x, do.NULL = TRUE, prefix = "row"){
+            relist(rownames(x@unlistData),x@partitioning)
           }
 )
 
@@ -348,6 +433,9 @@ setMethod(
   f = "initialize", 
   signature = signature(.Object = "SequenceData"),
   definition = function(.Object, bamfiles, seqinfo, args, ...){
+    if(!(.Object@sequencesType %in% c("RNAStringSet","ModRNAStringSet"))){
+      stop("'sequencesType' must be either 'RNAStringSet' or 'ModRNAStringSet'")
+    }
     if(missing(args) || !is.list(args)){
       args <- list()
     }
@@ -463,8 +551,7 @@ setMethod("SequenceData",
 #' @importFrom Biostrings xscat
 # load the transcript sequence per transcript aka. one sequence per GRangesList
 # element
-.load_transcript_sequences <- function(sequences,
-                                       grl){
+.load_transcript_sequences <- function(sequences, grl){
   seq <- Biostrings::getSeq(sequences, unlist(grl))
   seq <- split(seq,grl@partitioning)
   seq <- Reduce(c,lapply(seq,Biostrings::xscat))
@@ -473,7 +560,7 @@ setMethod("SequenceData",
 }
 
 # remove any elements, which are not in the seqinfo
-.subset_by_seqinfo <- function(grl,seqinfo){
+.subset_by_seqinfo <- function(grl, seqinfo){
   grl <- grl[GenomicRanges::seqnames(grl) %in% GenomeInfoDb::seqnames(seqinfo)]
   grl <- grl[width(grl@partitioning) != 0L]
   GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(seqinfo)
@@ -484,10 +571,8 @@ setMethod("SequenceData",
 
 #' @rdname RNAmodR-internals
 setMethod(".getData",
-          signature = c(x = "SequenceData",
-                        grl = "GRangesList",
-                        sequences = "XStringSet",
-                        param = "ScanBamParam"),
+          signature = c(x = "SequenceData", grl = "GRangesList",
+                        sequences = "XStringSet", param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){
             stop("This functions needs to be implemented by '",class(x),"'.",
                  call. = FALSE)
@@ -521,10 +606,7 @@ setMethod(".getData",
 
 #' @importFrom IRanges PartitioningByWidth PartitioningByEnd
 #' @importClassesFrom IRanges PartitioningByWidth PartitioningByEnd
-.postprocess_read_data <- function(x,
-                                   data,
-                                   grl,
-                                   sequences){
+.postprocess_read_data <- function(x, data, grl, sequences){
   conditionsFmultiplier <- length(data)
   # work with the unlisted data and construct a CompressedSplitDataFrameList
   # from this
@@ -536,17 +618,16 @@ setMethod(".getData",
     stop("Something went wrong. Length of data and Ranges do not match.")
   }
   # order data so that is matched the PartitioningByWidth object
-  data <- IRanges::SplitDataFrameList(data)
-  data@partitioning <- as(partitioning,"PartitioningByEnd")
+  data <- relist(data, partitioning)
   positions <- .seqs_rl(grl)
   rownames(data) <- IRanges::CharacterList(positions)
   # order sequences
   sequences <- sequences[match(names(grl),names(sequences))]
   # store data
   x@unlistData <- data@unlistData
+  x@partitioning <- data@partitioning
   x@replicate <- rep(x@replicate, each = conditionsFmultiplier)
   x@condition <- rep(x@condition, each = conditionsFmultiplier)
-  x@partitioning <- data@partitioning
   x@ranges <- grl
   x@sequences <- as(sequences,x@sequencesType)
   names(x) <- names(grl)
@@ -560,8 +641,7 @@ setMethod(".getData",
 }
 
 # subset to conditions
-.subset_to_condition <- function(conditions,
-                                 condition){
+.subset_to_condition <- function(conditions, condition){
   if(condition != "both"){
     f <- conditions == condition
     if(all(f == FALSE)){

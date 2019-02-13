@@ -44,7 +44,7 @@ NULL
 #' These functions are not intended for general use, but are used for 
 #' additional package development.
 #' 
-#' @param object,range,data,modType,scoreFun,source,type,x,grl,sequences,param,args,i,exact,value
+#' @param object,range,data,modType,scoreFun,source,type,x,grl,sequences,param,args,i,j,...,exact,value
 #' Internal arguments
 #' 
 #' @return internally used values

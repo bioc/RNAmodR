@@ -7,11 +7,11 @@ NULL
 #' @title SequenceData/SequenceDataList/SequenceDataFrame functions
 #' 
 #' @description 
-#' The \code{SequenceData},\code{SequenceDataList} and
+#' The \code{SequenceData}, \code{SequenceDataList} and
 #' \code{SequenceDataFrame} share functionality. Have a look at the elements
 #' listed under Usage.
 #' 
-#' @param x,object,value a \code{SequenceData},\code{SequenceDataList},
+#' @param x,object,value a \code{SequenceData}, \code{SequenceDataList},
 #' \code{SequenceDataFrame} object.
 #' 
 #' @return 
@@ -138,6 +138,14 @@ setMethod("show", "SequenceDataFrame",
             cat("\nand a ")
             show(object@sequence)
           })
+
+# relisting --------------------------------------------------------------------
+
+setMethod("relist", c(flesh = "SequenceDataFrame", skeleton = "ANY"),
+          function(flesh, skeleton){
+            stop("Relisting is not supported for 'SequenceDataFrame'")
+          }
+)
 
 # accessors --------------------------------------------------------------------
 

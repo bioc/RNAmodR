@@ -14,6 +14,7 @@
 \alias{length,ModifiedSequenceTrack-method}
 \alias{.constructModRanges,GRanges,DataFrame-method}
 \alias{parallelSlotNames,SequenceData-method}
+\alias{[<-,SequenceData,ANY,ANY,ANY-method}
 \alias{setListElement,SequenceData-method}
 \alias{getListElement,SequenceData-method}
 \alias{.getData,SequenceData,GRangesList,XStringSet,ScanBamParam-method}
@@ -41,6 +42,8 @@
   scoreFun, source, type)
 
 \S4method{parallelSlotNames}{SequenceData}(x)
+
+\S4method{[}{SequenceData,ANY,ANY,ANY}(x, i, j, ...) <- value
 
 \S4method{setListElement}{SequenceData}(x, i, value)
 
@@ -86,7 +89,7 @@
   grl, sequences, param, args)
 }
 \arguments{
-\item{object, range, data, modType, scoreFun, source, type, x, grl, sequences, param, args, i, exact, value}{Internal arguments}
+\item{object, range, data, modType, scoreFun, source, type, x, grl, sequences, param, args, i, j, ..., exact, value}{Internal arguments}
 }
 \value{
 internally used values

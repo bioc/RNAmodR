@@ -30,9 +30,7 @@ NULL
   IRanges::CharacterList(strand(grl))
 }
 .get_column_GRangesList <- function(grl,column){
-  columns <- IRanges::CharacterList(mcols(grl@unlistData)[,column])
-  columns@partitioning <- grl@partitioning
-  columns
+  relist(mcols(grl@unlistData)[,column],grl@partitioning)
 }
 
 # per element of GRangesList unique 
