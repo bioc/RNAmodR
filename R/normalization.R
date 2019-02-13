@@ -76,11 +76,11 @@ SAMPLE_TYPES <- c("treated","control")
 
 #' @importFrom Rsamtools BamFileList
 #' @importFrom BiocGenerics path
-.norm_bamfiles <- function(x, className,
+.norm_bamfiles <- function(x, className, 
                            .xname = assertive::get_name_in_parent(x)){
   if(!is(x,"BamFileList")){
     tmp <- try(Rsamtools::BamFileList(x), silent = TRUE)
-    if (is(x, "try-error")){
+    if (is(tmp, "try-error")){
       stop("To create a ",className," object, '",.xname,"' must be a ",
            "BamFileList object or be coercible to one.",
            call. = FALSE)
