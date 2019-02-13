@@ -9,14 +9,29 @@ NULL
 #' @title The SequenceData class
 #' 
 #' @description 
-#' The \code{SequenceData} class is a virtual class. It contains data on each
-#' position alongside transcripts and holds the nucleotide sequence of these 
-#' transcripts. To access this data several 
-#' \code{\link[=SequenceData-functions]{functions}} are available.
+#' The \code{SequenceData} class is implemented to contain data on each position
+#' along a transcripts and holds the corresponding annotation data and
+#' nucleotide sequence of these transcripts. To access this data several
+#' \code{\link[=SequenceData-functions]{functions}} are available. The
+#' \code{SequenceData} class is a virtual class, from which specific class can
+#' be extended. Currently the following classes are implemented:
 #' 
-#' It is derived from the 
-#' \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} 
-#' class.
+#' \itemize{
+#' \item{\code{\link[=CoverageSequenceData-class]{CoverageSequenceData}}} 
+#' \item{\code{\link[=EndSequenceData-class]{End5SequenceData}}, 
+#' \code{\link[=EndSequenceData-class]{End3SequenceData}}, 
+#' \code{\link[=EndSequenceData-class]{EndSequenceData}}}
+#' \item{\code{\link[=NormEndSequenceData-class]{NormEnd5SequenceData}}, 
+#' \code{\link[=NormEndSequenceData-class]{NormEnd5SequenceData}}}
+#' \item{\code{\link[=PileupSequenceData-class]{PileupSequenceData}}}
+#' \item{\code{\link[=ProtectedEndSequenceData-class]{ProtectedEndSequenceData}}}
+#' }
+#' 
+#' It is derived from the
+#' \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} class
+#' with additional slots for annotation and sequence data. Some functionality is
+#' not inherited and not available, e.g. \code{cbind}, \code{rbind} amd
+#' \code{relist}.
 #' 
 #' @param dataType The prefix for construction the class name of the 
 #' \code{SequenceData} subclass to be constructed.
@@ -41,7 +56,7 @@ NULL
 #' @slot ranges a \code{\link[GenomicRanges:GRangesList-class]{GRangesList}} 
 #' object each element describing a transcript including its element. The 
 #' \code{GRangesList} is constructed from the 
-#' \code{\link[GenomicFeatures:transcriptsBy]{transcriptsBy(x, by="tx")}}.
+#' \code{\link[GenomicFeatures:transcriptsBy]{exonsBy(x, by="tx")}}.
 #' @slot sequences a \code{\link[Biostrings:XStringSet-class]{XStringSet}} of 
 #' type \code{sequencesType}.
 #' @slot sequencesType a \code{character} value for the class name of 
@@ -467,17 +482,18 @@ setMethod(
   # check bam files
   bamfiles <- .norm_bamfiles(bamfiles, className)
   # get annotation and sequence data
-  txdb <- .norm_annotation(annotation, className)
+  annotation <- .norm_annotation(annotation, className)
   sequences <- .norm_sequences(sequences, className)
-  seqinfo <- .norm_seqnames(bamfiles, txdb, sequences, seqinfo, className)
+  seqinfo <- .norm_seqnames(bamfiles, annotation, sequences, seqinfo, className)
   # create the class
   ans <- new(className, bamfiles, seqinfo, args)
   # load transcript data and sequence data as well as the ScanBamParam
-  grl <- .load_annotation(txdb, ans@seqinfo)
+  grl <- .load_annotation(annotation)
+  grl <- .subset_by_seqinfo(grl, seqinfo)
   sequences <- .load_transcript_sequences(sequences, grl)
   param <- .assemble_scanBamParam(grl, ans@minQuality, ans@seqinfo)
   # run the specific data aggregation function
-  data <- .getData(ans, grl, sequences, param, args)
+  data <- getData(ans, grl, sequences, param, args)
   # post process the data
   .postprocess_read_data(ans, data, grl, sequences)
 }
@@ -502,6 +518,18 @@ setMethod("SequenceData",
           })
 setMethod("SequenceData",
           signature = c(annotation = "TxDb", sequences = "BSgenome"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GRangesList", sequences = "character"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
+setMethod("SequenceData",
+          signature = c(annotation = "GRangesList", sequences = "BSgenome"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
@@ -536,15 +564,28 @@ setMethod("SequenceData",
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+setMethod("SequenceData",
+          signature = c(annotation = "GRangesList", sequences = "FaFile"),
+          function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
+            .new_SequenceData(dataType, bamfiles, annotation, sequences,
+                              seqinfo, ...)
+          })
 
 
 ################################################################################
 # common utility functions -----------------------------------------------------
 
 # load annotation as GRangesList. one element per transcript
-.load_annotation <- function(txdb, seqinfo){
-  ranges <- GenomicFeatures::exonsBy(txdb, by = "tx")
-  ranges <- .subset_by_seqinfo(ranges, seqinfo)
+.load_annotation <- function(annotation){
+  if(is(annotation,"TxDb")){
+    ranges <- GenomicFeatures::exonsBy(annotation, by = "tx")
+    rm(annotation)
+    gc(FALSE)
+  } else if(is(annotation,"GRangesList")) {
+    ranges <- annotation
+  } else {
+    stop("Something went wrong.")
+  }
   ranges
 }
 
@@ -569,8 +610,9 @@ setMethod("SequenceData",
 
 ################################################################################
 
-#' @rdname RNAmodR-internals
-setMethod(".getData",
+#' @rdname SequenceData-functions
+#' @export
+setMethod("getData",
           signature = c(x = "SequenceData", grl = "GRangesList",
                         sequences = "XStringSet", param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){

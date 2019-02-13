@@ -161,6 +161,8 @@ setMethod(f = "relistToClass",
     names <- vector(mode = "list", length = length(x))
   }
   x <- lapply(x, .norm_bamfiles, className)
+  annotation <- .norm_annotation(annotation, className)
+  annotation <- .load_annotation(annotation)
   sequences <- .norm_sequences(sequences, className)
   if(missing(seqinfo)){
     seqinfo <- NA

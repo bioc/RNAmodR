@@ -231,6 +231,7 @@ setMethod(f = "aggregate",
                 x@aggregate <- .aggregate_inosine(x)
                 x@aggregateValidForCurrentArguments <- TRUE
               }
+              x <- callNextMethod()
               x
             }
 )
@@ -240,6 +241,9 @@ setMethod(f = "aggregate",
 }
 
 .find_inosine <- function(x){
+  if(!hasAggregateData(x)){
+    stop("Something went wrong.")
+  }
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   # get the aggregate data
   mod <- aggregateData(x)
@@ -282,6 +286,7 @@ setMethod(f = "aggregate",
     names(grl)[f],
     SIMPLIFY = FALSE)
   modifications <- GenomicRanges::GRangesList(modifications)
+  message("done.")
   unname(unlist(modifications))
 }
 
@@ -291,10 +296,8 @@ setMethod("modify",
           signature = c(x = "ModInosine"),
           function(x, force = FALSE){
             # get the aggregate data
-            x <- aggregate(x, force)
             x@modifications <- .find_inosine(x)
             x@modificationsValidForCurrentArguments <- TRUE
-            message("done.")
             x
           }
 )

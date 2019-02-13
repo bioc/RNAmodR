@@ -148,7 +148,7 @@ setClass("Modifier",
                    condition = "factor",
                    replicate = "factor",
                    data = "SequenceData_OR_SequenceDataList",
-                   aggregate = "DataFrameList",
+                   aggregate = "CompressedSplitDataFrameList",
                    modifications = "GRanges",
                    arguments = "list",
                    aggregateValidForCurrentArguments = "logical",
@@ -479,6 +479,8 @@ setMethod(f = "modifications",
   sequences <- .norm_sequences(sequences, className)
   seqinfo <- .norm_seqnames(bamfiles(ans), annotation, sequences, seqinfo,
                             className)
+  annotation <- .load_annotation(annotation)
+  annotation <- .subset_by_seqinfo(annotation, seqinfo)
   # get SequenceData
   data <- lapply(ans@dataType,
                  function(class){
@@ -493,15 +495,16 @@ setMethod(f = "modifications",
   } else {
     ans@data <- data[[1]]
   }
-  #
+  # aggregate data
+  ans <- aggregate(ans)
+  # search for modifications
   f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
   modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
   message("Starting to search for '", paste(tools::toTitleCase(modName), 
                                             collapse = "', '"),
           "' ... ", appendLF = FALSE)
   if(settings(ans,"findMod")){
-    ans <- do.call(modify,
-                   list(ans))
+    ans <- modify(ans)
   }
   validObject(ans)
   ans <- .norm_modifications(ans, settings(ans))
@@ -529,7 +532,7 @@ setMethod(f = "modifications",
   # settings
   settings(ans) <- list(...)
   # check data type, length
-  ans@data <- .check_list_for_SequenceData_elements(ans,x)
+  ans@data <- .check_list_for_SequenceData_elements(ans, x)
   # validate
   validObject(ans)
   #
@@ -539,7 +542,7 @@ setMethod(f = "modifications",
                                             collapse = "', '"),
           "' ... ", appendLF = FALSE)
   if(settings(ans,"findMod")){
-    ans <- do.call(modify,list(ans))
+    ans <- do.call(modify, list(ans))
   }
   validObject(ans)
   ans <- .norm_modifications(ans, settings(ans))
@@ -615,8 +618,12 @@ setMethod(f = "modify",
           signature = signature(x = "Modifier"),
           definition = 
             function(x, force){
-              stop("This functions needs to be implemented by '",class(x),"'.",
-                   call. = FALSE)
+              if(is.null(x@modifications)){
+                stop("This functions needs to be implemented by '",class(x),
+                     "'.",call. = FALSE)
+              }
+              x@modificationsValidForCurrentArguments <- TRUE
+              x
             }
 )
 
@@ -686,8 +693,13 @@ setMethod(f = "aggregate",
           signature = signature(x = "Modifier"),
           definition = 
             function(x, force = FALSE){
-              stop("This functions needs to be implemented by '",class(x),"'.",
-                   call. = FALSE)
+              if(is.null(x@aggregate)){
+                stop("This functions needs to be implemented by '",class(x),
+                     "'.",call. = FALSE)
+              }
+              .check_score_name(x@aggregate, x@score)
+              x@aggregateValidForCurrentArguments <- TRUE
+              x
             }
 )
 
@@ -727,7 +739,7 @@ setMethod(f = "hasAggregateData",
           signature = signature(x = "Modifier"),
           definition = 
             function(x){
-              if(is.null(nrow(x@aggregate))){
+              if(is.null(x@aggregate) || nrow(x@aggregate) == 0L){
                 return(FALSE)
               }
               return(TRUE)

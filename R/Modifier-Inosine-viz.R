@@ -59,16 +59,6 @@ setMethod(
     Gviz::displayPars(dtscore)$fontcolor.title <- "#000000"
     Gviz::displayPars(dtscore)$col.axis <- "#000000"
     Gviz::displayPars(dtscore) <- args[names(args) != "type"]
-    # dtsd <- Gviz::DataTrack(range = data[,"sd"],
-    #                            groups = "sd",
-    #                            col = args[["colour"]],
-    #                            type = "histogram",
-    #                            ylim = lim)
-    # Gviz::displayPars(dtsd)$background.title <- "#FFFFFF"
-    # Gviz::displayPars(dtsd)$fontcolor.title <- "#000000"
-    # Gviz::displayPars(dtsd)$col.axis <- "#000000"
-    # Gviz::displayPars(dtsd) <- args
-    # ot <- OverlayTrack(list(dtscore,dtsd))
     list("score" = dtscore)
   }
 )
@@ -77,8 +67,7 @@ setMethod(
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
-  signature = signature(x = "ModInosine",
-                        coord = "GRanges"),
+  signature = signature(x = "ModInosine", coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
     if(missing(type)){
       type <- RNAMODR_I_PLOT_DATA_DEFAULT
@@ -106,8 +95,7 @@ setMethod(
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
-  signature = signature(x = "ModSetInosine",
-                        coord = "GRanges"),
+  signature = signature(x = "ModSetInosine", coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
     if(missing(type)){
       type <- RNAMODR_I_PLOT_DATA_DEFAULT

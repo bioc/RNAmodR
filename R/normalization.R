@@ -23,22 +23,39 @@ NULL
 
 #' @importFrom GenomicFeatures makeTxDbFromGFF
 #' @importFrom BiocGenerics path
-# Return a TxDb object
+# Returns a TxDb or a GRangesList object
 .norm_annotation <- function(annotation, className, 
                   .annotationname = assertive::get_name_in_parent(annotation)){
-  if(!is(annotation,"GFFFile") && !is(annotation,"TxDb")){
-    annotation <- .norm_gff(annotation, className, .annotationname)
-  } else if(is(annotation,"GFFFile")) {
-    assertive::assert_all_are_existing_files(c(BiocGenerics::path(annotation)))
-  } else if(is(annotation,"TxDb")) {
-    assertive::assert_all_are_true(validObject(annotation))
+  if(!is(annotation,"GRangesList")){
+    if(!is(annotation,"GFFFile") && !is(annotation,"TxDb")){
+      annotation <- .norm_gff(annotation, className, .annotationname)
+    } else if(is(annotation,"GFFFile")) {
+      assertive::assert_all_are_existing_files(c(BiocGenerics::path(annotation)))
+    } else if(is(annotation,"TxDb")) {
+      assertive::assert_all_are_true(validObject(annotation))
+    } else {
+      stop("Something went wrong. Unrecognized annotation input during ",
+           "creation of class '",className,"'.",
+           call. = FALSE)
+    }
+    if(!is(annotation,"TxDb")){
+      annotation <- GenomicFeatures::makeTxDbFromGFF(annotation)
+    }
   } else {
-    stop("Something went wrong. Unrecognized annotation input during ",
-         "creation of class '",className,"'.",
-         call. = FALSE)
+    annotation <- .norm_annotation_GRangesList(annotation)
   }
-  if(!is(annotation,"TxDb")){
-    annotation <- GenomicFeatures::makeTxDbFromGFF(annotation)
+  annotation
+}
+
+.norm_annotation_GRangesList <- function(annotation){
+  if(is.null(names(annotation))){
+    stop("Elements of in 'annotation' GRangesList must be named.")
+  }
+  if(any(duplicated(names(annotation)))){
+    stop("Names of elements in 'annotation' GRangesList must be unique.")
+  }
+  if("*" %in% unique(unlist(IRanges::CharacterList(strand(annotation))))){
+    stop("Invalid strand information. Strand must either be '+' or '-'.")
   }
   annotation
 }
@@ -156,8 +173,8 @@ SAMPLE_TYPES <- c("treated","control")
     seqinfo <- .norm_seqinfo(seqinfo)
   }
   # norm annotation
-  if(!is(annotation,"TxDb")){
-    annotation  <- .norm_annotation(annotation, className)
+  if(!is(annotation,"GRangesList") && !is(annotation,"TxDb")){
+    stop("Something went wrong.")
   }
   # norm sequences input
   if(is(sequences,"FaFile")){
