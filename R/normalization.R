@@ -204,6 +204,9 @@ SAMPLE_TYPES <- c("treated","control")
 #'@importFrom stringr str_locate
 # check if a class of type x exists
 .norm_modifiertype <- function(x){
+  if(x == ""){
+    stop("Empty string.")
+  }
   class <- try(getClass(x), silent = TRUE)
   if (is(class, "try-error")){
     stop("Class '",x,"' is not implemented.",
@@ -216,14 +219,14 @@ SAMPLE_TYPES <- c("treated","control")
     stop("Class '",x,"' does not extend the 'Modifier' class.")
   }
   nameId <- stringr::str_locate(class@className,"Mod")
-  if(nrow(nameId) == 0L){
-    stop("The string 'Mod' must be present once at the front of the class ",
-         "name.",
+  if(any(is.na(nameId)) || nrow(nameId) == 0L){
+    stop("Invalid class name of Modifier class: the string 'Mod' must be ",
+         "present once at the front of the class name.",
          call. = FALSE)
   }
   if(nrow(nameId) > 1L || nameId[,"start"] != 1L || nameId[,"end"] != 3L){
-    stop("The string 'Mod' can only be present once at the front of the class ",
-         "name.",
+    stop("Invalid class name of Modifier class: the string 'Mod' can only be ",
+         "present once at the front of the class name.",
          call. = FALSE)
   }
   x

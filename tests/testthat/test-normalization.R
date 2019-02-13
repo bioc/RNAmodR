@@ -78,4 +78,13 @@ test_that("argument normalization:",{
   expect_error(RNAmodR:::.norm_mod("",""),"Modification '' as defined for  does")
   expect_error(RNAmodR:::.norm_mod("II",""),"Modification 'II' as defined for  does")
   expect_equal("I",RNAmodR:::.norm_mod("I",""))
+  # .norm_modifiertype
+  expect_error(RNAmodR:::.norm_modifiertype(),'argument "x" is missing')
+  expect_error(RNAmodR:::.norm_modifiertype(""),"Empty string")
+  setClass("Mo2dInosine2",contains = "ModInosine")
+  expect_error(RNAmodR:::.norm_modifiertype("Mo2dInosine2"),
+               "Invalid class name of Modifier class: the string 'Mod' must be present once at the front")
+  setClass("InosineMod2",contains = "ModInosine")
+  expect_error(RNAmodR:::.norm_modifiertype("InosineMod2"),
+               "Invalid class name of Modifier class: the string 'Mod' can only be present once at the front of")
 })

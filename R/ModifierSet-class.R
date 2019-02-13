@@ -143,7 +143,19 @@ setMethod(f = "relistToClass",
 }
 
 .get_class_name_for_set_from_modifier_type <- function(modifiertype){
-  gsub("Mod","ModSet",modifiertype)
+  x <- gsub("Mod","ModSet",modifiertype)
+  class <- try(getClass(x), silent = TRUE)
+  if (is(class, "try-error")){
+    stop("Class '",x,"' is not implemented.",
+         call. = FALSE)
+  }
+  if(isVirtualClass(class)){
+    stop("Class '",x,"' is virtual.")
+  }
+  if(!("ModifierSet" %in% extends(class))){
+    stop("Class '",x,"' does not extend the 'ModifierSet' class.")
+  }
+  x
 }
 
 
