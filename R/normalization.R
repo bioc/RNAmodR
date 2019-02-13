@@ -49,7 +49,7 @@ NULL
 
 .norm_annotation_GRangesList <- function(annotation){
   if(is.null(names(annotation))){
-    stop("Elements of in 'annotation' GRangesList must be named.")
+    stop("Elements of 'annotation' GRangesList must be named.")
   }
   if(any(duplicated(names(annotation)))){
     stop("Names of elements in 'annotation' GRangesList must be unique.")
@@ -109,8 +109,12 @@ SAMPLE_TYPES <- c("treated","control")
          call. = FALSE)
   }
   if(!all(file.exists(BiocGenerics::path(x)))){
-    stop("Some Bam files do not exists at the given locations.",
+    stop("Bam files do not exists at the given locations.",
          call. = FALSE)
+  }
+  if(is.null(names(x))){
+    stop("Names of BamFileList must either be 'treated' or 'control' (case ",
+         "insensitive). No names found.")
   }
   names <- tolower(unique(names(x)))
   if(!all(names %in% SAMPLE_TYPES)){
@@ -144,7 +148,7 @@ SAMPLE_TYPES <- c("treated","control")
 # try to coerce the input to a Seqinfo object
 .norm_seqinfo <- function(seqinfo){
   if(!is(seqinfo,"Seqinfo")){
-    tmp <- try(GenomeInfoDb::Seqinfo(seqinfo))
+    tmp <- try(GenomeInfoDb::Seqinfo(seqinfo), silent = TRUE)
     if(is(tmp,"try-error")){
       stop("Input is not a Seqinfo object and could not be coerced to ",
            "one.",
@@ -174,6 +178,9 @@ SAMPLE_TYPES <- c("treated","control")
   }
   # norm annotation
   if(!is(annotation,"GRangesList") && !is(annotation,"TxDb")){
+    stop("Something went wrong.")
+  }
+  if(!is(sequences,"FaFile")){
     stop("Something went wrong.")
   }
   # norm sequences input
