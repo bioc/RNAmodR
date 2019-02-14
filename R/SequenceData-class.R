@@ -177,7 +177,7 @@ setReplaceMethod("[", "SequenceData",
     if(!missing(j)){
       stop("replacement of columns not supported")
     }
-    if(class(x) != class(value)){
+    if(!is(value,class(x))){
       stop("replacement 'value' must be of the same class than 'x'")
     }
     if (missing(i)){

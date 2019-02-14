@@ -14,12 +14,12 @@ Description: RNAmodR provides classes and workflows for loading/aggregation data
     modifications from specific patterns. In addition, utilities are provided to
     validate and visualize the results. 
 biocViews: 
-    Software, Infrastructure, WorkflowStep, Visualization
+    Software, Infrastructure, WorkflowStep, Visualization, Sequencing
 License: Artistic-2.0
 Encoding: UTF-8
 LazyData: false
 Depends:
-    R (>= 3.5),
+    R (>= 3.6),
     IRanges,
     GenomicRanges,
     Modstrings
