@@ -21,14 +21,38 @@ BiocStyle::markdown(css.files = c('custom.css'))
 
 # Introduction
 
-`RNAmodR` implements class and a workflows to detect post-transcriptional RNA
-modifications in high throughput sequencing data.
+Post-transcriptional modifications can be found abundantly in rRNA and tRNA and
+can be detected classically via several strategies. However, difficulties arise
+if the identity and the position of the modified nucleotides is to be determined
+at the same time. Classically, a primer extension, a form of reverse
+transcription (RT), would allow certain modifications to be accessed by blocks
+during the RT changes or changes in the cDNA sequences. Other modification would
+need to be selectively treated by chemical reactions to influence the outcome of
+the reverse transcription.
 
-From the a basic `SequenceData`, specific subclasses are derived for accessing
-specific aspects of aligned reads, e.g. 5'-end positions or pileup data. From
+With the increased availability of high throughput sequencing, these classical
+methods were adapted to high throughput methods allowing more RNA molecules to
+be accessed at the same time. With these advances post-transcriptional
+modifications were also detected on mRNA. Among these high throughput techniques
+are for example Pseudo-Seq [[@Carlile.2014]](#References), RiboMethSeq
+[[@Birkedal.2015]](#References) and AlkAnilineSeq
+[[@Marchand.2018]](#References) each able to detect a specific type of
+modification from footprints in RNA-Seq data prepared with the selected methods.
+
+Since similar pattern can be observed from some of these techniques, overlaps of
+the bioinformatical pipeline already are and will become more frequent with new
+emerging sequencing techniques.
+
+`RNAmodR` implements classes and a workflow to detect post-transcriptional RNA
+modifications in high throughput sequencing data. It is easily adaptable to new
+methods and can help during the phase of initial method development as well as
+more complex screenings.
+
+Briefly, from the `SequenceData`, specific subclasses are derived for accessing
+specific aspects of aligned reads, e.g. 5’-end positions or pileup data. With
 this a `Modifier` class can be used to detect specific patterns for individual
 types of modifications. The `SequenceData` classes can be shared by different
-`Modifier` classes allowing easy adapattion to new methods.
+`Modifier` classes allowing easy adaptation to new methods.
 
 ```{r, echo = FALSE}
 suppressPackageStartupMessages({
@@ -46,8 +70,6 @@ library(RNAmodR)
 ```
 
 ## SequenceData
-
-Loading example files
 
 ```{r example_files}
 RNAmodR.files <- RNAmodR.Data::RNAmodR.files
@@ -70,7 +92,7 @@ seqdata
 ```
 
 Each `SequenceData` contains data per transcript alongside the annotation
-information and the sequence. This data stored within the `SequenceData` can be 
+information and the sequence. The data stored within the `SequenceData` can be 
 accessed by several functions.
 
 ```{r seqdata_functions,include=FALSE}
@@ -97,7 +119,6 @@ The data types and names of the columns are different for most of the
 `SequenceData` classes. As a naming convenction a descriptor is combined with
 the condition as defined in files input and the replicate. For more details
 please have a look at the man pages, e.g. `?End5SequenceData`.
-
 
 Upon subsetting of a `SequenceData` object, a `SequenceDataFrame` is returned
 independent of the class of `SequenceData`.
@@ -130,17 +151,15 @@ Whereas, the `SequenceData` classes are used to hold the data, `Modifier`
 classes are used to detect certain features within high throughput sequencing
 data to assign the presence of specific modifications for an established
 pattern. The `Modifier` class is virtual and can be addapted to individual
-methods. For example mapped reads from the AlkAnilineSeq
-[@Marchand.2018](#References) method can analyzed using the `ModAlkAnilineSeq`
-class to reveal the presence of m7G by detecting the accumulation of 5'-ends at
-the N+1 position, since m7G is susceptible cleavage by the aniline treatment
-(Marchand et al. 2018). Therefore, `ModAlkAnilineSeq` inherits from `Modifier`.
+methods. For example mapped reads can be analyzed using the `ModInosine`
+class to reveal the presence of I by detecting a A to G conversion in normal 
+RNA-Seq data. Therefore, `ModInosine` inherits from `Modifier`.
 
 To fix the data processing and detection strategy, for each type of sequencing
 method a `Modifier` class can be developed alongside to detect modifications.
 For more information on how to develop such a class and potentially a new
-corresponding `SequenceData` class, please have a look at the 
-[vignette for creating a new analysis](RNAmodR.create.html).
+corresponding `SequenceData` class, please have a look at the [vignette for
+creating a new analysis](RNAmodR.creation.html).
 
 Initially three `Modifier` classes are available:
 
@@ -155,8 +174,9 @@ they are required to contain data for the same annotation and sequence data.
 
 `Modifier` objects are created with the same arguments as `SequenceData` objects
 and will start loading the necessary `SequenceData` objects from these. In
-addition they will start automatically to search for modifications, if the
-optional argument `findMod` is not set to `FALSE`.
+addition they will start automatically start to calculate any additional scores 
+(aggregation) and then start to search for modifications, if the optional 
+argument `findMod` is not set to `FALSE`.
 
 ```{r modifier1}
 annotation <- GFF3File(RNAmodR.files[["example_AAS.gff3"]])
@@ -165,11 +185,12 @@ mi <- ModInosine(files, annotation = annotation, sequences = sequences)
 ```
 
 (Hint: If you use an artificial genome, name the chromosomes chr1-chrN. It
-will makes somethings easier later on during visualization using the `Gviz`
+will make some things easier later on during visualization using the `Gviz`
 package)
 
 Since the `Modifier` class wraps a `SequenceData` object the accessor to data
-contained withing work as well.
+contained withing work as well. What type of conditions the `Modifier` class 
+expects is explained in the man pages of the Modifier class.
 
 ```{r modifier1_functions,include=FALSE}
 names(mi) # matches the transcript names as returned by a TxDb object
@@ -203,7 +224,10 @@ msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
 ```
 
 The creation of the `ModifierSet` will itself trigger the creation of a
-`Modifier` object each containing from one sample set.
+`Modifier` object each containing data from one sample set. This step is 
+parallelized using the functions from the `BiocParallel` package. If a 
+`Modifier` class itself uses the functionallity it is switched of unless
+`internalBP = TRUE` is set.
 
 ```{r modifierset2}
 names(msi)
@@ -222,21 +246,22 @@ seqinfo(msi)
 # Analysis of detected modifications
 
 Found modifications can be retrieved from a `Modifier` or `ModifierSet` object
-via the `modification()` function. The function return a 
-`GRanges`/`GRangesList`, which contains the coordinates of the modifications 
-with respect to the genome used. For example if a transcript starts at position
-100 and contains a modified nucleotide at position 50, the returned coordinate
-will 149.
+via the `modifications()` function. The function returns a
+`GRanges`/`GRangesList` obejct, which contains the coordinates of the
+modifications with respect to the genome used. For example if a transcript
+starts at position 100 and contains a modified nucleotide at position 50, the
+returned coordinate will 149.
 
 ```{r results1}
 mod <- modifications(msi)
 mod[[1]]
 ```
 
-To retrieve the coordinates with respect to the transcript, use the optional
-argument `perTranscript = TRUE`. For this example this will yield the same
-coordinates, since a custom genome used for mapping, which does not contain
-transcripts on the negative strand and per transcript chromosomes.
+To retrieve the coordinates with respect to the transcript boundaries, use the
+optional argument `perTranscript = TRUE`. For this example this will yield the
+same coordinates, since a custom genome was used for mapping of the example,
+which does not contain transcripts on the negative strand and per transcript
+chromosomes.
 
 ```{r results2}
 mod <- modifications(msi, perTranscript = TRUE)
@@ -245,9 +270,9 @@ mod[[1]]
 
 ## Compairing results
 
-To compare results between samples, a `ModifierSet` is required as well as 
-positions to compare. To construct a set of positions, we will use the
-intersection of all modifications found.
+To compare results between samples, a `ModifierSet` is required as well as a
+definition of positions to compare. To construct a set of positions, we will use
+the intersection of all modifications found as an example.
 
 ```{r results3}
 mod <- modifications(msi)
@@ -259,9 +284,9 @@ compareByCoord(msi,coord)
 
 The result can also by plotted using `plotCompareByCoord`, which accepts an
 optional argument `alias` to allow transcript ids to be converted to other 
-identifiers. for this is step it probably helpful to construct a `TxDb` object
-right at the beginning and use it for constructiong the `Modifier`/`ModifierSet`
-object.
+identifiers. For this is step it probably helpful to construct a `TxDb` object
+right at the beginning and use it for constructing the `Modifier`/`ModifierSet`
+object as the `annotation` argument.
 
 ```{r}
 txdb <- makeTxDbFromGFF(path(annotation))
@@ -281,41 +306,53 @@ plotCompareByCoord(msi[c(3,1,2)], coord, alias = alias, normalize = "SampleSet3"
                    perTranscript = TRUE)
 ```
 
-Additionally, the calculated scores and data can be visualized along the 
-transcripts or chunks of the transcript. With the optional argument `seqdata`
-the plotting of the sequence data instead of the score data can be triggered
-by setting it to `TRUE`.
+The calculated scores and data can be visualized along the transcripts or chunks
+of the transcript. With the optional argument `seqdata` the plotting of the
+sequence data in addition to the score data can be triggered by setting it to
+`TRUE`.
 
 ```{r plot3, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine.", fig.asp=1}
 visualizeData(msi, "2", from = 10L, to = 45L, alias = alias) # seqdata = FALSE
 ```
 
-```{r plot4, fig.cap="Sequence data along a transcript containing a A to G conversion indicating the presence of Inosine. This figure includes the detailed pileup sequence data.", fig.asp=1}
+```{r plot4, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine. This figure includes the detailed pileup sequence data.", fig.asp=1.5}
 visualizeData(msi[1:2], "2", from = 10L, to = 45L, seqdata = TRUE, alias = alias)
 ```
 
 # Performance measurements
 
 Since the detection of modifications from high throughput sequencing data relies
-usually on thresholds for calling a modifications, there is considerable
-interest in analyzing the performance of the method based on scores chosen and
-samples available. To analyse the performance the function `plotROC()` is
-implemented, which is a wrapper around the functionality of the `ROCR` package
+usually on thresholds for calling modifications, there is considerable interest
+in analyzing the performance of the method based on scores chosen and samples
+available. To analyse the performance the function `plotROC()` is implemented,
+which is a wrapper around the functionality of the `ROCR` package
 [@Sing.2005](#References).
 
 For the example data used in this vignette, the information gained is rather 
 limited and the following figure should be regarded just as a proof of concept.
-In addition, the use of found modifications sites as an input for plotROC is
-strongly discouraged, since it is missing the point of this test. Please regard
-this aspect of the next chunk as proof of concept as well.
+In addition, the use of found modifications sites as an input for `plotROC` is
+strongly discouraged, since defeats the purpose of the test. Therefore, please 
+regard this aspect of the next chunk as proof of concept as well.
 
-```{r plot5, fig.cap="TPR vs. FPR plot.", fig.asp=1}
+```{r plot6, fig.cap="TPR vs. FPR plot.", fig.asp=1}
 plotROC(msi,coord)
 ```
 
 Please have a look at `?plotROC` for additional details. Most of the
 functionality from the `ROCR` package is available via additional arguments,
 thus the output of `plotROC` can be heavily customized.
+
+# Further development
+
+The development of `RNAmodR` will continue. General ascpects of the analysis
+workflow will be addressed in the `RNAmodR` package, whereas additional 
+classes for new sequencing techniques targeted at detecting post-transcriptional
+will be wrapped in individual `packages`. This will allow general improvements
+to be propagate upstream, but not hinder individual requirements of each 
+detection strategy.
+
+As example have a look at the `RNAmodR.RiboMethSeq` and `RNAmodR.AlkAnilineSeq`
+packages.
 
 # Sessioninfo
 

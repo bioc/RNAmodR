@@ -42,8 +42,8 @@ NULL
 #' subset the transcripts analyzed on a chromosome basis.
 #' @param ... Additional otpional parameters:
 #' \itemize{
-#' \item{internalBP }{\code{TRUE} or \code{FALSE}: should 
-#' parallilazation used internally for creation of each \code{Modifier} or
+#' \item{internalBP} {\code{TRUE} or \code{FALSE}: should 
+#' parallilazation used internally during creation of each \code{Modifier} or
 #' should the creation of the \code{Modifier} objects be parallalized? (default:
 #' \code{internalBP = FALSE})}
 #' }

@@ -70,11 +70,11 @@ type \code{sequencesType}.}
 \code{sequences}. Either \code{RNAStringSet} or \code{ModRNAStringSet}.}
 
 \item{\code{bamfiles}}{the input bam files as 
-\code{\link[Rsamtools:BamFileList]{BamFileList}}}
+\code{\link[Rsamtools:BamFile-class]{BamFileList}}}
 
 \item{\code{condition}}{conditions along the 
-\code{\link[Rsamtools:BamFileList]{BamFileList}}: Either \code{control} or 
-\code{treated}}
+\code{\link[Rsamtools:BamFile-class]{BamFileList}}: Either \code{control}
+or \code{treated}}
 
 \item{\code{replicate}}{replicate number along the \code{BamFileList} for each of the
 condition types.}

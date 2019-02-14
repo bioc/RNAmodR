@@ -69,7 +69,8 @@ getData(x, grl, sequences, param, args)
 \item{sequences}{a \code{XStringSet} of type \code{RNAStringSet} or 
 \code{ModRNAStringSet}}
 
-\item{param}{a \code{\link[Rsamtools:ScanBamParam]{ScanBamParam}} object}
+\item{param}{a \code{\link[Rsamtools:ScanBamParam-class]{ScanBamParam}} 
+object}
 
 \item{args}{a list of addition arguments}
 }

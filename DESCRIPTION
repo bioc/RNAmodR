@@ -19,7 +19,7 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: false
 Depends:
-    R (>= 3.6),
+    R (>= 3.5),
     IRanges,
     GenomicRanges,
     Modstrings
@@ -78,6 +78,7 @@ Collate:
     'Modifier-viz.R'
     'ModifierSet-comparison.R'
     'ModifierSet-viz.R'
+    'RangedSummarizedExperiment.R'
     'SequenceData-coverage.R'
     'SequenceData-end-pos.R'
     'SequenceData-normalized-end-pos.R'

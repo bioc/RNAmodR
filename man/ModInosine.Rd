@@ -48,20 +48,22 @@ sequences to be analyzed on a per chromosome basis.}
 a \code{ModInosine} or \code{ModSetInosine} object
 }
 \description{
-Inosine can be detected in sequence by the conversion of A positions to G.
-\code{ModInosine} uses to search for Inosine positions.
+Inosine can be detected in RNA-Seq data by the conversion of A positions to 
+G. This conversion is detected by \code{ModInosine} and used to search for 
+Inosine positions.
 
 Only samples named \code{treated} are used for this analysis, since the
 A to G conversion is common feature among the reverse transcriptases usually
 emploied. Let us know, if that is not the case, and the class needs to be
 modified.
 
-\code{\link{ModInosine-functions}}
+Further information on \code{\link[=ModInosine-functions]{Functions}} of 
+\code{ModInosine}.
 }
 \details{
-\code{ModInosine} score: the score for reported Inosine positions are between
-1 and 100. It is calculated as \code{min(log2(percent(G) /
-(percent(A)+percent(T)+percent(C))) * 10,100)}.
+\code{ModInosine} score: the scores for reported Inosine positions are 
+between 0 and 1. They are calculated as the relative amount of called G bases 
+(\code{(G / N)}) and only kept for A positions.
 }
 \examples{
 # construction of ModInosine object

@@ -16,7 +16,8 @@ NULL
 #' @param grl a \code{GRangesList} from \code{exonsBy(..., by = "tx")}
 #' @param sequences a \code{XStringSet} of type \code{RNAStringSet} or 
 #' \code{ModRNAStringSet}
-#' @param param a \code{\link[Rsamtools:ScanBamParam]{ScanBamParam}} object
+#' @param param a \code{\link[Rsamtools:ScanBamParam-class]{ScanBamParam}} 
+#' object
 #' @param args a list of addition arguments
 #' 
 #' @return 

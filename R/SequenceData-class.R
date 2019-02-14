@@ -62,10 +62,10 @@ NULL
 #' @slot sequencesType a \code{character} value for the class name of 
 #' \code{sequences}. Either \code{RNAStringSet} or \code{ModRNAStringSet}.
 #' @slot bamfiles the input bam files as 
-#' \code{\link[Rsamtools:BamFileList]{BamFileList}}
+#' \code{\link[Rsamtools:BamFile-class]{BamFileList}}
 #' @slot condition conditions along the 
-#' \code{\link[Rsamtools:BamFileList]{BamFileList}}: Either \code{control} or 
-#' \code{treated}
+#' \code{\link[Rsamtools:BamFile-class]{BamFileList}}: Either \code{control}
+#' or \code{treated}
 #' @slot replicate replicate number along the \code{BamFileList} for each of the
 #' condition types.
 #' @slot seqinfo a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
