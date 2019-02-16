@@ -112,13 +112,12 @@ NULL
 setMethod(
   f = "visualizeDataByCoord",
   signature = signature(x = "ModifierSet", coord = "GRanges"),
-  definition = function(x, coord, type = NA, seqdata = FALSE, window.size = 15L,
-                        ...) {
+  definition = function(x, coord, type = NA, window.size = 15L, ...) {
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
     from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
     visualizeData(x, name = coord$Parent, from = from_to$from,
-                  to = from_to$to, type = type, seqdata = seqdata, ...)
+                  to = from_to$to, type = type, ...)
     
   }
 )
@@ -128,25 +127,35 @@ setMethod(
 setMethod(
   f = "visualizeData",
   signature = signature(x = "ModifierSet"),
-  definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
+  definition = function(x, name, from, to, type = NA, showSequenceData = FALSE, 
+                        showSequence = TRUE, showAnnotation = FALSE, ...) {
     # get plotting arguments
     args <- .norm_viz_args_ModifierSet(list(...), x)
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
-    seqdata <- .norm_seqdata_show(seqdata)
+    showSequenceData <- .norm_show_argument(showSequenceData, FALSE)
+    showSequence <- .norm_show_argument(showSequence, TRUE)
+    showAnnotation <- .norm_show_argument(showAnnotation, FALSE)
     type <- .norm_type(type)
     colours <- .norm_viz_colours(x, args[["colours"]])
     # get tracks
-    atm <- .get_viz_annotation_track(ranges(x), args[["annotation.track.pars"]],
-                                     args[["alias"]])
-    st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
-                                  args[["sequence.track.pars"]])
+    atm <- NULL
+    st <- NULL
+    if(showAnnotation){
+      atm <- .get_viz_annotation_track(ranges(x),
+                                       args[["annotation.track.pars"]],
+                                       args[["alias"]])
+    }
+    if(showSequence){
+      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
+                                    args[["sequence.track.pars"]])
+    }
     dts <- lapply(x, getDataTrack, name = name, type = type, ...)
     dts <- .add_viz_names(dts, names(x))
     dts <- .add_viz_colours(dts, colours)
     dts <- do.call(c,unname(dts))
     dts <- .add_viz_ylim(dts, chromosome, from_to)
-    if(seqdata){
+    if(showSequenceData){
       sdts <- lapply(x, function(z){getDataTrack(seqData(z), name = name, ...)})
       sdts <- .add_viz_names(sdts, names(x))
       sdts <- do.call(c,unname(sdts))
@@ -156,6 +165,7 @@ setMethod(
       tracks <- c(dts, list(st,atm))
     }
     # plot tracks
+    tracks <- tracks[!vapply(tracks, is.null, logical(1))]
     do.call(Gviz::plotTracks,
             c(list(tracks, from = from_to$from, to = from_to$to,
                    chromosome = chromosome),

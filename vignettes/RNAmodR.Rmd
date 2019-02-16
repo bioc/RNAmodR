@@ -82,7 +82,7 @@ files <- c(Treated = RNAmodR.files[["example_wt_1.bam"]],
 
 Each `SequenceData` object is created with a named character vector, which can
 be coerced to a `BamFileList`, or named `BamFileList`. The names must be either
-"treated" or "control" describing the condition the data file belongs to. 
+"treated" or "control" describing the condition the data file b  elongs to. 
 Multiple files can be given per condition and are used as replicates.
 
 ```{r seqdata}
@@ -274,7 +274,7 @@ To compare results between samples, a `ModifierSet` is required as well as a
 definition of positions to compare. To construct a set of positions, we will use
 the intersection of all modifications found as an example.
 
-```{r results3}
+```{r coord}
 mod <- modifications(msi)
 coord <- unique(unlist(mod))
 coord$score <- NULL
@@ -307,16 +307,16 @@ plotCompareByCoord(msi[c(3,1,2)], coord, alias = alias, normalize = "SampleSet3"
 ```
 
 The calculated scores and data can be visualized along the transcripts or chunks
-of the transcript. With the optional argument `seqdata` the plotting of the
-sequence data in addition to the score data can be triggered by setting it to
-`TRUE`.
+of the transcript. With the optional argument `showSequenceData ` the plotting
+of the sequence data in addition to the score data can be triggered by setting
+it to `TRUE`.
 
 ```{r plot3, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine.", fig.asp=1}
-visualizeData(msi, "2", from = 10L, to = 45L, alias = alias) # seqdata = FALSE
+visualizeData(msi, "2", from = 10L, to = 45L, alias = alias) # showSequenceData = FALSE
 ```
 
-```{r plot4, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine. This figure includes the detailed pileup sequence data.", fig.asp=1.5}
-visualizeData(msi[1:2], "2", from = 10L, to = 45L, seqdata = TRUE, alias = alias)
+```{r plot4, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine. This figure includes the detailed pileup sequence data.", fig.asp=1.2}
+visualizeData(msi[1:2], "2", from = 10L, to = 45L, showSequenceData = TRUE, alias = alias)
 ```
 
 # Performance measurements
@@ -335,7 +335,7 @@ strongly discouraged, since defeats the purpose of the test. Therefore, please
 regard this aspect of the next chunk as proof of concept as well.
 
 ```{r plot6, fig.cap="TPR vs. FPR plot.", fig.asp=1}
-plotROC(msi,coord)
+plotROC(msi, coord)
 ```
 
 Please have a look at `?plotROC` for additional details. Most of the
@@ -354,10 +354,14 @@ detection strategy.
 As example have a look at the `RNAmodR.RiboMethSeq` and `RNAmodR.AlkAnilineSeq`
 packages.
 
+![](RNAmodR.png)
+
 # Sessioninfo
 
 ```{r}
 sessioninfo::session_info()
 ```
 
-# References<a name="References"></a>
+<a name="References"></a>
+
+# References

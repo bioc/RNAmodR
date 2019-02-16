@@ -18,8 +18,12 @@ NULL
 #' @param from Only for \code{visualizeData}: start position
 #' @param to Only for \code{visualizeData}: end position
 #' @param type the data type of data show as data tracks.
-#' @param seqdata \code{TRUE} or \code{FALSE}: whould the sequence data be 
-#' shown? (default: \code{seqdata = FALSE})
+#' @param showSequenceData \code{TRUE} or \code{FALSE}: should the sequence data
+#' be shown? (default: \code{seqdata = FALSE})
+#' @param showSequence \code{TRUE} or \code{FALSE}: should a sequence track be 
+#' shown? (default: \code{seqdata = TRUE})
+#' @param showAnnotation \code{TRUE} or \code{FALSE}: should a annotation track 
+#' be shown? (default: \code{seqdata = FALSE})
 #' @param window.size integer value for the number of positions on the left and 
 #' right site of the selected positions included in the plotting (default: 
 #' \code{window.size = 15L})
@@ -348,8 +352,7 @@ NULL
 setMethod(
   f = "visualizeDataByCoord",
   signature = signature(x = "SequenceData", coord = "GRanges"),
-  definition = function(x, coord, type = NA, window.size = 15L,
-                        perTranscript = FALSE, ...) {
+  definition = function(x, coord, type = NA, window.size = 15L, ...) {
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
     from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
@@ -365,22 +368,32 @@ setMethod(
   f = "visualizeData",
   signature = signature(x = "SequenceData"),
   definition = function(x, name, from, to, perTranscript = FALSE, 
-                        ...) {
+                        showSequence = TRUE, showAnnotation = FALSE, ...) {
     # get plotting arguments
     args <- .norm_viz_args_SequenceData(list(...), x)
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
+    showSequence <- .norm_show_argument(showSequence, TRUE)
+    showAnnotation <- .norm_show_argument(showAnnotation, FALSE)
     # get tracks
-    atm <- .get_viz_annotation_track(ranges(x), args[["annotation.track.pars"]],
-                                     args[["alias"]])
-    st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
-                                  args[["sequence.track.pars"]])
+    atm <- NULL
+    st <- NULL
+    if(showAnnotation){
+      atm <- .get_viz_annotation_track(ranges(x),
+                                       args[["annotation.track.pars"]],
+                                       args[["alias"]])
+    }
+    if(showAnnotation){
+      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
+                                    args[["sequence.track.pars"]])
+    }
     dt <- getDataTrack(x, name = name, ...)
     if(!is.list(dt)){
       dt <- list(dt)
     }
     tracks <- c(dt,list(st,atm))
     # plot tracks
+    tracks <- tracks[!vapply(tracks, is.null, logical(1))]
     do.call(Gviz::plotTracks,
             c(list(tracks, from = from_to$from, to = from_to$to,
                    chromosome = chromosome),
