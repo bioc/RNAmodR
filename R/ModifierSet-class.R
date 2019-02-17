@@ -186,7 +186,7 @@ setMethod(f = "relistToClass",
   }
   # do analysis by calling the Modifier classes
   FUN <- function(i, z, n, args, className, PACKAGE, CLASSFUN, annotation,
-                  sequences, seqinfo){
+                  sequences, seqinfo, ...){
     suppressPackageStartupMessages({
       requireNamespace(PACKAGE)
     })
@@ -206,7 +206,7 @@ setMethod(f = "relistToClass",
                    annotation = annotation,
                    sequences = sequences,
                    seqinfo = seqinfo),
-              args))
+              list(...)))
   }
   PACKAGE <- getClass(className)@package
   CLASSFUN <- get(className)
@@ -218,7 +218,8 @@ setMethod(f = "relistToClass",
                                               CLASSFUN = CLASSFUN,
                                               annotation = annotation,
                                               sequences = sequences,
-                                              seqinfo = seqinfo),
+                                              seqinfo = seqinfo,
+                                              ...),
                               SIMPLIFY = FALSE)
   f <- vapply(names,is.null,logical(1))
   names[f] <- as.list(as.character(seq_along(x))[f])
