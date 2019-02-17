@@ -40,30 +40,14 @@ NULL
   args
 }
 
-# .norm_addition.mod_for_visualization <- function(additional.mod,
-#                                                  coord){
-#   if(is(additional.mod,"GRangesList")){
-#     additional.mod <- unlist(additional.mod)
-#   }
-#   additional.mod <- additional.mod[additional.mod$Parent == coord$Parent]
-#   if(length(additional.mod) == 0L){
-#     return(additional.mod)
-#   }
-#   GRanges(seqnames = coord$Parent,
-#           ranges = ranges(additional.mod),
-#           strand = strand(additional.mod),
-#           mcols(additional.mod))
-# }
-
-# .get_viz_sequence <- function(seq,coord,args,modifications){
-#   if(args[["modified.seq"]]){
-#     if(length(modifications) > 0L){
-#       seq <- combineIntoModstrings(seq,modifications)
-#     }
-#   }
-#   seq
-# }
-
+.get_viz_sequence <- function(seq,coord,args,modifications){
+  if(args[["modified.seq"]]){
+    if(length(modifications) > 0L){
+      seq <- combineIntoModstrings(seq,modifications)
+    }
+  }
+  seq
+}
 
 # ------------------------------------------------------------------------------
 
@@ -112,7 +96,7 @@ setMethod(
       dt <- list(dt)
     }
     if(showSequenceData){
-      sdt <- getDataTrack(seqData(x), name = name,...)
+      sdt <- getDataTrack(sequenceData(x), name = name,...)
       if(!is.list(sdt)){
         sdt <- list(sdt)
       }

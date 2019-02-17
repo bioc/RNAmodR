@@ -108,7 +108,7 @@ NULL
 #' \code{Modifier} and \code{ModifierSet} objects.}
 #' \item{\code{mainScore}} {a character vector}
 #' \item{\code{settings}} {a \code{Seqinfo} object}
-#' \item{\code{seqData}} {a \code{SequenceData} object}
+#' \item{\code{sequenceData}} {a \code{SequenceData} object}
 #' \item{\code{modifications}} {a \code{GRanges} or \code{GRangesList} object
 #' describing the found modifications.}
 #' \item{\code{seqinfo}} {a \code{Seqinfo} object}
@@ -125,7 +125,7 @@ NULL
 #' modifierType(msi) #
 #' mainScore(mi)
 #' settings(mi)
-#' seqData(mi)
+#' sequenceData(mi)
 #' modifications(mi)
 #' # general accessors
 #' seqinfo(mi)
@@ -383,7 +383,7 @@ setReplaceMethod(f = "settings",
 
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "seqData", 
+setMethod(f = "sequenceData", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@data})
 
@@ -391,13 +391,13 @@ setMethod(f = "seqData",
 #' @export
 setMethod(f = "names", 
           signature = signature(x = "Modifier"),
-          definition = function(x){names(seqData(x))})
+          definition = function(x){names(sequenceData(x))})
 
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "seqinfo", 
           signature = signature(x = "Modifier"),
-          definition = function(x){seqinfo(seqData(x))})
+          definition = function(x){seqinfo(sequenceData(x))})
 
 #' @rdname Modifier-functions
 #' @export
@@ -409,11 +409,11 @@ setMethod(f = "sequences",
                 stop("'modified' has to be a single logical value.")
               }
               if(modified == FALSE){
-                return(sequences(seqData(x)))
+                return(sequences(sequenceData(x)))
               }
               mod <- .get_modifications_per_transcript(x)
               mod <- split(mod,names(mod))
-              ans <- ModRNAStringSet(sequences(seqData(x)))
+              ans <- ModRNAStringSet(sequences(sequenceData(x)))
               modSeqList <- ans[names(ans) %in% names(mod)]
               mod <- mod[match(names(mod),names(modSeqList))]
               ans[names(ans) %in% names(mod)] <- 
@@ -426,7 +426,7 @@ setMethod(f = "sequences",
 #' @export
 setMethod(f = "ranges", 
           signature = signature(x = "Modifier"),
-          definition = function(x){ranges(seqData(x))})
+          definition = function(x){ranges(sequenceData(x))})
 
 #' @rdname Modifier-functions
 #' @export

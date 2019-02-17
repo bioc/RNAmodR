@@ -135,7 +135,7 @@ setMethod(f = "aggregate",
           signature = signature(x = "ModExample"),
           definition = 
             function(x, force = FALSE){
-              some_data <- FUN(aggregate(seqData(x)))
+              some_data <- FUN(aggregate(sequenceData(x)))
               x@aggregate <- SplitDataFrameList(some_data) # Some data with element per transcript
               x <- callNextMethod()
               x

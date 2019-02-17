@@ -211,7 +211,7 @@ setReplaceMethod(f = "settings",
 
 .aggregate_inosine <- function(x){
   message("Aggregating data and calculating scores...")
-  data <- seqData(x)
+  data <- sequenceData(x)
   mod <- aggregate(data)
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   score <- .calculate_inosine_score(mod, letters)
@@ -248,7 +248,7 @@ setMethod(f = "aggregate",
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   # get the aggregate data
   mod <- aggregateData(x)
-  coverage <- .aggregate_pile_up_to_coverage(seqData(x))
+  coverage <- .aggregate_pile_up_to_coverage(sequenceData(x))
   # get arguments
   minCoverage <- settings(x,"minCoverage")
   minReplicate <- settings(x,"minReplicate")

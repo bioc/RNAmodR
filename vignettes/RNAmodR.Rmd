@@ -198,7 +198,7 @@ bamfiles(mi)
 ranges(mi) # generate from a TxDb object
 sequences(mi)
 seqinfo(mi)
-seqData(mi) # returns the SequenceData 
+sequenceData(mi) # returns the SequenceData 
 ```
 
 ## ModifierSet

@@ -156,7 +156,7 @@ setMethod(
     dts <- do.call(c,unname(dts))
     dts <- .add_viz_ylim(dts, chromosome, from_to)
     if(showSequenceData){
-      sdts <- lapply(x, function(z){getDataTrack(seqData(z), name = name, ...)})
+      sdts <- lapply(x, function(z){getDataTrack(sequenceData(z), name = name, ...)})
       sdts <- .add_viz_names(sdts, names(x))
       sdts <- do.call(c,unname(sdts))
       sdts <- .add_viz_ylim(sdts, chromosome, from_to)

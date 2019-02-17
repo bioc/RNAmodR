@@ -11,14 +11,14 @@
 \alias{settings<-}
 \alias{sequences}
 \alias{bamfiles}
-\alias{seqData}
+\alias{sequenceData}
 \alias{show,Modifier-method}
 \alias{modifierType,Modifier-method}
 \alias{modType,Modifier-method}
 \alias{mainScore,Modifier-method}
 \alias{settings,Modifier-method}
 \alias{settings<-,Modifier-method}
-\alias{seqData,Modifier-method}
+\alias{sequenceData,Modifier-method}
 \alias{names,Modifier-method}
 \alias{seqinfo,Modifier-method}
 \alias{sequences,Modifier-method}
@@ -51,7 +51,7 @@ sequences(x, ...)
 
 bamfiles(x)
 
-seqData(x)
+sequenceData(x)
 
 \S4method{show}{Modifier}(object)
 
@@ -65,7 +65,7 @@ seqData(x)
 
 \S4method{settings}{Modifier}(x) <- value
 
-\S4method{seqData}{Modifier}(x)
+\S4method{sequenceData}{Modifier}(x)
 
 \S4method{names}{Modifier}(x)
 
@@ -123,7 +123,7 @@ Name of a \code{\link[=Modifier-class]{Modifier}}. Works for both
 \code{Modifier} and \code{ModifierSet} objects.}
 \item{\code{mainScore}} {a character vector}
 \item{\code{settings}} {a \code{Seqinfo} object}
-\item{\code{seqData}} {a \code{SequenceData} object}
+\item{\code{sequenceData}} {a \code{SequenceData} object}
 \item{\code{modifications}} {a \code{GRanges} or \code{GRangesList} object
 describing the found modifications.}
 \item{\code{seqinfo}} {a \code{Seqinfo} object}
@@ -144,7 +144,7 @@ modifierType(mi) # The class name of the Modifier object
 modifierType(msi) #
 mainScore(mi)
 settings(mi)
-seqData(mi)
+sequenceData(mi)
 modifications(mi)
 # general accessors
 seqinfo(mi)
