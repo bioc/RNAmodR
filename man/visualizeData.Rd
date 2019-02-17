@@ -26,34 +26,38 @@ visualizeData(x, name, from = 1L, to = 30L, type, ...)
 getDataTrack(x, name, ...)
 
 \S4method{visualizeDataByCoord}{Modifier,GRanges}(x, coord, type = NA,
-  seqdata = FALSE, window.size = 15L, ...)
+  window.size = 15L, ...)
 
 \S4method{visualizeData}{Modifier}(x, name, from, to, type = NA,
-  seqdata = FALSE, ...)
+  showSequenceData = FALSE, showSequence = TRUE,
+  showAnnotation = FALSE, ...)
 
 \S4method{getDataTrack}{Modifier}(x, name = name, ...)
 
 \S4method{visualizeDataByCoord}{ModifierSet,GRanges}(x, coord, type = NA,
-  seqdata = FALSE, window.size = 15L, ...)
+  window.size = 15L, ...)
 
 \S4method{visualizeData}{ModifierSet}(x, name, from, to, type = NA,
-  seqdata = FALSE, ...)
+  showSequenceData = FALSE, showSequence = TRUE,
+  showAnnotation = FALSE, ...)
 
 \S4method{visualizeDataByCoord}{SequenceData,GRanges}(x, coord,
-  type = NA, window.size = 15L, perTranscript = FALSE, ...)
+  type = NA, window.size = 15L, ...)
 
 \S4method{visualizeData}{SequenceData}(x, name, from, to,
-  perTranscript = FALSE, ...)
+  perTranscript = FALSE, showSequence = TRUE, showAnnotation = FALSE,
+  ...)
 
 \S4method{getDataTrack}{SequenceData}(x, name = name, ...)
 
 \S4method{getDataTrack}{SequenceDataList}(x, name = name, ...)
 
 \S4method{visualizeDataByCoord}{SequenceDataList,GRanges}(x, coord,
-  type = NA, window.size = 15L, perTranscript = FALSE, ...)
+  type = NA, window.size = 15L, ...)
 
 \S4method{visualizeData}{SequenceDataList}(x, name, from, to,
-  perTranscript = FALSE, ...)
+  perTranscript = FALSE, showSequence = TRUE, showAnnotation = FALSE,
+  ...)
 }
 \arguments{
 \item{x}{a \code{Modifier} or \code{ModifierSet} object.}
@@ -88,8 +92,14 @@ with \code{\link[Modstrings:separate]{combineIntoModstrings}}.}
 
 \item{to}{Only for \code{visualizeData}: end position}
 
-\item{seqdata}{\code{TRUE} or \code{FALSE}: whould the sequence data be 
-shown? (default: \code{seqdata = FALSE})}
+\item{showSequenceData}{\code{TRUE} or \code{FALSE}: should the sequence data
+be shown? (default: \code{seqdata = FALSE})}
+
+\item{showSequence}{\code{TRUE} or \code{FALSE}: should a sequence track be 
+shown? (default: \code{seqdata = TRUE})}
+
+\item{showAnnotation}{\code{TRUE} or \code{FALSE}: should a annotation track 
+be shown? (default: \code{seqdata = FALSE})}
 
 \item{perTranscript}{\code{TRUE} or \code{FALSE}: Should the positions shown
 per transcript? (default: \code{perTranscript = FALSE})}

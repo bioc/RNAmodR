@@ -584,7 +584,7 @@ setMethod("SequenceData",
   } else if(is(annotation,"GRangesList")) {
     ranges <- annotation
   } else {
-    stop("Something went wrong.")
+    stop("Annotation is not a 'TxDb' or a 'GRangesList'.")
   }
   ranges
 }

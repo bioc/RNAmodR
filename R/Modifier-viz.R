@@ -2,11 +2,11 @@
 #' @include Modifier-class.R
 NULL
 
-.norm_seqdata_show <- function(seqdata){
-  if(missing(seqdata) || !assertive::is_a_bool(seqdata)){
-    seqdata <- FALSE
+.norm_show_argument <- function(show_arg, default = FALSE){
+  if(missing(show_arg) || !assertive::is_a_bool(show_arg)){
+    show_arg <- default
   }
-  seqdata
+  show_arg
 }
 
 .norm_type <- function(type){
@@ -71,13 +71,12 @@ NULL
 setMethod(
   f = "visualizeDataByCoord",
   signature = signature(x = "Modifier", coord = "GRanges"),
-  definition = function(x, coord, type = NA, seqdata = FALSE, window.size = 15L,
-                        ...) {
+  definition = function(x, coord, type = NA, window.size = 15L, ...) {
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
     from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
     visualizeData(x, name = coord$Parent, from = from_to$from,
-                  to = from_to$to, type = type, seqdata = seqdata, ...)
+                  to = from_to$to, type = type, ...)
   }
 )
 
@@ -86,23 +85,33 @@ setMethod(
 setMethod(
   f = "visualizeData",
   signature = signature(x = "Modifier"),
-  definition = function(x, name, from, to, type = NA, seqdata = FALSE, ...) {
+  definition = function(x, name, from, to, type = NA, showSequenceData = FALSE, 
+                        showSequence = TRUE, showAnnotation = FALSE, ...) {
     # get plotting arguments
     args <- .norm_viz_args_Modifier(list(...), x)
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
-    seqdata <- .norm_seqdata_show(seqdata)
+    showSequenceData <- .norm_show_argument(showSequenceData, FALSE)
+    showSequence <- .norm_show_argument(showSequence, TRUE)
+    showAnnotation <- .norm_show_argument(showAnnotation, FALSE)
     type <- .norm_type(type)
     # get tracks
-    atm <- .get_viz_annotation_track(ranges(x), args[["annotation.track.pars"]],
-                                     args[["alias"]])
-    st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
-                                  args[["sequence.track.pars"]])
+    atm <- NULL
+    st <- NULL
+    if(showAnnotation){
+      atm <- .get_viz_annotation_track(ranges(x), 
+                                       args[["annotation.track.pars"]],
+                                       args[["alias"]])
+    }
+    if(showSequence){
+      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
+                                    args[["sequence.track.pars"]])
+    }
     dt <- getDataTrack(x, name = name, type = type, ...)
     if(!is.list(dt)){
       dt <- list(dt)
     }
-    if(seqdata){
+    if(showSequenceData){
       sdt <- getDataTrack(seqData(x), name = name,...)
       if(!is.list(sdt)){
         sdt <- list(sdt)
@@ -112,6 +121,7 @@ setMethod(
       tracks <- c(dt,list(st,atm))
     }
     # plot tracks
+    tracks <- tracks[!vapply(tracks, is.null, logical(1))]
     do.call(Gviz::plotTracks,
             c(list(tracks, from = from_to$from, to = from_to$to,
                    chromosome = chromosome),
