@@ -142,11 +142,20 @@ NULL
   # add activity information if present
   coord <- unlist(coord)
   coord <- coord[coord$mod %in% modType(x),]
-  if(!is.null(coord$Activity)){
-    data$Activity <- unlist(lapply(coord$Activity, paste, collapse = "/"))
-  }
-  if(!is.null(coord$mod)){
-    data$mod <- unlist(coord$mod)
+  if(!is.null(coord$Activity) || !is.null(coord$mod)){
+    f <- unlist(lapply(unique(as.character(data$names)),
+                       function(n){
+                         d <- data[data$names == n,]
+                         d$positions %in% start(coord)[coord$Parent == n]
+                       }))
+    if(!is.null(coord$Activity)){
+      data$Activity <- ""
+      data$Activity[f] <- unlist(lapply(coord$Activity, paste, collapse = "/"))
+    }
+    if(!is.null(coord$mod)){
+      data$mod <- ""
+      data$mod[f] <- unlist(coord$mod)
+    }
   }
   #
   data <- .normlize_data_against_one_sample(data, normalize)

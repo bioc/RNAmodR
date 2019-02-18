@@ -204,7 +204,8 @@ NULL
 
 .subset_Modifier_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...), x)
-  coord <- .norm_coord(coord, args[["type"]])
+  # converts everything to a GRangesList
+  coord <- .norm_coord(coord, args[["type"]]) 
   data <- aggregateData(x)
   names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
   data <- data[match(names, names(data))]
@@ -237,6 +238,7 @@ NULL
 
 .label_Modifier_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...), x)
+  # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
   data <- aggregateData(x)
   names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
@@ -248,6 +250,7 @@ NULL
 
 .subset_ModifierSet_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...),x)
+  # converts everything to a GRangesList
   coord <- .norm_coord(coord,args[["type"]])
   lapply(x,
          function(z){
