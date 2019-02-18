@@ -50,7 +50,8 @@ plotCompareByCoord(x, coord, normalize, ...)
 
 \item{coord}{coordinates of position to subset to. Either a \code{GRanges} or
 a \code{GRangesList} object. For both types the Parent column is expected to
-match the gene or transcript name.}
+match the gene or transcript name. The \code{GRangesList} object is unlisted
+and only non duplicated entries are retained.}
 
 \item{normalize}{either a single logical or character value. If it is a 
 character, it must match one of the names in the \code{ModifierSet}.}

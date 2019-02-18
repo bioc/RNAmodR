@@ -94,6 +94,8 @@ NULL
       stop("Parent column must be present.", call. = FALSE)
     }
     coord <- split(coord, coord$Parent)
+  } else {
+    stop("Something went wrong.")
   }
   f <- IRanges::LogicalList(lapply(coord,function(c){c$type == "RNAMOD"}))
   coord <- coord[f]
@@ -114,7 +116,13 @@ NULL
 
 .get_element_names <- function(data, coord, name, type){
   namesData <- names(data)
-  namesCoord <- as.character(names(coord))
+  if(is(coord,"GRanges")){
+    namesCoord <- as.character(names(coord))
+  } else if(is(coord,"GRangesList")){
+    namesCoord <- as.character(unique(unlist(lapply(coord,function(c){c$Parent}))))
+  } else {
+    stop("Something went wrong.")
+  }
   if(is.null(name)){
     names <- intersect(namesData, namesCoord)
     message <- c("No intersection between names in data of 'x' and Parent in ",
@@ -191,7 +199,8 @@ NULL
   return(ans)
 }
 
-.subset_Modifier_by_GRangesList <- function(x, coord, ...){
+.subset_Modifier_by_GRanges <- function(x, coord, ...){
+  browser()
   args <- .norm_subset_args(list(...), x)
   coord <- .norm_coord(coord, args[["type"]])
   data <- aggregateData(x)
@@ -199,6 +208,14 @@ NULL
   data <- data[match(names, names(data))]
   coord <- coord[match(names, names(coord))]
   .perform_subset(data, coord, args[["flank"]], args[["perTranscript"]])
+}
+
+.subset_Modifier_by_GRangesList <- function(x, coord, ...){
+  browser()
+  lapply(coord,
+         function(c){
+           .subset_Modifier_by_GRanges(x,c,...)
+         })
 }
 
 ################################################################################
@@ -236,19 +253,26 @@ NULL
 }
 ################################################################################
 
-.subset_ModifierSet_by_GRangesList <- function(x, coord, ...){
+.subset_ModifierSet_by_GRanges <- function(x, coord, ...){
+  browser()
   args <- .norm_subset_args(list(...),x)
   coord <- .norm_coord(coord,args[["type"]])
-  lapply(x,
-         function(z){
-           data <- aggregateData(z)
-           names <- .get_element_names(data, coord, args[["name"]],
-                                       args[["type"]])
-           data <- data[match(names, names(data))]
-           coord <- coord[match(names, names(coord))]
-           .perform_subset(data, coord, args[["flank"]], 
-                           args[["perTranscript"]])
-         })
+  data <- aggregateData(x)
+  names <- .get_element_names(data, coord, args[["name"]],
+                              args[["type"]])
+  data <- data[match(names, names(data))]
+  coord <- coord[match(names, names(coord))]
+  .perform_subset(data, coord, args[["flank"]], 
+                  args[["perTranscript"]])
+}
+
+.subset_ModifierSet_by_GRangesList <- function(x, coord, ...){
+  browser()
+  mapply(.subset_ModifierSet_by_GRanges,
+         x,
+         coord,
+         MoreArgs = list(...),
+         SIMPLIFY = FALSE)
 }
 
 #' @rdname subsetByCoord
@@ -256,7 +280,7 @@ NULL
 setMethod("subsetByCoord",
           signature = c(x = "Modifier", coord = "GRanges"),
           function(x, coord, ...){
-            .subset_Modifier_by_GRangesList(x, coord, ...)
+            .subset_ModifierSet_by_GRanges(x, coord, ...)
           }
 )
 #' @rdname subsetByCoord
@@ -272,7 +296,7 @@ setMethod("subsetByCoord",
 setMethod("subsetByCoord",
           signature = c(x = "ModifierSet", coord = "GRanges"),
           function(x, coord, ...){
-            .subset_ModifierSet_by_GRangesList(x, coord, ...)
+            .subset_ModifierSet_by_GRanges(x, coord, ...)
           }
 )
 #' @rdname subsetByCoord

@@ -21,7 +21,8 @@ NULL
 #' @param x a \code{Modifier} or \code{ModifierSet} object.
 #' @param coord coordinates of position to subset to. Either a \code{GRanges} or
 #' a \code{GRangesList} object. For both types the Parent column is expected to
-#' match the gene or transcript name.
+#' match the gene or transcript name. The \code{GRangesList} object is unlisted
+#' and only non duplicated entries are retained.
 #' @param name Only for \code{compare}: the transcript name
 #' @param from Only for \code{compare}: start position
 #' @param to Only for \code{compare}: end position
@@ -103,6 +104,14 @@ NULL
 }
 
 .compare_ModifierSet_by_GRangesList <- function(x, coord, normalize, ...){
+  browser()
+  coord <- unlist(coord)
+  coord <- unname(coord[!duplicated(coord)])
+  .compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
+}
+
+.compare_ModifierSet_by_GRanges <- function(x, coord, normalize, ...){
+  browser()
   coord <- .norm_coord(coord, modType(x))
   data <- subsetByCoord(x, coord, ...)
   args <- .norm_compare_args(list(...), data, x)
@@ -152,7 +161,7 @@ NULL
 setMethod("compareByCoord",
           signature = c("ModifierSet","GRanges"),
           function(x, coord, normalize, ...){
-            .compare_ModifierSet_by_GRangesList(x, coord, normalize, ...)
+            .compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
           }
 )
 
@@ -245,11 +254,17 @@ setMethod("compareByCoord",
   factor(labels, levels = unique(labels))
 }
 
+.plot_compare_ModifierSet_by_GRangesList <- function(x, coord, normalize, ...){
+  coord <- unlist(coord)
+  coord <- unname(coord[!duplicated(coord)])
+  .plot_compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
+}
+
 #' @importFrom ggplot2 ggplot geom_raster
 #' @importFrom reshape2 melt
-.plot_compare_ModifierSet_by_GRangesList <- function(x, coord, normalize,  ...){
+.plot_compare_ModifierSet_by_GRanges <- function(x, coord, normalize,  ...){
   args <- .norm_compare_plot_args(list(...))
-  data <- .compare_ModifierSet_by_GRangesList(x, coord, normalize, ...)
+  data <- .compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
   data$labels <- .create_position_labels(data$positions,
                                          data$mod,
                                          data$Activity)
@@ -296,7 +311,7 @@ setMethod("compareByCoord",
 setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRanges"),
           function(x, coord, normalize, ...){
-            .plot_compare_ModifierSet_by_GRangesList(x, coord, normalize, ...)
+            .plot_compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
           }
 )
 

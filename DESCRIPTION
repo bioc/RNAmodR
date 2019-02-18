@@ -38,6 +38,7 @@ Imports:
     GenomicFeatures,
     GenomicAlignments,
     Biostrings,
+    SummarizedExperiment,
     GenomeInfoDb,
     rtracklayer,
     Rsamtools,
@@ -77,8 +78,8 @@ Collate:
     'Modifier-subset.R'
     'Modifier-viz.R'
     'ModifierSet-comparison.R'
+    'ModifierSet-export.R'
     'ModifierSet-viz.R'
-    'RangedSummarizedExperiment.R'
     'SequenceData-coverage.R'
     'SequenceData-end-pos.R'
     'SequenceData-normalized-end-pos.R'
