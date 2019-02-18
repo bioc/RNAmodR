@@ -48,9 +48,18 @@ NULL
 #' mapped onto. This must match the information contained in the BAM files.
 #' @param seqinfo optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
 #' subset the transcripts analyzed on a chromosome basis.
-#' @param ... Optional arguments overwriting default values, which are
+#' @param ... Optional arguments overwriting default values. Not all 
+#' \code{SequenceData} classes use all arguments. The arguments are:
 #' \itemize{
-#' \item{minQuality} {class dependent}
+#' \item{\code{minLength}} {single integer value setting a threshold for minimum
+#' read length. Shorther reads are discarded (default: \code{minLength = NA}).}
+#' \item{\code{maxLength}} {single integer value setting a threshold for maximum
+#' read length. Longer reads are discarded (default: \code{maxLength = NA}).}
+#' \item{\code{minQuality}} {single integer value setting a threshold for maximum
+#' read quality. Reads with a lower quality are discarded (default: 
+#' \code{minQuality = 5L}, but this is class dependent).}
+#' \item{\code{max_depth}} {maximum depth for pileup loading (default: 
+#' \code{max_depth = 10000L}).}
 #' }
 #' 
 #' @slot ranges a \code{\link[GenomicRanges:GRangesList-class]{GRangesList}} 
@@ -84,7 +93,8 @@ setClass("SequenceData",
                    replicate = "factor",
                    seqinfo = "Seqinfo",
                    minQuality = "integer",
-                   unlistType = "character"),
+                   unlistType = "character",
+                   dataDescription = "character"),
 prototype = list(ranges = GRangesList(),
                  sequencesType = "RNAStringSet",
                  sequences = RNAStringSet(),
@@ -370,21 +380,27 @@ setMethod("rownames", "SequenceData",
   max_depth <- 10000L # the default is 250, which is to small
   minLength <- NA
   maxLength <- NA
-  minCoverage <- NA
-  # for pileup
   if(!is.null(input[["max_depth"]])){
     max_depth <- input[["max_depth"]]
-    if(!is.integer(max_depth) | max_depth <= 10L){
+    if(!is.integer(max_depth) | length(max_depth) > 1L | max_depth <= 10L){
       stop("'max_depth' must be integer with a value higher than 10L.",
            call. = FALSE)
     }
   }
-  # for protected end data
   if(!is.null(input[["minLength"]])){
     minLength <- input[["minLength"]]
-    if(!is.integer(minLength) | minLength < 1L){
+    if(!is.integer(minLength) | length(minLength) > 1L | minLength < 1L){
       if(!is.na(minLength)){
         stop("'minLength' must be integer with a value higher than 0L or NA.",
+             call. = FALSE)
+      }
+    }
+  }
+  if(!is.null(input[["maxLength"]])){
+    maxLength <- input[["maxLength"]]
+    if(!is.integer(maxLength) | length(maxLength) > 1L | maxLength <= 1L){
+      if(!is.na(maxLength)){
+        stop("'maxLength' must be integer with a value higher than 1L or NA.",
              call. = FALSE)
       }
     }
@@ -395,30 +411,11 @@ setMethod("rownames", "SequenceData",
            call. = FALSE)
     }
   }
-  # for protected end data
-  if(!is.null(input[["maxLength"]])){
-    maxLength <- input[["maxLength"]]
-    if(!is.integer(maxLength) | maxLength <= 1L){
-      if(!is.na(maxLength)){
-        stop("'maxLength' must be integer with a value higher than 1L or NA.",
-             call. = FALSE)
-      }
-    }
-  }
-  # for norm protected end data
-  if(!is.null(input[["minCoverage"]])){
-    minCoverage <- input[["minCoverage"]]
-    if(!is.integer(minCoverage) | minCoverage <= 1L){
-      stop("'minCoverage' must be integer with a value higher than 1L or NA.",
-           call. = FALSE)
-    }
-  }
   #
   args <- list(minQuality = minQuality,
                max_depth = max_depth,
                minLength = minLength,
-               maxLength = maxLength,
-               minCoverage = minCoverage)
+               maxLength = maxLength)
   args
 }
 
@@ -448,6 +445,9 @@ setMethod(
   f = "initialize", 
   signature = signature(.Object = "SequenceData"),
   definition = function(.Object, bamfiles, seqinfo, args, ...){
+    if(!assertive::is_a_non_empty_string(.Object@dataDescription)){
+      stop("'dataDescription' must be a single non empty character value.")
+    }
     if(!(.Object@sequencesType %in% c("RNAStringSet","ModRNAStringSet"))){
       stop("'sequencesType' must be either 'RNAStringSet' or 'ModRNAStringSet'")
     }
@@ -493,9 +493,13 @@ setMethod(
   sequences <- .load_transcript_sequences(sequences, grl)
   param <- .assemble_scanBamParam(grl, ans@minQuality, ans@seqinfo)
   # run the specific data aggregation function
+  message("Loading ",ans@dataDescription," from BAM files ... ",
+          appendLF = FALSE)
   data <- getData(ans, grl, sequences, param, args)
   # post process the data
-  .postprocess_read_data(ans, data, grl, sequences)
+  ans <- .postprocess_read_data(ans, data, grl, sequences)
+  message("OK")
+  ans
 }
 
 setMethod("SequenceData",
@@ -678,7 +682,6 @@ setMethod("getData",
     stop("Something went wrong.")
   }
   validObject(x)
-  message("OK")
   x
 }
 

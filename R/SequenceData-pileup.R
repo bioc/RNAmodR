@@ -38,7 +38,8 @@ NULL
 #' @export
 setClass(Class = "PileupSequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L))
+         prototype = list(minQuality = 5L,
+                          dataDescription = "Pileup data"))
 
 #' @rdname PileupSequenceData-class
 #' @export
@@ -166,8 +167,6 @@ setMethod("getData",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){
-            message("Loading Pileup data from BAM files ... ",
-                    appendLF = FALSE)
             data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_pileup,
                            grl = grl,

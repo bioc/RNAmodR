@@ -25,9 +25,18 @@ mapped onto. This must match the information contained in the BAM files.}
 \item{seqinfo}{optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
 subset the transcripts analyzed on a chromosome basis.}
 
-\item{...}{Optional arguments overwriting default values, which are
+\item{...}{Optional arguments overwriting default values. Not all 
+\code{SequenceData} classes use all arguments. The arguments are:
 \itemize{
-\item{minQuality} {class dependent}
+\item{\code{minLength}} {single integer value setting a threshold for minimum
+read length. Shorther reads are discarded (default: \code{minLength = NA}).}
+\item{\code{maxLength}} {single integer value setting a threshold for maximum
+read length. Longer reads are discarded (default: \code{maxLength = NA}).}
+\item{\code{minQuality}} {single integer value setting a threshold for maximum
+read quality. Reads with a lower quality are discarded (default: 
+\code{minQuality = 5L}, but this is class dependent).}
+\item{\code{max_depth}} {maximum depth for pileup loading (default: 
+\code{max_depth = 10000L}).}
 }}
 }
 \description{

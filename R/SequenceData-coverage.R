@@ -42,7 +42,8 @@ NULL
 #' @export
 setClass(Class = "CoverageSequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L))
+         prototype = list(minQuality = 5L,
+                          dataDescription = "Coverage data"))
 
 #' @rdname CoverageSequenceData-class
 #' @export
@@ -78,8 +79,6 @@ setMethod("getData",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){
-            message("Loading Coverage data from BAM files ... ",
-                    appendLF = FALSE)
             data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_coverage,
                            grl = grl,

@@ -210,7 +210,6 @@ setReplaceMethod(f = "settings",
 }
 
 .aggregate_inosine <- function(x){
-  message("Aggregating data and calculating scores...")
   data <- sequenceData(x)
   mod <- aggregate(data)
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
@@ -287,7 +286,6 @@ setMethod(f = "aggregate",
     names(grl)[f],
     SIMPLIFY = FALSE)
   modifications <- GenomicRanges::GRangesList(modifications)
-  message("done.")
   unname(unlist(modifications))
 }
 

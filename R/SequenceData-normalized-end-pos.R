@@ -47,13 +47,15 @@ NULL
 #' @export
 setClass(Class = "NormEnd5SequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L))
+         prototype = list(minQuality = 5L,
+                          dataDescription = "normalized 5'-end position data"))
 
 #' @rdname NormEndSequenceData-class
 #' @export
 setClass(Class = "NormEnd3SequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L))
+         prototype = list(minQuality = 5L,
+                          dataDescription = "normalized 3'-end position data"))
 
 #' @rdname NormEndSequenceData-class
 #' @export
@@ -150,8 +152,6 @@ setMethod("getData",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){
-            message("Loading normalized 5'-end position data from BAM files ",
-                    "... ", appendLF = FALSE)
             data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_ends_norm,
                            grl = grl,
@@ -171,8 +171,6 @@ setMethod("getData",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){
-            message("Loading normalized 3'-end position data from BAM files ",
-                    "... ", appendLF = FALSE)
             data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_ends_norm,
                            grl = grl,

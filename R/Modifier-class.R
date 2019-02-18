@@ -496,15 +496,17 @@ setMethod(f = "modifications",
     ans@data <- data[[1]]
   }
   # aggregate data
+  message("Aggregating data and calculating scores ... ", appendLF = FALSE)
   ans <- aggregate(ans)
   # search for modifications
-  f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
-  modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
-  message("Starting to search for '", paste(tools::toTitleCase(modName), 
-                                            collapse = "', '"),
-          "' ... ", appendLF = FALSE)
   if(settings(ans,"findMod")){
+    f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
+    modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
+    message("Starting to search for '", paste(tools::toTitleCase(modName), 
+                                              collapse = "', '"),
+            "' ... ", appendLF = FALSE)
     ans <- modify(ans)
+    message("done.")
   }
   validObject(ans)
   ans <- .norm_modifications(ans, settings(ans))
@@ -535,14 +537,15 @@ setMethod(f = "modifications",
   ans@data <- .check_list_for_SequenceData_elements(ans, x)
   # validate
   validObject(ans)
-  #
-  f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
-  modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
-  message("Starting to search for '", paste(tools::toTitleCase(modName),
-                                            collapse = "', '"),
-          "' ... ", appendLF = FALSE)
+  # search for modifications
   if(settings(ans,"findMod")){
-    ans <- do.call(modify, list(ans))
+    f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
+    modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
+    message("Starting to search for '", paste(tools::toTitleCase(modName),
+                                              collapse = "', '"),
+            "' ... ", appendLF = FALSE)
+    ans <- modify(ans)
+    message("done.")
   }
   validObject(ans)
   ans <- .norm_modifications(ans, settings(ans))

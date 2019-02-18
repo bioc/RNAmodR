@@ -45,19 +45,22 @@ NULL
 #' @export
 setClass(Class = "End5SequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L))
+         prototype = list(minQuality = 5L,
+                          dataDescription = "5'-end position data"))
 
 #' @rdname EndSequenceData-class
 #' @export
 setClass(Class = "End3SequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L))
+         prototype = list(minQuality = 5L,
+                          dataDescription = "3'-end position data"))
 
 #' @rdname EndSequenceData-class
 #' @export
 setClass(Class = "EndSequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L))
+         prototype = list(minQuality = 5L,
+                          dataDescription = "read end position data (5' and 3')"))
 
 #' @rdname EndSequenceData-class
 #' @export
@@ -89,10 +92,10 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   }
   # apply length cut off if set
   if(!is.na(args[["maxLength"]])){
-    data <- data[qwidth(data) <= args[["maxLength"]],]
+    data <- data[GenomicAlignments::qwidth(data) <= args[["maxLength"]],]
   }
   if(!is.na(args[["minLength"]])){
-    data <- data[qwidth(data) >= args[["minLength"]],]
+    data <- data[GenomicAlignments::qwidth(data) >= args[["minLength"]],]
   }
   if(length(data) == 0L){
     stop("No reads found in data with read length equal or between 'minLength'",
@@ -204,8 +207,6 @@ setMethod("getData",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){
-            message("Loading 5'-end position data from BAM files ... ",
-                    appendLF = FALSE)
             data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_ends,
                            grl = grl,
@@ -225,8 +226,6 @@ setMethod("getData",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){
-            message("Loading 3'-end position data from BAM files ... ",
-                    appendLF = FALSE)
             data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_ends,
                            grl = grl,
@@ -246,8 +245,6 @@ setMethod("getData",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){
-            message("Loading read end position data (5' and 3') from BAM ",
-                    "files ... ", appendLF = FALSE)
             data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_ends,
                            grl = grl,

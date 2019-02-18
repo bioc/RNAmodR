@@ -55,7 +55,8 @@ NULL
 #' @export
 setClass(Class = "ProtectedEndSequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L))
+         prototype = list(minQuality = 5L,
+                          dataDescription = "protected end data"))
 
 #' @rdname ProtectedEndSequenceData-class
 #' @export
@@ -75,8 +76,6 @@ setMethod("getData",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
           definition = function(x, grl, sequences, param, args){
-            message("Loading protected end data from BAM files ... ",
-                    appendLF = FALSE)
             data <- lapply(bamfiles(x),
                            FUN = .get_position_data_of_transcript_ends,
                            grl = grl,
