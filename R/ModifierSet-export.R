@@ -80,12 +80,18 @@ NULL
       data <- compareByCoord(assays, mod, flanking = args[["flanking"]])
     }
     rowData <- data[,(colnames(data) %in% c("names","positions","mod"))]
+    colnames(rowData) <- c("Parent","positions","mod")
     data <- data[,!(colnames(data) %in% c("names","positions","mod"))]
     seqnames <- seqnames(mod)[match(rowData$names,as.character(mod$Parent))]
+    strand <- strand(mod)[match(rowData$names,as.character(mod$Parent))]
   } else {
     
   }
-  ans <- NULL
+  ans <- SummarizedExperiment(list(aggregate = data), 
+                              rowRanges = GRanges(seqnames,
+                                                  ranges = IRanges::IRanges(start = as.integer(rowData$positions), width = 1L),
+                                                  strand = strand,
+                                                  rowData[,colnames(rowData) != "positions"]))
   return(ans)
 }
 
