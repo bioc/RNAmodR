@@ -110,7 +110,6 @@ NULL
 }
 
 .compare_ModifierSet_by_GRanges <- function(x, coord, normalize, ...){
-  browser()
   coord <- .norm_coord(coord, modType(x))
   data <- subsetByCoord(x, coord, ...)
   args <- .norm_compare_args(list(...), data, x)

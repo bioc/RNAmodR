@@ -34,6 +34,8 @@ is derived from the \code{modType(x)}, but it can be overwritten using
 \code{type}. It must be a valid shortName for a modification according to
 \code{shortName(ModRNAString())} and of course present in metadata column 
 \code{mod} of \code{coord}}
+\item{flanking} {a single integer value how many flanking position should be
+included in the subset (default = \code{flanking = 0L}).}
 \item{\code{perTranscript}} {\code{TRUE} or \code{FALSE}: Should the 
 positions labeled per transcript and not per chromosome?
 (default: \code{perTranscript = FALSE}).}

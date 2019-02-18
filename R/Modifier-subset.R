@@ -121,7 +121,6 @@ NULL
 }
 
 .get_element_names <- function(data, coord, name, type){
-  browser()
   namesData <- names(data)
   namesCoord <- as.character(names(coord))
   if(is.null(name)){

@@ -81,6 +81,7 @@ NULL
     }
     rowData <- data[,(colnames(data) %in% c("names","positions","mod"))]
     data <- data[,!(colnames(data) %in% c("names","positions","mod"))]
+    seqnames <- seqnames(mod)[match(rowData$names,as.character(mod$Parent))]
   } else {
     
   }
