@@ -23,6 +23,8 @@ NULL
 #' \code{type}. It must be a valid shortName for a modification according to
 #' \code{shortName(ModRNAString())} and of course present in metadata column 
 #' \code{mod} of \code{coord}}
+#' \item{flanking} {a single integer value how many flanking position should be
+#' included in the subset (default = \code{flanking = 0L}).}
 #' \item{\code{perTranscript}} {\code{TRUE} or \code{FALSE}: Should the 
 #' positions labeled per transcript and not per chromosome?
 #' (default: \code{perTranscript = FALSE}).}
@@ -49,7 +51,7 @@ NULL
 .norm_subset_args <- function(input,x){
   name <- NULL
   type <- modType(x)
-  flank <- 0L
+  flanking <- 0L
   perTranscript <- FALSE
   if(!is.null(input[["name"]])){
     name <- input[["name"]]
@@ -69,10 +71,10 @@ NULL
            call. = FALSE)
     }
   }
-  if(!is.null(input[["flank"]])){
-    flank <- input[["flank"]]
-    if(!is.integer(flank) || flank < 0L){
-      stop("'flank' must be a single integer value equal or higher than 0L.",
+  if(!is.null(input[["flanking"]])){
+    flanking <- input[["flanking"]]
+    if(!is.integer(flanking) || flanking < 0L){
+      stop("'flanking' must be a single integer value equal or higher than 0L.",
            call. = FALSE)
     }
   }
@@ -83,7 +85,7 @@ NULL
            call. = FALSE)
     }
   }
-  args <- list(name = name, type = type, flank = flank,
+  args <- list(name = name, type = type, flanking = flanking,
                perTranscript = perTranscript)
   args
 }
@@ -113,6 +115,7 @@ NULL
 }
 
 .get_element_names <- function(data, coord, name, type){
+  browser()
   namesData <- names(data)
   namesCoord <- as.character(names(coord))
   if(is.null(name)){
@@ -162,21 +165,24 @@ NULL
   stop(message,call. = FALSE)
 }
 
-.perform_subset <- function(data, coord, flank = 0L, perTranscript = FALSE){
+.perform_subset <- function(data, coord, flanking = 0L, perTranscript = FALSE){
   if(!all(names(data) == names(coord))){
     stop("Length and/or order of data and coord do not match.")
   }
   .check_for_invalid_positions(data,coord)
   # construct flanking vector
-  flank <- seq.int(from = -flank,to = flank, by = 1L)
+  flanking <- seq.int(from = -flanking,to = flanking, by = 1L)
   f <- IRanges::IntegerList(lapply(start(ranges(coord)),
                                    function(i){
                                      unique(unlist(lapply(i,
                                                           function(j){
-                                                            j + flank
+                                                            j + flanking
                                                           })
                                                    ))
                                    }))
+  if(length(flanking) > 1L){
+    f <- f[f > 0L & f <= lengths(data)]
+  }
   ans <- data[f]
   if(perTranscript){
     pos <- IRanges::CharacterList(mapply(
@@ -198,7 +204,7 @@ NULL
   names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
   data <- data[match(names, names(data))]
   coord <- coord[match(names, names(coord))]
-  .perform_subset(data, coord, args[["flank"]], args[["perTranscript"]])
+  .perform_subset(data, coord, args[["flanking"]], args[["perTranscript"]])
 }
 
 ################################################################################
@@ -246,7 +252,7 @@ NULL
                                        args[["type"]])
            data <- data[match(names, names(data))]
            coord <- coord[match(names, names(coord))]
-           .perform_subset(data, coord, args[["flank"]], 
+           .perform_subset(data, coord, args[["flanking"]], 
                            args[["perTranscript"]])
          })
 }
