@@ -104,7 +104,6 @@ NULL
 }
 
 .compare_ModifierSet_by_GRangesList <- function(x, coord, normalize, ...){
-  browser()
   coord <- unlist(coord)
   coord <- unname(coord[!duplicated(coord)])
   .compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
