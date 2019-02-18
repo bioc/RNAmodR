@@ -30,7 +30,7 @@ getDataTrack(x, name, ...)
 
 \S4method{visualizeData}{Modifier}(x, name, from, to, type = NA,
   showSequenceData = FALSE, showSequence = TRUE,
-  showAnnotation = FALSE, showModifiedSequence = FALSE, ...)
+  showAnnotation = FALSE, ...)
 
 \S4method{getDataTrack}{Modifier}(x, name = name, ...)
 
@@ -39,7 +39,7 @@ getDataTrack(x, name, ...)
 
 \S4method{visualizeData}{ModifierSet}(x, name, from, to, type = NA,
   showSequenceData = FALSE, showSequence = TRUE,
-  showAnnotation = FALSE, showModifiedSequence = FALSE, ...)
+  showAnnotation = FALSE, ...)
 
 \S4method{visualizeDataByCoord}{SequenceData,GRanges}(x, coord,
   type = NA, window.size = 15L, ...)

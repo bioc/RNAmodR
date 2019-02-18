@@ -89,10 +89,10 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   }
   # apply length cut off if set
   if(!is.na(args[["maxLength"]])){
-    data <- data[width(data) <= args[["maxLength"]],]
+    data <- data[qwidth(data) <= args[["maxLength"]],]
   }
   if(!is.na(args[["minLength"]])){
-    data <- data[width(data) >= args[["minLength"]],]
+    data <- data[qwidth(data) >= args[["minLength"]],]
   }
   if(length(data) == 0L){
     stop("No reads found in data with read length equal or between 'minLength'",
