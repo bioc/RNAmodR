@@ -246,7 +246,10 @@ setMethod("getData",
   # merge data
   ans <- cbind(do.call(S4Vectors::DataFrame, means),
                do.call(S4Vectors::DataFrame, sds))
-  relist(ans, x@partitioning)
+  ans <- relist(ans, x@partitioning)
+  positions <- .seqs_rl(ranges(x))
+  rownames(ans) <- IRanges::CharacterList(positions)
+  ans
 }
 
 #' @rdname NormEndSequenceData-class

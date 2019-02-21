@@ -11,6 +11,7 @@ test_that("EndSequenceData:",{
   #
   e5sd <- End5SequenceData(files, annotation = annotation,
                               sequences = sequences)
+  expect_false(any(lengths(rownames(e5sd)) == 0L))
   expect_s4_class(e5sd,"End5SequenceData")
   expect_named(e5sd,c("1","2"))
   expect_s4_class(colnames(e5sd),"CharacterList")
@@ -19,6 +20,7 @@ test_that("EndSequenceData:",{
   expect_equal(colnames(e5sd)[[1]],colnames(e5sd)[[2]])
   expect_equal(colnames(e5sd)[[1]],c("end5.control.1","end5.treated.1"))
   actual <- aggregate(e5sd)
+  expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_s4_class(actual,"SplitDataFrameList")
   expect_equal(length(actual),2)
@@ -52,6 +54,7 @@ test_that("EndSequenceData:",{
   #
   e3sd <- End3SequenceData(files, annotation = annotation,
                           sequences = sequences)
+  expect_false(any(lengths(rownames(e3sd)) == 0L))
   expect_s4_class(e3sd,"End3SequenceData")
   expect_named(e3sd,c("1","2"))
   expect_s4_class(colnames(e3sd),"CharacterList")
@@ -60,6 +63,7 @@ test_that("EndSequenceData:",{
   expect_equal(colnames(e3sd)[[1]],colnames(e3sd)[[2]])
   expect_equal(colnames(e3sd)[[1]],c("end3.control.1","end3.treated.1"))
   actual <- aggregate(e3sd)
+  expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_s4_class(actual,"SplitDataFrameList")
   expect_equal(length(actual),2)
@@ -93,6 +97,7 @@ test_that("EndSequenceData:",{
   #
   esd <- EndSequenceData(files, annotation = annotation,
                           sequences = sequences)
+  expect_false(any(lengths(rownames(esd)) == 0L))
   expect_s4_class(esd,"EndSequenceData")
   expect_named(esd,c("1","2"))
   expect_s4_class(colnames(esd),"CharacterList")
@@ -101,6 +106,7 @@ test_that("EndSequenceData:",{
   expect_equal(colnames(esd)[[1]],colnames(esd)[[2]])
   expect_equal(colnames(esd)[[1]],c("end.control.1","end.treated.1"))
   actual <- aggregate(esd)
+  expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_s4_class(actual,"SplitDataFrameList")
   expect_equal(length(actual),2)

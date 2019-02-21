@@ -100,6 +100,7 @@ NULL
 #' @docType data
 #' @usage msi
 #' @usage psd
+#' @usage e5sd
 #' @format a \code{ModSetInosine} instance
 #' @keywords datasets
 "msi"

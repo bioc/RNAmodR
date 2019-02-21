@@ -284,7 +284,10 @@ setMethod("getData",
   # assemble data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
-  relist(ans, x@partitioning)
+  ans <- relist(ans, x@partitioning)
+  positions <- .seqs_rl(ranges(x))
+  rownames(ans) <- IRanges::CharacterList(positions)
+  ans
 }
 
 #' @rdname EndSequenceData-class
