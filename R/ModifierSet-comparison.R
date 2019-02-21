@@ -87,6 +87,7 @@ NULL
 .norm_compare_args <- function(input, data, x){
   compareType <- mainScore(x)
   perTranscript <- FALSE
+  sequenceData <- FALSE
   if(!is.null(input[["compareType"]])){
     compareType <- input[["compareType"]]
     colnames <- unique(unlist(colnames(data[[1]])))
@@ -97,9 +98,23 @@ NULL
            call. = FALSE)
     }
   }
+  if(!is.null(input[["perTranscript"]])){
+    perTranscript <- input[["perTranscript"]]
+    if(!assertive::is_a_bool(perTranscript)){
+      stop("'perTranscript' must be a single logical value.",
+           call. = FALSE)
+    }
+  }
+  if(!is.null(input[["sequenceData"]])){
+    sequenceData <- input[["sequenceData"]]
+    if(!assertive::is_a_bool(sequenceData)){
+      stop("'sequenceData' must be a single logical value.")
+    }
+  }
   args <- c(.norm_alias(input, x),
             list(compareType = compareType,
-                 perTranscript = perTranscript))
+                 perTranscript = perTranscript,
+                 sequenceData = sequenceData))
   args
 }
 
@@ -109,28 +124,14 @@ NULL
   .compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
 }
 
-.compare_ModifierSet_by_GRanges <- function(x, coord, normalize, ...){
-  coord <- .norm_coord(coord, modType(x))
-  data <- subsetByCoord(x, coord, ...)
-  args <- .norm_compare_args(list(...), data, x)
-  # subset to compare type
-  sampleNames <- names(data)
-  data <- lapply(data,
-                 function(d){
-                   d[,args[["compareType"]],drop = FALSE]
-                 })
-  data <- do.call(cbind, data)
+.assemble_data_per_compare_type <- function(data, coord, sampleNames, alias, 
+                                            modType, normalize){
+  data <- do.call(cbind,data)
+  colnames(data) <- sampleNames
   if(!is(data,"CompressedSplitDataFrameList")){
     data <- IRanges::SplitDataFrameList(data)
   }
-  colnames(data) <- sampleNames
   coord <- coord[match(names(data), names(coord))]
-  # convert ids to names for labeling if present
-  if(!is.null(args[["alias"]])){
-    alias <- args[["alias"]]
-    m <- match(as.character(alias$tx_id),names(data))
-    names(data)[m[!is.na(m)]] <- as.character(alias$name)[!is.na(m)]
-  }
   # keep rownames/names and unlist data
   positions <- rownames(data)
   names <- as.character(S4Vectors::Rle(names(data), lengths(data)))
@@ -141,7 +142,9 @@ NULL
   rownames(data) <- NULL
   # add activity information if present
   coord <- unlist(coord)
-  coord <- coord[coord$mod %in% modType(x),]
+  if(!is.na(modType)){
+    coord <- coord[coord$mod %in% modType,]
+  }
   if(!is.null(coord$Activity) || !is.null(coord$mod)){
     f <- unlist(lapply(unique(as.character(data$names)),
                        function(n){
@@ -157,8 +160,42 @@ NULL
       data$mod[f] <- unlist(coord$mod)
     }
   }
+  # convert ids to names for labeling if present
+  if(!is.null(alias)){
+    m <- match(as.character(alias$tx_id),names(data))
+    names(data)[m[!is.na(m)]] <- as.character(alias$name)[!is.na(m)]
+  }
   #
   data <- .normlize_data_against_one_sample(data, normalize)
+  data
+}
+
+.compare_ModifierSet_by_GRanges <- function(x, coord, normalize, ...){
+  coord <- .norm_coord(coord, modType(x))
+  args <- .norm_compare_args(list(...), data, x)
+  data <- subsetByCoord(x, coord, ...)
+  # restructure to different compare types
+  sampleNames <- names(data)
+  if(args[["sequenceData"]]){
+    compareTypes <- names(data[[1]][[1]])
+    modType <- NA
+  } else {
+    compareTypes <- args[["compareType"]]
+    modType <- modType(x)
+  }
+  data <- lapply(compareTypes,
+                 function(ct){
+                   lapply(data,
+                          function(d){
+                            d[,ct,drop = FALSE]
+                          })
+                 })
+  names(data) <- compareTypes
+  data <- lapply(data, .assemble_data_per_compare_type, coord, sampleNames,
+                 alias, modType, normalize)
+  if(length(data) == 1L){
+    return(data[[1L]])
+  }
   data
 }
 
@@ -272,8 +309,7 @@ setMethod("compareByCoord",
 .plot_compare_ModifierSet_by_GRanges <- function(x, coord, normalize,  ...){
   args <- .norm_compare_plot_args(list(...))
   data <- .compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
-  data$labels <- .create_position_labels(data$positions,
-                                         data$mod,
+  data$labels <- .create_position_labels(data$positions, data$mod,
                                          data$Activity)
   # melt data an plot
   data$labels <- factor(data$labels, levels = rev(levels(data$labels)))

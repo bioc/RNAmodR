@@ -10,6 +10,7 @@ test_that("CoverageSequenceData:",{
                                    package = "RNAmodR.Data"))
   csd <- CoverageSequenceData(files, annotation = annotation,
                               sequences = sequences)
+  expect_false(any(lengths(rownames(csd)) == 0L))
   expect_s4_class(csd,"CoverageSequenceData")
   expect_named(csd,c("1","2"))
   expect_s4_class(colnames(csd),"CharacterList")
@@ -18,6 +19,7 @@ test_that("CoverageSequenceData:",{
   expect_equal(colnames(csd)[[1]],colnames(csd)[[2]])
   expect_equal(colnames(csd)[[1]],c("coverage.control.1","coverage.treated.1"))
   actual <- aggregate(csd)
+  expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_s4_class(actual,"SplitDataFrameList")
   expect_equal(length(actual),2)
@@ -60,6 +62,7 @@ test_that("PileupSequenceData:",{
   #
   psd <- PileupSequenceData(files, annotation = annotation,
                             sequences = sequences)
+  expect_false(any(lengths(rownames(psd)) == 0L))
   expect_s4_class(psd,"PileupSequenceData")
   expect_named(psd,c("1","2"))
   expect_s4_class(colnames(psd),"CharacterList")
@@ -72,6 +75,7 @@ test_that("PileupSequenceData:",{
                                     "pileup.treated.1.G","pileup.treated.1.A",
                                     "pileup.treated.1.T","pileup.treated.1.C"))
   actual <- aggregate(psd)
+  expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_s4_class(actual,"SplitDataFrameList")
   expect_equal(length(actual),2)

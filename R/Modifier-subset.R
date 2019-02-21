@@ -49,10 +49,16 @@ NULL
 NULL
 
 .norm_subset_args <- function(input,x){
-  name <- NULL
-  type <- modType(x)
+  name <- NA_character_
+  if(is(x,"Modifier") || is(x,"ModifierSet")){
+    type <- modType(x)
+  } else {
+    type <- NA_character_
+  }
   flanking <- 0L
   perTranscript <- FALSE
+  sequenceData <- FALSE
+  rawData <- FALSE # only used for subsetting SequenceData
   if(!is.null(input[["name"]])){
     name <- input[["name"]]
     if(!is.character(name) || width(name) == 0L){
@@ -78,6 +84,13 @@ NULL
            call. = FALSE)
     }
   }
+  if(!is.null(input[["rawData"]])){ # only used for subsetting SequenceData
+    rawData <- input[["rawData"]]
+    if(!assertive::is_a_bool(rawData)){
+      stop("'rawData' must be a single logical value.",
+           call. = FALSE)
+    }
+  }
   if(!is.null(input[["perTranscript"]])){
     perTranscript <- input[["perTranscript"]]
     if(!assertive::is_a_bool(perTranscript)){
@@ -85,8 +98,15 @@ NULL
            call. = FALSE)
     }
   }
+  if(!is.null(input[["sequenceData"]])){
+    sequenceData <- input[["sequenceData"]]
+    if(!assertive::is_a_bool(sequenceData)){
+      stop("'sequenceData' must be a single logical value.")
+    }
+  }
   args <- list(name = name, type = type, flanking = flanking,
-               perTranscript = perTranscript)
+               rawData = rawData, perTranscript = perTranscript,
+               sequenceData = sequenceData)
   args
 }
 
@@ -109,13 +129,15 @@ NULL
     stop("Elements of type 'RNAMOD' with a width != 1L are not supported.",
          call. = "FALSE")
   }
-  f <- IRanges::LogicalList(lapply(coord,function(c){c$mod %in% type}))
-  coord <- coord[f]
-  coord <- coord[vapply(coord,function(c){length(c) > 0L},logical(1))]
-  if(length(coord) == 0L){
-    stop("No modifications of type '",paste(type,collapse = "','"),"' ",
-         "found in 'coord'.",
-         call. = FALSE)
+  if(!is.na(type)){
+    f <- IRanges::LogicalList(lapply(coord,function(c){c$mod %in% type}))
+    coord <- coord[f]
+    coord <- coord[vapply(coord,function(c){length(c) > 0L},logical(1))]
+    if(length(coord) == 0L){
+      stop("No modifications of type '",paste(type,collapse = "','"),"' ",
+           "found in 'coord'.",
+           call. = FALSE)
+    }
   }
   coord
 }
@@ -123,7 +145,7 @@ NULL
 .get_element_names <- function(data, coord, name, type){
   namesData <- names(data)
   namesCoord <- as.character(names(coord))
-  if(is.null(name)){
+  if(is.na(name)){
     names <- intersect(namesData, namesCoord)
     message <- c("No intersection between names in data of 'x' and Parent in ",
                  "'coord'\n for modification type '",
@@ -252,16 +274,23 @@ NULL
   args <- .norm_subset_args(list(...),x)
   # converts everything to a GRangesList
   coord <- .norm_coord(coord,args[["type"]])
-  lapply(x,
-         function(z){
-           data <- aggregateData(z)
-           names <- .get_element_names(data, coord, args[["name"]],
-                                       args[["type"]])
-           data <- data[match(names, names(data))]
-           coord <- coord[match(names, names(coord))]
-           .perform_subset(data, coord, args[["flanking"]], 
-                           args[["perTranscript"]])
-         })
+  if(args[["sequenceData"]]){
+    lapply(x,
+           function(z){
+             subsetByCoord(sequenceData(z), coord, ...)
+           })
+  } else {
+    lapply(x,
+           function(z){
+             data <- aggregateData(z)
+             names <- .get_element_names(data, coord, args[["name"]],
+                                         args[["type"]])
+             data <- data[match(names, names(data))]
+             coord <- coord[match(names, names(coord))]
+             .perform_subset(data, coord, args[["flanking"]], 
+                             args[["perTranscript"]])
+           })
+  }
 }
 
 #' @rdname subsetByCoord
