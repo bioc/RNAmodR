@@ -25,6 +25,11 @@ positions should be included in the \code{RangedSummarizedExperiment}?
 \code{RangedSummarizedExperiment}? This overrides the previous two options.
 It is potentially very resource hungry. Be careful. (default = 
 \code{allPositions = FALSE})}
+\item{sequenceData} {\code{TRUE} or \code{FALSE}: Should data from the 
+\code{SequenceData} objects (utilized in the \code{ModifierSet}) instead of 
+aggregated data from the \code{ModifierSet} object be included in the 
+\code{RangedSummarizedExperiment}? (default = 
+\code{sequenceData = FALSE})}
 }}
 }
 \description{

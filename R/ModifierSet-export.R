@@ -25,6 +25,11 @@ NULL
 #' \code{RangedSummarizedExperiment}? This overrides the previous two options.
 #' It is potentially very resource hungry. Be careful. (default = 
 #' \code{allPositions = FALSE})}
+#' \item{sequenceData} {\code{TRUE} or \code{FALSE}: Should data from the 
+#' \code{SequenceData} objects (utilized in the \code{ModifierSet}) instead of 
+#' aggregated data from the \code{ModifierSet} object be included in the 
+#' \code{RangedSummarizedExperiment}? (default = 
+#' \code{sequenceData = FALSE})}
 #' }
 NULL
 
@@ -32,6 +37,7 @@ NULL
   modificationsOnly <- TRUE
   flanking <- 10L
   allPositions <- FALSE
+  sequenceData <- FALSE
   if(!is.null(input[["modificationsOnly"]])){
     modificationsOnly <- input[["modificationsOnly"]]
     if(!assertive::is_a_bool(modificationsOnly)){
@@ -52,9 +58,14 @@ NULL
       stop("'allPositions' must be a single logical value.")
     }
   }
-  args <- list(modificationsOnly = modificationsOnly,
-               flanking = flanking,
-               allPositions = allPositions)
+  if(!is.null(input[["sequenceData"]])){
+    sequenceData <- input[["sequenceData"]]
+    if(!assertive::is_a_bool(sequenceData)){
+      stop("'sequenceData' must be a single logical value.")
+    }
+  }
+  args <- list(modificationsOnly = modificationsOnly, flanking = flanking, 
+               allPositions = allPositions, sequenceData = sequenceData)
   args
 }
 
@@ -75,9 +86,10 @@ NULL
   if(!args[["allPositions"]]){
     mod <- .get_unified_modifications(assays)
     if(args[["modificationsOnly"]]){
-      data <- compareByCoord(assays, mod)
+      data <- compareByCoord(assays, mod, sequenceData = args[["sequenceData"]])
     } else {
-      data <- compareByCoord(assays, mod, flanking = args[["flanking"]])
+      data <- compareByCoord(assays, mod, sequenceData = args[["sequenceData"]],
+                             flanking = args[["flanking"]])
     }
     rowData <- data[,(colnames(data) %in% c("names","positions","mod"))]
     colnames(rowData) <- c("Parent","positions","mod")
