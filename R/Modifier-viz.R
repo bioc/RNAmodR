@@ -9,14 +9,18 @@ NULL
   show_arg
 }
 
-.norm_score_type <- function(type, colnames = NA){
+.norm_score_type <- function(type, colnames = NA, multiple = FALSE){
   if(missing(type) && !anyNA(colnames)){
-    type <- colnames[1]
+    if(multiple){
+      type <- colnames
+    } else {
+      type <- colnames[1]
+    }
   } else if(missing(type)) {
     stop("'type' is missing.", call. = FALSE)
   }
   if(!anyNA(colnames)){
-    if(!(type %in% colnames)){
+    if(any(!(type %in% colnames))){
       stop("'type' was not found in data.", call. = FALSE)
     }
   }

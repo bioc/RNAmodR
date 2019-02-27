@@ -74,28 +74,15 @@ NULL
   gr
 }
 
-# export to bigwigfile ---------------------------------------------------------
+# export to bigWig file --------------------------------------------------------
 
-.get_GRanges_from_Modifier_for_bigWig_export <- function(x, type){
+.get_GRanges_for_bigWig_export <- function(x, type){
   ranges <- ranges(x)
-  data <- aggregateData(x)
-  type <- .norm_score_type(type, colnames(data@unlistData))
-  ranges <- .expand_ranges_per_position(ranges, rownames(data), x)
-  mcols(ranges)$score <- unlist(data)[,type]
-  ranges
-}
-
-#' @importFrom rtracklayer export.bw
-setMethod("export.bw","Modifier",
-          function(object, con, type, ...){
-            object <- .get_GRanges_from_Modifier_for_bigWig_export(object, type)
-            export.bw(object, con, ...)
-          }
-)
-
-.get_GRanges_from_SequenceData_for_bigWig_export <- function(x, type){
-  ranges <- ranges(x)
-  data <- aggregate(x)
+  if(is(x,"Modifier")){
+    data <- aggregateData(x)
+  } else {
+    data <- aggregate(x)
+  }
   if(is(x,"SequenceDataList")){
     data <- do.call(cbind, unname(data))
   }
@@ -105,20 +92,75 @@ setMethod("export.bw","Modifier",
   ranges
 }
 
+#' @importFrom rtracklayer export.bw
+setMethod("export.bw","Modifier",
+          function(object, con, type, ...){
+            object <- .get_GRanges_for_bigWig_export(object, type)
+            export.bw(object, con, ...)
+          }
+)
+
 setMethod("export.bw","SequenceData",
           function(object, con, type, ...){
             browser()
-            object <- 
-              .get_GRanges_from_SequenceData_for_bigWig_export(object, type)
+            object <- .get_GRanges_for_bigWig_export(object, type)
             export.bw(object, con, ...)
           }
 )
 
 setMethod("export.bw","SequenceDataList",
           function(object, con, type, ...){
-            object <- 
-              .get_GRanges_from_SequenceData_for_bigWig_export(object, type)
+            object <- .get_GRanges_for_bigWig_export(object, type)
             export.bw(object, con, ...)
+          }
+)
+
+# export to wig file -----------------------------------------------------------
+
+.get_GRangesList_for_Wig_export <- function(x, type){
+  ranges <- ranges(x)
+  if(is(x,"Modifier")){
+    data <- aggregateData(x)
+  } else {
+    data <- aggregate(x)
+  }
+  if(is(x,"SequenceDataList")){
+    data <- do.call(cbind, unname(data))
+  }
+  type <- .norm_score_type(type, colnames(data@unlistData), multiple = TRUE)
+  ranges <- .expand_ranges_per_position(ranges, rownames(data), x)
+  grl <- GRangesList(lapply(type,
+                            function(t){
+                              gr <- ranges
+                              mcols(gr)$score <- unlist(data)[,t]
+                              gr
+                            }))
+  names(grl) <- type
+  grl
+}
+
+#' @importFrom rtracklayer export.wig
+setMethod("export.wig","Modifier",
+          function(object, con, type, ...){
+            browser()
+            object <- .get_GRangesList_for_Wig_export(object, type)
+            export.wig(object, con, ...)
+          }
+)
+
+setMethod("export.wig","SequenceData",
+          function(object, con, type, ...){
+            browser()
+            object <- .get_GRangesList_for_Wig_export(object, type)
+            export.wig(object, con, ...)
+          }
+)
+
+setMethod("export.wig","SequenceDataList",
+          function(object, con, type, ...){
+            browser()
+            object <- .get_GRangesList_for_Wig_export(object, type)
+            export.wig(object, con, ...)
           }
 )
 
