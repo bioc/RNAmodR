@@ -244,6 +244,11 @@ SAMPLE_TYPES <- c("treated","control")
 
 # check data validity ----------------------------------------------------------
 
+.norm_modifications <- function(mod, args){
+  # needs to be implemented
+  mod
+}
+
 .norm_sequence_data <- function(data){
   if(any(lengths(rownames(data)) == 0L)){
     stop("Sequence data does not contain rownames.")
