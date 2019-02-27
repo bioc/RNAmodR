@@ -9,7 +9,17 @@ NULL
   show_arg
 }
 
-.norm_type <- function(type){
+.norm_score_type <- function(type, colnames = NA){
+  if(missing(type) && !anyNA(colnames)){
+    type <- colnames[1]
+  } else if(missing(type)) {
+    stop("'type' is missing.", call. = FALSE)
+  }
+  if(!anyNA(colnames)){
+    if(!(type %in% colnames)){
+      stop("'type' was not found in data.", call. = FALSE)
+    }
+  }
   if(is.na(type) || !is.character(type)){
     stop("'type' must be a character vector.", call. = FALSE)
   }
@@ -78,7 +88,7 @@ setMethod(
     showSequenceData <- .norm_show_argument(showSequenceData, FALSE)
     showSequence <- .norm_show_argument(showSequence, TRUE)
     showAnnotation <- .norm_show_argument(showAnnotation, FALSE)
-    type <- .norm_type(type)
+    type <- .norm_score_type(type)
     # get tracks
     atm <- NULL
     st <- NULL

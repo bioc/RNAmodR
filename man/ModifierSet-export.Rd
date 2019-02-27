@@ -11,7 +11,8 @@
 \arguments{
 \item{assays}{a \code{\link[=ModifierSet-class]{ModifierSet}} object}
 
-\item{...}{Optional arguments:
+\item{...}{See \code{\link[rtracklayer:BigWigFile]{export.bw}} or 
+optional arguments for \code{SummarizedExperiment}:
 \itemize{
 \item{modificationsOnly} {\code{TRUE} or \code{FALSE}: Should only data on
 positions with a modification found be included in the 
@@ -31,7 +32,21 @@ aggregated data from the \code{ModifierSet} object be included in the
 \code{RangedSummarizedExperiment}? (default = 
 \code{sequenceData = FALSE})}
 }}
+
+\item{object}{a \code{\link[=Modifier-class]{Modifier}}, a 
+\code{\link[=SequenceData-class]{SequenceData}} or a
+\code{\link[=SequenceDataList-class]{SequenceDataList}} object}
+
+\item{con}{See \code{\link[rtracklayer:BigWigFile]{export.bw}}}
 }
 \description{
-title
+\code{Modifier}, \code{SequenceData} and \code{SequenceDataList} can be 
+exported into several other formats.
+
+\code{export.bw} exports to a bigWig file as implemented by the
+\code{rtracklayer} package.
+
+\code{SummarizedExperiment} converts the results in a \code{ModifierSet} into
+a \code{\link[SummarizedExperiment:RangedSummarizedExperiment-class]{SummarizedExperiment}}
+object.
 }

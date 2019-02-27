@@ -8,10 +8,23 @@ NULL
 #' @title Exporting data to other classes and files
 #' 
 #' @description 
-#' title
+#' \code{Modifier}, \code{SequenceData} and \code{SequenceDataList} can be 
+#' exported into several other formats.
+#' 
+#' \code{export.bw} exports to a bigWig file as implemented by the
+#' \code{rtracklayer} package.
+#' 
+#' \code{SummarizedExperiment} converts the results in a \code{ModifierSet} into
+#' a \code{\link[SummarizedExperiment:RangedSummarizedExperiment-class]{SummarizedExperiment}}
+#' object.
 #' 
 #' @param assays a \code{\link[=ModifierSet-class]{ModifierSet}} object
-#' @param ... Optional arguments:
+#' @param object a \code{\link[=Modifier-class]{Modifier}}, a 
+#' \code{\link[=SequenceData-class]{SequenceData}} or a
+#' \code{\link[=SequenceDataList-class]{SequenceDataList}} object
+#' @param con See \code{\link[rtracklayer:BigWigFile]{export.bw}}
+#' @param ... See \code{\link[rtracklayer:BigWigFile]{export.bw}} or 
+#' optional arguments for \code{SummarizedExperiment}:
 #' \itemize{
 #' \item{modificationsOnly} {\code{TRUE} or \code{FALSE}: Should only data on
 #' positions with a modification found be included in the 
@@ -32,6 +45,84 @@ NULL
 #' \code{sequenceData = FALSE})}
 #' }
 NULL
+
+.add_seqlengths_for_bigWig_export <- function(gr, x){
+  seqlengths <- seqlengths(seqinfo(x))
+  f <- vapply(seqlengths, is.na, logical(1))
+  if(any(f)){
+    seqlengths[f] <- lengths(gr)[f]
+  }
+  seqlengths(gr) <- seqlengths
+  gr
+}
+
+.expand_ranges_per_position <- function(ranges, positions, x){
+  if(!is(positions,"IntegerList")){
+    positions <- as(positions,"IntegerList")
+  }
+  seqnames <- mapply(rep, seqnames(ranges), lengths(positions))
+  gr <- GRangesList(mapply(
+    function(sn, start){
+      GenomicRanges::GRanges(seqnames = sn,
+                             ranges = IRanges::IRanges(start = start,
+                                                       width = 1L))
+    },
+    seqnames,
+    positions))
+  gr <- .add_seqlengths_for_bigWig_export(gr, x)
+  gr <- unlist(gr, use.names = FALSE)
+  gr
+}
+
+# export to bigwigfile ---------------------------------------------------------
+
+.get_GRanges_from_Modifier_for_bigWig_export <- function(x, type){
+  ranges <- ranges(x)
+  data <- aggregateData(x)
+  type <- .norm_score_type(type, colnames(data@unlistData))
+  ranges <- .expand_ranges_per_position(ranges, rownames(data), x)
+  mcols(ranges)$score <- unlist(data)[,type]
+  ranges
+}
+
+#' @importFrom rtracklayer export.bw
+setMethod("export.bw","Modifier",
+          function(object, con, type, ...){
+            object <- .get_GRanges_from_Modifier_for_bigWig_export(object, type)
+            export.bw(object, con, ...)
+          }
+)
+
+.get_GRanges_from_SequenceData_for_bigWig_export <- function(x, type){
+  ranges <- ranges(x)
+  data <- aggregate(x)
+  if(is(x,"SequenceDataList")){
+    data <- do.call(cbind, unname(data))
+  }
+  type <- .norm_score_type(type, colnames(data@unlistData))
+  ranges <- .expand_ranges_per_position(ranges, rownames(data), x)
+  mcols(ranges)$score <- unlist(data)[,type]
+  ranges
+}
+
+setMethod("export.bw","SequenceData",
+          function(object, con, type, ...){
+            browser()
+            object <- 
+              .get_GRanges_from_SequenceData_for_bigWig_export(object, type)
+            export.bw(object, con, ...)
+          }
+)
+
+setMethod("export.bw","SequenceDataList",
+          function(object, con, type, ...){
+            object <- 
+              .get_GRanges_from_SequenceData_for_bigWig_export(object, type)
+            export.bw(object, con, ...)
+          }
+)
+
+# export to RangedSummarizedexperiment -----------------------------------------
 
 .get_rse_args <- function(input){
   modificationsOnly <- TRUE

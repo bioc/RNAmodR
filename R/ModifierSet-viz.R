@@ -136,7 +136,7 @@ setMethod(
     showSequenceData <- .norm_show_argument(showSequenceData, FALSE)
     showSequence <- .norm_show_argument(showSequence, TRUE)
     showAnnotation <- .norm_show_argument(showAnnotation, FALSE)
-    type <- .norm_type(type)
+    type <- .norm_score_type(type)
     colours <- .norm_viz_colours(x, args[["colours"]])
     # get tracks
     atm <- NULL
