@@ -192,7 +192,7 @@ NULL
                  })
   names(data) <- compareTypes
   data <- lapply(data, .assemble_data_per_compare_type, coord, sampleNames,
-                 alias, modType, normalize)
+                 args[["alias"]], modType, normalize)
   if(length(data) == 1L){
     return(data[[1L]])
   }
