@@ -129,7 +129,7 @@ NULL
     stop("Elements of type 'RNAMOD' with a width != 1L are not supported.",
          call. = "FALSE")
   }
-  if(!is.na(type)){
+  if(any(!is.na(type))){
     f <- IRanges::LogicalList(lapply(coord,function(c){c$mod %in% type}))
     coord <- coord[f]
     coord <- coord[vapply(coord,function(c){length(c) > 0L},logical(1))]
