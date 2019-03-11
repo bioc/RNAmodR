@@ -72,14 +72,14 @@ setMethod("pcompareRecursively", "ModifierSet", function(x) FALSE)
                  elementTypeX, "objects"))
   }
   valid_Modifier <- lapply(x@listData, .valid_Modifier)
-  valid_Modifier <- valid_Modifier[!vapply(valid_Modifier,is.null,logical(1))]
+  valid_Modifier <- valid_Modifier[!vapply(valid_Modifier, is.null, logical(1))]
   if(length(valid_Modifier) != 0L){
-    return(paste(paste0(seq_along(valid_Modifier),". :",valid_Modifier),
+    return(paste(paste0(seq_along(valid_Modifier), ". :", valid_Modifier),
                  collapse = "\n"))
   }
   NULL
 }
-S4Vectors::setValidity2(Class = "ModifierSet",.valid_ModifierSet)
+S4Vectors::setValidity2(Class = "ModifierSet", .valid_ModifierSet)
 
 # not supported functions ------------------------------------------------------
 
@@ -90,6 +90,11 @@ setMethod(f = "relistToClass",
           })
 
 # contructor -------------------------------------------------------------------
+
+.ModifierSet <- function(className, x){
+  new2(.get_class_name_for_set_from_modifier_type(className),
+       listData = x)
+}
 
 .norm_ModifierSet_args <- function(input){
   internalBP <- FALSE
@@ -225,7 +230,7 @@ setMethod(f = "relistToClass",
   names[f] <- as.list(as.character(seq_along(x))[f])
   names(x) <- unlist(names)
   # pass results to ModifierSet object
-  new2(.get_class_name_for_set_from_modifier_type(className), listData = x)
+  .ModifierSet(.get_class_name_for_set_from_modifier_type(className), x)
 }
 
 .Modifer_to_ModifierSet <- function(x, ...){
@@ -240,7 +245,7 @@ setMethod(f = "relistToClass",
     return(paste("All 'Modifier' in '",className,"' must be of ",
                  elementType, " objects"))
   }
-  new2(className, listData = x)
+  .ModifierSet(className, x)
 }
 
 #' @rdname ModifierSet-class
@@ -253,7 +258,6 @@ setMethod(f = "ModifierSet",
               return(.Modifer_to_ModifierSet(x, ...))
             }
             if(.contains_only_bamfiles(x)){
-              args <- list(...)
               return(.bamfiles_to_ModifierSet(className, x, annotation, 
                                               sequences, seqinfo, ...))
             }
@@ -357,19 +361,19 @@ setMethod(
 #' @export
 setMethod(f = "modifierType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) modifierType(new(elementType(x),NULL))
+          definition = function(x) modifierType(new(elementType(x)))
 )
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) modType(new(elementType(x),NULL))
+          definition = function(x) modType(new(elementType(x)))
 )
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "mainScore", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) mainScore(new(elementType(x),NULL))
+          definition = function(x) mainScore(new(elementType(x)))
 )
 
 #' @rdname Modifier-functions

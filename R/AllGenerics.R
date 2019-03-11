@@ -77,6 +77,11 @@ setGeneric(
 setGeneric( 
   name = "sequenceData",
   def = function(x) standardGeneric("sequenceData")
+)
+#' @rdname RNAmodR-internals
+setGeneric( 
+  name = "sequenceData<-",
+  def = function(x, value) standardGeneric("sequenceData<-")
 ) 
 #' @rdname modify
 #' @name modify
@@ -117,8 +122,8 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "getData",
-  signature = c("x","grl","sequences","param"),
-  def = function(x, grl, sequences, param, args)
+  signature = c("x","bamfiles","grl","sequences","param"),
+  def = function(x, bamfiles, grl, sequences, param, args)
     standardGeneric("getData")
 ) 
 

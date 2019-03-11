@@ -68,10 +68,11 @@ the data from a bam file and must return a named list of `IntegerList`,
 ```{r}
 setMethod("getData",
           signature = c(x = "ExampleSequenceData",
+                        bamfiles = "BamFileList",
                         grl = "GRangesList",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
+          definition = function(x, bamfiles, grl, sequences, param, args){
             ###
           }
 )

@@ -9,7 +9,7 @@
 \alias{sequences,SequenceDataFrame-method}
 \alias{ranges,SequenceDataFrame-method}
 \alias{show,SequenceData-method}
-\alias{getData,SequenceData,GRangesList,XStringSet,ScanBamParam-method}
+\alias{getData,SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{seqinfo,SequenceData-method}
 \alias{sequences,SequenceData-method}
 \alias{ranges,SequenceData-method}
@@ -23,7 +23,7 @@
 \alias{bamfiles,SequenceDataList-method}
 \title{SequenceData/SequenceDataList/SequenceDataFrame functions}
 \usage{
-getData(x, grl, sequences, param, args)
+getData(x, bamfiles, grl, sequences, param, args)
 
 \S4method{show}{SequenceDataFrame}(object)
 
@@ -33,8 +33,9 @@ getData(x, grl, sequences, param, args)
 
 \S4method{show}{SequenceData}(object)
 
-\S4method{getData}{SequenceData,GRangesList,XStringSet,ScanBamParam}(x,
-  grl, sequences, param, args)
+
+  \S4method{getData}{SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
+  bamfiles, grl, sequences, param, args)
 
 \S4method{seqinfo}{SequenceData}(x)
 

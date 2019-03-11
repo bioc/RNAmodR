@@ -83,41 +83,39 @@ setClass(Class = "SequenceDataFrame",
                    condition = "factor",
                    replicate = "factor"))
 
-setMethod(
-  f = "initialize", 
-  signature = signature(.Object = "SequenceDataFrame"),
-  definition = function(.Object, df, ranges, sequence, replicate, condition){
-    if(!is(df,"DataFrame")){
-      stop("Invalid data object: ", class(df), " found, DataFrame expected.")
-    }
-    if(ncol(df) != length(replicate) ||
-       ncol(df) != length(condition)){
-      stop("Replicate and Conditions information must match the DataFrame ",
-           "dimensions.")
-    }
-    if(!is(ranges,"GRanges")){
-      stop("Invalid data object: ", class(ranges), " found, GRanges expected.")
-    }
-    if(!is(sequence,"XString")){
-      stop("Invalid data object: ", class(sequence), " found, XString expected.")
-    }
-    .Object@replicate <- replicate
-    .Object@condition <- condition
-    .Object@rownames <- df@rownames
-    .Object@listData <- df@listData
-    .Object@nrows <- df@nrows
-    .Object@elementMetadata <- df@elementMetadata
-    .Object@metadata <- df@metadata
-    .Object@ranges <- ranges
-    .Object@sequence <- sequence
-    .Object
+# constructor ------------------------------------------------------------------
+
+.SequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
+  if(!is(df,"DataFrame")){
+    stop("Invalid data object: ", class(df), " found, DataFrame expected.")
   }
-)
+  if(ncol(df) != length(replicate) ||
+     ncol(df) != length(condition)){
+    stop("Replicate and Conditions information must match the DataFrame ",
+         "dimensions.")
+  }
+  if(!is(ranges,"GRanges")){
+    stop("Invalid data object: ", class(ranges), " found, GRanges expected.")
+  }
+  if(!is(sequence,"XString")){
+    stop("Invalid data object: ", class(sequence), " found, XString expected.")
+  }
+  new2("SequenceDataFrame",
+       ranges = ranges,
+       sequence = sequence,
+       condition = condition,
+       replicate = replicate,
+       rownames = df@rownames,
+       nrows = df@nrows,
+       listData = df@listData,
+       elementMetadata = df@elementMetadata,
+       metadata = df@metadata)
+}
 
 #' @rdname SequenceDataFrame-class
 #' @export
 SequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
-  new("SequenceDataFrame", df, ranges, sequence, replicate, condition)
+  .SequenceDataFrame(df, ranges, sequence, replicate, condition)
 }
 
 .valid_SequenceDataFrame <-  function(x){

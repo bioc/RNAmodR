@@ -148,17 +148,18 @@ NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 #' @export
 setMethod("getData",
           signature = c(x = "NormEnd5SequenceData",
+                        bamfiles = "BamFileList",
                         grl = "GRangesList",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
-            data <- lapply(bamfiles(x),
+          definition = function(x, bamfiles, grl, sequences, param, args){
+            data <- lapply(bamfiles,
                            FUN = .get_position_data_of_transcript_ends_norm,
                            grl = grl,
                            param = param,
                            type = "5prime",
                            args = args)
-            names(data) <- paste0("norm.end5.", x@condition, ".", x@replicate)
+            names(data) <- rep("norm.end5",length(data))
             data
           }
 )
@@ -167,17 +168,18 @@ setMethod("getData",
 #' @export
 setMethod("getData",
           signature = c(x = "NormEnd3SequenceData",
+                        bamfiles = "BamFileList",
                         grl = "GRangesList",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
-            data <- lapply(bamfiles(x),
+          definition = function(x, bamfiles, grl, sequences, param, args){
+            data <- lapply(bamfiles,
                            FUN = .get_position_data_of_transcript_ends_norm,
                            grl = grl,
                            param = param,
                            type = "3prime",
                            args = args)
-            names(data) <- paste0("norm.end3.", x@condition, ".", x@replicate)
+            names(data) <- rep("norm.end3",length(data))
             data
           }
 )

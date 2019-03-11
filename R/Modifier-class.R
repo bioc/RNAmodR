@@ -156,28 +156,6 @@ setClass("Modifier",
          prototype = list(aggregateValidForCurrentArguments = FALSE,
                           modificationsValidForCurrentArguments = FALSE))
 
-setMethod(
-  f = "initialize", 
-  signature = signature(.Object = "Modifier"),
-  definition = function(.Object, bamfiles = NULL) {
-    # check modification ident
-    .Object@mod <- .norm_mod(.Object@mod,className)
-    # short cut for creating an empty object
-    if(is.null(bamfiles)){
-      return(.Object)
-    }
-    className <- class(.Object)[[1]]
-    className <- .norm_modifiertype(className)
-    # check bam files
-    bamfiles <- .norm_bamfiles(bamfiles,className)
-    # set clots
-    .Object@bamfiles <- bamfiles
-    .Object@condition <- factor(names(bamfiles))
-    .Object@replicate <- .get_replicate_number(bamfiles, .Object@condition)
-    return(.Object)
-  }
-)
-
 # validity ---------------------------------------------------------------------
 
 .norm_SequenceData_elements <- function(x,list){
@@ -386,6 +364,13 @@ setReplaceMethod(f = "settings",
 setMethod(f = "sequenceData", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@data})
+#' @rdname RNAmodR-internals
+setReplaceMethod(f = "sequenceData", 
+                 signature = signature(x = "Modifier"),
+                 definition = function(x, value){
+                   ans@data <- value
+                   ans
+                 })
 
 #' @rdname Modifier-functions
 #' @export
@@ -469,9 +454,25 @@ setMethod(f = "modifications",
 
 # constructors -----------------------------------------------------------------
 
+.Modifier <- function(className, x){
+  # Check that external classes are implemented correctly
+  className <- class(ans)[[1]]
+  className <- .norm_modifiertype(className)
+  # short cut for creating an empty object
+  if(is.null(bamfiles)){
+    return(new2(className, x,
+                mod = .norm_mod(ans@mod, className)))
+  }
+  new2(className, x,
+       mod = .norm_mod(ans@mod, className), # set clots
+       bamfiles = .norm_bamfiles(bamfiles, className), # check bam files
+       condition = factor(names(bamfiles)), # set clots
+       replicate = .get_replicate_number(bamfiles, ans@condition)) # set clots
+}
+
 .new_ModFromCharacter <- function(className, x, annotation, sequences, seqinfo,
                                   ...){
-  ans <- new(className, x)
+  ans <- .Modifier(className, x)
   # settings
   settings(ans) <- list(...)
   #
@@ -491,9 +492,9 @@ setMethod(f = "modifications",
                                     settings(ans)))
                  })
   if(length(data) > 1L){
-    ans@data <- as(data,"SequenceDataList")
+    sequenceData(ans) <- as(data,"SequenceDataList")
   } else {
-    ans@data <- data[[1]]
+    sequenceData(ans) <- data[[1]]
   }
   # aggregate data
   message("Aggregating data and calculating scores ... ", appendLF = FALSE)
@@ -530,11 +531,11 @@ setMethod(f = "modifications",
 }
 
 .new_ModFromSequenceData <- function(className, x, ...){
-  ans <- new(className, bamfiles(x))
+  ans <- .Modifier(className, bamfiles(x))
   # settings
   settings(ans) <- list(...)
   # check data type, length
-  ans@data <- .check_list_for_SequenceData_elements(ans, x)
+  sequenceData(ans) <- .check_list_for_SequenceData_elements(ans, x)
   # validate
   validObject(ans)
   # search for modifications
