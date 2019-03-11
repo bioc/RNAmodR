@@ -127,6 +127,21 @@ setGeneric(
     standardGeneric("getData")
 ) 
 
+# SequenceDataFrame functions --------------------------------------------------
+
+#' @rdname SequenceData-functions
+#' @export
+setGeneric( 
+  name = "replicates",
+  def = function(x) standardGeneric("replicates")
+) 
+#' @rdname SequenceData-functions
+#' @export
+setGeneric( 
+  name = "conditions",
+  def = function(x) standardGeneric("conditions")
+) 
+
 # Modifier/SequenceData functions ----------------------------------------------
 
 #' @rdname aggregate

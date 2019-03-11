@@ -135,14 +135,16 @@ new_SequenceDataList_from_list <- function(Class, x, ..., mcols){
                                 },
                                 logical(1))
   if (!all(extends_elementType)){
-    stop("all elements in 'x' must be ", ans_elementType, " objects")
+    stop("All elements in 'x' must be ", ans_elementType, " objects")
   }
-  # check that all bamfiles, sequences and annotation information are the same
+  # check that all sequences and annotation information are the same
   if(!.compare_element_metadata(x,"ranges")){
-    stop("Annotation data is not equal.",stop = FALSE)
+    stop("Annotation data of all SequenceData elements are not equal.",
+         call. = FALSE)
   }
   if(!.compare_element_metadata(x,"sequences")){
-    stop("Sequence data is not equal.",stop = FALSE)
+    stop("Sequence data of all SequenceData elements are not equal.",
+         call. = FALSE)
   }
   # class name as default names
   if(is.null(names(x))){
@@ -225,17 +227,15 @@ setMethod("as.list", "SequenceDataList", .as.list.SequenceDataList)
 
 # ... back
 setAs("list", "SequenceDataList",
-      function(from) new_SequenceDataList_from_list("SequenceDataList", from))
-setAs("ANY", "SequenceDataList", function(from) {
-  new_SequenceDataList_from_list("SequenceDataList", as.list(from))
-})
+      function(from){
+        new_SequenceDataList_from_list("SequenceDataList", from)
+      })
+setAs("ANY", "SequenceDataList",
+      function(from) {
+        as(as.list(from),"SequenceDataList")
+      })
 
 # additional accessors ---------------------------------------------------------
-.subaccessors <- function(x,FUN,ans_Class){
-  x_not_NULL <- !vapply(x,is.null,logical(1))
-  do.call(ans_Class,
-          lapply(x[x_not_NULL],aggregate))
-}
 
 #' @rdname SequenceData-functions
 #' @export

@@ -65,6 +65,7 @@ test_that("Subsetting SequenceData:",{
   coord3 <- coord
   coord3$Parent <- NULL
   expect_error(RNAmodR:::.norm_coord(coord3,NA),"Parent column must be present")
+  #
   coord <- actual
   # subsetting
   actual <- subsetByCoord(sequenceData(msi[[1]]),coord)
@@ -75,6 +76,12 @@ test_that("Subsetting SequenceData:",{
                colnames(aggregate(sequenceData(msi[[1]]))@unlistData))
   expect_error(subsetByCoord(sequenceData(msi[[1]]),coord2),
                "No intersection between names in data of 'x' and Parent")
+  # flanking
+  actual <- subsetByCoord(sequenceData(msi[[1]]),coord,flanking = 3L)
+  expect_equal(nrow(actual[[1]]),7L)
+  # perTranscript
+  expect_equal(subsetByCoord(sequenceData(msi[[1]]),coord),
+               subsetByCoord(sequenceData(msi[[1]]),coord,perTranscript = TRUE))
   # labelling
   actual <- RNAmodR:::.label_SequenceData_by_GRangesList(sequenceData(msi[[1]]),
                                                          coord)
@@ -109,9 +116,36 @@ test_that("Subsetting SequenceData:",{
   actual <- RNAmodR:::.label_SequenceData_by_GRangesList(sdl[[1]],coord)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_type(actual@unlistData$labels,"logical")
+  expect_true(all(c("means.treated","sds.treated") %in% 
+                    colnames(actual@unlistData)))
+  actual <- RNAmodR:::.label_SequenceData_by_GRangesList(sdl[[1]],coord,
+                                                         rawData = TRUE)
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_type(actual@unlistData$labels,"logical")
+  expect_true(all(c("end5.treated.1","end5.treated.2","end5.treated.3") %in% 
+                    colnames(actual@unlistData)))
   actual <- RNAmodR:::.label_SequenceDataList_by_GRangesList(sdl,coord)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_type(actual@unlistData$labels,"logical")
+  expect_true(all(c("End5SequenceData.means.treated",
+                    "End5SequenceData.sds.treated") %in% 
+                    colnames(actual@unlistData)))
+  actual <- RNAmodR:::.label_SequenceDataList_by_GRangesList(sdl,coord,
+                                                             rawData = TRUE)
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_type(actual@unlistData$labels,"logical")
+  expect_true(all(c("End5SequenceData.end5.treated.1",
+                    "End5SequenceData.end5.treated.2",
+                    "End5SequenceData.end5.treated.3") %in% 
+                    colnames(actual@unlistData)))
+  # other errors
+  coord <- unlist(coord)
+  end(coord) <- end(coord) + 100
+  start(coord) <- start(coord) + 100
+  expect_error(subsetByCoord(psd,coord),
+               "'coord' for the following modifications")
+  expect_error(subsetByCoord(psd,c(coord,coord)),
+               "'coord' for the following modifications")
 })
 
 context("Subsetting Modifier/ModifierSet")

@@ -4,10 +4,14 @@
 \docType{methods}
 \name{getData}
 \alias{getData}
+\alias{replicates}
+\alias{conditions}
 \alias{SequenceData-functions}
 \alias{show,SequenceDataFrame-method}
 \alias{sequences,SequenceDataFrame-method}
 \alias{ranges,SequenceDataFrame-method}
+\alias{replicates,SequenceDataFrame-method}
+\alias{conditions,SequenceDataFrame-method}
 \alias{show,SequenceData-method}
 \alias{getData,SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{seqinfo,SequenceData-method}
@@ -25,11 +29,19 @@
 \usage{
 getData(x, bamfiles, grl, sequences, param, args)
 
+replicates(x)
+
+conditions(x)
+
 \S4method{show}{SequenceDataFrame}(object)
 
 \S4method{sequences}{SequenceDataFrame}(x)
 
 \S4method{ranges}{SequenceDataFrame}(x)
+
+\S4method{replicates}{SequenceDataFrame}(x)
+
+\S4method{conditions}{SequenceDataFrame}(x)
 
 \S4method{show}{SequenceData}(object)
 

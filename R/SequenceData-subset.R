@@ -149,7 +149,7 @@ NULL
                paste0(invalidPositions[i]," for '",invalidTypes[i],"'",
                       collapse = "\n"))
   if(length(invalidPositions) > 10L){
-    message <- c(message,"and more...")
+    message <- c(message," and more...")
   }
   stop(message,call. = FALSE)
 }

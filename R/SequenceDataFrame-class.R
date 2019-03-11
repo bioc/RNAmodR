@@ -166,6 +166,19 @@ setMethod(
   signature = signature(x = "SequenceDataFrame"),
   definition = function(x){x@ranges})
 
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "replicates", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@replicate})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "conditions", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@condition})
+
 #' @importFrom stats setNames
 #' @rdname SequenceDataFrame-class
 #' @export
@@ -192,7 +205,7 @@ setMethod("[", "SequenceDataFrame",
                 xstub <- stats::setNames(seq_along(x), names(x))
                 j <- normalizeSingleBracketSubscript(j, xstub)
               }
-              x <- initialize(x, df = as(x,"DataFrame")[, j, drop = FALSE],
+              x <- initialize(x, as(x,"DataFrame")[, j, drop = FALSE],
                               ranges = x@ranges,
                               sequence = x@sequence,
                               replicate = x@replicate[j],
