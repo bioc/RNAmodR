@@ -12,7 +12,7 @@ test_that("Subsetting SequenceData:",{
   expect_error(RNAmodR:::.norm_subset_args(list(type = 1),msi),
                "'type' must be a character with a width > 0L")
   expect_error(RNAmodR:::.norm_subset_args(list(type = "meep"),msi),
-               "'type' must be one or more elements of shortName(ModRNAString")
+               "'type' must be one or more elements of shortName")
   expect_error(RNAmodR:::.norm_subset_args(list(flanking = 1),msi),
         "'flanking' must be a single integer value equal or higher than 0L")
   expect_error(RNAmodR:::.norm_subset_args(list(rawData = 1),msi),
@@ -62,8 +62,10 @@ test_that("Subsetting SequenceData:",{
   expect_equal(actual,RNAmodR:::.norm_coord(actual,NA))
   expect_error(RNAmodR:::.norm_coord(coord,"Ix"),
                "No modifications of type 'Ix'")
-  coord$Parent <- NULL
-  expect_error(RNAmodR:::.norm_coord(coord,NA),"Parent column must be present")
+  coord3 <- coord
+  coord3$Parent <- NULL
+  expect_error(RNAmodR:::.norm_coord(coord3,NA),"Parent column must be present")
+  coord <- actual
   # subsetting
   actual <- subsetByCoord(sequenceData(msi[[1]]),coord)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
@@ -71,7 +73,8 @@ test_that("Subsetting SequenceData:",{
                subsetByCoord(sequenceData(msi[[1]]),unlist(coord)))
   expect_equal(colnames(actual@unlistData),
                colnames(aggregate(sequenceData(msi[[1]]))@unlistData))
-  expect_error(subsetByCoord(sequenceData(msi[[1]]),coord2))
+  expect_error(subsetByCoord(sequenceData(msi[[1]]),coord2),
+               "No intersection between names in data of 'x' and Parent")
   # labelling
   actual <- RNAmodR:::.label_SequenceData_by_GRangesList(sequenceData(msi[[1]]),
                                                          coord)
@@ -115,9 +118,9 @@ context("Subsetting Modifier/ModifierSet")
 test_that("Subsetting Modifier/ModifierSet:",{
   data(msi,package = "RNAmodR")
   # element names
-  coord <- actual
+  coord <- RNAmodR:::.norm_coord(modifications(msi)[[1]],NA)
   expect_error(RNAmodR:::.get_element_names(aggregateData(msi[[1]]),coord),
-               'argument "name" is missing')
+               'argument "type" is missing')
   expect_error(RNAmodR:::.get_element_names(aggregateData(msi[[1]]),coord,NA),
                'argument "type" is missing')
   actual <- RNAmodR:::.get_element_names(aggregateData(msi[[1]]),coord,NA,NA)
