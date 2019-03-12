@@ -11,6 +11,7 @@ test_that("SequenceDataList:",{
   expect_equal(seqinfo(sdl),seqinfo(sdl[[1]]))
   expect_equal(names(sdl),names(sdl[[1]]))
   expect_equal(ranges(sdl),ranges(sdl[[1]]))
+  expect_equal(sequences(sdl),sequences(sdl[[1]]))
   expect_equal(bamfiles(sdl),bamfiles(sdl[[1]]))
   expect_equal(aggregate(sdl),
                SimpleList(End5SequenceData = aggregate(sdl[[1]]),
@@ -26,4 +27,5 @@ test_that("SequenceDataList:",{
   # error
   expect_error(SequenceDataList(e5sd,c(1,2,3)),
                "All elements in 'x' must be SequenceData objects")
+  expect_error(as.list(sdl, use.names = 1))
 })

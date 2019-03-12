@@ -63,6 +63,18 @@ setGeneric(
 #' @rdname Modifier-functions
 #' @export
 setGeneric( 
+  name = "validAggregate",
+  def = function(x) standardGeneric("validAggregate")
+)
+#' @rdname Modifier-functions
+#' @export
+setGeneric( 
+  name = "validModification",
+  def = function(x) standardGeneric("validModification")
+)
+#' @rdname Modifier-functions
+#' @export
+setGeneric( 
   name = "sequences",
   def = function(x, ...) standardGeneric("sequences")
 )

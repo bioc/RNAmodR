@@ -5,11 +5,15 @@
 \alias{Modifier-class}
 \alias{Modifier}
 \alias{Modifier,SequenceData-method}
+\alias{Modifier,SequenceDataList-method}
 \alias{Modifier,character-method}
 \alias{Modifier,BamFileList-method}
 \title{The Modifier class}
 \usage{
 \S4method{Modifier}{SequenceData}(className, x, annotation = NULL,
+  sequences = NULL, seqinfo = NULL, ...)
+
+\S4method{Modifier}{SequenceDataList}(className, x, annotation = NULL,
   sequences = NULL, seqinfo = NULL, ...)
 
 \S4method{Modifier}{character}(className, x, annotation = NULL,

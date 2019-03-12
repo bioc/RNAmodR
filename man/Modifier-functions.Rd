@@ -9,6 +9,8 @@
 \alias{mainScore}
 \alias{settings}
 \alias{settings<-}
+\alias{validAggregate}
+\alias{validModification}
 \alias{sequences}
 \alias{bamfiles}
 \alias{sequenceData}
@@ -18,6 +20,8 @@
 \alias{mainScore,Modifier-method}
 \alias{settings,Modifier-method}
 \alias{settings<-,Modifier-method}
+\alias{validAggregate,Modifier-method}
+\alias{validModification,Modifier-method}
 \alias{sequenceData,Modifier-method}
 \alias{names,Modifier-method}
 \alias{seqinfo,Modifier-method}
@@ -47,6 +51,10 @@ settings(x, name = NULL)
 
 settings(x, name) <- value
 
+validAggregate(x)
+
+validModification(x)
+
 sequences(x, ...)
 
 bamfiles(x)
@@ -64,6 +72,10 @@ sequenceData(x)
 \S4method{settings}{Modifier}(x, name = NULL)
 
 \S4method{settings}{Modifier}(x) <- value
+
+\S4method{validAggregate}{Modifier}(x)
+
+\S4method{validModification}{Modifier}(x)
 
 \S4method{sequenceData}{Modifier}(x)
 

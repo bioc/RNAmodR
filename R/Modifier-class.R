@@ -161,13 +161,13 @@ setClass("Modifier",
 .norm_SequenceData_elements <- function(x,list){
   if(is(list,"SequenceData")){
     list <- list(list)
-  } else {
-    if(is(list,"list")){
-      elementTypeMatch <- !vapply(list,is,logical(1),"SequenceData")
-      if(any(elementTypeMatch)){
-        stop("Not all elements are 'SequenceData' objects.", call. = FALSE)
-      }
+  } else if(is(list,"list")){
+    elementTypeMatch <- !vapply(list,is,logical(1),"SequenceData")
+    if(any(elementTypeMatch)){
+      stop("Not all elements are 'SequenceData' objects.", call. = FALSE)
     }
+  } else {
+    stop("Something went wrong.")
   }
   elementTypes <- vapply(list,class,character(1))
   if(length(elementTypes) != length(x@dataType)){
@@ -176,7 +176,7 @@ setClass("Modifier",
          "required", call. = FALSE)
   }
   elementTypes <- elementTypes[match(elementTypes,x@dataType)]
-  if(any(elementTypes != x@dataType)){
+  if(is.na(elementTypes) || any(elementTypes != x@dataType)){
     stop("Type of SequenceData elements does not match the requirements of ",
          class(x),". '",paste(x@dataType, collapse = "','"),"' are ",
          "required", call. = FALSE)
@@ -197,9 +197,15 @@ setClass("Modifier",
   if(is(seqdata,"SequenceData")){
     seqdata <- list(seqdata)
   }
-  c(.valid_SequenceData(x), unlist(lapply(seqdata,.valid.SequenceData)))
+  if(!assertive::is_a_bool(x@aggregateValidForCurrentArguments)){
+    return("Invalid alot: 'aggregateValidForCurrentArguments'")
+  }
+  if(!assertive::is_a_bool(x@aggregateValidForCurrentArguments)){
+    return("Invalid alot: 'modificationsValidForCurrentArguments'")
+  }
+  c(.valid_SequenceData(x), unlist(lapply(seqdata, .valid.SequenceData)))
 }
-S4Vectors::setValidity2(Class = "Modifier",.valid_Modifier)
+S4Vectors::setValidity2(Class = "Modifier", .valid_Modifier)
 
 # show -------------------------------------------------------------------------
 
@@ -267,8 +273,7 @@ setMethod(
                        })
     settings <- DataFrame(settings)
     .show_settings(settings)
-    valid <- c(object@aggregateValidForCurrentArguments,
-               object@modificationsValidForCurrentArguments)
+    valid <- c(validAggregate(object), validModification(object))
     if(!all(valid)){
       warning("Settings were changed after data aggregation or modification ",
               "search. Rerun with modify(x,force = TRUE) to update with ",
@@ -361,6 +366,18 @@ setReplaceMethod(f = "settings",
 
 #' @rdname Modifier-functions
 #' @export
+setMethod(f = "validAggregate", 
+          signature = signature(x = "Modifier"),
+          definition = function(x) x@aggregateValidForCurrentArguments
+)
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "validModification", 
+          signature = signature(x = "Modifier"),
+          definition = function(x) x@modificationsValidForCurrentArguments
+)
+#' @rdname Modifier-functions
+#' @export
 setMethod(f = "sequenceData", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@data})
@@ -368,6 +385,7 @@ setMethod(f = "sequenceData",
 setReplaceMethod(f = "sequenceData", 
                  signature = signature(x = "Modifier"),
                  definition = function(x, value){
+                   .norm_SequenceData_elements(value)
                    ans@data <- value
                    ans
                  })
@@ -391,13 +409,14 @@ setMethod(f = "sequences",
           definition = 
             function(x, modified = FALSE){
               if(!assertive::is_a_bool(modified)){
-                stop("'modified' has to be a single logical value.")
+                stop("'modified' has to be a single logical value.",
+                     call. = FALSE)
               }
               if(modified == FALSE){
                 return(sequences(sequenceData(x)))
               }
               mod <- .get_modifications_per_transcript(x)
-              mod <- split(mod,names(mod))
+              mod <- split(mod,factor(mod$Parent, levels = mod$Parent))
               ans <- ModRNAStringSet(sequences(sequenceData(x)))
               modSeqList <- ans[names(ans) %in% names(mod)]
               mod <- mod[match(names(mod),names(modSeqList))]
@@ -454,66 +473,6 @@ setMethod(f = "modifications",
 
 # constructors -----------------------------------------------------------------
 
-.Modifier <- function(className, x){
-  # Check that external classes are implemented correctly
-  className <- class(ans)[[1]]
-  className <- .norm_modifiertype(className)
-  # short cut for creating an empty object
-  if(is.null(bamfiles)){
-    return(new2(className, x,
-                mod = .norm_mod(ans@mod, className)))
-  }
-  new2(className, x,
-       mod = .norm_mod(ans@mod, className), # set clots
-       bamfiles = .norm_bamfiles(bamfiles, className), # check bam files
-       condition = factor(names(bamfiles)), # set clots
-       replicate = .get_replicate_number(bamfiles, ans@condition)) # set clots
-}
-
-.new_ModFromCharacter <- function(className, x, annotation, sequences, seqinfo,
-                                  ...){
-  ans <- .Modifier(className, x)
-  # settings
-  settings(ans) <- list(...)
-  #
-  annotation <- .norm_annotation(annotation, className)
-  sequences <- .norm_sequences(sequences, className)
-  seqinfo <- .norm_seqnames(bamfiles(ans), annotation, sequences, seqinfo,
-                            className)
-  annotation <- .load_annotation(annotation)
-  annotation <- .subset_by_seqinfo(annotation, seqinfo)
-  # get SequenceData
-  data <- lapply(ans@dataType,
-                 function(class){
-                   do.call(class, c(list(bamfiles = bamfiles(ans),
-                                         annotation = annotation,
-                                         sequences = sequences,
-                                         seqinfo = seqinfo),
-                                    settings(ans)))
-                 })
-  if(length(data) > 1L){
-    sequenceData(ans) <- as(data,"SequenceDataList")
-  } else {
-    sequenceData(ans) <- data[[1]]
-  }
-  # aggregate data
-  message("Aggregating data and calculating scores ... ", appendLF = FALSE)
-  ans <- aggregate(ans)
-  # search for modifications
-  if(settings(ans,"findMod")){
-    f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
-    modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
-    message("Starting to search for '", paste(tools::toTitleCase(modName), 
-                                              collapse = "', '"),
-            "' ... ", appendLF = FALSE)
-    ans <- modify(ans)
-    message("done.")
-  }
-  validObject(ans)
-  ans <- .norm_modifications(ans, settings(ans))
-  ans
-}
-
 .check_list_for_SequenceData_elements <- function(ans, list){
   if(is(ans,"character") && extends(ans,"Modifier")){
     ans <- getClass(ans)@prototype
@@ -530,26 +489,69 @@ setMethod(f = "modifications",
   as(list,"SequenceDataList")
 }
 
+.Modifier <- function(className, data){
+  proto <- new(className)  # create prototype object for mod normalization only
+  data <- .check_list_for_SequenceData_elements(proto, data)
+  bamfiles <- bamfiles(data)
+  condition <- factor(names(bamfiles))
+  new2(className,
+       mod = .norm_mod(proto@mod, className),
+       bamfiles = bamfiles, 
+       condition = condition,
+       replicate = .get_replicate_number(bamfiles, condition),
+       data = data)
+}
+
+.new_ModFromCharacter <- function(className, x, annotation, sequences, seqinfo,
+                                  ...){
+  # Check that external classes are implemented correctly
+  className <- .norm_modifiertype(className)
+  # create prototype object for mod normalization and settings only
+  proto <- new(className) 
+  # short cut for creating an empty object
+  if(is.null(bamfiles)){
+    return(new2(className, mod = .norm_mod(proto@mod, className)))
+  }
+  bamfiles <- .norm_bamfiles(x, className) # check bam files
+  # settings
+  settings(proto) <- list(...)
+  #
+  annotation <- .norm_annotation(annotation, className)
+  sequences <- .norm_sequences(sequences, className)
+  seqinfo <- .norm_seqnames(bamfiles, annotation, sequences, seqinfo, className)
+  annotation <- .load_annotation(annotation)
+  annotation <- .subset_by_seqinfo(annotation, seqinfo)
+  # get SequenceData
+  data <- lapply(proto@dataType,
+                 function(class){
+                   do.call(class, c(list(bamfiles = bamfiles,
+                                         annotation = annotation,
+                                         sequences = sequences,
+                                         seqinfo = seqinfo),
+                                    settings(proto)))
+                 })
+  .new_ModFromSequenceData(className, data, ...)
+}
+
 .new_ModFromSequenceData <- function(className, x, ...){
-  ans <- .Modifier(className, bamfiles(x))
+  # create Modifier object
+  ans <- .Modifier(className, x)
   # settings
   settings(ans) <- list(...)
-  # check data type, length
-  sequenceData(ans) <- .check_list_for_SequenceData_elements(ans, x)
-  # validate
-  validObject(ans)
+  # aggregate data
+  message("Aggregating data and calculating scores ... ", appendLF = FALSE)
+  ans <- aggregate(ans)
   # search for modifications
   if(settings(ans,"findMod")){
     f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
     modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
-    message("Starting to search for '", paste(tools::toTitleCase(modName),
+    message("Starting to search for '", paste(tools::toTitleCase(modName), 
                                               collapse = "', '"),
             "' ... ", appendLF = FALSE)
     ans <- modify(ans)
-    message("done.")
   }
+  message("done.")
   validObject(ans)
-  ans <- .norm_modifications(ans, settings(ans))
   ans
 }
 
@@ -557,6 +559,14 @@ setMethod(f = "modifications",
 #' @export
 setMethod("Modifier",
           signature = c(x = "SequenceData"),
+          function(className, x, annotation = NULL, sequences = NULL, 
+                   seqinfo = NULL, ...){
+            .new_ModFromSequenceData(className, x, ...)
+          })
+#' @rdname Modifier-class
+#' @export
+setMethod("Modifier",
+          signature = c(x = "SequenceDataList"),
           function(className, x, annotation = NULL, sequences = NULL, 
                    seqinfo = NULL, ...){
             .new_ModFromSequenceData(className, x, ...)

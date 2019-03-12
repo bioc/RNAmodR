@@ -93,10 +93,8 @@ setReplaceMethod("names", "SequenceDataList",
 
 # constructors -----------------------------------------------------------------
 
-.SequenceDataList <- function(Class, listData, ..., elementMetadata,
-                              check = FALSE){
-  new2(Class, listData = listData, ..., elementMetadata = elementMetadata,
-       check = check)
+.SequenceDataList <- function(Class, listData, ..., check = FALSE){
+  new2(Class, listData = listData, ..., check = check)
 }
 
 .compare_element_metadata <- function(input,FUN){
@@ -152,7 +150,7 @@ new_SequenceDataList_from_list <- function(Class, x, ..., mcols){
   }
   #
   if (missing(mcols)){
-    return(new2(Class, listData = x, ..., check = FALSE))
+    return(.SequenceDataList(Class, listData = x, ..., check = FALSE))
   }
   .SequenceDataList(Class, listData = x, ..., elementMetadata = mcols,
                     check = FALSE)

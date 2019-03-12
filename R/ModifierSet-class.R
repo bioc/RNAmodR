@@ -91,6 +91,27 @@ setMethod(f = "relistToClass",
 
 # contructor -------------------------------------------------------------------
 
+#' @importFrom stringr str_detect
+.get_class_name_for_set_from_modifier_type <- function(modifiertype){
+  if(stringr::str_detect(modifiertype,"ModSet")){
+    ans <- modifiertype
+  } else {
+    ans <- gsub("Mod","ModSet",modifiertype)
+  }
+  class <- try(getClass(ans), silent = TRUE)
+  if (is(class, "try-error")){
+    stop("Class '",ans,"' is not implemented.",
+         call. = FALSE)
+  }
+  if(isVirtualClass(class)){
+    stop("Class '",ans,"' is virtual.")
+  }
+  if(!("ModifierSet" %in% extends(class))){
+    stop("Class '",ans,"' does not extend the 'ModifierSet' class.")
+  }
+  ans
+}
+
 .ModifierSet <- function(className, x){
   new2(.get_class_name_for_set_from_modifier_type(className),
        listData = x)
@@ -112,6 +133,15 @@ setMethod(f = "relistToClass",
 .contains_only_Modifier <- function(x){
   classNames <- unique(vapply(x, function(z){class(z)[[1]]},character(1)))
   if(length(classNames) != 1L){
+    return(FALSE)
+  }
+  allSameClass <- vapply(x,
+                         function(z, c){
+                           class(z)[[1]] == c
+                         },
+                         logical(1),
+                         classNames)
+  if(!all(allSameClass)){
     return(FALSE)
   }
   x <- try(.norm_modifiertype(classNames), silent = TRUE)
@@ -146,23 +176,6 @@ setMethod(f = "relistToClass",
   }
   TRUE
 }
-
-.get_class_name_for_set_from_modifier_type <- function(modifiertype){
-  x <- gsub("Mod","ModSet",modifiertype)
-  class <- try(getClass(x), silent = TRUE)
-  if (is(class, "try-error")){
-    stop("Class '",x,"' is not implemented.",
-         call. = FALSE)
-  }
-  if(isVirtualClass(class)){
-    stop("Class '",x,"' is virtual.")
-  }
-  if(!("ModifierSet" %in% extends(class))){
-    stop("Class '",x,"' does not extend the 'ModifierSet' class.")
-  }
-  x
-}
-
 
 #' @importFrom BiocParallel SerialParam register bpmapply bplapply
 .bamfiles_to_ModifierSet <- function(className, x, annotation, sequences,
@@ -230,14 +243,17 @@ setMethod(f = "relistToClass",
   names[f] <- as.list(as.character(seq_along(x))[f])
   names(x) <- unlist(names)
   # pass results to ModifierSet object
-  .ModifierSet(.get_class_name_for_set_from_modifier_type(className), x)
+  .ModifierSet(className, x)
 }
 
-.Modifer_to_ModifierSet <- function(x, ...){
+.Modifer_to_ModifierSet <- function(className, x, ...){
   if(!is.list(x)){
     x <- list(x)
   }
   elementType <- modifierType(x[[1]])
+  if(className != elementType){
+    stop("Something went wrong.")
+  }
   className <- .get_class_name_for_set_from_modifier_type(elementType)
   if (!all(vapply(x,
                   function(xi) extends(class(xi), elementType),
@@ -255,7 +271,7 @@ setMethod(f = "ModifierSet",
           function(className, x, annotation = NULL, sequences = NULL, 
                    seqinfo = NULL, ...) {
             if(.contains_only_Modifier(x)){
-              return(.Modifer_to_ModifierSet(x, ...))
+              return(.Modifer_to_ModifierSet(className, x, ...))
             }
             if(.contains_only_bamfiles(x)){
               return(.bamfiles_to_ModifierSet(className, x, annotation, 
@@ -292,7 +308,7 @@ setMethod(f = "ModifierSet",
 setMethod(f = "ModifierSet",
           signature = c(x = "Modifier"),
           function(className, x, ...) {
-            .Modifer_to_ModifierSet(x, ...)
+            .Modifer_to_ModifierSet(className, x, ...)
           })
 
 # show -------------------------------------------------------------------------
@@ -344,8 +360,7 @@ setMethod(
     .show_settings(settings)
     valid <- unlist(lapply(object,
                            function(o){
-                             c(o@aggregateValidForCurrentArguments,
-                               o@modificationsValidForCurrentArguments)
+                             c(validAggregate(o), validModification(o))
                            }))
     if(!all(valid)){
       warning("Settings were changed after data aggregation or modification ",
