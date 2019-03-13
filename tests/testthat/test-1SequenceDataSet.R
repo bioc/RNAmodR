@@ -45,13 +45,15 @@ test_that("SequenceDataList:",{
   expect_equal(ranges(sdl),ranges(sdl[[1]]))
   expect_equal(sequences(sdl),sequences(sdl[[1]]))
   expect_equal(aggregate(sdl),
-               SimpleList(End5SequenceData = aggregate(sdl[[1]]),
-                          PileupSequenceData = aggregate(sdl[[2]])))
+               SimpleList(End5SequenceData_PileupSequenceData = aggregate(sdl[[1]]),
+                          End5SequenceData = aggregate(sdl[[2]]),
+                          PileupSequenceData = aggregate(sdl[[3]])))
   actual <- as.list(sdl)
   expect_type(actual,"list")
-  expect_named(actual,c(class(e5sd),class(psd)))
-  expect_equal(actual[[1]],e5sd)
-  expect_equal(actual[[2]],psd)
+  expect_named(actual,c(paste0(class(e5sd),"_",class(psd)),class(e5sd),
+                        class(psd)))
+  expect_equal(actual[[2]],e5sd)
+  expect_equal(actual[[3]],psd)
   actual <- as.list(sdl, use.names = FALSE)
   expect_null(names(actual))
   expect_true(validObject(actual))
