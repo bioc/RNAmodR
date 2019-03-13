@@ -70,21 +70,6 @@ setReplaceMethod("names", "SequenceDataList",
   new2(Class, listData = listData, ..., check = check)
 }
 
-
-.compare_element_metadata <- function(input, FUN){
-  if(length(input) == 1L){
-    return(TRUE)
-  }
-  input <- lapply(input,FUN)
-  first_input <- input[[1]]
-  ans <- vapply(input[seq.int(2,length(input))],
-                function(i){
-                  all(all(first_input == i))
-                },
-                logical(1))
-  all(ans)
-}
-
 # not exported. Only used internally
 new_SequenceDataList_from_list <- function(Class, x, ..., mcols){
   if (!extends(Class, "SequenceDataList")){

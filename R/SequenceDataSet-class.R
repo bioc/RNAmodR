@@ -105,14 +105,25 @@ setReplaceMethod("names", "SequenceDataSet",
   new2(Class, listData = listData, ..., check = check)
 }
 
-.compare_element_metadata <- function(input,FUN){
+.compare_element_metadata <- function(input, FUN){
+  if(length(input) == 1L){
+    return(TRUE)
+  }
   input <- lapply(input,FUN)
   first_input <- input[[1]]
-  ans <- vapply(input[seq.int(2,length(input))],
-                function(i){
-                  all(all(first_input == i))
-                },
-                logical(1))
+  if(is(first_input,"BamFileList")){
+    ans <- vapply(input[seq.int(2,length(input))],
+                  function(i){
+                    all(path(first_input) == path(i))
+                  },
+                  logical(1))
+  } else {
+    ans <- vapply(input[seq.int(2,length(input))],
+                  function(i){
+                    all(all(first_input == i))
+                  },
+                  logical(1))
+  }
   all(ans)
 }
 
@@ -138,7 +149,6 @@ new_SequenceDataSet_from_list <- function(Class, x, ..., mcols){
     stop("All elements in 'x' must be ", ans_elementType, " objects")
   }
   # check that all sequences and annotation information are the same
-  browser()
   if(!.compare_element_metadata(x,"bamfiles")){
     stop("Annotation data of all SequenceData elements are not equal.",
          call. = FALSE)
