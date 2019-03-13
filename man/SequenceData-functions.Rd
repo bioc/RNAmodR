@@ -20,16 +20,14 @@
 \alias{ranges,SequenceData-method}
 \alias{bamfiles,SequenceData-method}
 \alias{show,SequenceDataSet-method}
-\alias{names,SequenceDataSet-method}
-\alias{names<-,SequenceDataSet,ANY-method}
 \alias{seqinfo,SequenceDataSet-method}
+\alias{names,SequenceDataSet-method}
 \alias{sequences,SequenceDataSet-method}
 \alias{ranges,SequenceDataSet-method}
 \alias{bamfiles,SequenceDataSet-method}
 \alias{show,SequenceDataList-method}
-\alias{names,SequenceDataList-method}
-\alias{names<-,SequenceDataList,ANY-method}
 \alias{seqinfo,SequenceDataList-method}
+\alias{names,SequenceDataList-method}
 \alias{sequences,SequenceDataList-method}
 \alias{ranges,SequenceDataList-method}
 \alias{bamfiles,SequenceDataList-method}
@@ -68,10 +66,6 @@ conditions(x)
 
 \S4method{show}{SequenceDataSet}(object)
 
-\S4method{names}{SequenceDataSet}(x)
-
-\S4method{names}{SequenceDataSet,ANY}(x) <- value
-
 \S4method{seqinfo}{SequenceDataSet}(x)
 
 \S4method{names}{SequenceDataSet}(x)
@@ -83,10 +77,6 @@ conditions(x)
 \S4method{bamfiles}{SequenceDataSet}(x)
 
 \S4method{show}{SequenceDataList}(object)
-
-\S4method{names}{SequenceDataList}(x)
-
-\S4method{names}{SequenceDataList,ANY}(x) <- value
 
 \S4method{seqinfo}{SequenceDataList}(x)
 

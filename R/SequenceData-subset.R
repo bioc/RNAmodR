@@ -203,26 +203,32 @@ NULL
   .perform_subset(data, coord, args[["flanking"]], args[["perTranscript"]])
 }
 
-# subsetting SequenceDataSet --------------------------------------------------
+# subsetting SequenceDataSet ---------------------------------------------------
 
 .subset_SequenceDataSet_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...),x)
   coord <- .norm_coord(coord,args[["type"]])
-  ans <- lapply(x,
-                function(z){
-                  coord <- .norm_coord(coord, args[["type"]])
-                  if(args[["rawData"]]){
-                    data <- as(z,"SplitDataFrameList")
-                  } else {
-                    data <- aggregate(z)
-                  }
-                  names <- .get_element_names(data, coord, args[["name"]],
-                                              args[["type"]])
-                  data <- data[match(names, names(data))]
-                  coord <- coord[match(names, names(coord))]
-                  .perform_subset(data, coord, args[["flanking"]], 
-                                  args[["perTranscript"]])
-                })
+  ans <- lapply(x, .subset_SequenceData_by_GRangesList, coord, ...)
+  ans <- do.call(cbind,ans)
+  ans
+}
+
+# subsetting SequenceDataList --------------------------------------------------
+
+.subset_SequenceDataList_by_GRangesList <- function(x, coord, ...){
+  args <- .norm_subset_args(list(...),x)
+  coord <- .norm_coord(coord,args[["type"]])
+  ans <- 
+    lapply(x,
+           function(z){
+             if(is(z,"SequenceData")){
+               return(.subset_SequenceData_by_GRangesList(z, coord, ...))
+             } else if(is(z,"SequenceDataSet")) {
+               return(.subset_SequenceDataSet_by_GRangesList(z, coord, ...))
+             } else {
+               stop("Something went wrong.")
+             }
+           })
   ans <- do.call(cbind,ans)
   ans
 }
@@ -257,6 +263,22 @@ setMethod("subsetByCoord",
           signature = c(x = "SequenceDataSet", coord = "GRangesList"),
           function(x, coord, ...){
             .subset_SequenceDataSet_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("subsetByCoord",
+          signature = c(x = "SequenceDataList", coord = "GRanges"),
+          function(x, coord, ...){
+            .subset_SequenceDataList_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("subsetByCoord",
+          signature = c(x = "SequenceDataList", coord = "GRangesList"),
+          function(x, coord, ...){
+            .subset_SequenceDataList_by_GRangesList(x, coord, ...)
           }
 )
 
@@ -298,30 +320,41 @@ setMethod("subsetByCoord",
   .perform_label(data, coord)
 }
 
+.keep_one_labels_column <- function(data){
+  labels <- data[[1]][,"labels",drop=FALSE]
+  data <- lapply(data,
+                 function(d){
+                   d@unlistData <- 
+                     d@unlistData[,colnames(d@unlistData) != "labels",
+                                  drop=FALSE]
+                   d
+                 })
+  data <- do.call(cbind,c(data,list(labels)))
+  data
+}
+
 .label_SequenceDataSet_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...), x)
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
-  ans <- lapply(x,
-                function(z){
-                  if(args[["rawData"]]){
-                    data <- as(z,"SplitDataFrameList")
-                  } else {
-                    data <- aggregate(z)
-                  }
-                  names <- .get_element_names(data, coord, args[["name"]],
-                                              args[["type"]])
-                  data <- data[match(names, names(data))]
-                  coord <- coord[match(names, names(coord))]
-                  .perform_label(data, coord)
-                })
-  labels <- ans[[1]][,"labels",drop=FALSE]
-  ans <- lapply(ans,
-                function(a){
-                  a@unlistData <- 
-                    a@unlistData[,colnames(a@unlistData) != "labels",drop=FALSE]
-                  a
-                })
-  ans <- do.call(cbind,c(ans,list(labels)))
-  ans
+  ans <- lapply(x, .label_SequenceData_by_GRangesList, coord, ...)
+  .keep_one_labels_column(ans)
+}
+
+.label_SequenceDataList_by_GRangesList <- function(x, coord, ...){
+  args <- .norm_subset_args(list(...), x)
+  # converts everything to a GRangesList
+  coord <- .norm_coord(coord, args[["type"]])
+  ans <- 
+    lapply(x,
+           function(z){
+             if(is(z,"SequenceData")){
+               return(.label_SequenceData_by_GRangesList(z, coord, ...))
+             } else if(is(z,"SequenceDataSet")) {
+               return(.label_SequenceDataSet_by_GRangesList(z, coord,...))
+             } else {
+               stop("Something went wrong.")
+             }
+           })
+  .keep_one_labels_column(ans)
 }

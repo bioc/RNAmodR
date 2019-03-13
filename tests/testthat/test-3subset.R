@@ -92,11 +92,20 @@ test_that("Subsetting SequenceData:",{
   expect_type(actual@unlistData$labels,"logical")
   # SequenceDataSet specific
   data(e5sd,package = "RNAmodR")
-  sdl <- SequenceDataSet(e5sd,psd)
+  sds <- SequenceDataSet(e5sd,psd)
+  actual <- subsetByCoord(sds,coord)
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_equal(actual,subsetByCoord(sds,unlist(coord)))
+  actual <- RNAmodR:::.label_SequenceDataSet_by_GRangesList(sds,coord)
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_type(actual@unlistData$labels,"logical")
+  # SequenceDataList specific
+  data(e5sd,package = "RNAmodR")
+  sdl <- SequenceDataList(sds,e5sd,psd)
   actual <- subsetByCoord(sdl,coord)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_equal(actual,subsetByCoord(sdl,unlist(coord)))
-  actual <- RNAmodR:::.label_SequenceDataSet_by_GRangesList(sdl,coord)
+  actual <- RNAmodR:::.label_SequenceDataList_by_GRangesList(sdl,coord)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_type(actual@unlistData$labels,"logical")
   # raw data
@@ -107,34 +116,52 @@ test_that("Subsetting SequenceData:",{
   actual <- subsetByCoord(sequenceData(msi[[1]]),coord, rawData = TRUE)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_equal(unique(ncol(actual)),15)
-  actual <- subsetByCoord(sdl,coord, rawData = TRUE)
+  actual <- subsetByCoord(sds,coord, rawData = TRUE)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_equal(unique(ncol(actual)),18)
-  expect_equivalent(cbind(subsetByCoord(sdl[[1]],coord, rawData = TRUE),
-                     subsetByCoord(sdl[[2]],coord, rawData = TRUE)),
-                    subsetByCoord(sdl,coord, rawData = TRUE))
-  actual <- RNAmodR:::.label_SequenceData_by_GRangesList(sdl[[1]],coord)
+  expect_equivalent(cbind(subsetByCoord(sds[[1]],coord, rawData = TRUE),
+                     subsetByCoord(sds[[2]],coord, rawData = TRUE)),
+                    subsetByCoord(sds,coord, rawData = TRUE))
+  actual <- RNAmodR:::.label_SequenceData_by_GRangesList(sds[[1]],coord)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_type(actual@unlistData$labels,"logical")
   expect_true(all(c("means.treated","sds.treated") %in% 
                     colnames(actual@unlistData)))
-  actual <- RNAmodR:::.label_SequenceData_by_GRangesList(sdl[[1]],coord,
+  actual <- RNAmodR:::.label_SequenceData_by_GRangesList(sds[[1]],coord,
                                                          rawData = TRUE)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_type(actual@unlistData$labels,"logical")
   expect_true(all(c("end5.treated.1","end5.treated.2","end5.treated.3") %in% 
                     colnames(actual@unlistData)))
-  actual <- RNAmodR:::.label_SequenceDataSet_by_GRangesList(sdl,coord)
+  actual <- RNAmodR:::.label_SequenceDataSet_by_GRangesList(sds,coord)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_type(actual@unlistData$labels,"logical")
   expect_true(all(c("End5SequenceData.means.treated",
                     "End5SequenceData.sds.treated") %in% 
                     colnames(actual@unlistData)))
-  actual <- RNAmodR:::.label_SequenceDataSet_by_GRangesList(sdl,coord,
+  actual <- RNAmodR:::.label_SequenceDataSet_by_GRangesList(sds,coord,
                                                              rawData = TRUE)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_type(actual@unlistData$labels,"logical")
   expect_true(all(c("End5SequenceData.end5.treated.1",
+                    "End5SequenceData.end5.treated.2",
+                    "End5SequenceData.end5.treated.3") %in% 
+                    colnames(actual@unlistData)))
+  actual <- RNAmodR:::.label_SequenceDataList_by_GRangesList(sdl,coord)
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_type(actual@unlistData$labels,"logical")
+  expect_true(all(c("End5SequenceData_PileupSequenceData.End5SequenceData.means.treated",
+                    "End5SequenceData.means.treated",
+                    "End5SequenceData.sds.treated") %in% 
+                    colnames(actual@unlistData)))
+  actual <- RNAmodR:::.label_SequenceDataList_by_GRangesList(sdl,coord,
+                                                             rawData = TRUE)
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_type(actual@unlistData$labels,"logical")
+  expect_true(all(c("End5SequenceData_PileupSequenceData.End5SequenceData.end5.treated.1",
+                    "End5SequenceData_PileupSequenceData.End5SequenceData.end5.treated.2",
+                    "End5SequenceData_PileupSequenceData.End5SequenceData.end5.treated.3",
+                    "End5SequenceData.end5.treated.1",
                     "End5SequenceData.end5.treated.2",
                     "End5SequenceData.end5.treated.3") %in% 
                     colnames(actual@unlistData)))

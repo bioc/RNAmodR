@@ -7,4 +7,5 @@ test_that("show:",{
   expect_output(show(psd))
   expect_output(show(psd[[1]]))
   expect_output(show(SequenceDataSet(e5sd,psd)))
+  expect_output(show(SequenceDataList(SequenceDataSet(e5sd,psd),e5sd,psd)))
 })

@@ -36,22 +36,27 @@ test_that("SequenceDataList:",{
   data(e5sd,package = "RNAmodR")
   sds <- SequenceDataSet(e5sd,psd)
   sdl <- SequenceDataList(sds,e5sd,psd)
+  names <- c(paste0(class(e5sd),"_",class(psd)),class(e5sd),
+             class(psd))
   sdl2 <- as(list(sds,e5sd,psd),"SequenceDataList")
   expect_equal(sdl,sdl2)
   sdl2 <- as(SimpleList(sds,e5sd,psd),"SequenceDataList")
   expect_equal(sdl,sdl2)
   expect_equal(seqinfo(sdl),seqinfo(sdl[[1]]))
   expect_equal(names(sdl),names(sdl[[1]]))
+  expect_named(bamfiles(sdl),names)
+  expect_s4_class(bamfiles(sdl),"SimpleList")
   expect_equal(ranges(sdl),ranges(sdl[[1]]))
   expect_equal(sequences(sdl),sequences(sdl[[1]]))
-  expect_equal(aggregate(sdl),
+  actual <- aggregate(sdl)
+  expect_s4_class(actual,"SimpleList")
+  expect_equal(actual,
                SimpleList(End5SequenceData_PileupSequenceData = aggregate(sdl[[1]]),
                           End5SequenceData = aggregate(sdl[[2]]),
                           PileupSequenceData = aggregate(sdl[[3]])))
   actual <- as.list(sdl)
   expect_type(actual,"list")
-  expect_named(actual,c(paste0(class(e5sd),"_",class(psd)),class(e5sd),
-                        class(psd)))
+  expect_named(actual,names)
   expect_equal(actual[[2]],e5sd)
   expect_equal(actual[[3]],psd)
   actual <- as.list(sdl, use.names = FALSE)

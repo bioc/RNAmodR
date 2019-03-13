@@ -89,16 +89,6 @@ setMethod("parallelSlotNames", "SequenceDataSet",
           function(x) c("listData", callNextMethod())
 )
 
-# accessors --------------------------------------------------------------------
-#' @rdname SequenceData-functions
-setMethod("names", "SequenceDataSet", function(x) names(as.list(x)))
-#' @rdname SequenceData-functions
-setReplaceMethod("names", "SequenceDataSet",
-                 function(x, value) {
-                   names(x@listData) <- value
-                   x
-                 })
-
 # constructors -----------------------------------------------------------------
 
 .SequenceDataSet <- function(Class, listData, ..., check = FALSE){
@@ -185,8 +175,11 @@ SequenceDataSet <- function(...){
   if (!all(vapply(as.list(x),
                   function(xi) extends(class(xi), elementTypeX),
                   logical(1)))){
-    return(paste("the 'listData' slot must be a list containing",
-                 elementTypeX, "objects"))
+    return(paste("the 'listData' slot must be a list containing ",
+                 elementTypeX, " objects"))
+  }
+  if(!.compare_element_metadata(x,"bamfiles")){
+    return("Bam input files are not equal.")
   }
   if(!.compare_element_metadata(x,"ranges")){
     return("Annotation data is not equal.")

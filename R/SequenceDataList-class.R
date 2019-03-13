@@ -54,16 +54,6 @@ setMethod("parallelSlotNames", "SequenceDataList",
           function(x) c("listData", callNextMethod())
 )
 
-# accessors --------------------------------------------------------------------
-#' @rdname SequenceData-functions
-setMethod("names", "SequenceDataList", function(x) names(as.list(x)))
-#' @rdname SequenceData-functions
-setReplaceMethod("names", "SequenceDataList",
-                 function(x, value) {
-                   names(x@listData) <- value
-                   x
-                 })
-
 # constructors -----------------------------------------------------------------
 
 .SequenceDataList <- function(Class, listData, ..., check = FALSE){
@@ -127,8 +117,36 @@ SequenceDataList <- function(...){
 }
 
 # Validity ---------------------------------------------------------------------
-.valid.SequenceDataList <- function(x){
+.valid.SequenceDataList.listData <- function(x){
+  elementTypeX <- elementType(x)
+  if (!all(vapply(as.list(x),
+                  function(xi) extends(class(xi), elementTypeX),
+                  logical(1)))){
+    classes <- getClass("SD_or_SDS")
+    if(isClassUnion(classes)){
+      classes <- paste(names(classes@subclasses), collapse = " or ")
+    } else {
+      classes <- classes@className
+    }
+    return(paste("the 'listData' slot must be a list containing ",
+                 classes, " objects"))
+  }
+  if(!.compare_element_metadata(x,"ranges")){
+    return("Annotation data is not equal.")
+  }
+  if(!.compare_element_metadata(x,"sequences")){
+    return("Sequence data is not equal.")
+  }
   NULL
+}
+.valid.SequenceDataSet <- function(x){
+  c(.valid.SequenceDataSet.listData(x),
+    unlist(lapply(x,validObject)))
+}
+
+.valid.SequenceDataList <- function(x){
+  c(.valid.SequenceDataList.listData(x),
+    unlist(lapply(x,validObject)))
 }
 S4Vectors::setValidity2("SequenceDataList", .valid.SequenceDataList)
 
