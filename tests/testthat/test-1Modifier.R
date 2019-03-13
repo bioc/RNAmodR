@@ -19,15 +19,15 @@ test_that("Modifier/ModifierSet:",{
   expect_error(RNAmodR:::.norm_args(list(findMod = 1)),
                "'findMod' must be a single logical value")
   # .norm_SequenceData_elements
-  expect_error(RNAmodR:::.norm_SequenceData_elements(),
+  expect_error(RNAmodR:::.check_SequenceData_elements(),
                'argument "list" is missing, with no default')
-  expect_error(RNAmodR:::.norm_SequenceData_elements(msi[[1]],character()),
+  expect_error(RNAmodR:::.check_SequenceData_elements(msi[[1]],character()),
                "Something went wrong")
-  expect_error(RNAmodR:::.norm_SequenceData_elements(msi[[1]],list()),
+  expect_error(RNAmodR:::.check_SequenceData_elements(msi[[1]],list()),
                "Number of 'SequenceData' elements does not match")
-  expect_error(RNAmodR:::.norm_SequenceData_elements(msi[[1]],e5sd),
+  expect_error(RNAmodR:::.check_SequenceData_elements(msi[[1]],e5sd),
                "Type of SequenceData elements does not match")
-  expect_null(RNAmodR:::.norm_SequenceData_elements(msi[[1]],psd))
+  expect_null(RNAmodR:::.check_SequenceData_elements(msi[[1]],psd))
   # settings
   expect_error(settings(msi[[1]]) <- list(minCoverage = 1),
                "'minCoverage' must be a single positive integer value")
@@ -99,16 +99,21 @@ test_that("Modifier/ModifierSet:",{
                                                   perTranscript = TRUE)))),
                factor("*", levels = c("+","-","*")))
   # .get_class_name_for_set_from_modifier_type
-  expect_error(RNAmodR:::.get_class_name_for_set_from_modifier_type(),
-               'argument "modifiertype" is missing, with no default')
-  expect_error(RNAmodR:::.get_class_name_for_set_from_modifier_type("abc"),
-               "Class 'abc' is not implemented")
-  expect_error(RNAmodR:::.get_class_name_for_set_from_modifier_type("DataFrame"),
-               "Class 'DataFrame' does not extend the 'ModifierSet' class")
-  expect_equal(RNAmodR:::.get_class_name_for_set_from_modifier_type("ModInosine"),
-               "ModSetInosine")
-  expect_equal(RNAmodR:::.get_class_name_for_set_from_modifier_type("ModSetInosine"),
-               "ModSetInosine")
+  expect_error(
+    RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type(),
+    'argument "modifiertype" is missing, with no default')
+  expect_error(
+    RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type("abc"),
+    "Class 'abc' is not implemented")
+  expect_error(
+    RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type("DataFrame"),
+    "Class 'DataFrame' does not extend the 'ModifierSet' class")
+  expect_equal(
+    RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type("ModInosine"),
+    "ModSetInosine")
+  expect_equal(
+    RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type("ModSetInosine"),
+    "ModSetInosine")
   # ModifierSet creation
   files <- list("SampleSet1" = c(treated = RNAmodR.files[["example_wt_1.bam"]],
                                  treated = RNAmodR.files[["example_wt_2.bam"]],
@@ -123,7 +128,10 @@ test_that("Modifier/ModifierSet:",{
   expect_s4_class(msi,"ModSetInosine")
   msi2 <- ModSetInosine(as.list(msi))
   expect_s4_class(msi,"ModSetInosine")
+  input <- c(files[[1]],msi[[1]])
+  expect_error(ModSetInosine(input),
+               "'x' must be a list containing only elements")
   expect_equal(msi,msi2)
-  
-  
+  expect_equivalent(msi,aggregate(msi))
+  expect_equivalent(msi,modify(msi))
 })

@@ -33,6 +33,15 @@ NULL
 #' \item{\code{alias}} {a data.frame with two columns, \code{tx_id} and 
 #' \code{name}, to convert transcipt ids to another identifier}
 #' \item{\code{name}} {Limit results to one specific gene or transcript}
+#' \item{\code{sequenceData}} {TRUE or FALSE? Should the aggregate of 
+#' sequenceData be used for the comparison instead of the aggregate data if each
+#' \code{Modifier} element? (default: \code{sequenceData = FALSE})}
+#' \item{\code{compareType}} {a valid score type to use for the comparison. If
+#' \code{sequenceData = FALSE} this defaults to \code{mainScore(x)}, whereas
+#' if \code{sequenceData = TRUE} all columns will be used by setting 
+#' \code{allTypes = TRUE}.}
+#' \item{\code{allTypes}} {TRUE or FALSE? Should all available score be 
+#' compared? (default: \code{allTypes = sequenceData})}
 #' \item{...} {passed on to \code{\link{subsetByCoord}}}
 #' }
 #' 
@@ -85,19 +94,14 @@ NULL
 }
 
 .norm_compare_args <- function(input, data, x){
-  compareType <- mainScore(x)
+  if(is(x,"ModifierSet")){
+    compareType <- mainScore(x)
+  } else {
+    compareType <- NA
+  }
+  allTypes <- FALSE
   perTranscript <- FALSE
   sequenceData <- FALSE
-  if(!is.null(input[["compareType"]])){
-    compareType <- input[["compareType"]]
-    colnames <- unique(unlist(colnames(data[[1]])))
-    if(!is.character(compareType) || width(compareType) == 0L ||
-       !(compareType %in% colnames)){
-      stop("'compareType' must be a character and a valid colname in the 
-           aggregated data of 'x'.",
-           call. = FALSE)
-    }
-  }
   if(!is.null(input[["perTranscript"]])){
     perTranscript <- input[["perTranscript"]]
     if(!assertive::is_a_bool(perTranscript)){
@@ -110,6 +114,29 @@ NULL
     if(!assertive::is_a_bool(sequenceData)){
       stop("'sequenceData' must be a single logical value.")
     }
+  }
+  if(!is.null(input[["compareType"]])){
+    compareType <- input[["compareType"]]
+    colnames <- unique(unlist(colnames(data[[1]])))
+    if(!is.character(compareType) || width(compareType) == 0L ||
+       !(compareType %in% colnames)){
+      stop("'compareType' must be a character and a valid colname in the 
+           aggregated data of 'x'.", call. = FALSE)
+    }
+  }
+  if(!is.null(input[["allTypes"]])){
+    allTypes <- input[["allTypes"]]
+    if(length(allTypes) != 1L ||
+       !is.logical(allTypes)){
+      stop("'allTypes' must be a single logical value.", call. = FALSE)
+    }
+  }
+  if(allTypes){
+    compareType <- names(data[[1]][[1]])
+  }
+  if(is.na(compareType[1L])){
+    stop("'compareType' must be set if 'sequenceData = TRUE' and ",
+         "'allTypes = FALSE'", call. = FALSE)
   }
   args <- c(.norm_alias(input, x),
             list(compareType = compareType,
@@ -142,7 +169,7 @@ NULL
   rownames(data) <- NULL
   # add activity information if present
   coord <- unlist(coord)
-  if(!is.na(modType)){
+  if(any(!is.na(modType))){
     coord <- coord[coord$mod %in% modType,]
   }
   if(!is.null(coord$Activity) || !is.null(coord$mod)){
@@ -172,15 +199,14 @@ NULL
 
 .compare_ModifierSet_by_GRanges <- function(x, coord, normalize, ...){
   coord <- .norm_coord(coord, modType(x))
-  args <- .norm_compare_args(list(...), data, x)
   data <- subsetByCoord(x, coord, ...)
+  args <- .norm_compare_args(list(...), data, x)
   # restructure to different compare types
   sampleNames <- names(data)
+  compareTypes <- args[["compareType"]]
   if(args[["sequenceData"]]){
-    compareTypes <- names(data[[1]][[1]])
     modType <- NA
   } else {
-    compareTypes <- args[["compareType"]]
     modType <- modType(x)
   }
   data <- lapply(compareTypes,

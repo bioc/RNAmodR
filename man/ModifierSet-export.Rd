@@ -34,14 +34,15 @@ aggregated data from the \code{ModifierSet} object be included in the
 }}
 
 \item{object}{a \code{\link[=Modifier-class]{Modifier}}, a 
-\code{\link[=SequenceData-class]{SequenceData}} or a
+\code{\link[=SequenceData-class]{SequenceData}}, 
+\code{\link[=SequenceDataSet-class]{SequenceDataSet}} or a
 \code{\link[=SequenceDataList-class]{SequenceDataList}} object}
 
 \item{con}{See \code{\link[rtracklayer:BigWigFile]{export.bw}}}
 }
 \description{
-\code{Modifier}, \code{SequenceData} and \code{SequenceDataList} can be 
-exported into several other formats.
+\code{Modifier}, \code{SequenceData}, \code{SequenceDataSet} and 
+\code{SequenceDataList} can be exported into several other formats.
 
 \code{export.bw} exports to a bigWig file as implemented by the
 \code{rtracklayer} package.

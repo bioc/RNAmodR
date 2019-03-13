@@ -46,7 +46,7 @@ setMethod("initialize",
 #' @rdname RNAmodR-internals
 setMethod("show", "ModifiedSequenceTrack",
           function(object){
-            cat(Gviz:::.sequenceTrackInfo(object))
+            cat(.sequenceTrackInfo(object))
           }
 )
 

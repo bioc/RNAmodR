@@ -15,12 +15,17 @@ SequenceDataList(...)
 a \code{SequenceDataList}
 }
 \description{
-The \code{SequenceDataList} class is used to hold \code{SequenceData} objects
-as its elements. It is derived from the 
+The \code{SequenceDataList} class is used to hold \code{SequenceData} or 
+\code{SequenceDataSet} objects as its elements. It is derived from the 
 \code{\link[S4Vectors:List-class]{List}}.
+
+The \code{SequenceDataList} is used to hold data from different sets of
+aligned reads. This allows multiple methods to be aggregated into one
+modification detection strategy. Annotation and sequence data must be the 
+same for all elements, however the bam files can be different.
 }
 \examples{
 data(psd,package="RNAmodR")
 data(e5sd,package="RNAmodR")
-sdl <- SequenceDataList(psd,e5sd)
+sdl <- SequenceDataList(SequenceDataSet(psd,e5sd),e5sd)
 }

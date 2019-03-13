@@ -90,11 +90,6 @@ setGeneric(
   name = "sequenceData",
   def = function(x) standardGeneric("sequenceData")
 )
-#' @rdname RNAmodR-internals
-setGeneric( 
-  name = "sequenceData<-",
-  def = function(x, value) standardGeneric("sequenceData<-")
-) 
 #' @rdname modify
 #' @name modify
 #' @export

@@ -4,15 +4,16 @@ NULL
 #' @name SequenceData-functions
 #' @aliases show,SequenceDataFrame-method
 #' 
-#' @title SequenceData/SequenceDataList/SequenceDataFrame functions
+#' @title SequenceData/SequenceDataSet/SequenceDataList/SequenceDataFrame 
+#' functions
 #' 
 #' @description 
-#' The \code{SequenceData}, \code{SequenceDataList} and
+#' The \code{SequenceData}, \code{SequenceDataSet}, \code{SequenceDataList} and
 #' \code{SequenceDataFrame} share functionality. Have a look at the elements
 #' listed under Usage.
 #' 
-#' @param x,object,value a \code{SequenceData}, \code{SequenceDataList},
-#' \code{SequenceDataFrame} object.
+#' @param x,object,value a \code{SequenceData}, \code{SequenceDataSet}, 
+#' \code{SequenceDataList} or a \code{SequenceDataFrame} object.
 #' @param grl a \code{GRangesList} from \code{exonsBy(..., by = "tx")}
 #' @param sequences a \code{XStringSet} of type \code{RNAStringSet} or 
 #' \code{ModRNAStringSet}
@@ -22,11 +23,13 @@ NULL
 #' 
 #' @return 
 #' \itemize{
-#' \item{\code{seqinfo}} {a \code{Seqinfo} object}
-#' \item{\code{sequences}} {a \code{RNAStingSet} object}
+#' \item{\code{seqinfo}} {a \code{Seqinfo} object ()}
+#' \item{\code{sequences}} {a \code{RNAStingSet} object or a \code{RNAString} 
+#' object for a \code{SequenceDataFrame}}
 #' \item{\code{ranges}} {a \code{GRangesList} object with each element per 
-#' transcript}
-#' \item{\code{bamfiles}} {a \code{BamFileList} object}
+#' transcript or a \code{GRanges} object for a \code{SequenceDataFrame}}
+#' \item{\code{bamfiles}} {a \code{BamFileList} object or a SimpleList of 
+#' \code{BamFileList} objects for a \code{SequenceDataList}}
 #' }
 #' 
 #' @examples 

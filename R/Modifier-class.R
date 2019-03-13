@@ -1,5 +1,6 @@
 #' @include RNAmodR.R
 #' @include SequenceData-class.R
+#' @include SequenceDataSet-class.R
 #' @include SequenceDataList-class.R
 #' @include Modifier-utils.R
 NULL
@@ -69,8 +70,9 @@ NULL
 #' \code{control} or \code{treated}
 #' @slot replicate replicate number along the \code{BamFileList} for each of the
 #' condition types.
-#' @slot data The sequence data object: Either a \code{SequenceData} or a 
-#' \code{SequenceDataList} object, if more than one \code{dataType} is used.
+#' @slot data The sequence data object: Either a \code{SequenceData}, 
+#' \code{SequenceDataSet} or a \code{SequenceDataList} object, if more than one 
+#' \code{dataType} is used.
 #' @slot aggregate the aggregated data as a \code{SplitDataFrameList}
 #' @slot modifications the found modifications as a \code{GRanges} object
 #' @slot arguments arguments used for the analysis as a \code{list}
@@ -134,8 +136,8 @@ NULL
 #' bamfiles(mi)
 NULL
 
-setClassUnion("SequenceData_OR_SequenceDataList",
-              c("SequenceData", "SequenceDataList"))
+setClassUnion("list_OR_character",
+              c("list", "character"))
 
 #' @rdname Modifier-class
 #' @export
@@ -143,11 +145,11 @@ setClass("Modifier",
          contains = c("VIRTUAL"),
          slots = c(mod = "character", # this have to be populated by subclass
                    score = "character", # this have to be populated by subclass
-                   dataType = "character", # this have to be populated by subclass
+                   dataType = "list_OR_character", # this have to be populated by subclass
                    bamfiles = "BamFileList",
                    condition = "factor",
                    replicate = "factor",
-                   data = "SequenceData_OR_SequenceDataList",
+                   data = "SD_or_SDS_or_SDL",
                    aggregate = "CompressedSplitDataFrameList",
                    modifications = "GRanges",
                    arguments = "list",
@@ -158,7 +160,7 @@ setClass("Modifier",
 
 # validity ---------------------------------------------------------------------
 
-.norm_SequenceData_elements <- function(x,list){
+.check_SequenceData_elements <- function(x, list){
   if(is(list,"SequenceData")){
     list <- list(list)
   } else if(is(list,"list")){
@@ -166,8 +168,8 @@ setClass("Modifier",
     if(any(elementTypeMatch)){
       stop("Not all elements are 'SequenceData' objects.", call. = FALSE)
     }
-  } else {
-    stop("Something went wrong.")
+  } else if(!is(list,"SequenceDataSet")){
+   stop("Something went wrong.")
   }
   elementTypes <- vapply(list,class,character(1))
   if(length(elementTypes) != length(x@dataType)){
@@ -184,8 +186,23 @@ setClass("Modifier",
   NULL
 }
 
+.check_SequenceDataList_data_elements <- function(x, list){
+  ans <- lapply(list, .check_SequenceData_elements, x)
+  if(all(vapply(ans,is.null))) {
+    return(NULL)
+  }
+  ans
+}
+
+.check_Modifier_data_elements <- function(x, data){
+  if(is(data,"SequenceData") || is(data,"SequenceDataSet")){
+    return(.check_SequenceData_elements(x, data))
+  } 
+  .check_SequenceDataList_elements(x, data)
+}
+
 .valid_SequenceData <- function(x){
-  tmp <- try(.norm_SequenceData_elements(x,x@data))
+  tmp <- try(.check_Modifier_data_elements(x,x@data))
   if (inherits(tmp, "try-error")){
     return(tmp)
   }
@@ -381,15 +398,6 @@ setMethod(f = "validModification",
 setMethod(f = "sequenceData", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@data})
-#' @rdname RNAmodR-internals
-setReplaceMethod(f = "sequenceData", 
-                 signature = signature(x = "Modifier"),
-                 definition = function(x, value){
-                   .norm_SequenceData_elements(value)
-                   ans@data <- value
-                   ans
-                 })
-
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "names", 
@@ -473,25 +481,22 @@ setMethod(f = "modifications",
 
 # constructors -----------------------------------------------------------------
 
-.check_list_for_SequenceData_elements <- function(ans, list){
+.norm_Modifier_input_SequenceData_elements <- function(list, ans){
   if(is(ans,"character") && extends(ans,"Modifier")){
     ans <- getClass(ans)@prototype
   } else if(!is(ans,"Modifier")) {
     stop("Something went wrong.")
   }
-  if(!is(list,"list")){
-    list <- list(list)
-  }
-  .norm_SequenceData_elements(ans,list)
+  .check_Modifier_data_elements(ans, list)
   if(length(list) == 1L){
     return(list[[1]])
   }
-  as(list,"SequenceDataList")
+  list
 }
 
 .Modifier <- function(className, data){
   proto <- new(className)  # create prototype object for mod normalization only
-  data <- .check_list_for_SequenceData_elements(proto, data)
+  data <- .norm_Modifier_input_SequenceData_elements(data, proto)
   bamfiles <- bamfiles(data)
   condition <- factor(names(bamfiles))
   new2(className,
@@ -500,6 +505,28 @@ setMethod(f = "modifications",
        condition = condition,
        replicate = .get_replicate_number(bamfiles, condition),
        data = data)
+}
+
+.load_SequenceData <- function(classes, bamfiles, annotation, sequences,
+                               seqinfo, args){
+  if(is.list(classes)){
+    data <- BiocParallel::bplapply(classes, .load_SequenceData, bamfiles, 
+                                   annotation, sequences, seqinfo, args)
+    data <- as(data,"SequenceDataList")
+  } else if(is.character(classes)){
+    data <- lapply(classes,
+                   function(class){
+                     do.call(class, c(list(bamfiles = bamfiles,
+                                           annotation = annotation,
+                                           sequences = sequences,
+                                           seqinfo = seqinfo),
+                                      args))
+                   })
+    data <- as(data,"SequenceDataSet")
+  } else {
+    stop("Something went wrong.")
+  }
+  data
 }
 
 .new_ModFromCharacter <- function(className, x, annotation, sequences, seqinfo,
@@ -522,14 +549,9 @@ setMethod(f = "modifications",
   annotation <- .load_annotation(annotation)
   annotation <- .subset_by_seqinfo(annotation, seqinfo)
   # get SequenceData
-  data <- lapply(proto@dataType,
-                 function(class){
-                   do.call(class, c(list(bamfiles = bamfiles,
-                                         annotation = annotation,
-                                         sequences = sequences,
-                                         seqinfo = seqinfo),
-                                    settings(proto)))
-                 })
+  data <- .load_SequenceData(proto@dataType, bamfiles = bamfiles,
+                             annotation = annotation, sequences = sequences,
+                             seqinfo = seqinfo, args = settings(proto))
   .new_ModFromSequenceData(className, data, ...)
 }
 
@@ -566,7 +588,7 @@ setMethod("Modifier",
 #' @rdname Modifier-class
 #' @export
 setMethod("Modifier",
-          signature = c(x = "SequenceDataList"),
+          signature = c(x = "SequenceDataSet"),
           function(className, x, annotation = NULL, sequences = NULL, 
                    seqinfo = NULL, ...){
             .new_ModFromSequenceData(className, x, ...)

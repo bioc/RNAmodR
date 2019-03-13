@@ -10,8 +10,8 @@
 \alias{subsetByCoord,ModifierSet,GRangesList-method}
 \alias{subsetByCoord,SequenceData,GRanges-method}
 \alias{subsetByCoord,SequenceData,GRangesList-method}
-\alias{subsetByCoord,SequenceDataList,GRanges-method}
-\alias{subsetByCoord,SequenceDataList,GRangesList-method}
+\alias{subsetByCoord,SequenceDataSet,GRanges-method}
+\alias{subsetByCoord,SequenceDataSet,GRangesList-method}
 \title{Subsetting data from a \code{Modifier} or \code{ModifierSet} object.}
 \usage{
 subsetByCoord(x, coord, ...)
@@ -28,9 +28,9 @@ subsetByCoord(x, coord, ...)
 
 \S4method{subsetByCoord}{SequenceData,GRangesList}(x, coord, ...)
 
-\S4method{subsetByCoord}{SequenceDataList,GRanges}(x, coord, ...)
+\S4method{subsetByCoord}{SequenceDataSet,GRanges}(x, coord, ...)
 
-\S4method{subsetByCoord}{SequenceDataList,GRangesList}(x, coord, ...)
+\S4method{subsetByCoord}{SequenceDataSet,GRangesList}(x, coord, ...)
 }
 \arguments{
 \item{x}{a \code{Modifier} or \code{ModifierSet} object.}

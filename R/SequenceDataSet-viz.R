@@ -1,12 +1,12 @@
 #' @include RNAmodR.R
-#' @include SequenceDataList-class.R
+#' @include SequenceDataSet-class.R
 NULL
 
 #' @rdname visualizeData
 #' @export
 setMethod(
   f = "getDataTrack",
-  signature = signature(x = "SequenceDataList"),
+  signature = signature(x = "SequenceDataSet"),
   definition = function(x, name = name, ...) {
     sdts <- lapply(x,
                    function(z){
@@ -22,7 +22,7 @@ setMethod(
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
-  signature = signature(x = "SequenceDataList", coord = "GRanges"),
+  signature = signature(x = "SequenceDataSet", coord = "GRanges"),
   definition = function(x, coord, type = NA, window.size = 15L, ...) {
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
@@ -37,7 +37,7 @@ setMethod(
 #' @export
 setMethod(
   f = "visualizeData",
-  signature = signature(x = "SequenceDataList"),
+  signature = signature(x = "SequenceDataSet"),
   definition = function(x, name, from, to, perTranscript = FALSE, 
                         showSequence = TRUE, showAnnotation = FALSE, ...) {
     # get plotting arguments

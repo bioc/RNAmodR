@@ -1,6 +1,6 @@
 #' @include RNAmodR.R
 #' @include SequenceData-class.R
-#' @include SequenceDataList-class.R
+#' @include SequenceDataSet-class.R
 #' @include Modifier-subset.R
 NULL
 
@@ -203,9 +203,9 @@ NULL
   .perform_subset(data, coord, args[["flanking"]], args[["perTranscript"]])
 }
 
-# subsetting SequenceDataList --------------------------------------------------
+# subsetting SequenceDataSet --------------------------------------------------
 
-.subset_SequenceDataList_by_GRangesList <- function(x, coord, ...){
+.subset_SequenceDataSet_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...),x)
   coord <- .norm_coord(coord,args[["type"]])
   ans <- lapply(x,
@@ -246,17 +246,17 @@ setMethod("subsetByCoord",
 #' @rdname subsetByCoord
 #' @export
 setMethod("subsetByCoord",
-          signature = c(x = "SequenceDataList", coord = "GRanges"),
+          signature = c(x = "SequenceDataSet", coord = "GRanges"),
           function(x, coord, ...){
-            .subset_SequenceDataList_by_GRangesList(x, coord, ...)
+            .subset_SequenceDataSet_by_GRangesList(x, coord, ...)
           }
 )
 #' @rdname subsetByCoord
 #' @export
 setMethod("subsetByCoord",
-          signature = c(x = "SequenceDataList", coord = "GRangesList"),
+          signature = c(x = "SequenceDataSet", coord = "GRangesList"),
           function(x, coord, ...){
-            .subset_SequenceDataList_by_GRangesList(x, coord, ...)
+            .subset_SequenceDataSet_by_GRangesList(x, coord, ...)
           }
 )
 
@@ -298,7 +298,7 @@ setMethod("subsetByCoord",
   .perform_label(data, coord)
 }
 
-.label_SequenceDataList_by_GRangesList <- function(x, coord, ...){
+.label_SequenceDataSet_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...), x)
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])

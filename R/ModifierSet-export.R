@@ -8,8 +8,8 @@ NULL
 #' @title Exporting data to other classes and files
 #' 
 #' @description 
-#' \code{Modifier}, \code{SequenceData} and \code{SequenceDataList} can be 
-#' exported into several other formats.
+#' \code{Modifier}, \code{SequenceData}, \code{SequenceDataSet} and 
+#' \code{SequenceDataList} can be exported into several other formats.
 #' 
 #' \code{export.bw} exports to a bigWig file as implemented by the
 #' \code{rtracklayer} package.
@@ -20,7 +20,8 @@ NULL
 #' 
 #' @param assays a \code{\link[=ModifierSet-class]{ModifierSet}} object
 #' @param object a \code{\link[=Modifier-class]{Modifier}}, a 
-#' \code{\link[=SequenceData-class]{SequenceData}} or a
+#' \code{\link[=SequenceData-class]{SequenceData}}, 
+#' \code{\link[=SequenceDataSet-class]{SequenceDataSet}} or a
 #' \code{\link[=SequenceDataList-class]{SequenceDataList}} object
 #' @param con See \code{\link[rtracklayer:BigWigFile]{export.bw}}
 #' @param ... See \code{\link[rtracklayer:BigWigFile]{export.bw}} or 
@@ -47,7 +48,7 @@ NULL
 NULL
 
 .add_seqlengths_for_bigWig_export <- function(gr, x){
-  seqlengths <- seqlengths(seqinfo(x))
+  seqlengths <- GenomeInfoDb::seqlengths(seqinfo(x))
   f <- vapply(seqlengths, is.na, logical(1))
   if(any(f)){
     seqlengths[f] <- lengths(gr)[f]
@@ -83,7 +84,7 @@ NULL
   } else {
     data <- aggregate(x)
   }
-  if(is(x,"SequenceDataList")){
+  if(is(x,"SequenceDataSet")){
     data <- do.call(cbind, unname(data))
   }
   type <- .norm_score_type(type, colnames(data@unlistData))
@@ -108,7 +109,7 @@ setMethod("export.bw","SequenceData",
           }
 )
 
-setMethod("export.bw","SequenceDataList",
+setMethod("export.bw","SequenceDataSet",
           function(object, con, type, ...){
             object <- .get_GRanges_for_bigWig_export(object, type)
             export.bw(object, con, ...)
@@ -124,7 +125,7 @@ setMethod("export.bw","SequenceDataList",
   } else {
     data <- aggregate(x)
   }
-  if(is(x,"SequenceDataList")){
+  if(is(x,"SequenceDataSet")){
     data <- do.call(cbind, unname(data))
   }
   type <- .norm_score_type(type, colnames(data@unlistData), multiple = TRUE)
@@ -156,7 +157,7 @@ setMethod("export.wig","SequenceData",
           }
 )
 
-setMethod("export.wig","SequenceDataList",
+setMethod("export.wig","SequenceDataSet",
           function(object, con, type, ...){
             browser()
             object <- .get_GRangesList_for_Wig_export(object, type)
@@ -219,24 +220,29 @@ setMethod("export.wig","SequenceDataList",
   if(!args[["allPositions"]]){
     mod <- .get_unified_modifications(assays)
     if(args[["modificationsOnly"]]){
-      data <- compareByCoord(assays, mod, sequenceData = args[["sequenceData"]])
+      data <- compareByCoord(assays, mod, sequenceData = args[["sequenceData"]],
+                             allTypes = TRUE)
     } else {
       data <- compareByCoord(assays, mod, sequenceData = args[["sequenceData"]],
-                             flanking = args[["flanking"]])
+                             flanking = args[["flanking"]], allTypes = TRUE)
     }
+    
     rowData <- data[,(colnames(data) %in% c("names","positions","mod"))]
     colnames(rowData) <- c("Parent","positions","mod")
     data <- data[,!(colnames(data) %in% c("names","positions","mod"))]
-    seqnames <- seqnames(mod)[match(rowData$names,as.character(mod$Parent))]
-    strand <- strand(mod)[match(rowData$names,as.character(mod$Parent))]
+    f <- match(rowData$Parent,as.character(mod$Parent))
+    seqnames <- seqnames(mod)[f]
+    strand <- strand(mod)[f]
   } else {
     
   }
-  ans <- SummarizedExperiment(list(aggregate = data), 
-                              rowRanges = GRanges(seqnames,
-                                                  ranges = IRanges::IRanges(start = as.integer(rowData$positions), width = 1L),
-                                                  strand = strand,
-                                                  rowData[,colnames(rowData) != "positions"]))
+  ir <- IRanges::IRanges(start = as.integer(rowData$positions),
+                         width = 1L)
+  gr <- GRanges(seqnames,
+                ranges = ir,
+                strand = strand,
+                rowData[,colnames(rowData) != "positions"])
+  ans <- SummarizedExperiment(assayList, rowRanges = gr)
   return(ans)
 }
 

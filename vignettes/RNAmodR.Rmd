@@ -168,7 +168,7 @@ Initially three `Modifier` classes are available:
  * `ModAlkAnilineSeq` from the `RNAmodR.AlkAnilineSeq` package
 
 `Modifier` objects can use and wrap multiple `SequenceData` objects as elements
-of a `SequenceDataList` class. The elements of this class are different types of
+of a `SequenceDataSet` class. The elements of this class are different types of
 `SequenceData`, which are needed for the specific `Modifier` class. However,
 they are required to contain data for the same annotation and sequence data.
 

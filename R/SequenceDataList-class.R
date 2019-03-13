@@ -1,5 +1,6 @@
 #' @include RNAmodR.R
 #' @include SequenceData-class.R
+#' @include SequenceDataSet-class.R
 NULL
 
 #' @name SequenceDataList-class
@@ -8,9 +9,14 @@ NULL
 #' @title The SequenceDataList class
 #' 
 #' @description 
-#' The \code{SequenceDataList} class is used to hold \code{SequenceData} objects
-#' as its elements. It is derived from the 
+#' The \code{SequenceDataList} class is used to hold \code{SequenceData} or 
+#' \code{SequenceDataSet} objects as its elements. It is derived from the 
 #' \code{\link[S4Vectors:List-class]{List}}.
+#' 
+#' The \code{SequenceDataList} is used to hold data from different sets of
+#' aligned reads. This allows multiple methods to be aggregated into one
+#' modification detection strategy. Annotation and sequence data must be the 
+#' same for all elements, however the bam files can be different. 
 #' 
 #' @param ... The elements to be included in the \code{SequenceDataList}.
 #' 
@@ -19,7 +25,7 @@ NULL
 #' @examples
 #' data(psd,package="RNAmodR")
 #' data(e5sd,package="RNAmodR")
-#' sdl <- SequenceDataList(psd,e5sd)
+#' sdl <- SequenceDataList(SequenceDataSet(psd,e5sd),e5sd)
 NULL
 
 #' @rdname SequenceDataList-class
@@ -27,7 +33,10 @@ NULL
 setClass("SequenceDataList",
          contains = c("List"),
          slots = c(listData = "list"),
-         prototype = list(elementType = "SequenceData"))
+         prototype = list(elementType = "SD_or_SDS"))
+
+setClassUnion("SD_or_SDS_or_SDL",
+              c("SequenceData", "SequenceDataSet", "SequenceDataList"))
 
 # show method ------------------------------------------------------------------
 #' @rdname SequenceData-functions
@@ -37,42 +46,6 @@ setMethod("show", "SequenceDataList",
             lo <- length(object)
             cat(classNameForDisplay(object), " of length ", lo,
                 "\n", sep = "")
-            if (!is.null(names(object)))
-              cat(S4Vectors:::labeledLine("names", names(object)))
-            ranges_mcols <- mcols(object@listData[[1]]@ranges@unlistData,
-                                  use.names = FALSE)
-            nhead <- S4Vectors::get_showHeadLines()
-            ntail <- S4Vectors::get_showTailLines()
-            nc <- if (is.null(ranges_mcols)) 0L else ncol(ranges_mcols)
-            nr <- if (is.null(ranges_mcols)) 0L else nrow(ranges_mcols)
-            nms <- rownames(ranges_mcols)
-            if (nr <= (nhead + ntail + 1L)) {
-              out <-
-                as.matrix(format(as.data.frame(
-                  lapply(ranges_mcols, showAsCell),
-                  optional = TRUE)))
-            } else {
-              out <-
-                rbind(as.matrix(format(as.data.frame(
-                  lapply(ranges_mcols, function(x)
-                    showAsCell(head(x, nhead))),
-                  optional = TRUE))),
-                  rbind(rep.int("...", nc)),
-                  as.matrix(format(as.data.frame(
-                    lapply(ranges_mcols, function(x) 
-                      showAsCell(tail(x, ntail))),
-                    optional = TRUE))))
-              rownames(out) <- S4Vectors:::.rownames(nms, nr, nhead, ntail) 
-            }
-            classinfo <-
-              matrix(unlist(lapply(ranges_mcols, function(x) {
-                paste0("<", classNameForDisplay(x)[1],
-                       ">")
-              }), use.names = FALSE), nrow = 1,
-              dimnames = list("", colnames(out)))
-            out <- rbind(classinfo, out)
-            cat("- Ranges metadata columns:\n")
-            print(out, quote = FALSE, right = TRUE)
           })
 
 # parallelSlotNames ------------------------------------------------------------
@@ -97,7 +70,11 @@ setReplaceMethod("names", "SequenceDataList",
   new2(Class, listData = listData, ..., check = check)
 }
 
-.compare_element_metadata <- function(input,FUN){
+
+.compare_element_metadata <- function(input, FUN){
+  if(length(input) == 1L){
+    return(TRUE)
+  }
   input <- lapply(input,FUN)
   first_input <- input[[1]]
   ans <- vapply(input[seq.int(2,length(input))],
@@ -116,12 +93,6 @@ new_SequenceDataList_from_list <- function(Class, x, ..., mcols){
   if (!is.list(x)){
     stop("'x' must be a list")
   }
-  if (is.array(x)) { # drop any unwanted dimensions
-    tmp_names <- names(x)
-    dim(x) <- NULL # clears the names
-    names(x) <- tmp_names
-  }
-  class(x) <- "list"
   proto <- new(Class)
   ans_elementType <- elementType(proto)
   if (is(S4Vectors::mcols(proto, use.names = FALSE), "DataFrame")){
@@ -129,7 +100,7 @@ new_SequenceDataList_from_list <- function(Class, x, ..., mcols){
   }
   extends_elementType <- vapply(x,
                                 function(xi){
-                                  extends(class(xi), ans_elementType)
+                                  extends(class(xi), ans_elementType) 
                                 },
                                 logical(1))
   if (!all(extends_elementType)){
@@ -137,58 +108,44 @@ new_SequenceDataList_from_list <- function(Class, x, ..., mcols){
   }
   # check that all sequences and annotation information are the same
   if(!.compare_element_metadata(x,"ranges")){
-    stop("Annotation data of all SequenceData elements are not equal.",
+    stop("Annotation data of all SequenceDataList elements are not equal.",
          call. = FALSE)
   }
   if(!.compare_element_metadata(x,"sequences")){
-    stop("Sequence data of all SequenceData elements are not equal.",
+    stop("Sequence data of all SequenceDataList elements are not equal.",
          call. = FALSE)
   }
   # class name as default names
   if(is.null(names(x))){
     names(x) <- vapply(x,class,character(1))
+    f <- vapply(x,is,logical(1),"SequenceDataSet")
+    if(any(f)){
+      names(x)[f] <- vapply(x[f],
+                            function(xi){
+                              paste0(vapply(xi,class,character(1)),collapse="_")
+                            },
+                            character(1))
+    }
   }
   #
   if (missing(mcols)){
     return(.SequenceDataList(Class, listData = x, ..., check = FALSE))
   }
   .SequenceDataList(Class, listData = x, ..., elementMetadata = mcols,
-                    check = FALSE)
+                   check = FALSE)
 }
 
 #' @rdname SequenceDataList-class
 #' @export
 SequenceDataList <- function(...){
-  args <- list(...)
-  if (length(args) == 1L && extends(class(args[[1L]]), "SequenceData")){
-    args <- args[[1L]]
-  }
-  new_SequenceDataList_from_list("SequenceDataList", args)
+  new_SequenceDataList_from_list("SequenceDataList", list(...))
 }
 
 # Validity ---------------------------------------------------------------------
-.valid.SequenceDataList.listData <- function(x){
-  elementTypeX <- elementType(x)
-  if (!all(vapply(as.list(x),
-                  function(xi) extends(class(xi), elementTypeX),
-                  logical(1)))){
-    return(paste("the 'listData' slot must be a list containing",
-                 elementTypeX, "objects"))
-  }
-  if(!.compare_element_metadata(x,"ranges")){
-    return("Annotation data is not equal.")
-  }
-  if(!.compare_element_metadata(x,"sequences")){
-    return("Sequence data is not equal.")
-  }
+.valid.SequenceDataList <- function(x){
   NULL
 }
-.valid.SequenceDataList <- function(x){
-  c(.valid.SequenceDataList.listData(x),
-    unlist(lapply(x,validObject)))
-}
 S4Vectors::setValidity2("SequenceDataList", .valid.SequenceDataList)
-
 
 # classNameForDisplay ----------------------------------------------------------
 setMethod("classNameForDisplay", "SequenceDataList",
@@ -272,7 +229,9 @@ setMethod(f = "ranges",
 setMethod(f = "bamfiles", 
           signature = signature(x = "SequenceDataList"),
           definition = function(x){
-            bamfiles(x[[1]])
+            ans <- do.call(S4Vectors::SimpleList, lapply(x, bamfiles))
+            names(ans) <- names(x@listData)
+            ans
           })
 
 #' @rdname aggregate
@@ -281,7 +240,7 @@ setMethod("aggregate",
           signature = c(x = "SequenceDataList"),
           function(x, condition = "Treated"){
             ans <- do.call(S4Vectors::SimpleList,
-                           lapply(x,aggregate, condition = condition))
+                           lapply(x, aggregate, condition = condition))
             names(ans) <- names(x@listData)
             ans
           })

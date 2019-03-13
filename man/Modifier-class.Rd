@@ -5,7 +5,7 @@
 \alias{Modifier-class}
 \alias{Modifier}
 \alias{Modifier,SequenceData-method}
-\alias{Modifier,SequenceDataList-method}
+\alias{Modifier,SequenceDataSet-method}
 \alias{Modifier,character-method}
 \alias{Modifier,BamFileList-method}
 \title{The Modifier class}
@@ -13,7 +13,7 @@
 \S4method{Modifier}{SequenceData}(className, x, annotation = NULL,
   sequences = NULL, seqinfo = NULL, ...)
 
-\S4method{Modifier}{SequenceDataList}(className, x, annotation = NULL,
+\S4method{Modifier}{SequenceDataSet}(className, x, annotation = NULL,
   sequences = NULL, seqinfo = NULL, ...)
 
 \S4method{Modifier}{character}(className, x, annotation = NULL,
@@ -99,8 +99,9 @@ elements from the alphabet of a
 \item{\code{replicate}}{replicate number along the \code{BamFileList} for each of the
 condition types.}
 
-\item{\code{data}}{The sequence data object: Either a \code{SequenceData} or a 
-\code{SequenceDataList} object, if more than one \code{dataType} is used.}
+\item{\code{data}}{The sequence data object: Either a \code{SequenceData}, 
+\code{SequenceDataSet} or a \code{SequenceDataList} object, if more than one 
+\code{dataType} is used.}
 
 \item{\code{aggregate}}{the aggregated data as a \code{SplitDataFrameList}}
 

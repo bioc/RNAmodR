@@ -92,12 +92,17 @@ setMethod(f = "relistToClass",
 # contructor -------------------------------------------------------------------
 
 #' @importFrom stringr str_detect
-.get_class_name_for_set_from_modifier_type <- function(modifiertype){
-  if(stringr::str_detect(modifiertype,"ModSet")){
-    ans <- modifiertype
+.norm_classname_ModifierSet <- function(classname){
+  if(stringr::str_detect(classname,"ModSet")){
+    ans <- classname
   } else {
-    ans <- gsub("Mod","ModSet",modifiertype)
+    ans <- gsub("Mod","ModSet",classname)
   }
+  ans
+}
+
+.get_classname_for_ModifierSet_from_modifier_type <- function(modifiertype){
+  ans <- .norm_classname_ModifierSet(modifiertype)
   class <- try(getClass(ans), silent = TRUE)
   if (is(class, "try-error")){
     stop("Class '",ans,"' is not implemented.",
@@ -113,7 +118,7 @@ setMethod(f = "relistToClass",
 }
 
 .ModifierSet <- function(className, x){
-  new2(.get_class_name_for_set_from_modifier_type(className),
+  new2(.get_classname_for_ModifierSet_from_modifier_type(className),
        listData = x)
 }
 
@@ -251,10 +256,10 @@ setMethod(f = "relistToClass",
     x <- list(x)
   }
   elementType <- modifierType(x[[1]])
-  if(className != elementType){
+  className <- .get_classname_for_ModifierSet_from_modifier_type(className)
+  if(className != .norm_classname_ModifierSet(elementType)){
     stop("Something went wrong.")
   }
-  className <- .get_class_name_for_set_from_modifier_type(elementType)
   if (!all(vapply(x,
                   function(xi) extends(class(xi), elementType),
                   logical(1)))){
