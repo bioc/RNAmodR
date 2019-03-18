@@ -198,7 +198,7 @@ setClass("Modifier",
   if(is(data,"SequenceData") || is(data,"SequenceDataSet")){
     return(.check_SequenceData_elements(x, data))
   } 
-  .check_SequenceDataList_elements(x, data)
+  .check_SequenceDataList_data_elements(x, data)
 }
 
 .valid_SequenceData <- function(x){

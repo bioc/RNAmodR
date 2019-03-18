@@ -12,8 +12,9 @@ NULL
 #' \code{SequenceDataFrame} share functionality. Have a look at the elements
 #' listed under Usage.
 #' 
-#' @param x,object,value a \code{SequenceData}, \code{SequenceDataSet}, 
+#' @param x,object a \code{SequenceData}, \code{SequenceDataSet}, 
 #' \code{SequenceDataList} or a \code{SequenceDataFrame} object.
+#' @param bamfiles a \code{BamFileList}.
 #' @param grl a \code{GRangesList} from \code{exonsBy(..., by = "tx")}
 #' @param sequences a \code{XStringSet} of type \code{RNAStringSet} or 
 #' \code{ModRNAStringSet}

@@ -1,4 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^literature*
+^docs*
 .Rproj
+_pkgdown.yml

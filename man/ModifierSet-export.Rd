@@ -3,13 +3,39 @@
 \docType{methods}
 \name{ModifierSet-export}
 \alias{ModifierSet-export}
+\alias{export.bw,Modifier-method}
+\alias{export.bw,SequenceData-method}
+\alias{export.bw,SequenceDataSet-method}
+\alias{export.wig,Modifier-method}
+\alias{export.wig,SequenceData-method}
+\alias{export.wig,SequenceDataSet-method}
 \alias{SummarizedExperiment,ModifierSet-method}
 \title{Exporting data to other classes and files}
 \usage{
+\S4method{export.bw}{Modifier}(object, con, type, ...)
+
+\S4method{export.bw}{SequenceData}(object, con, type, ...)
+
+\S4method{export.bw}{SequenceDataSet}(object, con, type, ...)
+
+\S4method{export.wig}{Modifier}(object, con, type, ...)
+
+\S4method{export.wig}{SequenceData}(object, con, type, ...)
+
+\S4method{export.wig}{SequenceDataSet}(object, con, type, ...)
+
 \S4method{SummarizedExperiment}{ModifierSet}(assays, ...)
 }
 \arguments{
-\item{assays}{a \code{\link[=ModifierSet-class]{ModifierSet}} object}
+\item{object}{a \code{\link[=Modifier-class]{Modifier}}, a 
+\code{\link[=SequenceData-class]{SequenceData}}, 
+\code{\link[=SequenceDataSet-class]{SequenceDataSet}} or a
+\code{\link[=SequenceDataList-class]{SequenceDataList}} object}
+
+\item{con}{See \code{\link[rtracklayer:BigWigFile]{export.bw}}}
+
+\item{type}{Which column(s) of data should be exported?
+(A wig files only supports one type of data)}
 
 \item{...}{See \code{\link[rtracklayer:BigWigFile]{export.bw}} or 
 optional arguments for \code{SummarizedExperiment}:
@@ -33,12 +59,7 @@ aggregated data from the \code{ModifierSet} object be included in the
 \code{sequenceData = FALSE})}
 }}
 
-\item{object}{a \code{\link[=Modifier-class]{Modifier}}, a 
-\code{\link[=SequenceData-class]{SequenceData}}, 
-\code{\link[=SequenceDataSet-class]{SequenceDataSet}} or a
-\code{\link[=SequenceDataList-class]{SequenceDataList}} object}
-
-\item{con}{See \code{\link[rtracklayer:BigWigFile]{export.bw}}}
+\item{assays}{a \code{\link[=ModifierSet-class]{ModifierSet}} object}
 }
 \description{
 \code{Modifier}, \code{SequenceData}, \code{SequenceDataSet} and 

@@ -110,3 +110,9 @@ NULL
 #' @rdname RNAmodR-datasets
 #' @format a \code{End5SequenceData} instance
 "e5sd"
+#' @rdname RNAmodR-datasets
+#' @format a \code{SequenceDataSet} instance
+"sds"
+#' @rdname RNAmodR-datasets
+#' @format a \code{SequenceDataList} instance
+"sdl"

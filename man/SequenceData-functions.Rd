@@ -89,8 +89,10 @@ conditions(x)
 \S4method{bamfiles}{SequenceDataList}(x)
 }
 \arguments{
-\item{x, object, value}{a \code{SequenceData}, \code{SequenceDataSet}, 
+\item{x, object}{a \code{SequenceData}, \code{SequenceDataSet}, 
 \code{SequenceDataList} or a \code{SequenceDataFrame} object.}
+
+\item{bamfiles}{a \code{BamFileList}.}
 
 \item{grl}{a \code{GRangesList} from \code{exonsBy(..., by = "tx")}}
 

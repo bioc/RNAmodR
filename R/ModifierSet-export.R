@@ -24,6 +24,8 @@ NULL
 #' \code{\link[=SequenceDataSet-class]{SequenceDataSet}} or a
 #' \code{\link[=SequenceDataList-class]{SequenceDataList}} object
 #' @param con See \code{\link[rtracklayer:BigWigFile]{export.bw}}
+#' @param type Which column(s) of data should be exported?
+#' (A wig files only supports one type of data)
 #' @param ... See \code{\link[rtracklayer:BigWigFile]{export.bw}} or 
 #' optional arguments for \code{SummarizedExperiment}:
 #' \itemize{
@@ -53,7 +55,7 @@ NULL
   if(any(f)){
     seqlengths[f] <- lengths(gr)[f]
   }
-  seqlengths(gr) <- seqlengths
+  GenomeInfoDb::seqlengths(gr) <- seqlengths
   gr
 }
 
@@ -87,13 +89,15 @@ NULL
   if(is(x,"SequenceDataSet")){
     data <- do.call(cbind, unname(data))
   }
-  type <- .norm_score_type(type, colnames(data@unlistData))
+  type <- .norm_score_type(type, colnames(data@unlistData), multiple = FALSE)
   ranges <- .expand_ranges_per_position(ranges, rownames(data), x)
   mcols(ranges)$score <- unlist(data)[,type]
   ranges
 }
 
+#' @rdname ModifierSet-export
 #' @importFrom rtracklayer export.bw
+#' @export
 setMethod("export.bw","Modifier",
           function(object, con, type, ...){
             object <- .get_GRanges_for_bigWig_export(object, type)
@@ -101,14 +105,17 @@ setMethod("export.bw","Modifier",
           }
 )
 
+#' @rdname ModifierSet-export
+#' @export
 setMethod("export.bw","SequenceData",
           function(object, con, type, ...){
-            browser()
             object <- .get_GRanges_for_bigWig_export(object, type)
             export.bw(object, con, ...)
           }
 )
 
+#' @rdname ModifierSet-export
+#' @export
 setMethod("export.bw","SequenceDataSet",
           function(object, con, type, ...){
             object <- .get_GRanges_for_bigWig_export(object, type)
@@ -140,26 +147,29 @@ setMethod("export.bw","SequenceDataSet",
   grl
 }
 
+#' @rdname ModifierSet-export
 #' @importFrom rtracklayer export.wig
+#' @export
 setMethod("export.wig","Modifier",
           function(object, con, type, ...){
-            browser()
             object <- .get_GRangesList_for_Wig_export(object, type)
             export.wig(object, con, ...)
           }
 )
 
+#' @rdname ModifierSet-export
+#' @export
 setMethod("export.wig","SequenceData",
           function(object, con, type, ...){
-            browser()
             object <- .get_GRangesList_for_Wig_export(object, type)
             export.wig(object, con, ...)
           }
 )
 
+#' @rdname ModifierSet-export
+#' @export
 setMethod("export.wig","SequenceDataSet",
           function(object, con, type, ...){
-            browser()
             object <- .get_GRangesList_for_Wig_export(object, type)
             export.wig(object, con, ...)
           }
