@@ -4,7 +4,8 @@ Version: 0.98.0
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
                     email = "felix.gm.ernst@outlook.com", 
-                    role = c("aut", "cre")),
+                    role = c("aut", "cre"),
+                    comment = c(ORCID = "0000-0001-5064-0928")),
              person("Denis L.J.", 
                     "Lafontaine", 
                     email = "denis.lafontaine@ulb.ac.be", 
@@ -89,7 +90,10 @@ Collate:
     'SequenceData-viz.R'
     'SequenceData-protected-end-pos.R'
     'SequenceData-subset.R'
+    'SequenceDataList-viz.R'
     'SequenceDataSet-viz.R'
     'utils-bam.R'
     'utils.R'
 RoxygenNote: 6.1.1
+BugReports: https://github.com/FelixErnst/RNAmodR/issues
+URL: https://github.com/FelixErnst/RNAmodR
