@@ -60,6 +60,8 @@ test_that("Modifier/ModifierSet:",{
   expect_equal(unique(unlist(strand(modifications(msi[[1]],
                                                        perTranscript = TRUE)))),
                factor("*", levels = c("+","-","*")))
+  expect_true(is.factor(conditions(msi[[1]])))
+  expect_equal(conditions(msi[[1]]),factor(rep("treated",ncol(sequenceData(msi[[1]]))[1])))
   # Modifier creation
   library(rtracklayer)
   library(Rsamtools)
@@ -98,6 +100,12 @@ test_that("Modifier/ModifierSet:",{
   expect_equal(unique(unlist(strand(modifications(msi[[1]],
                                                   perTranscript = TRUE)))),
                factor("*", levels = c("+","-","*")))
+  actual <- conditions(msi)
+  expect_s4_class(actual,"SimpleList")
+  expect_true(is.factor(actual[[1]]))
+  actual <- replicates(msi)
+  expect_s4_class(actual,"SimpleList")
+  expect_true(is.factor(actual[[1]]))
   # .get_class_name_for_set_from_modifier_type
   expect_error(
     RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type(),

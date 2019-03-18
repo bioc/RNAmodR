@@ -743,7 +743,17 @@ setMethod(f = "ranges",
 setMethod(f = "bamfiles", 
           signature = signature(x = "SequenceData"),
           definition = function(x){x@bamfiles})
-
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "conditions", 
+          signature = signature(object = "SequenceData"),
+          definition = function(object){object@condition})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "replicates", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@replicate})
+  
 
 # dummy functions --------------------------------------------------------------
 # this needs to be implemented by each subclass

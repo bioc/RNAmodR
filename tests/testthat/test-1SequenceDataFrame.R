@@ -2,6 +2,14 @@ context("SequenceDataFrame")
 test_that("SequenceDataFrame:",{
   data(psd,package = "RNAmodR")
   sdf <- psd[[1]]
+  #Accessors
+  expect_type(names(sdf),"character")
+  expect_s4_class(sequences(sdf),"RNAString")
+  expect_s4_class(ranges(sdf),"GRanges")
+  expect_true(is.factor(conditions(sdf)))
+  expect_equal(replicates(sdf),factor(c(1,1,1,1,1,2,2,2,2,2,3,3,3,3,3)))
+  expect_equal(conditions(sdf),factor(rep("treated",ncol(sdf))))
+  #
   sdf2 <- SequenceDataFrame(as(sdf,"DataFrame"),
                             ranges(sdf),
                             sequences(sdf),

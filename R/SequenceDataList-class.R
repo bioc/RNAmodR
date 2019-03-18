@@ -236,6 +236,22 @@ setMethod(f = "bamfiles",
             names(ans) <- names(x@listData)
             ans
           })
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "conditions", 
+          signature = signature(object = "SequenceDataList"),
+          definition = function(object){
+            ans <- S4Vectors::SimpleList(lapply(object,conditions))
+            ans
+          })
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "replicates", 
+          signature = signature(x = "SequenceDataList"),
+          definition = function(x){
+            ans <- S4Vectors::SimpleList(lapply(x,replicates))
+            ans
+          })
 
 #' @rdname aggregate
 #' @export

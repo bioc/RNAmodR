@@ -180,8 +180,8 @@ setMethod(
 #' @export
 setMethod(
   f = "conditions", 
-  signature = signature(x = "SequenceDataFrame"),
-  definition = function(x){x@condition})
+  signature = signature(object = "SequenceDataFrame"),
+  definition = function(object){object@condition})
 
 #' @importFrom stats setNames
 #' @rdname SequenceDataFrame-class

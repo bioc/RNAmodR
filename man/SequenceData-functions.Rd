@@ -6,7 +6,6 @@
 \name{getData}
 \alias{getData}
 \alias{replicates}
-\alias{conditions}
 \alias{SequenceData-functions}
 \alias{show,SequenceDataFrame-method}
 \alias{sequences,SequenceDataFrame-method}
@@ -19,26 +18,30 @@
 \alias{sequences,SequenceData-method}
 \alias{ranges,SequenceData-method}
 \alias{bamfiles,SequenceData-method}
+\alias{conditions,SequenceData-method}
+\alias{replicates,SequenceData-method}
 \alias{show,SequenceDataSet-method}
 \alias{seqinfo,SequenceDataSet-method}
 \alias{names,SequenceDataSet-method}
 \alias{sequences,SequenceDataSet-method}
 \alias{ranges,SequenceDataSet-method}
 \alias{bamfiles,SequenceDataSet-method}
+\alias{conditions,SequenceDataSet-method}
+\alias{replicates,SequenceDataSet-method}
 \alias{show,SequenceDataList-method}
 \alias{seqinfo,SequenceDataList-method}
 \alias{names,SequenceDataList-method}
 \alias{sequences,SequenceDataList-method}
 \alias{ranges,SequenceDataList-method}
 \alias{bamfiles,SequenceDataList-method}
+\alias{conditions,SequenceDataList-method}
+\alias{replicates,SequenceDataList-method}
 \title{SequenceData/SequenceDataSet/SequenceDataList/SequenceDataFrame 
 functions}
 \usage{
 getData(x, bamfiles, grl, sequences, param, args)
 
 replicates(x)
-
-conditions(x)
 
 \S4method{show}{SequenceDataFrame}(object)
 
@@ -48,7 +51,7 @@ conditions(x)
 
 \S4method{replicates}{SequenceDataFrame}(x)
 
-\S4method{conditions}{SequenceDataFrame}(x)
+\S4method{conditions}{SequenceDataFrame}(object)
 
 \S4method{show}{SequenceData}(object)
 
@@ -64,6 +67,10 @@ conditions(x)
 
 \S4method{bamfiles}{SequenceData}(x)
 
+\S4method{conditions}{SequenceData}(object)
+
+\S4method{replicates}{SequenceData}(x)
+
 \S4method{show}{SequenceDataSet}(object)
 
 \S4method{seqinfo}{SequenceDataSet}(x)
@@ -76,6 +83,10 @@ conditions(x)
 
 \S4method{bamfiles}{SequenceDataSet}(x)
 
+\S4method{conditions}{SequenceDataSet}(object)
+
+\S4method{replicates}{SequenceDataSet}(x)
+
 \S4method{show}{SequenceDataList}(object)
 
 \S4method{seqinfo}{SequenceDataList}(x)
@@ -87,6 +98,10 @@ conditions(x)
 \S4method{ranges}{SequenceDataList}(x)
 
 \S4method{bamfiles}{SequenceDataList}(x)
+
+\S4method{conditions}{SequenceDataList}(object)
+
+\S4method{replicates}{SequenceDataList}(x)
 }
 \arguments{
 \item{x, object}{a \code{SequenceData}, \code{SequenceDataSet}, 

@@ -280,6 +280,23 @@ setMethod(f = "bamfiles",
           definition = function(x){
             bamfiles(x[[1]])
           })
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "conditions", 
+          signature = signature(object = "SequenceDataSet"),
+          definition = function(object){
+            ans <- IRanges::FactorList(lapply(object,conditions))
+            ans
+          })
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "replicates", 
+          signature = signature(x = "SequenceDataSet"),
+          definition = function(x){
+            ans <- IRanges::FactorList(lapply(x,replicates))
+            ans
+          })
+  
 
 #' @rdname aggregate
 #' @export

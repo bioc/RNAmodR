@@ -28,16 +28,20 @@
 \alias{sequences,Modifier-method}
 \alias{ranges,Modifier-method}
 \alias{bamfiles,Modifier-method}
+\alias{conditions,Modifier-method}
+\alias{replicates,Modifier-method}
 \alias{show,ModifierSet-method}
 \alias{modifierType,ModifierSet-method}
 \alias{modType,ModifierSet-method}
 \alias{mainScore,ModifierSet-method}
 \alias{settings,ModifierSet-method}
 \alias{settings<-,ModifierSet-method}
-\alias{bamfiles,ModifierSet-method}
 \alias{sequences,ModifierSet-method}
 \alias{ranges,ModifierSet-method}
 \alias{seqinfo,ModifierSet-method}
+\alias{bamfiles,ModifierSet-method}
+\alias{conditions,ModifierSet-method}
+\alias{replicates,ModifierSet-method}
 \alias{modifications,ModifierSet-method}
 \title{Modifier/ModifierSet functions}
 \usage{
@@ -89,6 +93,10 @@ sequenceData(x)
 
 \S4method{bamfiles}{Modifier}(x)
 
+\S4method{conditions}{Modifier}(object)
+
+\S4method{replicates}{Modifier}(x)
+
 \S4method{show}{ModifierSet}(object)
 
 \S4method{modifierType}{ModifierSet}(x)
@@ -101,13 +109,17 @@ sequenceData(x)
 
 \S4method{settings}{ModifierSet}(x) <- value
 
-\S4method{bamfiles}{ModifierSet}(x)
-
 \S4method{sequences}{ModifierSet}(x, modified = FALSE)
 
 \S4method{ranges}{ModifierSet}(x)
 
 \S4method{seqinfo}{ModifierSet}(x)
+
+\S4method{bamfiles}{ModifierSet}(x)
+
+\S4method{conditions}{ModifierSet}(object)
+
+\S4method{replicates}{ModifierSet}(x)
 
 \S4method{modifications}{ModifierSet}(x, perTranscript = FALSE)
 }

@@ -51,6 +51,15 @@ test_that("EndSequenceData:",{
   expect_equal(colnames(actual)[[1]],c("means.treated","sds.treated"))
   expect_s4_class(seqinfo(e5sd),"Seqinfo")
   expect_equal(length(seqinfo(e5sd)),11)
+  # General accessors
+  expect_type(names(e5sd),"character")
+  expect_s4_class(seqinfo(e5sd),"Seqinfo")
+  expect_s4_class(sequences(e5sd),"RNAStringSet")
+  expect_s4_class(ranges(e5sd),"GRangesList")
+  expect_true(is.factor(conditions(e5sd)))
+  expect_equal(conditions(e5sd),factor(c("control","treated")))
+  expect_true(is.factor(replicates(e5sd)))
+  expect_equal(replicates(e5sd),factor(c(1,1)))
   #
   e3sd <- End3SequenceData(files, annotation = annotation,
                           sequences = sequences)

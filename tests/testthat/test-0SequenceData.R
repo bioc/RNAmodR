@@ -134,7 +134,62 @@ test_that("ProtectedEndSequenceData:",{
                                    package = "RNAmodR.Data"))
   #
   pesd <- ProtectedEndSequenceData(files, annotation = annotation,
-                            sequences = sequences)
+                                   sequences = sequences)
+  expect_false(any(lengths(rownames(pesd)) == 0L))
+  expect_s4_class(pesd,"ProtectedEndSequenceData")
+  expect_named(pesd,c("1","2"))
+  expect_s4_class(colnames(pesd),"CharacterList")
+  expect_length(colnames(pesd),2)
+  expect_equal(lengths(colnames(pesd)),c(2,2))
+  expect_equal(colnames(pesd)[[1]],colnames(pesd)[[2]])
+  expect_equal(colnames(pesd)[[1]],c("protectedend.control.1",
+                                     "protectedend.treated.1"))
+  actual <- aggregate(pesd)
+  expect_false(any(lengths(rownames(actual)) == 0L))
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_s4_class(actual,"SplitDataFrameList")
+  expect_equal(length(actual),2)
+  expect_length(colnames(actual),2)
+  expect_equal(lengths(colnames(actual)),c(4,4))
+  expect_equal(colnames(actual)[[1]],colnames(actual)[[2]])
+  expect_equal(colnames(actual)[[1]],c("means.control","means.treated",
+                                       "sds.control","sds.treated"))
+  expect_s4_class(seqinfo(pesd),"Seqinfo")
+  expect_equal(length(seqinfo(pesd)),11)
+  actual <- aggregate(pesd, condition = "Control")
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_s4_class(actual,"SplitDataFrameList")
+  expect_equal(length(actual),2)
+  expect_length(colnames(actual),2)
+  expect_equal(lengths(colnames(actual)),c(2,2))
+  expect_equal(colnames(actual)[[1]],colnames(actual)[[2]])
+  expect_equal(colnames(actual)[[1]],c("means.control","sds.control"))
+  expect_s4_class(seqinfo(pesd),"Seqinfo")
+  expect_equal(length(seqinfo(pesd)),11)
+  actual <- aggregate(pesd, condition = "Treated")
+  expect_s4_class(actual,"CompressedSplitDataFrameList")
+  expect_s4_class(actual,"SplitDataFrameList")
+  expect_equal(length(actual),2)
+  expect_length(colnames(actual),2)
+  expect_equal(lengths(colnames(actual)),c(2,2))
+  expect_equal(colnames(actual)[[1]],colnames(actual)[[2]])
+  expect_equal(colnames(actual)[[1]],c("means.treated","sds.treated"))
+  expect_s4_class(seqinfo(pesd),"Seqinfo")
+  expect_equal(length(seqinfo(pesd)),11)
+})
+
+
+context("ProtectedEndSequenceData")
+test_that("ProtectedEndSequenceData:",{
+  annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
+  sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
+  files <- c(control = system.file("extdata","example_wt_1.bam",
+                                   package = "RNAmodR.Data"),
+             treated = system.file("extdata","example_wt_2.bam",
+                                   package = "RNAmodR.Data"))
+  #
+  pesd <- ProtectedEndSequenceData(files, annotation = annotation,
+                                   sequences = sequences)
   expect_false(any(lengths(rownames(pesd)) == 0L))
   expect_s4_class(pesd,"ProtectedEndSequenceData")
   expect_named(pesd,c("1","2"))

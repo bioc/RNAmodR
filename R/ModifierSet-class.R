@@ -418,14 +418,6 @@ setReplaceMethod(f = "settings",
                  })
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "bamfiles", 
-          signature = signature(x = "ModifierSet"),
-          definition = function(x){
-            S4Vectors::SimpleList(lapply(x, bamfiles))
-          }
-)
-#' @rdname Modifier-functions
-#' @export
 setMethod(f = "sequences", 
           signature = signature(x = "ModifierSet"),
           definition = function(x, modified = FALSE){
@@ -448,6 +440,30 @@ setMethod(f = "seqinfo",
             S4Vectors::SimpleList(lapply(x, seqinfo))
           }
 )
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "bamfiles", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x){
+            S4Vectors::SimpleList(lapply(x, bamfiles))
+          }
+)
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "conditions", 
+          signature = signature(object = "ModifierSet"),
+          definition = function(object){
+            ans <- S4Vectors::SimpleList(lapply(object,conditions))
+            ans
+          })
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "replicates", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x){
+            ans <- S4Vectors::SimpleList(lapply(x,replicates))
+            ans
+          })
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modifications", 

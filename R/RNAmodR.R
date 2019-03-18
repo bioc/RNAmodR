@@ -68,7 +68,7 @@ NULL
 #' @import XVector
 #' @import S4Vectors
 #' @import GenomicRanges
-#' @importFrom BiocGenerics which
+#' @importFrom BiocGenerics which conditions
 #' @importFrom Biostrings DNAString RNAString DNAStringSet RNAStringSet getSeq
 #' @importFrom Modstrings ModRNAString ModRNAStringSet combineIntoModstrings
 #' shortName fullName

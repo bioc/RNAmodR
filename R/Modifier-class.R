@@ -445,6 +445,20 @@ setMethod(f = "ranges",
 setMethod(f = "bamfiles", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@bamfiles})
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "conditions", 
+          signature = signature(object = "Modifier"),
+          definition = function(object){
+            conditions(sequenceData(object))
+          })
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "replicates", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){
+            replicates(sequenceData(x))
+          })
 
 # converts the genomic coordinates to transcript based coordinates
 .get_modifications_per_transcript <- function(x){
