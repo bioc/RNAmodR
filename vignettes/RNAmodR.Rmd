@@ -347,14 +347,22 @@ thus the output of `plotROC` can be heavily customized.
 The development of `RNAmodR` will continue. General ascpects of the analysis
 workflow will be addressed in the `RNAmodR` package, whereas additional 
 classes for new sequencing techniques targeted at detecting post-transcriptional
-will be wrapped in individual `packages`. This will allow general improvements
+will be wrapped in individual packages. This will allow general improvements
 to be propagate upstream, but not hinder individual requirements of each 
 detection strategy.
 
-As example have a look at the `RNAmodR.RiboMethSeq` and `RNAmodR.AlkAnilineSeq`
-packages.
+For an example have a look at the `RNAmodR.RiboMethSeq` and 
+`RNAmodR.AlkAnilineSeq` packages.
 
 ![](RNAmodR.png)
+
+Feature, which might be added in the future:
+
+- interaction with our packages for data aggregation (for example meta gene 
+aggregation)
+- interaction with our packages for downstream analysis for visualization
+
+We welcome contribution of any sort.
 
 # Sessioninfo
 
