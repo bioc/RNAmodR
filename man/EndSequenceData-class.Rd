@@ -8,9 +8,9 @@
 \alias{EndSequenceData}
 \alias{End5SequenceData-class}
 \alias{End3SequenceData-class}
-\alias{getData,End5SequenceData,GRangesList,XStringSet,ScanBamParam-method}
-\alias{getData,End3SequenceData,GRangesList,XStringSet,ScanBamParam-method}
-\alias{getData,EndSequenceData,GRangesList,XStringSet,ScanBamParam-method}
+\alias{getData,End5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
+\alias{getData,End3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
+\alias{getData,EndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{aggregate,End5SequenceData-method}
 \alias{aggregate,End3SequenceData-method}
 \alias{aggregate,EndSequenceData-method}
@@ -26,15 +26,16 @@ End3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 EndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 
-  \S4method{getData}{End5SequenceData,GRangesList,XStringSet,ScanBamParam}(x,
-  grl, sequences, param, args)
+  \S4method{getData}{End5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
+  bamfiles, grl, sequences, param, args)
 
 
-  \S4method{getData}{End3SequenceData,GRangesList,XStringSet,ScanBamParam}(x,
-  grl, sequences, param, args)
+  \S4method{getData}{End3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
+  bamfiles, grl, sequences, param, args)
 
-\S4method{getData}{EndSequenceData,GRangesList,XStringSet,ScanBamParam}(x,
-  grl, sequences, param, args)
+
+  \S4method{getData}{EndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
+  bamfiles, grl, sequences, param, args)
 
 \S4method{aggregate}{End5SequenceData}(x, condition = c("Both",
   "Treated", "Control"))

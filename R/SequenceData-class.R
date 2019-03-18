@@ -95,10 +95,24 @@ setClass("SequenceData",
                    minQuality = "integer",
                    unlistType = "character",
                    dataDescription = "character"),
-prototype = list(ranges = GRangesList(),
+         prototype = list(ranges = GRangesList(),
                  sequencesType = "RNAStringSet",
                  sequences = RNAStringSet(),
                  unlistType = "SequenceDataFrame"))
+
+setMethod(
+  f = "initialize",
+  signature = signature(.Object = "SequenceData"),
+  definition = function(.Object, ...){
+    if(!assertive::is_a_non_empty_string(.Object@dataDescription)){
+      stop("'dataDescription' must be a single non empty character value.")
+    }
+    if(!(.Object@sequencesType %in% c("RNAStringSet","ModRNAStringSet"))){
+      stop("'sequencesType' must be either 'RNAStringSet' or 'ModRNAStringSet'")
+    }
+    callNextMethod(.Object, ...)
+  }
+)
 
 # class names must be compatible with this class name generation function
 sequenceDataClass <- function(dataType){
@@ -174,7 +188,7 @@ setMethod("show", "SequenceData",
   c(.valid.SequenceData_elements(x),
     IRanges:::.valid.SimpleSplitDataFrameList(x))
 }
-S4Vectors::setValidity2(Class = "SequenceData",.valid.SequenceData)
+S4Vectors::setValidity2(Class = "SequenceData", .valid.SequenceData)
 
 # replacing --------------------------------------------------------------------
 
@@ -248,7 +262,6 @@ setMethod("setListElement", "SequenceData",
 lapply_SequenceData <- function(X, FUN, ...){
   FUN <- match.fun(FUN)
   ans <- vector(mode = "list", length = length(X))
-  unlisted_X <- unlist(X, use.names = FALSE)
   X_partitioning <- IRanges::PartitioningByEnd(X)
   X_elt_width <- width(X_partitioning)
   empty_idx <- which(X_elt_width == 0L)
@@ -322,10 +335,10 @@ setMethod("getListElement", "SequenceData",
         S4Vectors:::Vector_window(unlisted_x,
                                   start = window_start,
                                   end = window_end),
-        x@ranges[[i2]],
-        x@sequences[[i2]],
-        x@replicate,
-        x@condition)
+        ranges = x@ranges[[i2]],
+        sequence = x@sequences[[i2]],
+        condition = x@condition,
+        replicate = x@replicate)
   }
 )
 
@@ -358,10 +371,10 @@ setMethod("unlist", "SequenceData",
             }
             new(x@unlistType,
                 unlisted_x,
-                unlist(ranges(x), use.names = use.names),
-                unlist(sequences(x)),
-                x@replicate,
-                x@condition)
+                ranges = unlist(ranges(x), use.names = use.names),
+                sequence = unlist(sequences(x)),
+                condition = x@condition,
+                replicate = x@replicate)
           }
 )
 
@@ -373,7 +386,107 @@ setMethod("rownames", "SequenceData",
           }
 )
 
-# object creation --------------------------------------------------------------
+# constructor ------------------------------------------------------------------
+
+.norm_min_quality <- function(input, minQuality){
+  if(!is.null(input[["minQuality"]])){
+    minQuality <- input[["minQuality"]]
+    if(!is.integer(minQuality) | minQuality <= 1L){
+      if(!is.na(minQuality)){
+        stop("'minQuality' must be integer with a value higher than 1L.",
+             call. = FALSE)
+      }
+    }
+  }
+  minQuality
+}
+
+.get_replicate_number <- function(bamfiles, conditions){
+  control_rep <- seq_along(bamfiles[conditions == "control"])
+  treated_rep <- seq_along(bamfiles[conditions == "treated"])
+  rep <- c(control_rep,treated_rep)
+  rep <- rep[c(which(conditions == "control"),
+               which(conditions == "treated"))]
+  factor(rep)
+}
+
+#' @importFrom IRanges PartitioningByWidth PartitioningByEnd
+#' @importClassesFrom IRanges PartitioningByWidth PartitioningByEnd
+.SequenceData <- function(className, bamfiles, ranges, sequences, seqinfo, args,
+                          ...){
+  ##############################################################################
+  # setup additional variables
+  ##############################################################################
+  if(missing(args) || !is.list(args)){
+    args <- list()
+  }
+  proto <- new(className)
+  minQuality <- .norm_min_quality(args, proto@minQuality)
+  condition <- factor(names(bamfiles))
+  replicate <- .get_replicate_number(bamfiles, condition)
+  if(!assertive::is_a_non_empty_string(proto@dataDescription)){
+    stop("'dataDescription' must be a single non empty character value.")
+  }
+  if(!(proto@sequencesType %in% c("RNAStringSet","ModRNAStringSet"))){
+    stop("'sequencesType' must be either 'RNAStringSet' or 'ModRNAStringSet'")
+  }
+  if(is.null(minQuality)){
+    stop("Minimum quality is not set for '", className ,"'.",
+         call. = FALSE)
+  }
+  param <- .assemble_scanBamParam(ranges, proto@minQuality, seqinfo)
+  ##############################################################################
+  # run the specific data aggregation function
+  ##############################################################################
+  message("Loading ", proto@dataDescription, " from BAM files ... ",
+          appendLF = FALSE)
+  data <- getData(proto, bamfiles, ranges, sequences, param, args)
+  names(data) <- paste0(names(data),".",condition,".",replicate)
+  ##############################################################################
+  # post process the data
+  ##############################################################################
+  conditionsFmultiplier <- length(data)
+  # work with the unlisted data and construct a CompressedSplitDataFrameList
+  # from this
+  data <- .norm_postprocess_read_data(data)
+  # readjust replicate and condition to the normalized dimensions of the data
+  conditionsFmultiplier <- ncol(data) / conditionsFmultiplier 
+  replicate <- rep(replicate, each = conditionsFmultiplier)
+  condition <- rep(condition, each = conditionsFmultiplier)
+  # create partitioning object from ranges
+  partitioning <- IRanges::PartitioningByWidth(sum(width(ranges)))
+  if(sum(width(partitioning)) != nrow(data)){
+    stop("Something went wrong. Length of data and Ranges do not match.")
+  }
+  # order data so that is matched the PartitioningByWidth object
+  data <- relist(data, partitioning)
+  positions <- .seqs_rl(ranges)
+  rownames(data) <- IRanges::CharacterList(positions)
+  # order sequences
+  sequences <- as(sequences, proto@sequencesType)
+  sequences <- sequences[match(names(ranges),names(sequences))]
+  # basic checks
+  names(data) <- names(ranges)
+  if(any(names(ranges) != names(sequences)) || 
+     any(names(ranges) != names(data))){
+    stop("Something went wrong.")
+  }
+  message("OK")
+  ##############################################################################
+  # Create Sequencedata object
+  ##############################################################################
+  new2(className, 
+       ranges = ranges,
+       sequences = sequences,
+       bamfiles = bamfiles, 
+       condition = condition,
+       replicate = replicate,
+       seqinfo = seqinfo,
+       minQuality = minQuality,
+       unlistData = data@unlistData,
+       partitioning = data@partitioning,
+       ...)
+}
 
 .get_sequence_data_args <- function(input){
   minQuality <- .norm_min_quality(input, NULL)
@@ -419,58 +532,6 @@ setMethod("rownames", "SequenceData",
   args
 }
 
-.norm_min_quality <- function(input,minQuality){
-  if(!is.null(input[["minQuality"]])){
-    minQuality <- input[["minQuality"]]
-    if(!is.integer(minQuality) | minQuality <= 1L){
-      if(!is.na(minQuality)){
-        stop("'minQuality' must be integer with a value higher than 1L.",
-             call. = FALSE)
-      }
-    }
-  }
-  minQuality
-}
-
-.get_replicate_number <- function(bamfiles, conditions){
-  control_rep <- seq_along(bamfiles[conditions == "control"])
-  treated_rep <- seq_along(bamfiles[conditions == "treated"])
-  rep <- c(control_rep,treated_rep)
-  rep <- rep[c(which(conditions == "control"),
-               which(conditions == "treated"))]
-  factor(rep)
-}
-
-setMethod(
-  f = "initialize", 
-  signature = signature(.Object = "SequenceData"),
-  definition = function(.Object, bamfiles, seqinfo, args, ...){
-    if(!assertive::is_a_non_empty_string(.Object@dataDescription)){
-      stop("'dataDescription' must be a single non empty character value.")
-    }
-    if(!(.Object@sequencesType %in% c("RNAStringSet","ModRNAStringSet"))){
-      stop("'sequencesType' must be either 'RNAStringSet' or 'ModRNAStringSet'")
-    }
-    if(missing(args) || !is.list(args)){
-      args <- list()
-    }
-    # quality
-    .Object@minQuality <- .norm_min_quality(args,.Object@minQuality)
-    if(is.null(.Object@minQuality)){
-      stop("Minimum quality is not set for '",class(.Object),"'.",
-           call. = FALSE)
-    }
-    # set slots
-    .Object@bamfiles <- bamfiles
-    .Object@condition <- factor(names(bamfiles))
-    .Object@replicate <- .get_replicate_number(bamfiles, .Object@condition)
-    .Object@seqinfo <- .norm_seqinfo(seqinfo)
-    # additional sanity checks
-    .Object <- callNextMethod(.Object,...)
-    .Object
-  }
-)
-
 # internal SequenceData constructor
 .new_SequenceData <- function(dataType, bamfiles, annotation, sequences, seqinfo,
                               ...){
@@ -485,21 +546,88 @@ setMethod(
   annotation <- .norm_annotation(annotation, className)
   sequences <- .norm_sequences(sequences, className)
   seqinfo <- .norm_seqnames(bamfiles, annotation, sequences, seqinfo, className)
-  # create the class
-  ans <- new(className, bamfiles, seqinfo, args)
-  # load transcript data and sequence data as well as the ScanBamParam
+  # load transcript data and sequence data
   grl <- .load_annotation(annotation)
   grl <- .subset_by_seqinfo(grl, seqinfo)
   sequences <- .load_transcript_sequences(sequences, grl)
-  param <- .assemble_scanBamParam(grl, ans@minQuality, ans@seqinfo)
-  # run the specific data aggregation function
-  message("Loading ",ans@dataDescription," from BAM files ... ",
-          appendLF = FALSE)
-  data <- getData(ans, grl, sequences, param, args)
-  # post process the data
-  ans <- .postprocess_read_data(ans, data, grl, sequences)
-  message("OK")
-  ans
+  # create the class
+  .SequenceData(className, bamfiles, grl, sequences, seqinfo, args)
+}
+
+# constructor utility functions ------------------------------------------------
+# also used at other places
+
+# load annotation as GRangesList. one element per transcript
+.load_annotation <- function(annotation){
+  if(is(annotation,"TxDb")){
+    ranges <- GenomicFeatures::exonsBy(annotation, by = "tx")
+    rm(annotation)
+    gc(FALSE)
+  } else if(is(annotation,"GRangesList")) {
+    ranges <- annotation
+  } else {
+    stop("Annotation is not a 'TxDb' or a 'GRangesList'.")
+  }
+  ranges
+}
+
+#' @importFrom Biostrings xscat
+# load the transcript sequence per transcript aka. one sequence per GRangesList
+# element
+.load_transcript_sequences <- function(sequences, grl){
+  seq <- Biostrings::getSeq(sequences, unlist(grl))
+  seq <- split(seq,grl@partitioning)
+  seq <- Reduce(c,lapply(seq,Biostrings::xscat))
+  names(seq) <- names(grl)
+  as(seq,"RNAStringSet")
+}
+
+# remove any elements, which are not in the seqinfo
+.subset_by_seqinfo <- function(grl, seqinfo){
+  grl <- grl[GenomicRanges::seqnames(grl) %in% GenomeInfoDb::seqnames(seqinfo)]
+  grl <- grl[width(grl@partitioning) != 0L]
+  GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(seqinfo)
+  grl
+}
+
+################################################################################
+
+.norm_postprocess_read_data <- function(data){
+  if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
+    data <- lapply(data, unlist)
+    if(length(unique(lengths(data))) != 1L){
+      stop("Data is of unequal length and cannot be coerced to a DataFrame.",
+           call. = FALSE)
+    }
+    data <- S4Vectors::DataFrame(data)
+  } else if(is(data[[1L]],"DataFrameList")) {
+    data <- lapply(data, unlist, use.names = FALSE)
+    ncols <- unique(unlist(lapply(data, ncol)))
+    if(length(ncols) != 1L){
+      stop("Something went wrong. Width of data should be constant.")
+    }
+    if(length(unique(vapply(data,nrow,numeric(1)))) != 1L){
+      stop("Data is of unequal length and cannot be merged into a DataFrame.",
+           call. = FALSE)
+    }
+    data <- do.call(cbind,data)
+  } else {
+    stop("Something went wrong.")
+  }
+  data
+}
+
+# subset to conditions
+.subset_to_condition <- function(conditions, condition){
+  if(condition != "both"){
+    f <- conditions == condition
+    if(all(f == FALSE)){
+      stop("No data for condition '",condition,"' found.")
+    }
+  } else {
+    f <- rep(TRUE,length(conditions))
+  }
+  f
 }
 
 setMethod("SequenceData",
@@ -575,131 +703,22 @@ setMethod("SequenceData",
                               seqinfo, ...)
           })
 
-
+# Constructor end
 ################################################################################
-# common utility functions -----------------------------------------------------
 
-# load annotation as GRangesList. one element per transcript
-.load_annotation <- function(annotation){
-  if(is(annotation,"TxDb")){
-    ranges <- GenomicFeatures::exonsBy(annotation, by = "tx")
-    rm(annotation)
-    gc(FALSE)
-  } else if(is(annotation,"GRangesList")) {
-    ranges <- annotation
-  } else {
-    stop("Annotation is not a 'TxDb' or a 'GRangesList'.")
-  }
-  ranges
-}
-
-#' @importFrom Biostrings xscat
-# load the transcript sequence per transcript aka. one sequence per GRangesList
-# element
-.load_transcript_sequences <- function(sequences, grl){
-  seq <- Biostrings::getSeq(sequences, unlist(grl))
-  seq <- split(seq,grl@partitioning)
-  seq <- Reduce(c,lapply(seq,Biostrings::xscat))
-  names(seq) <- names(grl)
-  as(seq,"RNAStringSet")
-}
-
-# remove any elements, which are not in the seqinfo
-.subset_by_seqinfo <- function(grl, seqinfo){
-  grl <- grl[GenomicRanges::seqnames(grl) %in% GenomeInfoDb::seqnames(seqinfo)]
-  grl <- grl[width(grl@partitioning) != 0L]
-  GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(seqinfo)
-  grl
-}
-
-################################################################################
+# accessors --------------------------------------------------------------------
 
 #' @rdname SequenceData-functions
 #' @export
 setMethod("getData",
-          signature = c(x = "SequenceData", grl = "GRangesList",
-                        sequences = "XStringSet", param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
+          signature = c(x = "SequenceData", bamfiles = "BamFileList", 
+                        grl = "GRangesList", sequences = "XStringSet", 
+                        param = "ScanBamParam"),
+          definition = function(x, bamfiles, grl, sequences, param, args){
             stop("This functions needs to be implemented by '",class(x),"'.",
                  call. = FALSE)
           }
 )
-
-.norm_postprocess_read_data <- function(data){
-  if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
-    data <- lapply(data, unlist)
-    if(length(unique(lengths(data))) != 1L){
-      stop("Data is of unequal length and cannot be coerced to a DataFrame.",
-           call. = FALSE)
-    }
-    data <- S4Vectors::DataFrame(data)
-  } else if(is(data[[1L]],"DataFrameList")) {
-    data <- lapply(data, unlist, use.names = FALSE)
-    ncols <- unique(unlist(lapply(data, ncol)))
-    if(length(ncols) != 1L){
-      stop("Something went wrong. Width of data should be constant.")
-    }
-    if(length(unique(vapply(data,nrow,numeric(1)))) != 1L){
-      stop("Data is of unequal length and cannot be merged into a DataFrame.",
-           call. = FALSE)
-    }
-    data <- do.call(cbind,data)
-  } else {
-    stop("Something went wrong.")
-  }
-  data
-}
-
-#' @importFrom IRanges PartitioningByWidth PartitioningByEnd
-#' @importClassesFrom IRanges PartitioningByWidth PartitioningByEnd
-.postprocess_read_data <- function(x, data, grl, sequences){
-  conditionsFmultiplier <- length(data)
-  # work with the unlisted data and construct a CompressedSplitDataFrameList
-  # from this
-  data <- .norm_postprocess_read_data(data)
-  conditionsFmultiplier <- ncol(data) / conditionsFmultiplier 
-  # create partitioning object from ranges
-  partitioning <- IRanges::PartitioningByWidth(sum(width(grl)))
-  if(sum(width(partitioning)) != nrow(data)){
-    stop("Something went wrong. Length of data and Ranges do not match.")
-  }
-  # order data so that is matched the PartitioningByWidth object
-  data <- relist(data, partitioning)
-  positions <- .seqs_rl(grl)
-  rownames(data) <- IRanges::CharacterList(positions)
-  # order sequences
-  sequences <- sequences[match(names(grl),names(sequences))]
-  # store data
-  x@unlistData <- data@unlistData
-  x@partitioning <- data@partitioning
-  x@replicate <- rep(x@replicate, each = conditionsFmultiplier)
-  x@condition <- rep(x@condition, each = conditionsFmultiplier)
-  x@ranges <- grl
-  x@sequences <- as(sequences,x@sequencesType)
-  names(x) <- names(grl)
-  if(any(names(x@ranges) != names(x@sequences)) || 
-     any(names(x@ranges) != names(x))){
-    stop("Something went wrong.")
-  }
-  validObject(x)
-  x
-}
-
-# subset to conditions
-.subset_to_condition <- function(conditions, condition){
-  if(condition != "both"){
-    f <- conditions == condition
-    if(all(f == FALSE)){
-      stop("No data for condition '",condition,"' found.")
-    }
-  } else {
-    f <- rep(TRUE,length(conditions))
-  }
-  f
-}
-
-
-# accessors --------------------------------------------------------------------
 
 #' @rdname SequenceData-functions
 #' @export
@@ -724,7 +743,17 @@ setMethod(f = "ranges",
 setMethod(f = "bamfiles", 
           signature = signature(x = "SequenceData"),
           definition = function(x){x@bamfiles})
-
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "conditions", 
+          signature = signature(object = "SequenceData"),
+          definition = function(object){object@condition})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "replicates", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@replicate})
+  
 
 # dummy functions --------------------------------------------------------------
 # this needs to be implemented by each subclass

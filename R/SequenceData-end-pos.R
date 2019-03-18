@@ -203,17 +203,18 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 #' @export
 setMethod("getData",
           signature = c(x = "End5SequenceData",
+                        bamfiles = "BamFileList",
                         grl = "GRangesList",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
-            data <- lapply(bamfiles(x),
+          definition = function(x, bamfiles, grl, sequences, param, args){
+            data <- lapply(bamfiles,
                            FUN = .get_position_data_of_transcript_ends,
                            grl = grl,
                            param = param,
                            type = "5prime",
                            args = args)
-            names(data) <- paste0("end5.", x@condition, ".", x@replicate)
+            names(data) <- rep("end5",length(data))
             data
           }
 )
@@ -222,17 +223,18 @@ setMethod("getData",
 #' @export
 setMethod("getData",
           signature = c(x = "End3SequenceData",
+                        bamfiles = "BamFileList",
                         grl = "GRangesList",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
-            data <- lapply(bamfiles(x),
+          definition = function(x, bamfiles, grl, sequences, param, args){
+            data <- lapply(bamfiles,
                            FUN = .get_position_data_of_transcript_ends,
                            grl = grl,
                            param = param,
                            type = "3prime",
                            args = args)
-            names(data) <- paste0("end3.", x@condition, ".", x@replicate)
+            names(data) <- rep("end3",length(data))
             data
           }
 )
@@ -241,17 +243,18 @@ setMethod("getData",
 #' @export
 setMethod("getData",
           signature = c(x = "EndSequenceData",
+                        bamfiles = "BamFileList",
                         grl = "GRangesList",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
-            data <- lapply(bamfiles(x),
+          definition = function(x, bamfiles, grl, sequences, param, args){
+            data <- lapply(bamfiles,
                            FUN = .get_position_data_of_transcript_ends,
                            grl = grl,
                            param = param,
                            type = "all",
                            args = args)
-            names(data) <- paste0("end.", x@condition, ".", x@replicate)
+            names(data) <- rep("end",length(data))
             data
           }
 )
@@ -284,7 +287,10 @@ setMethod("getData",
   # assemble data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
-  relist(ans, x@partitioning)
+  ans <- relist(ans, x@partitioning)
+  positions <- .seqs_rl(ranges(x))
+  rownames(ans) <- IRanges::CharacterList(positions)
+  ans
 }
 
 #' @rdname EndSequenceData-class

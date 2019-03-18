@@ -242,7 +242,18 @@ SAMPLE_TYPES <- c("treated","control")
   mod
 }
 
-.norm_modifications <- function(ans, args){
-  # ToDo: implement sanity check for given modifications
-  ans
+# check data validity ----------------------------------------------------------
+
+.norm_sequence_data <- function(data){
+  if(any(lengths(rownames(data)) == 0L)){
+    stop("Sequence data does not contain rownames.")
+  }
+  data
+}
+
+.norm_aggregate_data <- function(data){
+  if(any(lengths(rownames(data)) == 0L)){
+    stop("Aggregated data does not contain rownames.")
+  }
+  data
 }

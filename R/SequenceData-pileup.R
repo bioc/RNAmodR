@@ -163,17 +163,18 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 #' @export
 setMethod("getData",
           signature = c(x = "PileupSequenceData",
+                        bamfiles = "BamFileList",
                         grl = "GRangesList",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
-            data <- lapply(bamfiles(x),
+          definition = function(x, bamfiles, grl, sequences, param, args){
+            data <- lapply(bamfiles,
                            FUN = .get_position_data_of_transcript_pileup,
                            grl = grl,
                            sequences = sequences,
                            param = param,
                            args = args)
-            names(data) <- paste0("pileup.", x@condition, ".", x@replicate)
+            names(data) <- rep("pileup",length(data))
             data
           }
 )
@@ -250,7 +251,10 @@ setMethod("getData",
   # merge data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
-  relist(ans, x@partitioning)
+  ans <- relist(ans, x@partitioning)
+  positions <- .seqs_rl(ranges(x))
+  rownames(ans) <- IRanges::CharacterList(positions)
+  ans
 }
 
 #' @rdname PileupSequenceData-class

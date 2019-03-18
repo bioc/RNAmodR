@@ -11,6 +11,7 @@ test_that("NormEndSequenceData:",{
   #
   ne5sd <- NormEnd5SequenceData(files, annotation = annotation,
                                 sequences = sequences)
+  expect_false(any(lengths(rownames(ne5sd)) == 0L))
   expect_s4_class(ne5sd,"NormEnd5SequenceData")
   expect_named(ne5sd,c("1","2"))
   expect_s4_class(colnames(ne5sd),"CharacterList")
@@ -24,6 +25,7 @@ test_that("NormEndSequenceData:",{
                                       "norm.end5.treated.1.norm.tx",
                                       "norm.end5.treated.1.norm.ol"))
   actual <- aggregate(ne5sd)
+  expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_s4_class(actual,"SplitDataFrameList")
   expect_equal(length(actual),2)
@@ -65,6 +67,7 @@ test_that("NormEndSequenceData:",{
   #
   ne3sd <- NormEnd3SequenceData(files, annotation = annotation,
                                 sequences = sequences)
+  expect_false(any(lengths(rownames(ne3sd)) == 0L))
   expect_s4_class(ne3sd,"NormEnd3SequenceData")
   expect_named(ne3sd,c("1","2"))
   expect_s4_class(colnames(ne3sd),"CharacterList")
@@ -78,6 +81,7 @@ test_that("NormEndSequenceData:",{
                                       "norm.end3.treated.1.norm.tx",
                                       "norm.end3.treated.1.norm.ol"))
   actual <- aggregate(ne3sd)
+  expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")
   expect_s4_class(actual,"SplitDataFrameList")
   expect_equal(length(actual),2)

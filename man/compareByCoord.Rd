@@ -45,12 +45,22 @@ plotCompareByCoord(x, coord, normalize, ...)
 \item{\code{alias}} {a data.frame with two columns, \code{tx_id} and 
 \code{name}, to convert transcipt ids to another identifier}
 \item{\code{name}} {Limit results to one specific gene or transcript}
+\item{\code{sequenceData}} {TRUE or FALSE? Should the aggregate of 
+sequenceData be used for the comparison instead of the aggregate data if each
+\code{Modifier} element? (default: \code{sequenceData = FALSE})}
+\item{\code{compareType}} {a valid score type to use for the comparison. If
+\code{sequenceData = FALSE} this defaults to \code{mainScore(x)}, whereas
+if \code{sequenceData = TRUE} all columns will be used by setting 
+\code{allTypes = TRUE}.}
+\item{\code{allTypes}} {TRUE or FALSE? Should all available score be 
+compared? (default: \code{allTypes = sequenceData})}
 \item{...} {passed on to \code{\link{subsetByCoord}}}
 }}
 
 \item{coord}{coordinates of position to subset to. Either a \code{GRanges} or
 a \code{GRangesList} object. For both types the Parent column is expected to
-match the gene or transcript name.}
+match the gene or transcript name. The \code{GRangesList} object is unlisted
+and only non duplicated entries are retained.}
 
 \item{normalize}{either a single logical or character value. If it is a 
 character, it must match one of the names in the \code{ModifierSet}.}

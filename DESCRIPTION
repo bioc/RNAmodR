@@ -4,7 +4,8 @@ Version: 0.98.0
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
                     email = "felix.gm.ernst@outlook.com", 
-                    role = c("aut", "cre")),
+                    role = c("aut", "cre"),
+                    comment = c(ORCID = "0000-0001-5064-0928")),
              person("Denis L.J.", 
                     "Lafontaine", 
                     email = "denis.lafontaine@ulb.ac.be", 
@@ -38,6 +39,7 @@ Imports:
     GenomicFeatures,
     GenomicAlignments,
     Biostrings,
+    SummarizedExperiment,
     GenomeInfoDb,
     rtracklayer,
     Rsamtools,
@@ -68,6 +70,7 @@ Collate:
     'SequenceDataFrame-class.R'
     'normalization.R'
     'SequenceData-class.R'
+    'SequenceDataSet-class.R'
     'SequenceDataList-class.R'
     'Modifier-class.R'
     'ModifierSet-class.R'
@@ -77,15 +80,20 @@ Collate:
     'Modifier-subset.R'
     'Modifier-viz.R'
     'ModifierSet-comparison.R'
+    'ModifierSet-export.R'
     'ModifierSet-viz.R'
-    'RangedSummarizedExperiment.R'
+    'RNAmodR-external-functions.R'
     'SequenceData-coverage.R'
     'SequenceData-end-pos.R'
     'SequenceData-normalized-end-pos.R'
     'SequenceData-pileup.R'
     'SequenceData-viz.R'
     'SequenceData-protected-end-pos.R'
+    'SequenceData-subset.R'
     'SequenceDataList-viz.R'
+    'SequenceDataSet-viz.R'
     'utils-bam.R'
     'utils.R'
 RoxygenNote: 6.1.1
+BugReports: https://github.com/FelixErnst/RNAmodR/issues
+URL: https://github.com/FelixErnst/RNAmodR

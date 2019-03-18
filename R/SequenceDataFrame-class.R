@@ -4,15 +4,17 @@ NULL
 #' @name SequenceData-functions
 #' @aliases show,SequenceDataFrame-method
 #' 
-#' @title SequenceData/SequenceDataList/SequenceDataFrame functions
+#' @title SequenceData/SequenceDataSet/SequenceDataList/SequenceDataFrame 
+#' functions
 #' 
 #' @description 
-#' The \code{SequenceData}, \code{SequenceDataList} and
+#' The \code{SequenceData}, \code{SequenceDataSet}, \code{SequenceDataList} and
 #' \code{SequenceDataFrame} share functionality. Have a look at the elements
 #' listed under Usage.
 #' 
-#' @param x,object,value a \code{SequenceData}, \code{SequenceDataList},
-#' \code{SequenceDataFrame} object.
+#' @param x,object a \code{SequenceData}, \code{SequenceDataSet}, 
+#' \code{SequenceDataList} or a \code{SequenceDataFrame} object.
+#' @param bamfiles a \code{BamFileList}.
 #' @param grl a \code{GRangesList} from \code{exonsBy(..., by = "tx")}
 #' @param sequences a \code{XStringSet} of type \code{RNAStringSet} or 
 #' \code{ModRNAStringSet}
@@ -22,11 +24,13 @@ NULL
 #' 
 #' @return 
 #' \itemize{
-#' \item{\code{seqinfo}} {a \code{Seqinfo} object}
-#' \item{\code{sequences}} {a \code{RNAStingSet} object}
+#' \item{\code{seqinfo}} {a \code{Seqinfo} object ()}
+#' \item{\code{sequences}} {a \code{RNAStingSet} object or a \code{RNAString} 
+#' object for a \code{SequenceDataFrame}}
 #' \item{\code{ranges}} {a \code{GRangesList} object with each element per 
-#' transcript}
-#' \item{\code{bamfiles}} {a \code{BamFileList} object}
+#' transcript or a \code{GRanges} object for a \code{SequenceDataFrame}}
+#' \item{\code{bamfiles}} {a \code{BamFileList} object or a SimpleList of 
+#' \code{BamFileList} objects for a \code{SequenceDataList}}
 #' }
 #' 
 #' @examples 
@@ -83,41 +87,39 @@ setClass(Class = "SequenceDataFrame",
                    condition = "factor",
                    replicate = "factor"))
 
-setMethod(
-  f = "initialize", 
-  signature = signature(.Object = "SequenceDataFrame"),
-  definition = function(.Object, df, ranges, sequence, replicate, condition){
-    if(!is(df,"DataFrame")){
-      stop("Invalid data object: ", class(df), " found, DataFrame expected.")
-    }
-    if(ncol(df) != length(replicate) ||
-       ncol(df) != length(condition)){
-      stop("Replicate and Conditions information must match the DataFrame ",
-           "dimensions.")
-    }
-    if(!is(ranges,"GRanges")){
-      stop("Invalid data object: ", class(ranges), " found, GRanges expected.")
-    }
-    if(!is(sequence,"XString")){
-      stop("Invalid data object: ", class(sequence), " found, XString expected.")
-    }
-    .Object@replicate <- replicate
-    .Object@condition <- condition
-    .Object@rownames <- df@rownames
-    .Object@listData <- df@listData
-    .Object@nrows <- df@nrows
-    .Object@elementMetadata <- df@elementMetadata
-    .Object@metadata <- df@metadata
-    .Object@ranges <- ranges
-    .Object@sequence <- sequence
-    .Object
+# constructor ------------------------------------------------------------------
+
+.SequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
+  if(!is(df,"DataFrame")){
+    stop("Invalid data object: ", class(df), " found, DataFrame expected.")
   }
-)
+  if(ncol(df) != length(replicate) ||
+     ncol(df) != length(condition)){
+    stop("Replicate and Conditions information must match the DataFrame ",
+         "dimensions.")
+  }
+  if(!is(ranges,"GRanges")){
+    stop("Invalid data object: ", class(ranges), " found, GRanges expected.")
+  }
+  if(!is(sequence,"XString")){
+    stop("Invalid data object: ", class(sequence), " found, XString expected.")
+  }
+  new2("SequenceDataFrame",
+       ranges = ranges,
+       sequence = sequence,
+       condition = condition,
+       replicate = replicate,
+       rownames = df@rownames,
+       nrows = df@nrows,
+       listData = df@listData,
+       elementMetadata = df@elementMetadata,
+       metadata = df@metadata)
+}
 
 #' @rdname SequenceDataFrame-class
 #' @export
 SequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
-  new("SequenceDataFrame", df, ranges, sequence, replicate, condition)
+  .SequenceDataFrame(df, ranges, sequence, replicate, condition)
 }
 
 .valid_SequenceDataFrame <-  function(x){
@@ -168,6 +170,19 @@ setMethod(
   signature = signature(x = "SequenceDataFrame"),
   definition = function(x){x@ranges})
 
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "replicates", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@replicate})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "conditions", 
+  signature = signature(object = "SequenceDataFrame"),
+  definition = function(object){object@condition})
+
 #' @importFrom stats setNames
 #' @rdname SequenceDataFrame-class
 #' @export
@@ -194,7 +209,7 @@ setMethod("[", "SequenceDataFrame",
                 xstub <- stats::setNames(seq_along(x), names(x))
                 j <- normalizeSingleBracketSubscript(j, xstub)
               }
-              x <- initialize(x, df = as(x,"DataFrame")[, j, drop = FALSE],
+              x <- initialize(x, as(x,"DataFrame")[, j, drop = FALSE],
                               ranges = x@ranges,
                               sequence = x@sequence,
                               replicate = x@replicate[j],

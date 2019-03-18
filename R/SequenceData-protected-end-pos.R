@@ -72,17 +72,18 @@ ProtectedEndSequenceData <- function(bamfiles, annotation, sequences, seqinfo,
 #' @export
 setMethod("getData",
           signature = c(x = "ProtectedEndSequenceData",
+                        bamfiles = "BamFileList",
                         grl = "GRangesList",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
-            data <- lapply(bamfiles(x),
+          definition = function(x, bamfiles, grl, sequences, param, args){
+            data <- lapply(bamfiles,
                            FUN = .get_position_data_of_transcript_ends,
                            grl = grl,
                            param = param,
                            type = "protected_ends",
                            args = args)
-            names(data) <- paste0("protectedend.",x@condition,".",x@replicate)
+            names(data) <- rep("protectedend",length(data))
             data
           }
 )

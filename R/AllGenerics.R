@@ -63,6 +63,18 @@ setGeneric(
 #' @rdname Modifier-functions
 #' @export
 setGeneric( 
+  name = "validAggregate",
+  def = function(x) standardGeneric("validAggregate")
+)
+#' @rdname Modifier-functions
+#' @export
+setGeneric( 
+  name = "validModification",
+  def = function(x) standardGeneric("validModification")
+)
+#' @rdname Modifier-functions
+#' @export
+setGeneric( 
   name = "sequences",
   def = function(x, ...) standardGeneric("sequences")
 )
@@ -77,7 +89,7 @@ setGeneric(
 setGeneric( 
   name = "sequenceData",
   def = function(x) standardGeneric("sequenceData")
-) 
+)
 #' @rdname modify
 #' @name modify
 #' @export
@@ -117,10 +129,19 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "getData",
-  signature = c("x","grl","sequences","param"),
-  def = function(x, grl, sequences, param, args)
+  signature = c("x","bamfiles","grl","sequences","param"),
+  def = function(x, bamfiles, grl, sequences, param, args)
     standardGeneric("getData")
 ) 
+
+# SequenceDataFrame functions --------------------------------------------------
+
+#' @rdname SequenceData-functions
+#' @export
+setGeneric( 
+  name = "replicates",
+  def = function(x) standardGeneric("replicates")
+)
 
 # Modifier/SequenceData functions ----------------------------------------------
 

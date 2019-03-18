@@ -313,6 +313,6 @@ setClass("ModSetInosine",
 #' @export
 ModSetInosine <- function(x, annotation = NA, sequences = NA, seqinfo = NA, 
                           ...){
-  ModifierSet("ModInosine", x = x, annotation = annotation,
-              sequences = sequences, seqinfo = seqinfo, ...)
+  RNAmodR::ModifierSet("ModInosine", x = x, annotation = annotation,
+                       sequences = sequences, seqinfo = seqinfo, ...)
 }

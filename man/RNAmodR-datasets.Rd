@@ -6,6 +6,8 @@
 \alias{msi}
 \alias{psd}
 \alias{e5sd}
+\alias{sds}
+\alias{sdl}
 \title{Example data in the RNAmodR package}
 \format{a \code{ModSetInosine} instance}
 \usage{
@@ -14,6 +16,10 @@ msi
 psd
 
 e5sd
+
+sds
+
+sdl
 }
 \description{
 This contains an example ModifierSet object

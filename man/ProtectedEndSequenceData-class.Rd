@@ -4,7 +4,7 @@
 \name{ProtectedEndSequenceData-class}
 \alias{ProtectedEndSequenceData-class}
 \alias{ProtectedEndSequenceData}
-\alias{getData,ProtectedEndSequenceData,GRangesList,XStringSet,ScanBamParam-method}
+\alias{getData,ProtectedEndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{aggregate,ProtectedEndSequenceData-method}
 \alias{getDataTrack,ProtectedEndSequenceData-method}
 \title{ProtectedEndSequenceData}
@@ -12,8 +12,8 @@
 ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 
-  \S4method{getData}{ProtectedEndSequenceData,GRangesList,XStringSet,ScanBamParam}(x,
-  grl, sequences, param, args)
+  \S4method{getData}{ProtectedEndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
+  bamfiles, grl, sequences, param, args)
 
 \S4method{aggregate}{ProtectedEndSequenceData}(x, condition = c("Both",
   "Treated", "Control"))

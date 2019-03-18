@@ -110,6 +110,53 @@
          style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
          transform="matrix(-0.8,0,0,-0.8,-10,0)" />
     </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker5673-1"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend"
+       inkscape:collect="always">
+      <path
+         inkscape:connector-curvature="0"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path5671-9" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="marker7800-6"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         inkscape:connector-curvature="0"
+         id="path7798-5"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)" />
+    </marker>
+    <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker5673-1-9"
+       refX="0"
+       refY="0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lend"
+       inkscape:collect="always">
+      <path
+         inkscape:connector-curvature="0"
+         transform="matrix(-0.8,0,0,-0.8,-10,0)"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.00000003pt;stroke-opacity:1"
+         d="M 0,0 5,-5 -12.5,0 5,5 Z"
+         id="path5671-9-4" />
+    </marker>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -118,9 +165,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.98994949"
-     inkscape:cx="301.22721"
-     inkscape:cy="828.62204"
+     inkscape:zoom="1.4"
+     inkscape:cx="440.80976"
+     inkscape:cy="760.56106"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -155,7 +202,7 @@
          id="tspan4747"
          x="57.910179"
          y="79.495689"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746">RNAmodR</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;">RNAmodR</tspan></text>
     <rect
        style="opacity:0.98000004;fill:none;fill-opacity:0.94117647;stroke:#000000;stroke-width:0.39216614;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        id="rect4751"
@@ -174,11 +221,11 @@
          id="tspan4753"
          x="59.806519"
          y="87.023933"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746">SequenceData</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;">SequenceData</tspan><tspan
          sodipodi:role="line"
          x="59.806519"
          y="91.785873"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;"
          id="tspan6219" /></text>
     <rect
        style="opacity:0.98000004;fill:none;fill-opacity:0.94117647;stroke:#000000;stroke-width:0.26746306;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
@@ -206,11 +253,11 @@
          id="tspan4774"
          x="95.568108"
          y="87.068878"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746">Modifier /</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;">Modifier /</tspan><tspan
          sodipodi:role="line"
          x="95.568108"
          y="91.830818"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;"
          id="tspan4796">ModifierSet</tspan></text>
     <text
        xml:space="preserve"
@@ -222,7 +269,7 @@
          id="tspan4798"
          x="25.029819"
          y="154.92673"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746">RNAmodR.RiboMethSeq</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;">RNAmodR.RiboMethSeq</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.42071867px;line-height:1.25;font-family:Aller;-inkscape-font-specification:Aller;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.20064746"
@@ -233,7 +280,7 @@
          id="tspan4798-5"
          x="111.91833"
          y="154.92673"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746">RNAmodR.AlkAnilineSeq</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;">RNAmodR.AlkAnilineSeq</tspan></text>
     <rect
        style="opacity:0.98000004;fill:none;fill-opacity:0.94117647;stroke:#000000;stroke-width:0.3813388;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        id="rect4751-6"
@@ -260,11 +307,11 @@
          id="tspan4865"
          x="27.560972"
          y="134.94955"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746">ModRiboMethSeq /</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;">ModRiboMethSeq /</tspan><tspan
          sodipodi:role="line"
          x="27.560972"
          y="139.7115"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;"
          id="tspan4869">ModSetRiboMethSeq</tspan></text>
     <text
        xml:space="preserve"
@@ -276,11 +323,11 @@
          id="tspan4865-0"
          x="114.31551"
          y="134.94955"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746">ModAlkAnilineSeq /</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;">ModAlkAnilineSeq /</tspan><tspan
          sodipodi:role="line"
          x="114.31551"
          y="139.7115"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;"
          id="tspan4869-6">ModSetAlkAnilineSeq</tspan></text>
     <rect
        style="opacity:0.98000004;fill:none;fill-opacity:0.94117647;stroke:#000000;stroke-width:0.2734248;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
@@ -311,13 +358,13 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.2275058;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5673)"
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5673)"
        d="m 63.964155,129.87066 0,-24.22077"
        id="path5663"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.2275058;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5715)"
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5715)"
        d="M 112.40902,130.14301 87.472961,105.62267"
        id="path5705"
        inkscape:connector-curvature="0"
@@ -332,16 +379,16 @@
          id="tspan6226"
          x="59.786186"
          y="91.232048"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746">- 5'-End</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;">- 5'-End</tspan><tspan
          sodipodi:role="line"
          x="59.786186"
          y="95.313713"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;"
          id="tspan6230">- Pileup</tspan><tspan
          sodipodi:role="line"
          x="59.786186"
          y="99.395378"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;"
          id="tspan6232">- ...</tspan></text>
     <g
        id="g7614"
@@ -360,7 +407,7 @@
          x="117.72717"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.42071867px;line-height:1.25;font-family:Aller;-inkscape-font-specification:Aller;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.20064746"
          xml:space="preserve"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Aller;-inkscape-font-specification:Aller;stroke-width:0.20064746"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:0.20064746;"
            y="42.095005"
            x="117.72717"
            id="tspan4798-5-2"
@@ -372,9 +419,43 @@
        id="path7616"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker7628);stroke-dashoffset:0"
+       style="fill:none;stroke:#000000;stroke-width:0.3;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker7628);stroke-dashoffset:0"
        d="M 108.6134,66.209551 87.472961,82.2126"
        id="path7618"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="160.74712"
+       y="95.643288"
+       id="text4869"><tspan
+         sodipodi:role="line"
+         id="tspan4867"
+         x="160.74712"
+         y="95.643288"
+         style="stroke-width:0.26458332">inheriting</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.3499999px;line-height:1.25;font-family:Arial;-inkscape-font-specification:Arial;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="160.76262"
+       y="88.380577"
+       id="text4873"><tspan
+         sodipodi:role="line"
+         id="tspan4871"
+         x="160.76262"
+         y="88.380577"
+         style="stroke-width:0.26458332">using</tspan></text>
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker5673-1)"
+       d="m 146.68164,86.776024 h 10.69863"
+       id="path5663-5"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.30000001;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:0.90000004, 0.90000004;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker5673-1-9)"
+       d="m 146.68164,94.038735 h 10.69863"
+       id="path5663-5-2"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
   </g>

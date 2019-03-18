@@ -75,16 +75,17 @@ CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 #' @export
 setMethod("getData",
           signature = c(x = "CoverageSequenceData",
+                        bamfiles = "BamFileList",
                         grl = "GRangesList",
                         sequences = "XStringSet",
                         param = "ScanBamParam"),
-          definition = function(x, grl, sequences, param, args){
-            data <- lapply(bamfiles(x),
+          definition = function(x, bamfiles, grl, sequences, param, args){
+            data <- lapply(bamfiles,
                            FUN = .get_position_data_of_transcript_coverage,
                            grl = grl,
                            param = param,
                            args = args)
-            names(data) <- paste0("coverage.", x@condition, ".", x@replicate)
+            names(data) <- rep("coverage",length(data))
             data
           })
 

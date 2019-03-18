@@ -72,14 +72,14 @@ setMethod("pcompareRecursively", "ModifierSet", function(x) FALSE)
                  elementTypeX, "objects"))
   }
   valid_Modifier <- lapply(x@listData, .valid_Modifier)
-  valid_Modifier <- valid_Modifier[!vapply(valid_Modifier,is.null,logical(1))]
+  valid_Modifier <- valid_Modifier[!vapply(valid_Modifier, is.null, logical(1))]
   if(length(valid_Modifier) != 0L){
-    return(paste(paste0(seq_along(valid_Modifier),". :",valid_Modifier),
+    return(paste(paste0(seq_along(valid_Modifier), ". :", valid_Modifier),
                  collapse = "\n"))
   }
   NULL
 }
-S4Vectors::setValidity2(Class = "ModifierSet",.valid_ModifierSet)
+S4Vectors::setValidity2(Class = "ModifierSet", .valid_ModifierSet)
 
 # not supported functions ------------------------------------------------------
 
@@ -90,6 +90,37 @@ setMethod(f = "relistToClass",
           })
 
 # contructor -------------------------------------------------------------------
+
+#' @importFrom stringr str_detect
+.norm_classname_ModifierSet <- function(classname){
+  if(stringr::str_detect(classname,"ModSet")){
+    ans <- classname
+  } else {
+    ans <- gsub("Mod","ModSet",classname)
+  }
+  ans
+}
+
+.get_classname_for_ModifierSet_from_modifier_type <- function(modifiertype){
+  ans <- .norm_classname_ModifierSet(modifiertype)
+  class <- try(getClass(ans), silent = TRUE)
+  if (is(class, "try-error")){
+    stop("Class '",ans,"' is not implemented.",
+         call. = FALSE)
+  }
+  if(isVirtualClass(class)){
+    stop("Class '",ans,"' is virtual.")
+  }
+  if(!("ModifierSet" %in% extends(class))){
+    stop("Class '",ans,"' does not extend the 'ModifierSet' class.")
+  }
+  ans
+}
+
+.ModifierSet <- function(className, x){
+  new2(.get_classname_for_ModifierSet_from_modifier_type(className),
+       listData = x)
+}
 
 .norm_ModifierSet_args <- function(input){
   internalBP <- FALSE
@@ -107,6 +138,15 @@ setMethod(f = "relistToClass",
 .contains_only_Modifier <- function(x){
   classNames <- unique(vapply(x, function(z){class(z)[[1]]},character(1)))
   if(length(classNames) != 1L){
+    return(FALSE)
+  }
+  allSameClass <- vapply(x,
+                         function(z, c){
+                           class(z)[[1]] == c
+                         },
+                         logical(1),
+                         classNames)
+  if(!all(allSameClass)){
     return(FALSE)
   }
   x <- try(.norm_modifiertype(classNames), silent = TRUE)
@@ -141,23 +181,6 @@ setMethod(f = "relistToClass",
   }
   TRUE
 }
-
-.get_class_name_for_set_from_modifier_type <- function(modifiertype){
-  x <- gsub("Mod","ModSet",modifiertype)
-  class <- try(getClass(x), silent = TRUE)
-  if (is(class, "try-error")){
-    stop("Class '",x,"' is not implemented.",
-         call. = FALSE)
-  }
-  if(isVirtualClass(class)){
-    stop("Class '",x,"' is virtual.")
-  }
-  if(!("ModifierSet" %in% extends(class))){
-    stop("Class '",x,"' does not extend the 'ModifierSet' class.")
-  }
-  x
-}
-
 
 #' @importFrom BiocParallel SerialParam register bpmapply bplapply
 .bamfiles_to_ModifierSet <- function(className, x, annotation, sequences,
@@ -225,22 +248,25 @@ setMethod(f = "relistToClass",
   names[f] <- as.list(as.character(seq_along(x))[f])
   names(x) <- unlist(names)
   # pass results to ModifierSet object
-  new2(.get_class_name_for_set_from_modifier_type(className), listData = x)
+  .ModifierSet(className, x)
 }
 
-.Modifer_to_ModifierSet <- function(x, ...){
+.Modifer_to_ModifierSet <- function(className, x, ...){
   if(!is.list(x)){
     x <- list(x)
   }
   elementType <- modifierType(x[[1]])
-  className <- .get_class_name_for_set_from_modifier_type(elementType)
+  className <- .get_classname_for_ModifierSet_from_modifier_type(className)
+  if(className != .norm_classname_ModifierSet(elementType)){
+    stop("Something went wrong.")
+  }
   if (!all(vapply(x,
                   function(xi) extends(class(xi), elementType),
                   logical(1)))){
     return(paste("All 'Modifier' in '",className,"' must be of ",
                  elementType, " objects"))
   }
-  new2(className, listData = x)
+  .ModifierSet(className, x)
 }
 
 #' @rdname ModifierSet-class
@@ -250,10 +276,9 @@ setMethod(f = "ModifierSet",
           function(className, x, annotation = NULL, sequences = NULL, 
                    seqinfo = NULL, ...) {
             if(.contains_only_Modifier(x)){
-              return(.Modifer_to_ModifierSet(x, ...))
+              return(.Modifer_to_ModifierSet(className, x, ...))
             }
             if(.contains_only_bamfiles(x)){
-              args <- list(...)
               return(.bamfiles_to_ModifierSet(className, x, annotation, 
                                               sequences, seqinfo, ...))
             }
@@ -288,7 +313,7 @@ setMethod(f = "ModifierSet",
 setMethod(f = "ModifierSet",
           signature = c(x = "Modifier"),
           function(className, x, ...) {
-            .Modifer_to_ModifierSet(x, ...)
+            .Modifer_to_ModifierSet(className, x, ...)
           })
 
 # show -------------------------------------------------------------------------
@@ -340,8 +365,7 @@ setMethod(
     .show_settings(settings)
     valid <- unlist(lapply(object,
                            function(o){
-                             c(o@aggregateValidForCurrentArguments,
-                               o@modificationsValidForCurrentArguments)
+                             c(validAggregate(o), validModification(o))
                            }))
     if(!all(valid)){
       warning("Settings were changed after data aggregation or modification ",
@@ -357,19 +381,19 @@ setMethod(
 #' @export
 setMethod(f = "modifierType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) modifierType(new(elementType(x),NULL))
+          definition = function(x) modifierType(new(elementType(x)))
 )
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) modType(new(elementType(x),NULL))
+          definition = function(x) modType(new(elementType(x)))
 )
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "mainScore", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) mainScore(new(elementType(x),NULL))
+          definition = function(x) mainScore(new(elementType(x)))
 )
 
 #' @rdname Modifier-functions
@@ -394,14 +418,6 @@ setReplaceMethod(f = "settings",
                  })
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "bamfiles", 
-          signature = signature(x = "ModifierSet"),
-          definition = function(x){
-            S4Vectors::SimpleList(lapply(x, bamfiles))
-          }
-)
-#' @rdname Modifier-functions
-#' @export
 setMethod(f = "sequences", 
           signature = signature(x = "ModifierSet"),
           definition = function(x, modified = FALSE){
@@ -424,6 +440,30 @@ setMethod(f = "seqinfo",
             S4Vectors::SimpleList(lapply(x, seqinfo))
           }
 )
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "bamfiles", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x){
+            S4Vectors::SimpleList(lapply(x, bamfiles))
+          }
+)
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "conditions", 
+          signature = signature(object = "ModifierSet"),
+          definition = function(object){
+            ans <- S4Vectors::SimpleList(lapply(object,conditions))
+            ans
+          })
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "replicates", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x){
+            ans <- S4Vectors::SimpleList(lapply(x,replicates))
+            ans
+          })
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modifications", 

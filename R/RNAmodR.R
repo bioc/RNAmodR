@@ -68,7 +68,7 @@ NULL
 #' @import XVector
 #' @import S4Vectors
 #' @import GenomicRanges
-#' @importFrom BiocGenerics which
+#' @importFrom BiocGenerics which conditions
 #' @importFrom Biostrings DNAString RNAString DNAStringSet RNAStringSet getSeq
 #' @importFrom Modstrings ModRNAString ModRNAStringSet combineIntoModstrings
 #' shortName fullName
@@ -100,6 +100,7 @@ NULL
 #' @docType data
 #' @usage msi
 #' @usage psd
+#' @usage e5sd
 #' @format a \code{ModSetInosine} instance
 #' @keywords datasets
 "msi"
@@ -109,3 +110,9 @@ NULL
 #' @rdname RNAmodR-datasets
 #' @format a \code{End5SequenceData} instance
 "e5sd"
+#' @rdname RNAmodR-datasets
+#' @format a \code{SequenceDataSet} instance
+"sds"
+#' @rdname RNAmodR-datasets
+#' @format a \code{SequenceDataList} instance
+"sdl"

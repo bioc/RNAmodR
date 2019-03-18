@@ -7,8 +7,8 @@
 \alias{NormEnd3SequenceData}
 \alias{NormEnd5SequenceData-class}
 \alias{NormEnd3SequenceData-class}
-\alias{getData,NormEnd5SequenceData,GRangesList,XStringSet,ScanBamParam-method}
-\alias{getData,NormEnd3SequenceData,GRangesList,XStringSet,ScanBamParam-method}
+\alias{getData,NormEnd5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
+\alias{getData,NormEnd3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{aggregate,NormEnd5SequenceData-method}
 \alias{aggregate,NormEnd3SequenceData-method}
 \alias{getDataTrack,NormEnd5SequenceData-method}
@@ -20,12 +20,12 @@ NormEnd5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 
-  \S4method{getData}{NormEnd5SequenceData,GRangesList,XStringSet,ScanBamParam}(x,
-  grl, sequences, param, args)
+  \S4method{getData}{NormEnd5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
+  bamfiles, grl, sequences, param, args)
 
 
-  \S4method{getData}{NormEnd3SequenceData,GRangesList,XStringSet,ScanBamParam}(x,
-  grl, sequences, param, args)
+  \S4method{getData}{NormEnd3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
+  bamfiles, grl, sequences, param, args)
 
 \S4method{aggregate}{NormEnd5SequenceData}(x, condition = c("Both",
   "Treated", "Control"))
