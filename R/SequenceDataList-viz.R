@@ -6,8 +6,9 @@ NULL
 #' @export
 setMethod(
   f = "getDataTrack",
-  signature = signature(x = "SequenceDataSet"),
+  signature = signature(x = "SequenceDataList"),
   definition = function(x, name = name, ...) {
+    browser()
     sdts <- lapply(x,
                    function(z){
                      getDataTrack(z, name = name, ...)
@@ -22,7 +23,7 @@ setMethod(
 #' @export
 setMethod(
   f = "visualizeDataByCoord",
-  signature = signature(x = "SequenceDataSet", coord = "GRanges"),
+  signature = signature(x = "SequenceDataList", coord = "GRanges"),
   definition = function(x, coord, type = NA, window.size = 15L, ...) {
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
@@ -37,9 +38,10 @@ setMethod(
 #' @export
 setMethod(
   f = "visualizeData",
-  signature = signature(x = "SequenceDataSet"),
+  signature = signature(x = "SequenceDataList"),
   definition = function(x, name, from, to, perTranscript = FALSE, 
                         showSequence = TRUE, showAnnotation = FALSE, ...) {
+    browser()
     # get plotting arguments
     args <- .norm_viz_args_SequenceData(list(...), x)
     chromosome <- .norm_viz_chromosome(ranges(x), name)

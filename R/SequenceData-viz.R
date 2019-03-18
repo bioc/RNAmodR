@@ -137,11 +137,13 @@ NULL
          "can be interpreted by col2rgb().",
          call. = FALSE)
   }
-  if(!is.na(type)){
-    if(length(colour) != 1 && !all(names(colour) %in% type)){
-      stop("'colour' must be a named character vector parallel to 'type' ",
-           "or of length = 1.",
-           call. = FALSE)
+  if(length(type) > 1L || !is.na(type)){
+    if(length(colour) != 1){
+      if(is.null(names(colour)) || !all(names(colour) %in% type)  ){
+           stop("'colour' must be a named character vector parallel to 'type' ",
+                "or of length = 1.",
+                call. = FALSE)
+      }
     }
     if(length(colour) == 1){
       colour <- rep(colour,length(type))
@@ -149,6 +151,13 @@ NULL
     }
   }
   colour
+}
+
+.norm_viz_chromosome <- function(ranges, name){
+  if(!(name %in% names(ranges))){
+    stop("Transcript name '",name,"' not found in 'x'", call. = FALSE)
+  }
+  as.character(seqnames(ranges[name]))
 }
 
 .norm_viz_args_SequenceData <- function(input, x){
@@ -177,17 +186,13 @@ NULL
   args
 }
 
-.norm_viz_chromosome <- function(ranges, name){
-  if(!(name %in% names(ranges))){
-    stop("Transcript name '",name,"' not found in 'x'", call. = FALSE)
-  }
-  as.character(seqnames(ranges[name]))
-}
-
 # track loading wraps ----------------------------------------------------------
 
 #' @importFrom Gviz AnnotationTrack
-.get_viz_annotation_track <- function(ranges, args, alias){
+.get_viz_annotation_track <- function(x, args){
+  ranges <- ranges(x)
+  alias <- args[["alias"]]
+  args <- args[["annotation.track.pars"]]
   d <- mcols(ranges@unlistData)
   if(!is.null(d$type) && is.null(d$feature)){
     d$feature <- d$type
@@ -225,10 +230,20 @@ NULL
 .stitch_chromosome <- function(seq, ranges, chromosome){
   ranges <- ranges[seqnames(ranges) == chromosome]
   ranges <- ranges[!vapply(ranges,function(r){length(r) == 0L},logical(1))]
+  if(length(ranges) == 0L){
+    stop("No ranges with seqnames = '",chromosome,"' found.")
+  }
   names <- names(ranges)
   seq <- seq[names(seq) %in% names]
+  if(length(seq) == 0L){
+    stop("No sequences for seqnames = '",chromosome,"' found.")
+  }
   ranges <- unlist(ranges)
+  if(any(width(ranges) != width(seq))){
+    stop("width() or sequences and ranges does not match.")
+  }
   hits <- findOverlaps(ranges)
+  # if overlapping ranges exist, merge em
   if(length(hits) > length(ranges)){
     h <- split(subjectHits(hits),
                queryHits(hits))
@@ -245,45 +260,40 @@ NULL
     ranges <- ranges[!duplicated(ranges)]
     ranges <- unlist(GRangesList(ranges))
   }
-  max_end <- max(end(ranges))
-  starts <- c(1L,end(ranges) + 1L)
-  starts <- starts[starts <= max_end]
-  ends <- start(ranges) - 1L
-  start_N <- ends > 0L
-  starts <- starts[start_N]
-  ends <- ends[start_N]
-  if(length(ends) != length(starts)){
-    stop("Something went wrong.")
-  }
-  if(length(starts) == 0L){
+  # get gaps in ranges
+  gaps <- gaps(ranges)
+  if(length(gaps) == 0L){
     names(seq) <- chromosome
     return(seq)
   }
-  start_N <- start_N[1]
-  starts <- starts[order(starts)]
-  ends <- ends[order(ends)]
-  f <- starts > ends
-  starts <- starts[!f]
-  ends <- ends[!f]
-  N <- paste0(rep("N",max_end),collapse = "")
-  N <- unlist(do.call(class(seq),list(unlist(N))))
+  starts <- start(gaps)
+  ends <- end(gaps)
+  # get N sequence for gaps
+  N <- paste0(rep("N",max(ends)),collapse = "")
+  FUN <- match.fun(class(seq))
+  N <- unlist(FUN(unlist(N)))
   Ns <- as(IRanges::Views(N,starts,ends),class(seq))
   common_length <- min(length(seq),length(Ns))
   common_seq <- seq_len(common_length)
-  if(start_N){
-    comb <- pc(Ns[common_seq],seq[common_seq])
+  # assemble result
+  equal_no_of_gaps_and_ranges <- length(gaps) == length(ranges)
+  if(equal_no_of_gaps_and_ranges){
+    ans <- pc(Ns[common_seq],seq[common_seq])
   } else {
     missing_length_seq <- seq_along(seq)
     missing_length_seq <- missing_length_seq[missing_length_seq > common_length]
-    comb <- pc(seq[common_seq],Ns[common_seq])
-    comb <- Biostrings::xscat(comb,seq[missing_length_seq])
+    ans <- pc(seq[common_seq],Ns[common_seq])
+    ans <- Biostrings::xscat(ans,seq[missing_length_seq])
   }
-  comb <- as(unlist(comb),class(seq))
-  names(comb) <- chromosome
-  comb
+  ans <- as(unlist(ans),class(seq))
+  names(ans) <- chromosome
+  ans
 }
 
-.get_viz_sequence_track <- function(seq, ranges, chromosome, args){
+.get_viz_sequence_track <- function(x, chromosome, args){
+  seq <- sequences(x)
+  ranges <- ranges(x)
+  args <- args[["sequence.track.pars"]]
   FUN <- function(trackClass, seqClass, seq, args){
     set <- do.call(seqClass,list(seq))
     track <- do.call(trackClass,
@@ -379,13 +389,10 @@ setMethod(
     atm <- NULL
     st <- NULL
     if(showAnnotation){
-      atm <- .get_viz_annotation_track(ranges(x),
-                                       args[["annotation.track.pars"]],
-                                       args[["alias"]])
+      atm <- .get_viz_annotation_track(x,args)
     }
     if(showAnnotation){
-      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
-                                    args[["sequence.track.pars"]])
+      st <- .get_viz_sequence_track(x, chromosome, args)
     }
     dt <- getDataTrack(x, name = name, ...)
     if(!is.list(dt)){

@@ -131,6 +131,9 @@ setMethod(
                         showSequence = TRUE, showAnnotation = FALSE, ...) {
     # get plotting arguments
     args <- .norm_viz_args_ModifierSet(list(...), x)
+    if(!assertive::is_a_string(name)){
+      stop("'Name' must be a character.", call. = FALSE)
+    }
     chromosome <- .norm_viz_chromosome(ranges(x), name)
     from_to <- .get_viz_from_to(ranges(x), name, from, to)
     showSequenceData <- .norm_show_argument(showSequenceData, FALSE)
@@ -142,13 +145,10 @@ setMethod(
     atm <- NULL
     st <- NULL
     if(showAnnotation){
-      atm <- .get_viz_annotation_track(ranges(x),
-                                       args[["annotation.track.pars"]],
-                                       args[["alias"]])
+      atm <- .get_viz_annotation_track(x, args)
     }
     if(showSequence){
-      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
-                                    args[["sequence.track.pars"]])
+      st <- .get_viz_sequence_track(x, chromosome, args)
     }
     dts <- lapply(x, getDataTrack, name = name, type = type, ...)
     dts <- .add_viz_names(dts, names(x))

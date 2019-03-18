@@ -19,13 +19,13 @@ NULL
   } else if(missing(type)) {
     stop("'type' is missing.", call. = FALSE)
   }
+  if(is.na(type) || !is.character(type)){
+    stop("'type' must be a character vector.", call. = FALSE)
+  }
   if(!anyNA(colnames)){
     if(any(!(type %in% colnames))){
       stop("'type' was not found in data.", call. = FALSE)
     }
-  }
-  if(is.na(type) || !is.character(type)){
-    stop("'type' must be a character vector.", call. = FALSE)
   }
   type
 }
@@ -97,13 +97,10 @@ setMethod(
     atm <- NULL
     st <- NULL
     if(showAnnotation){
-      atm <- .get_viz_annotation_track(ranges(x), 
-                                       args[["annotation.track.pars"]],
-                                       args[["alias"]])
+      atm <- .get_viz_annotation_track(x, args)
     }
     if(showSequence){
-      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome,
-                                    args[["sequence.track.pars"]])
+      st <- .get_viz_sequence_track(x, chromosome, args)
     }
     dt <- getDataTrack(x, name = name, type = type, ...)
     if(!is.list(dt)){
