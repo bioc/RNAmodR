@@ -175,7 +175,7 @@ NULL
   if(!is.null(input[["lwd"]])){
     lwd <- input[["lwd"]]
     if(!assertive::is_numeric_string(lwd)){
-      stop("'lwd' must a single logical value.",
+      stop("'lwd' must be a single numeric value.",
            call. = FALSE)
     }
   }
@@ -188,7 +188,7 @@ NULL
   args
 }
 
-.readjust_plot_args <- function(data, plot.args, performance.args){
+.readjust_plot_args <- function(plot.args, performance.args){
   if(performance.args[["measure"]] %in% .rocr_exclusive_functions){
     plot.args[["colorize"]] <- NULL
   }
@@ -257,7 +257,7 @@ NULL
   if(!is.null(score)){
     data <- data[names(data) %in% score]
   }
-  plot.args <- .readjust_plot_args(data, plot.args, performance.args)
+  plot.args <- .readjust_plot_args(plot.args, performance.args)
   # add argument logical vector
   n <- length(data)
   # save mfrow setting
