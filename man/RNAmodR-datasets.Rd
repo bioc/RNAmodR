@@ -4,22 +4,40 @@
 \name{RNAmodR-datasets}
 \alias{RNAmodR-datasets}
 \alias{msi}
-\alias{psd}
-\alias{e5sd}
 \alias{sds}
 \alias{sdl}
+\alias{psd}
+\alias{e5sd}
+\alias{e3sd}
+\alias{esd}
+\alias{csd}
+\alias{ne3sd}
+\alias{ne5sd}
+\alias{pesd}
 \title{Example data in the RNAmodR package}
 \format{a \code{ModSetInosine} instance}
 \usage{
 msi
 
+sds
+
+sdl
+
 psd
 
 e5sd
 
-sds
+e3sd
 
-sdl
+esd
+
+csd
+
+ne3sd
+
+ne5sd
+
+pesd
 }
 \description{
 This contains an example ModifierSet object

@@ -105,14 +105,32 @@ NULL
 #' @keywords datasets
 "msi"
 #' @rdname RNAmodR-datasets
+#' @format a \code{SequenceDataSet} instance
+"sds"
+#' @rdname RNAmodR-datasets
+#' @format a \code{SequenceDataList} instance
+"sdl"
+#' @rdname RNAmodR-datasets
 #' @format a \code{PileupSequenceData} instance
 "psd"
 #' @rdname RNAmodR-datasets
 #' @format a \code{End5SequenceData} instance
 "e5sd"
 #' @rdname RNAmodR-datasets
-#' @format a \code{SequenceDataSet} instance
-"sds"
+#' @format a \code{End3SequenceData} instance
+"e3sd"
 #' @rdname RNAmodR-datasets
-#' @format a \code{SequenceDataList} instance
-"sdl"
+#' @format a \code{EndSequenceData} instance
+"esd"
+#' @rdname RNAmodR-datasets
+#' @format a \code{CoverageSequenceData} instance
+"csd"
+#' @rdname RNAmodR-datasets
+#' @format a \code{NormEnd3SequenceData} instance
+"ne3sd"
+#' @rdname RNAmodR-datasets
+#' @format a \code{NormEnd5SequenceData} instance
+"ne5sd"
+#' @rdname RNAmodR-datasets
+#' @format a \code{ProtectedEndSequenceData} instance
+"pesd"
