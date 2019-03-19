@@ -8,7 +8,6 @@ setMethod(
   f = "getDataTrack",
   signature = signature(x = "SequenceDataList"),
   definition = function(x, name = name, ...) {
-    browser()
     sdts <- lapply(x,
                    function(z){
                      getDataTrack(z, name = name, ...)
@@ -41,7 +40,6 @@ setMethod(
   signature = signature(x = "SequenceDataList"),
   definition = function(x, name, from, to, perTranscript = FALSE, 
                         showSequence = TRUE, showAnnotation = FALSE, ...) {
-    browser()
     # get plotting arguments
     args <- .norm_viz_args_SequenceData(list(...), x)
     chromosome <- .norm_viz_chromosome(ranges(x), name)
@@ -55,7 +53,7 @@ setMethod(
       atm <- .get_viz_annotation_track(x, args)
     }
     if(showSequence){
-      st <- .get_viz_sequence_track(x, chromosome, args)
+      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome, args)
     }
     dts <- getDataTrack(x, name = name, ...)
     tracks <- c(dts,list(st,atm))

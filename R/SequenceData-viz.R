@@ -290,9 +290,7 @@ NULL
   ans
 }
 
-.get_viz_sequence_track <- function(x, chromosome, args){
-  seq <- sequences(x)
-  ranges <- ranges(x)
+.get_viz_sequence_track <- function(seq, ranges, chromosome, args){
   args <- args[["sequence.track.pars"]]
   FUN <- function(trackClass, seqClass, seq, args){
     set <- do.call(seqClass,list(seq))
@@ -392,7 +390,7 @@ setMethod(
       atm <- .get_viz_annotation_track(x,args)
     }
     if(showAnnotation){
-      st <- .get_viz_sequence_track(x, chromosome, args)
+      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome, args)
     }
     dt <- getDataTrack(x, name = name, ...)
     if(!is.list(dt)){

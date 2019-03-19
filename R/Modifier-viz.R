@@ -54,10 +54,24 @@ NULL
   args
 }
 
-.get_viz_sequence <- function(seq,coord,args,modifications){
+.get_viz_sequence <- function(x,args){
+  seq <- sequences(x)
   if(args[["modified.seq"]]){
+    mod <- modifications(x)
+    if(is(mod,"GRangesList")){
+      mod <- unlist(mod)
+    }
+    mcols(mod) <- mcols(mod)[,c("mod","Parent")]
+    mod <- unique(mod)
+    add.mod <- args[["additional.mod"]]
+    if(length(add.mod) > 0L){
+      mcols(add.mod) <- mcols(add.mod)[,c("mod","Parent")]
+      mod <- c(mod,add.mod)
+      mod <- unique(mod)
+    }
+    mod <- .rebase_seqnames(mod, mod$Parent)
     if(length(modifications) > 0L){
-      seq <- combineIntoModstrings(seq,modifications)
+      seq <- combineIntoModstrings(seq,mod)
     }
   }
   seq
@@ -100,7 +114,8 @@ setMethod(
       atm <- .get_viz_annotation_track(x, args)
     }
     if(showSequence){
-      st <- .get_viz_sequence_track(x, chromosome, args)
+      seq <- .get_viz_sequence(x, args)
+      st <- .get_viz_sequence_track(seq, ranges(x), chromosome, args)
     }
     dt <- getDataTrack(x, name = name, type = type, ...)
     if(!is.list(dt)){

@@ -53,7 +53,7 @@ setMethod(
       atm <- .get_viz_annotation_track(x, args)
     }
     if(showSequence){
-      st <- .get_viz_sequence_track(x, chromosome, args)
+      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome, args)
     }
     dts <- getDataTrack(x, name = name, ...)
     tracks <- c(dts,list(st,atm))

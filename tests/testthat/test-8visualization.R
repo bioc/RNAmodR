@@ -153,7 +153,9 @@ test_that("Visualization:",{
   actual <- RNAmodR:::.get_viz_annotation_track(psd, args)
   expect_s4_class(actual,"AnnotationTrack")
   # .get_viz_sequence_track
-  actual <- RNAmodR:::.get_viz_sequence_track(psd, "chr2", args)
+  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd), "chr2", args)
+  expect_s4_class(actual,"RNASequenceTrack")
+  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd), "chr2", args)
   expect_s4_class(actual,"RNASequenceTrack")
   # .get_data_for_visualization
   expect_error(RNAmodR:::.get_data_for_visualization(),
@@ -182,6 +184,22 @@ test_that("Visualization:",{
   expect_type(actual[["annotation.track.pars"]],"list")
   expect_type(actual[["plot.pars"]],"list")
   expect_s4_class(actual[["additional.mod"]],"GRanges")
+  # .get_viz_sequence
+  args <- 
+    expect_error(RNAmodR:::.get_viz_sequence(),
+                 'argument "x" is missing, with no default')
+  expect_error(RNAmodR:::.get_viz_sequence(msi[[1]]),
+               'argument "args" is missing, with no default')
+  actual <- RNAmodR:::.get_viz_sequence(msi[[1]],
+                                        RNAmodR:::.norm_viz_args_Modifier(list()))
+  expect_s4_class(actual,"RNAStringSet")
+  actual <- RNAmodR:::.get_viz_sequence(
+    msi[[1]],
+    RNAmodR:::.norm_viz_args_Modifier(list(modified.seq = TRUE)))
+  expect_s4_class(actual,"ModRNAStringSet")
+  actual <- separate(actual)
+  expect_s4_class(actual,"GRanges")
+  expect_equal(unique(actual$mod),"I")
   # SequenceData
   coord <- getDefCoord()
   actual <- visualizeData(psd, "2", from = 1L, to = 60L)
@@ -192,6 +210,28 @@ test_that("Visualization:",{
   expect_type(actual2,"list")
   expect_s4_class(actual2[[1]],"DataTrack")
   expect_s4_class(actual2[[2]],"ImageMap")
+  expect_equal(actual,actual2)
+  # SequenceDataSet
+  coord <- getDefCoord()
+  actual <- visualizeData(sds, "2", from = 1L, to = 60L)
+  expect_type(actual,"list")
+  expect_s4_class(actual[[1]],"DataTrack")
+  expect_s4_class(actual[[4]],"ImageMap")
+  actual2 <- visualizeDataByCoord(sds, coord)
+  expect_type(actual2,"list")
+  expect_s4_class(actual2[[1]],"DataTrack")
+  expect_s4_class(actual2[[4]],"ImageMap")
+  expect_equal(actual,actual2)
+  # SequenceDataList
+  coord <- getDefCoord()
+  actual <- visualizeData(sdl, "2", from = 1L, to = 60L)
+  expect_type(actual,"list")
+  expect_s4_class(actual[[1]],"DataTrack")
+  expect_s4_class(actual[[6]],"ImageMap")
+  actual2 <- visualizeDataByCoord(sdl, coord)
+  expect_type(actual2,"list")
+  expect_s4_class(actual2[[1]],"DataTrack")
+  expect_s4_class(actual2[[6]],"ImageMap")
   expect_equal(actual,actual2)
   # Modifier
   actual <- visualizeData(msi[[1]], "2", from = 1L, to = 60L)
