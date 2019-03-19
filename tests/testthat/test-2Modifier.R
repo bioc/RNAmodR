@@ -87,7 +87,7 @@ test_that("Modifier/ModifierSet:",{
   expect_type(mainScore(msi),"character")
   expect_s4_class(seqinfo(msi),"SimpleList")
   expect_s4_class(sequences(msi),"RNAStringSet")
-  actual <- sequences(msi[[1]], modified = TRUE)
+  actual <- sequences(msi, modified = TRUE)
   expect_s4_class(actual,"ModRNAStringSet")
   expect_equivalent(unique(unlist(strsplit(as.character(actual),""))),
                     c("U","A","C","G","I"))

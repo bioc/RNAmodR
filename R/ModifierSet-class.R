@@ -420,8 +420,24 @@ setReplaceMethod(f = "settings",
 #' @export
 setMethod(f = "sequences", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x, modified = FALSE){
-              sequences(x[[1]], modified = modified)
+          definition = 
+            function(x, modified = FALSE){
+              if(!assertive::is_a_bool(modified)){
+                stop("'modified' has to be a single logical value.",
+                     call. = FALSE)
+              }
+              if(modified == FALSE){
+                return(sequences(sequenceData(x[[1]])))
+              }
+              mod <- .get_modifications_per_transcript(x)
+              mod <- .rebase_seqnames(mod, mod$Parent)
+              mod <- split(mod,factor(mod$Parent, levels = mod$Parent))
+              ans <- ModRNAStringSet(sequences(sequenceData(x[[1]])))
+              modSeqList <- ans[names(ans) %in% names(mod)]
+              mod <- mod[match(names(mod),names(modSeqList))]
+              ans[names(ans) %in% names(mod)] <- 
+                Modstrings::combineIntoModstrings(modSeqList, mod)
+              ans
             }
 )
 #' @rdname Modifier-functions

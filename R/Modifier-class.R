@@ -424,6 +424,7 @@ setMethod(f = "sequences",
                 return(sequences(sequenceData(x)))
               }
               mod <- .get_modifications_per_transcript(x)
+              mod <- .rebase_seqnames(mod, mod$Parent)
               mod <- split(mod,factor(mod$Parent, levels = mod$Parent))
               ans <- ModRNAStringSet(sequences(sequenceData(x)))
               modSeqList <- ans[names(ans) %in% names(mod)]
@@ -467,6 +468,10 @@ setMethod(f = "replicates",
   seqs <- .seqs_rl_by(grl, 1L)
   seqs[strand_u == "-"] <- .seqs_rl_by(grl[strand_u == "-"], -1L)
   modifications <- modifications(x)
+  if(is(modifications,"GRangesList")){
+    modifications <- unlist(modifications)
+    modifications <- modifications[!duplicated(modifications)]
+  }
   start_mod <- start(modifications)
   parent_mod <- as.character(modifications$Parent)
   new_start_mod <- BiocGenerics::which(seqs[parent_mod] == start_mod)
