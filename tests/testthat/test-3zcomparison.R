@@ -71,4 +71,10 @@ test_that("Comparing data:",{
   actual3 <- compareByCoord(msi, coord, perTranscript = TRUE)
   expect_s4_class(actual3,"DataFrame")
   expect_equal(actual,actual3)
+  # plotting
+  coord <- modifications(msi[[1]])
+  actual <- plotCompareByCoord(msi, coord)
+  expect_s3_class(actual,"ggplot")
+  actual2 <- plotCompareByCoord(msi, split(coord,seq_along(coord)))
+  expect_s3_class(actual2,"ggplot")
 })
