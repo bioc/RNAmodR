@@ -82,6 +82,10 @@ test_that("Subsetting SequenceData:",{
   # perTranscript
   expect_equal(subsetByCoord(sequenceData(msi[[1]]),coord),
                subsetByCoord(sequenceData(msi[[1]]),coord,perTranscript = TRUE))
+  expect_equal(subsetByCoord(msi[[1]],coord),
+               subsetByCoord(msi[[1]],coord,perTranscript = TRUE))
+  expect_equal(subsetByCoord(msi,coord),
+               subsetByCoord(msi,coord,perTranscript = TRUE))
   # labelling
   actual <- RNAmodR:::.label_SequenceData_by_GRangesList(sequenceData(msi[[1]]),
                                                          coord)

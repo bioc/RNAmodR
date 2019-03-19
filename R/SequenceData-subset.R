@@ -81,13 +81,12 @@ NULL
   } else {
     stop("Something went wrong.")
   }
-  f <- IRanges::LogicalList(lapply(coord,function(c){c$type == "RNAMOD"}))
-  coord <- coord[f]
   if(unique(unlist(width(ranges(coord)))) != 1L){
     stop("Elements of type 'RNAMOD' with a width != 1L are not supported.",
          call. = "FALSE")
   }
-  if(any(!is.na(type))){
+  if(any(!is.na(type)) && 
+     "type" %in% colnames(S4Vectors::mcols(coord@unlistData))){
     f <- IRanges::LogicalList(lapply(coord,function(c){c$mod %in% type}))
     coord <- coord[f]
     coord <- coord[vapply(coord,function(c){length(c) > 0L},logical(1))]
@@ -174,9 +173,10 @@ NULL
   }
   ans <- data[f]
   if(perTranscript){
+    f <- as(f,"CharacterList")
     pos <- IRanges::CharacterList(mapply(
       function(d,i){
-        BiocGenerics::which(i == rownames(d))
+        BiocGenerics::which(rownames(d) %in% i)
       },
       data,
       f,

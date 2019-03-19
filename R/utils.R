@@ -23,6 +23,13 @@ NULL
   as.logical(.get_strand(x) == .get_unique_strand(gr)) 
 }
 
+.rebase_seqnames <- function(gr, seqnames){
+  GenomicRanges::GRanges(seqnames = seqnames,
+                         ranges = ranges(gr),
+                         strand = strand(gr),
+                         mcols(gr))
+}
+
 # GRanges/GRangesList helper functions -----------------------------------------
 
 # per element entry

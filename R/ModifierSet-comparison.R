@@ -120,8 +120,8 @@ NULL
     colnames <- unique(unlist(colnames(data[[1]])))
     if(!is.character(compareType) || width(compareType) == 0L ||
        !(compareType %in% colnames)){
-      stop("'compareType' must be a character and a valid colname in the 
-           aggregated data of 'x'.", call. = FALSE)
+      stop("'compareType' must be a character and a valid colname in the ",
+           "aggregated data of 'x'.", call. = FALSE)
     }
   }
   if(!is.null(input[["allTypes"]])){
@@ -285,9 +285,7 @@ setMethod("compareByCoord",
   args
 }
 
-.create_position_labels <- function(positions,
-                                    mod,
-                                    activity){
+.create_position_labels <- function(positions, mod, activity){
   if(is.factor(positions)){
     positions <- as.numeric(as.character(positions))
   }
