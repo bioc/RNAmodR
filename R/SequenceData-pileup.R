@@ -179,6 +179,13 @@ setMethod("getData",
           }
 )
 
+# summary ----------------------------------------------------------------------
+
+setMethod("summary",
+          signature = "PileupSequenceData",
+          function(object){
+            .get_summary_MultiColSequenceData(object)
+          })
 
 # aggregation ------------------------------------------------------------------
 

@@ -28,8 +28,45 @@ setGeneric(
     standardGeneric("ModifierSet")
 )
 
-# Modifier accessors -----------------------------------------------------------
+# misc functions ---------------------------------------------------------------
 
+#' @rdname RNAmodR-internals
+setGeneric( 
+  name = ".constructModRanges",
+  signature = c("range","data"),
+  def = function(range, data, modType, scoreFun, source, type)
+    standardGeneric(".constructModRanges")
+)
+#' @rdname plotROC
+#' @export
+setGeneric( 
+  name = "plotROC",
+  signature = c("x"),
+  def = function(x, coord, ...)
+    standardGeneric("plotROC")
+)
+
+# accessors --------------------------------------------------------------------
+
+#' @rdname Modifier-functions
+#' @export
+setGeneric( 
+  name = "bamfiles",
+  def = function(x) standardGeneric("bamfiles")
+)
+#' @rdname Modifier-functions
+#' @export
+setGeneric( 
+  name = "mainScore",
+  def = function(x) standardGeneric("mainScore")
+)
+#' @rdname modify
+#' @name modify
+#' @export
+setGeneric( 
+  name = "modifications",
+  def = function(x, ...) standardGeneric("modifications")
+) 
 #' @rdname Modifier-functions
 #' @export
 setGeneric( 
@@ -42,11 +79,23 @@ setGeneric(
   name = "modType",
   def = function(x) standardGeneric("modType")
 )
+#' @rdname SequenceData-functions
+#' @export
+setGeneric( 
+  name = "replicates",
+  def = function(x) standardGeneric("replicates")
+)
 #' @rdname Modifier-functions
 #' @export
 setGeneric( 
-  name = "mainScore",
-  def = function(x) standardGeneric("mainScore")
+  name = "sequenceData",
+  def = function(x) standardGeneric("sequenceData")
+)
+#' @rdname Modifier-functions
+#' @export
+setGeneric( 
+  name = "sequences",
+  def = function(x, ...) standardGeneric("sequences")
 )
 #' @rdname Modifier-functions
 #' @export
@@ -72,41 +121,9 @@ setGeneric(
   name = "validModification",
   def = function(x) standardGeneric("validModification")
 )
-#' @rdname Modifier-functions
-#' @export
-setGeneric( 
-  name = "sequences",
-  def = function(x, ...) standardGeneric("sequences")
-)
-#' @rdname Modifier-functions
-#' @export
-setGeneric( 
-  name = "bamfiles",
-  def = function(x) standardGeneric("bamfiles")
-)
-#' @rdname Modifier-functions
-#' @export
-setGeneric( 
-  name = "sequenceData",
-  def = function(x) standardGeneric("sequenceData")
-)
-#' @rdname modify
-#' @name modify
-#' @export
-setGeneric( 
-  name = "modifications",
-  def = function(x, ...) standardGeneric("modifications")
-) 
 
-# Modifier functions -----------------------------------------------------------
+# Modifier/ModifierSet functions -----------------------------------------------
 
-#' @rdname RNAmodR-internals
-setGeneric( 
-  name = ".constructModRanges",
-  signature = c("range","data"),
-  def = function(range, data, modType, scoreFun, source, type)
-    standardGeneric(".constructModRanges")
-)
 #' @rdname modify
 #' @export
 setGeneric( 
@@ -114,14 +131,6 @@ setGeneric(
   signature = c("x"),
   def = function(x, force = FALSE) standardGeneric("modify")
 )
-#' @rdname plotROC
-#' @export
-setGeneric( 
-  name = "plotROC",
-  signature = c("x"),
-  def = function(x, coord, ...)
-    standardGeneric("plotROC")
-) 
 
 # SequenceData functions -------------------------------------------------------
 
@@ -134,16 +143,7 @@ setGeneric(
     standardGeneric("getData")
 ) 
 
-# SequenceDataFrame functions --------------------------------------------------
-
-#' @rdname SequenceData-functions
-#' @export
-setGeneric( 
-  name = "replicates",
-  def = function(x) standardGeneric("replicates")
-)
-
-# Modifier/SequenceData functions ----------------------------------------------
+# SequenceData/SequenceDataSet/SequenceDataList/Modifier functions -------------
 
 #' @rdname aggregate
 #' @export
@@ -166,8 +166,7 @@ setGeneric(
   def = function(x, ...) standardGeneric("hasAggregateData")
 ) 
 
-
-# SequenceData/Modifier/ModifierSet functions ----------------------------------
+# SequenceData/SequenceDataSet/SequenceDataList/Modifier/ModifierSet -----------
 
 #' @rdname subsetByCoord
 #' @export

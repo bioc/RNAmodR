@@ -83,6 +83,7 @@ Collate:
     'ModifierSet-export.R'
     'ModifierSet-viz.R'
     'RNAmodR-external-functions.R'
+    'RNAmodR-summary.R'
     'SequenceData-coverage.R'
     'SequenceData-end-pos.R'
     'SequenceData-normalized-end-pos.R'

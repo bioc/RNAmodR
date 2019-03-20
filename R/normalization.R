@@ -95,6 +95,13 @@ SAMPLE_TYPES <- c("treated","control")
 #' @importFrom BiocGenerics path
 .norm_bamfiles <- function(x, className, 
                            .xname = assertive::get_name_in_parent(x)){
+  if(is.list(x)){
+    if(!is.character(x[[1]]) && !is(x[[1]],"BamFile")){
+      ans <- lapply(x, .norm_bamfiles, className, .xname)
+      names(ans) <- names(x)
+      return(ans)
+    }
+  }
   if(!is(x,"BamFileList")){
     tmp <- try(Rsamtools::BamFileList(x), silent = TRUE)
     if (is(tmp, "try-error")){
@@ -131,11 +138,25 @@ SAMPLE_TYPES <- c("treated","control")
 .bam_header_to_seqinfo <- function(bfl){
   if(is(bfl,"BamFile")){
     bfl <- Rsamtools::BamFileList(bfl)
+  } else if(!is(bfl,"BamFileList")){
+    message <- "BamFileList or list of BamFileList required."
+    if(!is.list(bfl)){
+      stop(message)
+    }
+    test <- !vapply(bfl,is,logical(1),"BamFileList")
+    if(any(test)){
+      stop(message)
+    }
   }
-  if(!is(bfl,"BamFileList")){
-    stop("BamFileList required.")
+  if(is.list(bfl)){
+    headers <- lapply(bfl,
+                      function(l){
+                        lapply(l,Rsamtools::scanBamHeader)
+                      })
+    headers <- unlist(headers)
+  } else {
+    headers <- lapply(bfl,Rsamtools::scanBamHeader)
   }
-  headers <- lapply(bfl,Rsamtools::scanBamHeader)
   targets <- lapply(headers,"[[","targets")
   targets <- unique(do.call(c,lapply(unname(targets),names)))
   seqinfo <- GenomeInfoDb::Seqinfo(targets)

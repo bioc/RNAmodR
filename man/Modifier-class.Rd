@@ -6,7 +6,9 @@
 \alias{Modifier}
 \alias{Modifier,SequenceData-method}
 \alias{Modifier,SequenceDataSet-method}
+\alias{Modifier,SequenceDataList-method}
 \alias{Modifier,character-method}
+\alias{Modifier,list-method}
 \alias{Modifier,BamFileList-method}
 \title{The Modifier class}
 \usage{
@@ -16,7 +18,13 @@
 \S4method{Modifier}{SequenceDataSet}(className, x, annotation = NULL,
   sequences = NULL, seqinfo = NULL, ...)
 
+\S4method{Modifier}{SequenceDataList}(className, x, annotation = NULL,
+  sequences = NULL, seqinfo = NULL, ...)
+
 \S4method{Modifier}{character}(className, x, annotation = NULL,
+  sequences = NULL, seqinfo = NULL, ...)
+
+\S4method{Modifier}{list}(className, x, annotation = NULL,
   sequences = NULL, seqinfo = NULL, ...)
 
 \S4method{Modifier}{BamFileList}(className, x, annotation = NULL,

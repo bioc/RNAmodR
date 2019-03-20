@@ -138,6 +138,9 @@ NULL
 
 setClassUnion("list_OR_character",
               c("list", "character"))
+#' @importClassesFrom Rsamtools BamFileList PileupFiles
+setClassUnion("list_OR_BamFileList",
+              c("list", "BamFileList"))
 
 #' @rdname Modifier-class
 #' @export
@@ -146,7 +149,7 @@ setClass("Modifier",
          slots = c(mod = "character", # this have to be populated by subclass
                    score = "character", # this have to be populated by subclass
                    dataType = "list_OR_character", # this have to be populated by subclass
-                   bamfiles = "BamFileList",
+                   bamfiles = "list_OR_BamFileList",
                    condition = "factor",
                    replicate = "factor",
                    data = "SD_or_SDS_or_SDL",
@@ -211,14 +214,20 @@ setClass("Modifier",
 
 .valid_Modifier <- function(x){
   seqdata <- x@data
+  if(is.list(x@bamfiles)){
+    test <- !vapply(x@bamfiles,is,logical(1),"BamFileList")
+    if(any(test)){
+      return("Invalid slot: 'bamfiles'")
+    }
+  }
   if(is(seqdata,"SequenceData")){
     seqdata <- list(seqdata)
   }
   if(!assertive::is_a_bool(x@aggregateValidForCurrentArguments)){
-    return("Invalid alot: 'aggregateValidForCurrentArguments'")
+    return("Invalid slot: 'aggregateValidForCurrentArguments'")
   }
   if(!assertive::is_a_bool(x@aggregateValidForCurrentArguments)){
-    return("Invalid alot: 'modificationsValidForCurrentArguments'")
+    return("Invalid slot: 'modificationsValidForCurrentArguments'")
   }
   c(.valid_SequenceData(x), unlist(lapply(seqdata, .valid.SequenceData)))
 }
@@ -303,6 +312,60 @@ setMethod(
 
 #' @rdname Modifier-functions
 #' @export
+setMethod(f = "bamfiles", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){x@bamfiles})
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "conditions", 
+          signature = signature(object = "Modifier"),
+          definition = function(object){
+            conditions(sequenceData(object))
+          })
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "mainScore", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){x@score})
+
+# converts the genomic coordinates to transcript based coordinates
+.get_modifications_per_transcript <- function(x){
+  grl <- ranges(x)
+  strand_u <- .get_strand_u_GRangesList(grl)
+  seqs <- .seqs_rl_by(grl, 1L)
+  seqs[strand_u == "-"] <- .seqs_rl_by(grl[strand_u == "-"], -1L)
+  modifications <- modifications(x)
+  if(is(modifications,"GRangesList")){
+    modifications <- unlist(modifications)
+    modifications <- modifications[!duplicated(modifications)]
+  }
+  start_mod <- start(modifications)
+  parent_mod <- as.character(modifications$Parent)
+  new_start_mod <- BiocGenerics::which(seqs[parent_mod] == start_mod)
+  # reset strand since it is now transcipt centric
+  strand(modifications) <- "*"
+  ranges(modifications) <- IRanges::IRanges(start = unlist(new_start_mod),
+                                            end = unlist(new_start_mod))
+  modifications
+}
+
+#' @rdname modify
+#' @export
+setMethod(f = "modifications", 
+          signature = signature(x = "Modifier"),
+          definition = 
+            function(x, perTranscript = FALSE){
+              if(!assertive::is_a_bool(perTranscript)){
+                stop("'perTranscript' has to be a single logical value.")
+              }
+              if(perTranscript){
+                return(.get_modifications_per_transcript(x))
+              }
+              x@modifications
+            }
+)
+#' @rdname Modifier-functions
+#' @export
 setMethod(f = "modifierType", 
           signature = signature(x = "Modifier"),
           definition = function(x){class(x)[[1]]})
@@ -313,9 +376,55 @@ setMethod(f = "modType",
           definition = function(x){x@mod})
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "mainScore", 
+setMethod(f = "names", 
           signature = signature(x = "Modifier"),
-          definition = function(x){x@score})
+          definition = function(x){names(sequenceData(x))})
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "ranges", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){ranges(sequenceData(x))})
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "replicates", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){
+            replicates(sequenceData(x))
+          })
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "sequenceData", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){x@data})
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "sequences", 
+          signature = signature(x = "Modifier"),
+          definition = 
+            function(x, modified = FALSE){
+              if(!assertive::is_a_bool(modified)){
+                stop("'modified' has to be a single logical value.",
+                     call. = FALSE)
+              }
+              if(modified == FALSE){
+                return(sequences(sequenceData(x)))
+              }
+              mod <- .get_modifications_per_transcript(x)
+              mod <- .rebase_seqnames(mod, mod$Parent)
+              mod <- split(mod,factor(mod$Parent, levels = mod$Parent))
+              ans <- ModRNAStringSet(sequences(sequenceData(x)))
+              modSeqList <- ans[names(ans) %in% names(mod)]
+              mod <- mod[match(names(mod),names(modSeqList))]
+              ans[names(ans) %in% names(mod)] <- 
+                Modstrings::combineIntoModstrings(modSeqList, mod)
+              ans
+            }
+)
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "seqinfo", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){seqinfo(sequenceData(x))})
 
 .norm_args <- function(input){
   minCoverage <- 10L
@@ -393,110 +502,6 @@ setMethod(f = "validModification",
           signature = signature(x = "Modifier"),
           definition = function(x) x@modificationsValidForCurrentArguments
 )
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "sequenceData", 
-          signature = signature(x = "Modifier"),
-          definition = function(x){x@data})
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "names", 
-          signature = signature(x = "Modifier"),
-          definition = function(x){names(sequenceData(x))})
-
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "seqinfo", 
-          signature = signature(x = "Modifier"),
-          definition = function(x){seqinfo(sequenceData(x))})
-
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "sequences", 
-          signature = signature(x = "Modifier"),
-          definition = 
-            function(x, modified = FALSE){
-              if(!assertive::is_a_bool(modified)){
-                stop("'modified' has to be a single logical value.",
-                     call. = FALSE)
-              }
-              if(modified == FALSE){
-                return(sequences(sequenceData(x)))
-              }
-              mod <- .get_modifications_per_transcript(x)
-              mod <- .rebase_seqnames(mod, mod$Parent)
-              mod <- split(mod,factor(mod$Parent, levels = mod$Parent))
-              ans <- ModRNAStringSet(sequences(sequenceData(x)))
-              modSeqList <- ans[names(ans) %in% names(mod)]
-              mod <- mod[match(names(mod),names(modSeqList))]
-              ans[names(ans) %in% names(mod)] <- 
-                Modstrings::combineIntoModstrings(modSeqList, mod)
-              ans
-            }
-)
-
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "ranges", 
-          signature = signature(x = "Modifier"),
-          definition = function(x){ranges(sequenceData(x))})
-
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "bamfiles", 
-          signature = signature(x = "Modifier"),
-          definition = function(x){x@bamfiles})
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "conditions", 
-          signature = signature(object = "Modifier"),
-          definition = function(object){
-            conditions(sequenceData(object))
-          })
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "replicates", 
-          signature = signature(x = "Modifier"),
-          definition = function(x){
-            replicates(sequenceData(x))
-          })
-
-# converts the genomic coordinates to transcript based coordinates
-.get_modifications_per_transcript <- function(x){
-  grl <- ranges(x)
-  strand_u <- .get_strand_u_GRangesList(grl)
-  seqs <- .seqs_rl_by(grl, 1L)
-  seqs[strand_u == "-"] <- .seqs_rl_by(grl[strand_u == "-"], -1L)
-  modifications <- modifications(x)
-  if(is(modifications,"GRangesList")){
-    modifications <- unlist(modifications)
-    modifications <- modifications[!duplicated(modifications)]
-  }
-  start_mod <- start(modifications)
-  parent_mod <- as.character(modifications$Parent)
-  new_start_mod <- BiocGenerics::which(seqs[parent_mod] == start_mod)
-  # reset strand since it is now transcipt centric
-  strand(modifications) <- "*"
-  ranges(modifications) <- IRanges::IRanges(start = unlist(new_start_mod),
-                                            end = unlist(new_start_mod))
-  modifications
-}
-
-#' @rdname modify
-#' @export
-setMethod(f = "modifications", 
-          signature = signature(x = "Modifier"),
-          definition = 
-            function(x, perTranscript = FALSE){
-              if(!assertive::is_a_bool(perTranscript)){
-                stop("'perTranscript' has to be a single logical value.")
-              }
-              if(perTranscript){
-                return(.get_modifications_per_transcript(x))
-              }
-              x@modifications
-            }
-)
 
 # constructors -----------------------------------------------------------------
 
@@ -529,8 +534,30 @@ setMethod(f = "modifications",
 .load_SequenceData <- function(classes, bamfiles, annotation, sequences,
                                seqinfo, args){
   if(is.list(classes)){
-    data <- BiocParallel::bplapply(classes, .load_SequenceData, bamfiles, 
-                                   annotation, sequences, seqinfo, args)
+    if(is.list(bamfiles)){
+      if(length(classes) != length(bamfiles)){
+        stop("'x' has invalid length. '",paste(classes, collapse = "' and '"),
+             "' ",ifelse(length(classes) > 1L,"are","is")," required.",
+             call. = FALSE)
+      }
+      if(is.null(names(bamfiles))){
+        stop("If 'x' is a list, it must be named. The names must match the ",
+             "required SequenceData class names.",
+             call. = FALSE)
+      }
+      if(all(classes %in% names(bamfiles))){
+        stop("If 'x' is named, names must match the required SequenceData ",
+             "class names.",
+             call. = FALSE)
+      }
+      bamfiles <- bamfiles[match(class,names(bamfiles))]
+      data <- BiocParallel::bpmapply(.load_SequenceData, classes, bamfiles, 
+                                     MoreArgs = list(annotation, sequences, 
+                                                     seqinfo, args))
+    } else {
+      data <- BiocParallel::bplapply(classes, .load_SequenceData, bamfiles, 
+                                     annotation, sequences, seqinfo, args)
+    }
     data <- as(data,"SequenceDataList")
   } else if(is.character(classes)){
     data <- lapply(classes,
@@ -555,7 +582,7 @@ setMethod(f = "modifications",
   # create prototype object for mod normalization and settings only
   proto <- new(className) 
   # short cut for creating an empty object
-  if(is.null(bamfiles)){
+  if(is.null(x)){
     return(new2(className, mod = .norm_mod(proto@mod, className)))
   }
   bamfiles <- .norm_bamfiles(x, className) # check bam files
@@ -615,7 +642,24 @@ setMethod("Modifier",
 #' @rdname Modifier-class
 #' @export
 setMethod("Modifier",
+          signature = c(x = "SequenceDataList"),
+          function(className, x, annotation = NULL, sequences = NULL, 
+                   seqinfo = NULL, ...){
+            .new_ModFromSequenceData(className, x, ...)
+          })
+#' @rdname Modifier-class
+#' @export
+setMethod("Modifier",
           signature = c(x = "character"),
+          function(className, x, annotation = NULL, sequences = NULL, 
+                   seqinfo = NULL, ...){
+            .new_ModFromCharacter(className, x, annotation, sequences, seqinfo,
+                                  ...)
+          })
+#' @rdname Modifier-class
+#' @export
+setMethod("Modifier",
+          signature = c(x = "list"),
           function(className, x, annotation = NULL, sequences = NULL, 
                    seqinfo = NULL, ...){
             .new_ModFromCharacter(className, x, annotation, sequences, seqinfo,

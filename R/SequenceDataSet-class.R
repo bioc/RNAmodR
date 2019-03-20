@@ -296,7 +296,8 @@ setMethod(f = "replicates",
             ans <- IRanges::FactorList(lapply(x,replicates))
             ans
           })
-  
+
+# aggregate --------------------------------------------------------------------
 
 #' @rdname aggregate
 #' @export

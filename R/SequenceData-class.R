@@ -706,8 +706,6 @@ setMethod("SequenceData",
 # Constructor end
 ################################################################################
 
-# accessors --------------------------------------------------------------------
-
 #' @rdname SequenceData-functions
 #' @export
 setMethod("getData",
@@ -720,23 +718,7 @@ setMethod("getData",
           }
 )
 
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "seqinfo", 
-          signature = signature(x = "SequenceData"),
-          definition = function(x){x@seqinfo})
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "sequences", 
-          signature = signature(x = "SequenceData"),
-          definition = function(x){x@sequences})
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "ranges", 
-          signature = signature(x = "SequenceData"),
-          definition = function(x){x@ranges})
+# accessors --------------------------------------------------------------------
 
 #' @rdname SequenceData-functions
 #' @export
@@ -750,10 +732,24 @@ setMethod(f = "conditions",
           definition = function(object){object@condition})
 #' @rdname SequenceData-functions
 #' @export
+setMethod(f = "ranges", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@ranges})
+#' @rdname SequenceData-functions
+#' @export
 setMethod(f = "replicates", 
           signature = signature(x = "SequenceData"),
           definition = function(x){x@replicate})
-  
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "seqinfo", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@seqinfo})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "sequences", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){x@sequences})
 
 # dummy functions --------------------------------------------------------------
 # this needs to be implemented by each subclass

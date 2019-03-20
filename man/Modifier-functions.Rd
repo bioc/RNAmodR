@@ -4,52 +4,58 @@
 \docType{methods}
 \name{Modifier-functions}
 \alias{Modifier-functions}
+\alias{bamfiles}
+\alias{mainScore}
 \alias{modifierType}
 \alias{modType}
-\alias{mainScore}
+\alias{sequenceData}
+\alias{sequences}
 \alias{settings}
 \alias{settings<-}
 \alias{validAggregate}
 \alias{validModification}
-\alias{sequences}
-\alias{bamfiles}
-\alias{sequenceData}
 \alias{show,Modifier-method}
+\alias{bamfiles,Modifier-method}
+\alias{conditions,Modifier-method}
+\alias{mainScore,Modifier-method}
 \alias{modifierType,Modifier-method}
 \alias{modType,Modifier-method}
-\alias{mainScore,Modifier-method}
+\alias{names,Modifier-method}
+\alias{ranges,Modifier-method}
+\alias{replicates,Modifier-method}
+\alias{sequenceData,Modifier-method}
+\alias{sequences,Modifier-method}
+\alias{seqinfo,Modifier-method}
 \alias{settings,Modifier-method}
 \alias{settings<-,Modifier-method}
 \alias{validAggregate,Modifier-method}
 \alias{validModification,Modifier-method}
-\alias{sequenceData,Modifier-method}
-\alias{names,Modifier-method}
-\alias{seqinfo,Modifier-method}
-\alias{sequences,Modifier-method}
-\alias{ranges,Modifier-method}
-\alias{bamfiles,Modifier-method}
-\alias{conditions,Modifier-method}
-\alias{replicates,Modifier-method}
 \alias{show,ModifierSet-method}
+\alias{bamfiles,ModifierSet-method}
+\alias{conditions,ModifierSet-method}
+\alias{mainScore,ModifierSet-method}
+\alias{modifications,ModifierSet-method}
 \alias{modifierType,ModifierSet-method}
 \alias{modType,ModifierSet-method}
-\alias{mainScore,ModifierSet-method}
+\alias{ranges,ModifierSet-method}
+\alias{replicates,ModifierSet-method}
+\alias{seqinfo,ModifierSet-method}
 \alias{settings,ModifierSet-method}
 \alias{settings<-,ModifierSet-method}
 \alias{sequences,ModifierSet-method}
-\alias{ranges,ModifierSet-method}
-\alias{seqinfo,ModifierSet-method}
-\alias{bamfiles,ModifierSet-method}
-\alias{conditions,ModifierSet-method}
-\alias{replicates,ModifierSet-method}
-\alias{modifications,ModifierSet-method}
 \title{Modifier/ModifierSet functions}
 \usage{
+bamfiles(x)
+
+mainScore(x)
+
 modifierType(x)
 
 modType(x)
 
-mainScore(x)
+sequenceData(x)
+
+sequences(x, ...)
 
 settings(x, name = NULL)
 
@@ -59,19 +65,29 @@ validAggregate(x)
 
 validModification(x)
 
-sequences(x, ...)
-
-bamfiles(x)
-
-sequenceData(x)
-
 \S4method{show}{Modifier}(object)
+
+\S4method{bamfiles}{Modifier}(x)
+
+\S4method{conditions}{Modifier}(object)
+
+\S4method{mainScore}{Modifier}(x)
 
 \S4method{modifierType}{Modifier}(x)
 
 \S4method{modType}{Modifier}(x)
 
-\S4method{mainScore}{Modifier}(x)
+\S4method{names}{Modifier}(x)
+
+\S4method{ranges}{Modifier}(x)
+
+\S4method{replicates}{Modifier}(x)
+
+\S4method{sequenceData}{Modifier}(x)
+
+\S4method{sequences}{Modifier}(x, modified = FALSE)
+
+\S4method{seqinfo}{Modifier}(x)
 
 \S4method{settings}{Modifier}(x, name = NULL)
 
@@ -81,56 +97,40 @@ sequenceData(x)
 
 \S4method{validModification}{Modifier}(x)
 
-\S4method{sequenceData}{Modifier}(x)
-
-\S4method{names}{Modifier}(x)
-
-\S4method{seqinfo}{Modifier}(x)
-
-\S4method{sequences}{Modifier}(x, modified = FALSE)
-
-\S4method{ranges}{Modifier}(x)
-
-\S4method{bamfiles}{Modifier}(x)
-
-\S4method{conditions}{Modifier}(object)
-
-\S4method{replicates}{Modifier}(x)
-
 \S4method{show}{ModifierSet}(object)
+
+\S4method{bamfiles}{ModifierSet}(x)
+
+\S4method{conditions}{ModifierSet}(object)
+
+\S4method{mainScore}{ModifierSet}(x)
+
+\S4method{modifications}{ModifierSet}(x, perTranscript = FALSE)
 
 \S4method{modifierType}{ModifierSet}(x)
 
 \S4method{modType}{ModifierSet}(x)
 
-\S4method{mainScore}{ModifierSet}(x)
+\S4method{ranges}{ModifierSet}(x)
+
+\S4method{replicates}{ModifierSet}(x)
+
+\S4method{seqinfo}{ModifierSet}(x)
 
 \S4method{settings}{ModifierSet}(x, name = NULL)
 
 \S4method{settings}{ModifierSet}(x) <- value
 
 \S4method{sequences}{ModifierSet}(x, modified = FALSE)
-
-\S4method{ranges}{ModifierSet}(x)
-
-\S4method{seqinfo}{ModifierSet}(x)
-
-\S4method{bamfiles}{ModifierSet}(x)
-
-\S4method{conditions}{ModifierSet}(object)
-
-\S4method{replicates}{ModifierSet}(x)
-
-\S4method{modifications}{ModifierSet}(x, perTranscript = FALSE)
 }
 \arguments{
 \item{x, object}{a \code{Modifier} or \code{ModifierSet} class}
 
+\item{...}{Additional arguments.}
+
 \item{name}{For \code{settings}: name of the setting to be returned or set}
 
 \item{value}{For \code{settings}: value of the setting to be set}
-
-\item{...}{Additional arguments.}
 
 \item{modified}{For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
 the sequences be returned as a \code{ModRNAString} with the found 

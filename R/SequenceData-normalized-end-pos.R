@@ -70,6 +70,40 @@ NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
                sequences = sequences, seqinfo = seqinfo, ...)
 }
 
+# summary ----------------------------------------------------------------------
+
+.get_summary_MultiColSequenceData <- function(object){
+  bamfilesstats <- .get_bamfiles_stats(object)
+  n <- ncol(bamfilesstats)
+  datastats <- .get_data_stats(object)
+  ndt <- ncol(datastats)
+  ncols <- ndt / n
+  datastats <- lapply(seq_len(ncols),
+                      function(i){
+                        d <- datastats[,seq.int(i,ndt,ncols),drop=FALSE]
+                        coln <- colnames(object@unlistData)[i]
+                        coln <- strsplit(coln,"\\.")[[1]]
+                        coln <- coln[length(coln)]
+                        rownames(d) <- paste0("Data.",coln,
+                                              gsub("Data","",rownames(d)))
+                        colnames(d) <- seq_len(ncol(d))
+                        d
+                      })
+  .merge_summary_data(bamfilesstats,Reduce(rbind,datastats))
+}
+
+setMethod("summary",
+          signature = "NormEnd5SequenceData",
+          function(object){
+            .get_summary_MultiColSequenceData(object)
+          })
+
+setMethod("summary",
+          signature = "NormEnd3SequenceData",
+          function(object){
+            .get_summary_MultiColSequenceData(object)
+          })
+
 
 # End5SequenceData ------------------------------------------------------------------
 

@@ -3,9 +3,9 @@
 %   R/SequenceData-class.R, R/SequenceDataSet-class.R,
 %   R/SequenceDataList-class.R
 \docType{methods}
-\name{getData}
-\alias{getData}
+\name{replicates}
 \alias{replicates}
+\alias{getData}
 \alias{SequenceData-functions}
 \alias{show,SequenceDataFrame-method}
 \alias{sequences,SequenceDataFrame-method}
@@ -14,12 +14,12 @@
 \alias{conditions,SequenceDataFrame-method}
 \alias{show,SequenceData-method}
 \alias{getData,SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
-\alias{seqinfo,SequenceData-method}
-\alias{sequences,SequenceData-method}
-\alias{ranges,SequenceData-method}
 \alias{bamfiles,SequenceData-method}
 \alias{conditions,SequenceData-method}
+\alias{ranges,SequenceData-method}
 \alias{replicates,SequenceData-method}
+\alias{seqinfo,SequenceData-method}
+\alias{sequences,SequenceData-method}
 \alias{show,SequenceDataSet-method}
 \alias{seqinfo,SequenceDataSet-method}
 \alias{names,SequenceDataSet-method}
@@ -29,19 +29,19 @@
 \alias{conditions,SequenceDataSet-method}
 \alias{replicates,SequenceDataSet-method}
 \alias{show,SequenceDataList-method}
-\alias{seqinfo,SequenceDataList-method}
-\alias{names,SequenceDataList-method}
-\alias{sequences,SequenceDataList-method}
-\alias{ranges,SequenceDataList-method}
 \alias{bamfiles,SequenceDataList-method}
 \alias{conditions,SequenceDataList-method}
+\alias{names,SequenceDataList-method}
+\alias{ranges,SequenceDataList-method}
 \alias{replicates,SequenceDataList-method}
+\alias{seqinfo,SequenceDataList-method}
+\alias{sequences,SequenceDataList-method}
 \title{SequenceData/SequenceDataSet/SequenceDataList/SequenceDataFrame 
 functions}
 \usage{
-getData(x, bamfiles, grl, sequences, param, args)
-
 replicates(x)
+
+getData(x, bamfiles, grl, sequences, param, args)
 
 \S4method{show}{SequenceDataFrame}(object)
 
@@ -59,17 +59,17 @@ replicates(x)
   \S4method{getData}{SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
   bamfiles, grl, sequences, param, args)
 
-\S4method{seqinfo}{SequenceData}(x)
-
-\S4method{sequences}{SequenceData}(x)
-
-\S4method{ranges}{SequenceData}(x)
-
 \S4method{bamfiles}{SequenceData}(x)
 
 \S4method{conditions}{SequenceData}(object)
 
+\S4method{ranges}{SequenceData}(x)
+
 \S4method{replicates}{SequenceData}(x)
+
+\S4method{seqinfo}{SequenceData}(x)
+
+\S4method{sequences}{SequenceData}(x)
 
 \S4method{show}{SequenceDataSet}(object)
 
@@ -89,19 +89,19 @@ replicates(x)
 
 \S4method{show}{SequenceDataList}(object)
 
-\S4method{seqinfo}{SequenceDataList}(x)
-
-\S4method{names}{SequenceDataList}(x)
-
-\S4method{sequences}{SequenceDataList}(x)
-
-\S4method{ranges}{SequenceDataList}(x)
-
 \S4method{bamfiles}{SequenceDataList}(x)
 
 \S4method{conditions}{SequenceDataList}(object)
 
+\S4method{names}{SequenceDataList}(x)
+
+\S4method{ranges}{SequenceDataList}(x)
+
 \S4method{replicates}{SequenceDataList}(x)
+
+\S4method{seqinfo}{SequenceDataList}(x)
+
+\S4method{sequences}{SequenceDataList}(x)
 }
 \arguments{
 \item{x, object}{a \code{SequenceData}, \code{SequenceDataSet}, 

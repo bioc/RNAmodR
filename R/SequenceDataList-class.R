@@ -197,38 +197,6 @@ setAs("ANY", "SequenceDataList",
 
 #' @rdname SequenceData-functions
 #' @export
-setMethod(f = "seqinfo", 
-          signature = signature(x = "SequenceDataList"),
-          definition = function(x){
-            seqinfo(x[[1]])
-          })
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "names", 
-          signature = signature(x = "SequenceDataList"),
-          definition = function(x){
-            names(x[[1]])
-          })
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "sequences", 
-          signature = signature(x = "SequenceDataList"),
-          definition = function(x){
-            sequences(x[[1]])
-          })
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "ranges", 
-          signature = signature(x = "SequenceDataList"),
-          definition = function(x){
-            ranges(x[[1]])
-          })
-
-#' @rdname SequenceData-functions
-#' @export
 setMethod(f = "bamfiles", 
           signature = signature(x = "SequenceDataList"),
           definition = function(x){
@@ -246,12 +214,42 @@ setMethod(f = "conditions",
           })
 #' @rdname SequenceData-functions
 #' @export
+setMethod(f = "names", 
+          signature = signature(x = "SequenceDataList"),
+          definition = function(x){
+            names(x[[1]])
+          })
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "ranges", 
+          signature = signature(x = "SequenceDataList"),
+          definition = function(x){
+            ranges(x[[1]])
+          })
+#' @rdname SequenceData-functions
+#' @export
 setMethod(f = "replicates", 
           signature = signature(x = "SequenceDataList"),
           definition = function(x){
             ans <- S4Vectors::SimpleList(lapply(x,replicates))
             ans
           })
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "seqinfo", 
+          signature = signature(x = "SequenceDataList"),
+          definition = function(x){
+            seqinfo(x[[1]])
+          })
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "sequences", 
+          signature = signature(x = "SequenceDataList"),
+          definition = function(x){
+            sequences(x[[1]])
+          })
+
+# aggregate --------------------------------------------------------------------
 
 #' @rdname aggregate
 #' @export

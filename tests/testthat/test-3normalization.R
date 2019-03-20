@@ -50,6 +50,9 @@ test_that("argument normalization:",{
   actual <- RNAmodR:::.norm_bamfiles(c(treated = bf))
   expect_s4_class(actual,"BamFileList")
   expect_equal(actual, RNAmodR:::.norm_bamfiles(c(Treated = bf)))
+  actual <- RNAmodR:::.norm_bamfiles(list(c(Treated = bf),c(Treated = bf)))
+  expect_type(actual,"list")
+  expect_s4_class(actual[[1]],"BamFileList")
   # .bam_header_to_seqinfo
   expect_error(RNAmodR:::.bam_header_to_seqinfo(),'argument "bfl" is missing')
   expect_error(RNAmodR:::.bam_header_to_seqinfo(""),"BamFileList required")
