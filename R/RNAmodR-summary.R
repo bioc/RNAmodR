@@ -29,6 +29,7 @@ NULL
   stats <- Reduce(rbind,stats)
   stats <- as.data.frame(t(stats),
                          stringsAsFactors = FALSE)
+  colnames(stats) <- colnames(object@unlistData)
   rownames(stats) <- paste0("Data.",rownames(stats))
   stats
 }
@@ -95,15 +96,14 @@ setMethod("summary",
 setMethod("summary",
           signature = "Modifier",
           function(object){
-            browser()
-            
-            NULL
+            bamfilesstats <- .get_bamfiles_stats(object)
+            datastats <- .get_data_stats(aggregateData(object))
+            return(list("bamfiles" = bamfilesstats,
+                        "aggregated data" = datastats))
           })
 
 setMethod("summary",
           signature = "ModifierSet",
           function(object){
-            browser()
-            
-            NULL
+            lapply(msaas, summary)
           })
