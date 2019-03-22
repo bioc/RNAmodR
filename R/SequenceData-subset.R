@@ -102,7 +102,7 @@ NULL
 .get_element_names <- function(data, coord, name, type){
   namesData <- names(data)
   namesCoord <- as.character(names(coord))
-  if(is.na(type)){
+  if(any(is.na(type))){
     messageType <- "for any modification type"
   } else {
     messageType <- paste0("for modification type '",
