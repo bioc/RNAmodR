@@ -186,7 +186,7 @@ setMethod("show", "SequenceData",
 
 .valid.SequenceData <- function(x){
   c(.valid.SequenceData_elements(x),
-    IRanges:::.valid.SimpleSplitDataFrameList(x))
+    IRanges:::.valid.CompressedList(x))
 }
 S4Vectors::setValidity2(Class = "SequenceData", .valid.SequenceData)
 
@@ -576,8 +576,7 @@ setMethod("rownames", "SequenceData",
 # element
 .load_transcript_sequences <- function(sequences, grl){
   seq <- Biostrings::getSeq(sequences, unlist(grl))
-  seq <- split(seq,grl@partitioning)
-  seq <- Reduce(c,lapply(seq,Biostrings::xscat))
+  seq <- relist(unlist(seq),PartitioningByWidth(sum(width(grl))))
   names(seq) <- names(grl)
   as(seq,"RNAStringSet")
 }

@@ -198,16 +198,16 @@ SAMPLE_TYPES <- c("treated","control")
     seqinfo <- .norm_seqinfo(seqinfo)
   }
   # norm annotation
-  if(!is(annotation,"GRangesList") && !is(annotation,"TxDb")){
+  if(!is(annotation,"GRangesList") & !is(annotation,"TxDb")){
     stop("Something went wrong.")
   }
-  if(!is(sequences,"FaFile")){
+  if(!is(sequences,"FaFile") & !is(sequences,"BSgenome")){
     stop("Something went wrong.")
   }
   # norm sequences input
   if(is(sequences,"FaFile")){
     seqnames <- names(Rsamtools::scanFa(sequences))
-  } else if(is(sequences,"BSgenome")) {
+  } else {
     seqnames <- BSgenome::seqnames(sequences)
   }
   seqnames <- seqnames[seqnames %in% GenomeInfoDb::seqlevels(annotation)]
