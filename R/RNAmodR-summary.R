@@ -64,7 +64,7 @@ setMethod("summary",
                             function(i){
                               s <- stats[[i]]
                               if(i > 1L){
-                                s <- s[!grepl("Bam",rownames(s)),]
+                                s <- s[!grepl("Bam",rownames(s)),,drop=FALSE]
                               }
                               rownames(s) <- gsub("Data",class(object[[i]]),
                                                   rownames(s))
@@ -82,7 +82,7 @@ setMethod("summary",
                             function(i){
                               s <- stats[[i]]
                               if(i > 1L){
-                                s <- s[!grepl("Bam",rownames(s)),]
+                                s <- s[!grepl("Bam",rownames(s)),,drop=FALSE]
                               }
                               rownames(s) <- gsub("Data",class(object[[i]]),
                                                   rownames(s))
