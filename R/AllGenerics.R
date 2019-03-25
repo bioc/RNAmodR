@@ -28,15 +28,8 @@ setGeneric(
     standardGeneric("ModifierSet")
 )
 
-# misc functions ---------------------------------------------------------------
+# ROC functions ----------------------------------------------------------------
 
-#' @rdname RNAmodR-internals
-setGeneric( 
-  name = ".constructModRanges",
-  signature = c("range","data"),
-  def = function(range, data, modType, scoreFun, source, type)
-    standardGeneric(".constructModRanges")
-)
 #' @rdname plotROC
 #' @export
 setGeneric( 
@@ -132,17 +125,6 @@ setGeneric(
   def = function(x, force = FALSE) standardGeneric("modify")
 )
 
-# SequenceData functions -------------------------------------------------------
-
-#' @rdname SequenceData-functions
-#' @export
-setGeneric( 
-  name = "getData",
-  signature = c("x","bamfiles","grl","sequences","param"),
-  def = function(x, bamfiles, grl, sequences, param, args)
-    standardGeneric("getData")
-) 
-
 # SequenceData/SequenceDataSet/SequenceDataList/Modifier functions -------------
 
 #' @rdname aggregate
@@ -234,4 +216,23 @@ setGeneric(
   signature = c("x","coord"),
   def = function(x, coord, normalize, ...)
     standardGeneric("plotCompareByCoord")
+) 
+
+# development functions --------------------------------------------------------
+
+#' @rdname RNAmodR-development
+setGeneric( 
+  name = "constructModRanges",
+  signature = c("range","data"),
+  def = function(range, data, modType, scoreFun, source, type)
+    standardGeneric("constructModRanges")
+)
+
+#' @rdname RNAmodR-development
+#' @export
+setGeneric( 
+  name = "getData",
+  signature = c("x","bamfiles","grl","sequences","param"),
+  def = function(x, bamfiles, grl, sequences, param, args)
+    standardGeneric("getData")
 ) 

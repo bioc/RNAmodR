@@ -58,6 +58,12 @@ be extended. Currently the following classes are implemented:
 \item{\code{\link[=ProtectedEndSequenceData-class]{ProtectedEndSequenceData}}}
 }
 
+The annotation and sequence data can be accessed through \code{ranges} and
+\code{sequences}, respectively. Beaware, that the data is always given 
+according to genomic position with increasing \code{rownames}, but the
+sequence is given as the actual sequence of the transcript. Therefore, it 
+is necessary to treat the minus strand accordingly.
+
 It is derived from the
 \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} class
 with additional slots for annotation and sequence data. Some functionality is

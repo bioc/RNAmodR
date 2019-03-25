@@ -113,9 +113,7 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
                        "min_minor_allele_depth", 
                        "distinguish_strands", 
                        "distinguish_nucleotides", 
-                       "ignore_query_Ns", 
-                       "include_deletions", 
-                       "include_insertions", 
+                       "ignore_query_Ns",
                        "left_bins", 
                        "query_bins", 
                        "cycle_bins")]
@@ -128,7 +126,9 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   pileup <- S4Vectors::DataFrame(pileup)
   # split into data per transcript which is defined by the which_label column
   # format: chromosome:start-end
-  pileup <- split(pileup, pileup$which_label)
+  # merge results from different exons by creating a custom PartitioningByEnd
+  # object and using it to relist
+  pileup <- .splitPileupAsList_transcript(pileup, grl)
   if(length(pileup) != length(grl)){
     stop("Something went wrong.")
   }
@@ -147,7 +147,11 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
                                  value.var = "count")
         }
         ans <- .fill_up_pileup_data(ans,seq)
-        # remove pos column since we don't need this anymore. seq_along == pos
+        # data has to be in ascending order
+        if(strand == "-"){
+          ans <- ans[order(ans$pos,decreasing = FALSE),]
+        }
+        rownames(ans) <- ans$pos
         ans$pos <- NULL
         ans
       },
@@ -259,7 +263,7 @@ setMethod("summary",
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
   ans <- relist(ans, x@partitioning)
-  positions <- .seqs_rl(ranges(x))
+  positions <- .seqs_rl_strand(ranges(x))
   rownames(ans) <- IRanges::CharacterList(positions)
   ans
 }

@@ -142,7 +142,11 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
                                         function(i){
                                           # offset applied to start to
                                           # sync the data on the position
-                                          c(starts[[i]] - 1L, ends[[i]])
+                                          if(strands[i] == "-"){
+                                            c(ends[[i]] - 1L, starts[[i]])
+                                          } else {
+                                            c(starts[[i]] - 1L, ends[[i]])
+                                          }
                                         }))
   } else {
     stop("Something went wrong. Invalid type '", type, "'.")
@@ -171,7 +175,7 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   seqs <- .seqs_rl(grl)
   data <- IRanges::IntegerList(mapply(
     function(d,s){
-      bg <- table(s) - 1
+      bg <- table(s) - 1L
       d <- d[d %in% s]
       d <- table(d)
       d <- d[as.integer(names(d)) > 0L]
@@ -288,7 +292,7 @@ setMethod("getData",
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
   ans <- relist(ans, x@partitioning)
-  positions <- .seqs_rl(ranges(x))
+  positions <- .seqs_rl_strand(ranges(x))
   rownames(ans) <- IRanges::CharacterList(positions)
   ans
 }

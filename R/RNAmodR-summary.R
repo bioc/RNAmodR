@@ -105,5 +105,5 @@ setMethod("summary",
 setMethod("summary",
           signature = "ModifierSet",
           function(object){
-            lapply(msaas, summary)
+            lapply(object, summary)
           })

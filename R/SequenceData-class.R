@@ -27,6 +27,12 @@ NULL
 #' \item{\code{\link[=ProtectedEndSequenceData-class]{ProtectedEndSequenceData}}}
 #' }
 #' 
+#' The annotation and sequence data can be accessed through \code{ranges} and
+#' \code{sequences}, respectively. Beaware, that the data is always given 
+#' according to genomic position with increasing \code{rownames}, but the
+#' sequence is given as the actual sequence of the transcript. Therefore, it 
+#' is necessary to treat the minus strand accordingly.
+#' 
 #' It is derived from the
 #' \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} class
 #' with additional slots for annotation and sequence data. Some functionality is
@@ -175,7 +181,7 @@ setMethod("show", "SequenceData",
   if(is.null(rownames(x@unlistData))){
     return("rownames of data is not set.")
   } else {
-    seqs <- .seqs_rl(ranges(x))
+    seqs <- .seqs_rl_strand(ranges(x))
     if(any(any(seqs != IRanges::IntegerList(rownames(x))))){
       return(paste0("Out of range rownames of data. The rownames do not match ",
                     "the ranges covered by the annotation data."))
@@ -410,6 +416,70 @@ setMethod("rownames", "SequenceData",
   factor(rep)
 }
 
+.check_positions_in_data <- function(data, positions){
+  data_rownames <- lapply(data,rownames)
+  data_rownames_non_empty <- !vapply(data_rownames,is.null,logical(1))
+  # only check if data is present
+  if(any(data_rownames_non_empty)){
+    check <- lapply(data_rownames[data_rownames_non_empty],
+                    "==", positions)
+    check <- unlist(lapply(check,all))
+    if(!all(check)){
+      stop("rownames()/names() in data does not have the correct order. ",
+           "rownames()/names() must be coercible to numeric and strictly ",
+           "increasing.")
+    }
+  }
+  NULL
+}
+
+# construct a result DataFrame by creating from Integer or NumericList
+# or mergeing DataFrames into one
+.norm_postprocess_read_data <- function(data){
+  if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
+    data <- lapply(data, unlist)
+    if(length(unique(lengths(data))) != 1L){
+      stop("Data is of unequal length and cannot be coerced to a DataFrame.",
+           call. = FALSE)
+    }
+    data <- S4Vectors::DataFrame(data)
+  } else if(is(data[[1L]],"DataFrameList")) {
+    data <- lapply(data, unlist, use.names = FALSE)
+    ncols <- unique(unlist(lapply(data, ncol)))
+    if(length(ncols) != 1L){
+      stop("Something went wrong. Width of data should be constant.")
+    }
+    if(length(unique(vapply(data,nrow,numeric(1)))) != 1L){
+      stop("Data is of unequal length and cannot be merged into a DataFrame.",
+           call. = FALSE)
+    }
+    data <- do.call(cbind,data)
+  } else {
+    stop("Something went wrong.")
+  }
+  data
+}
+
+# reverse order of data, if originating from minus strand
+.order_read_data_by_strand <- function(data, grl){
+  # check if minus strand data is ordered in reverse
+  strand_u <- .get_strand_u_GRangesList(grl)
+  strand_minus <- strand_u == "-"
+  if(any(strand_minus)){
+    strand_minus_and_needs_rev <- strand_minus & 
+      vapply(IRanges::IntegerList(rownames(data)),
+             function(i){
+               i[1] < i[2]
+             },
+             logical(1))
+    if(any(strand_minus_and_needs_rev)){
+      data[strand_minus_and_needs_rev] <- 
+        lapply(data[strand_minus_and_needs_rev], rev)
+    }
+  }
+  data
+}
+
 #' @importFrom IRanges PartitioningByWidth PartitioningByEnd
 #' @importClassesFrom IRanges PartitioningByWidth PartitioningByEnd
 .SequenceData <- function(className, bamfiles, ranges, sequences, seqinfo, args,
@@ -435,6 +505,7 @@ setMethod("rownames", "SequenceData",
          call. = FALSE)
   }
   param <- .assemble_scanBamParam(ranges, proto@minQuality, seqinfo)
+  positions <- .seqs_rl_strand(ranges, force_continous = TRUE)
   ##############################################################################
   # run the specific data aggregation function
   ##############################################################################
@@ -442,6 +513,8 @@ setMethod("rownames", "SequenceData",
           appendLF = FALSE)
   data <- getData(proto, bamfiles, ranges, sequences, param, args)
   names(data) <- paste0(names(data),".",condition,".",replicate)
+  # check positions
+  .check_positions_in_data(data, positions)
   ##############################################################################
   # post process the data
   ##############################################################################
@@ -460,11 +533,11 @@ setMethod("rownames", "SequenceData",
   }
   # order data so that is matched the PartitioningByWidth object
   data <- relist(data, partitioning)
-  positions <- .seqs_rl(ranges)
   rownames(data) <- IRanges::CharacterList(positions)
+  data <- .order_read_data_by_strand(data, ranges)
   # order sequences
   sequences <- as(sequences, proto@sequencesType)
-  sequences <- sequences[match(names(ranges),names(sequences))]
+  sequences <- sequences[match(names(ranges), names(sequences))]
   # basic checks
   names(data) <- names(ranges)
   if(any(names(ranges) != names(sequences)) || 
@@ -590,44 +663,6 @@ setMethod("rownames", "SequenceData",
 }
 
 ################################################################################
-
-.norm_postprocess_read_data <- function(data){
-  if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
-    data <- lapply(data, unlist)
-    if(length(unique(lengths(data))) != 1L){
-      stop("Data is of unequal length and cannot be coerced to a DataFrame.",
-           call. = FALSE)
-    }
-    data <- S4Vectors::DataFrame(data)
-  } else if(is(data[[1L]],"DataFrameList")) {
-    data <- lapply(data, unlist, use.names = FALSE)
-    ncols <- unique(unlist(lapply(data, ncol)))
-    if(length(ncols) != 1L){
-      stop("Something went wrong. Width of data should be constant.")
-    }
-    if(length(unique(vapply(data,nrow,numeric(1)))) != 1L){
-      stop("Data is of unequal length and cannot be merged into a DataFrame.",
-           call. = FALSE)
-    }
-    data <- do.call(cbind,data)
-  } else {
-    stop("Something went wrong.")
-  }
-  data
-}
-
-# subset to conditions
-.subset_to_condition <- function(conditions, condition){
-  if(condition != "both"){
-    f <- conditions == condition
-    if(all(f == FALSE)){
-      stop("No data for condition '",condition,"' found.")
-    }
-  } else {
-    f <- rep(TRUE,length(conditions))
-  }
-  f
-}
 
 setMethod("SequenceData",
           signature = c(annotation = "character", sequences = "character"),

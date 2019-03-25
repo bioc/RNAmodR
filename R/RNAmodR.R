@@ -84,11 +84,12 @@ NULL
 #' @title RNAmodR internal functions
 #' 
 #' @description
-#' These functions are not intended for general use, but are used for 
-#' additional package development.
+#' These functions are used internally.
 #' 
 #' @param object,range,data,modType,scoreFun,source,type,x,i,j,...,exact,value
 #' Internal arguments
+#' 
+#' @keywords internal
 #' 
 #' @return internally used values
 NULL
@@ -134,3 +135,54 @@ NULL
 #' @rdname RNAmodR-datasets
 #' @format a \code{ProtectedEndSequenceData} instance
 "pesd"
+
+#' @name RNAmodR-development
+#' @aliases getData
+#' 
+#' @title RNAmodR developments functions
+#' 
+#' @description
+#' These functions are not intended for general use, but are used for 
+#' additional package development. 
+#' 
+#' \code{getData} is used to load data into a
+#' \code{\link[RNAmodR:SequenceData-class]{SequenceData}} object and must be
+#' implented for all \code{SequenceData} classes. The results must match the
+#' requirements outlined in the value section.
+#' 
+#' \code{constructModRanges} constructs a \code{GRanges} object describing the
+#' location, type and associated scores of a modification. 
+#' \code{constructModRanges} is typically called from the \code{modify} 
+#' function, which must be implemented for all 
+#' \code{\link[RNAmodR:Modifier-class]{Modifier}} classes.
+#' 
+#' @param x for \code{getData}:a \code{SequenceData} object.
+#' @param bamfiles for \code{getData}:a \code{BamFileList} object.
+#' @param grl for \code{getData}:a \code{GRangesList} object.
+#' @param sequences for \code{getData}:a \code{XStringSet} object.
+#' @param param for \code{getData}:a \code{ScanBamParam} object.
+#' @param args for \code{getData}: a \code{list} with optional arguments.
+#' @param range for \code{constructModRanges}: a \code{GRanges} object
+#' @param data for \code{constructModRanges}: a \code{DataFrame} object
+#' @param modType for \code{constructModRanges}: a valid shortName for the 
+#' modification found. Must be present in \code{shortName(ModRNAString())}.
+#' @param scoreFun for \code{constructModRanges}: a custom function for 
+#' extracting scores from \code{data}. The result must be a \code{list}.
+#' @param source for \code{constructModRanges}: a single character vector for
+#' populating the source column of the result.
+#' @param type for \code{constructModRanges}: a single character vector for
+#' populating the source column of the result.
+#' 
+#' @return 
+#' \itemize{
+#' \item{\code{getData}:} {returns a list with elements per BamFile in 
+#' \code{bamfiles}. Elements can be 
+#' \code{\link[IRanges:AtomicList-class]{IntegerList}}, 
+#' \code{\link[IRanges:AtomicList-class]{NumericList}} or a
+#' \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}}. The
+#' data in the elements must be order by increasing positions numbers. However, 
+#' names and rownames will be discarded.}
+#' \item{\code{constructModRanges}:} {returns a \code{GRanges} object with
+#' genomic coordinates of modified nucleotides in the associated transcripts.}
+#' }
+NULL

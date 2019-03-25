@@ -41,18 +41,36 @@ NULL
 
 # construct GRanges object from found modifications ----------------------------
 
-#' @rdname RNAmodR-internals
-setMethod(f = ".constructModRanges",
+#' @rdname RNAmodR-development
+setMethod(f = "constructModRanges",
           signature = c(range = "GRanges", data = "DataFrame"),
           function(range, data, modType, scoreFun, source, type) {
             if(nrow(data) == 0L) {
               return(GenomicRanges::GRanges()) 
+            }
+            assertive::assert_is_a_non_empty_string(modType)
+            assertive::assert_is_closure_function(scoreFun)
+            assertive::assert_is_a_non_empty_string(source)
+            assertive::assert_is_a_non_empty_string(type)
+            if(!.is_valid_modType(modType)){
+              stop("Modification '",modType,"' not found in the short name ",
+                   "alphabet from the Modstrings package. ",
+                   "'shortName(ModRNAString())'",call. = FALSE)
             }
             positions <- as.integer(rownames(data))
             if(as.character(GenomicRanges::strand(range)) == "-"){
               positions <- GenomicRanges::end(range) - positions + 1L
             } else {
               positions <- GenomicRanges::start(range) + positions - 1L
+            }
+            scores <- do.call(scoreFun,
+                              list(data))
+            if(!is.list(scores)){
+              stop("result of 'scoreFun' must be a list.")
+            }
+            if(any(length(positions) != 
+                   unique(vapply(scores, length, integer(1))))){
+              stop("Number of positions and scores do not match.")
             }
             mranges <- do.call(
               GenomicRanges::GRanges,
@@ -65,8 +83,7 @@ setMethod(f = ".constructModRanges",
                      mod = rep(modType,nrow(data))),
                 source = source,
                 type = type,
-                do.call(scoreFun,
-                        list(data))))
+                scores))
             mranges
           }
 )

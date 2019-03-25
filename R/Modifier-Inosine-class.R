@@ -264,9 +264,9 @@ setMethod(f = "aggregate",
                m$score >= minScore & 
                c,,drop=FALSE] # coverage check
       if(nrow(m) == 0L) return(NULL)
-      ans <- .constructModRanges(r, m, modType = "I",
-                                 RNAmodR:::.get_inosine_score, "RNAmodR",
-                                 "RNAMOD")
+      ans <- constructModRanges(r, m, modType = "I",
+                                RNAmodR:::.get_inosine_score, "RNAmodR",
+                                "RNAMOD")
       ans
     },
     mod,

@@ -5,7 +5,6 @@
 \docType{methods}
 \name{replicates}
 \alias{replicates}
-\alias{getData}
 \alias{SequenceData-functions}
 \alias{show,SequenceDataFrame-method}
 \alias{sequences,SequenceDataFrame-method}
@@ -40,8 +39,6 @@
 functions}
 \usage{
 replicates(x)
-
-getData(x, bamfiles, grl, sequences, param, args)
 
 \S4method{show}{SequenceDataFrame}(object)
 

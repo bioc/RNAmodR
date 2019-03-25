@@ -121,10 +121,10 @@ setMethod("summary",
   # summarize pos of reads based on type
   enddata <- .summarize_to_position_data(data, strands_u[f], type)
   # tabulate the counts per position
-  seqs <- .seqs_rl(grl)
+  seqs <- .seqs_rl_strand(grl, force_continous = TRUE)
   enddata <- IRanges::IntegerList(mapply(
     function(d,s){
-      bg <- table(s) - 1
+      bg <- table(s) - 1L
       d <- d[d %in% s]
       d <- table(d)
       d <- d[as.integer(names(d)) > 0L]
@@ -175,7 +175,9 @@ setMethod("summary",
   df <- S4Vectors::DataFrame(ends = unlist(enddata),
                              norm.tx = unlist(normTranscript),
                              norm.ol = unlist(normOverlap))
-  relist(df, enddata@partitioning)
+  ans <- relist(df, enddata@partitioning)
+  rownames(ans) <- IRanges::CharacterList(seqs)
+  ans
 }
 
 #' @rdname NormEndSequenceData-class
@@ -283,7 +285,7 @@ setMethod("getData",
   ans <- cbind(do.call(S4Vectors::DataFrame, means),
                do.call(S4Vectors::DataFrame, sds))
   ans <- relist(ans, x@partitioning)
-  positions <- .seqs_rl(ranges(x))
+  positions <- .seqs_rl_strand(ranges(x))
   rownames(ans) <- IRanges::CharacterList(positions)
   ans
 }

@@ -108,9 +108,10 @@ setMethod("parallelSlotNames", "SequenceDataSet",
                   },
                   logical(1))
   } else {
+    first_input <- unlist(first_input)
     ans <- vapply(input[seq.int(2,length(input))],
                   function(i){
-                    all(all(first_input == i))
+                    all(all(first_input == unlist(i)))
                   },
                   logical(1))
   }
