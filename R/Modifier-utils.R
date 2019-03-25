@@ -58,11 +58,6 @@ setMethod(f = "constructModRanges",
                    "'shortName(ModRNAString())'",call. = FALSE)
             }
             positions <- as.integer(rownames(data))
-            if(as.character(GenomicRanges::strand(range)) == "-"){
-              positions <- GenomicRanges::end(range) - positions + 1L
-            } else {
-              positions <- GenomicRanges::start(range) + positions - 1L
-            }
             scores <- do.call(scoreFun,
                               list(data))
             if(!is.list(scores)){
