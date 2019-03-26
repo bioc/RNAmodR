@@ -229,6 +229,19 @@ setClass("Modifier",
   if(!assertive::is_a_bool(x@aggregateValidForCurrentArguments)){
     return("Invalid slot: 'modificationsValidForCurrentArguments'")
   }
+  if(hasAggregateData(x)){
+    data <- getAggregateData(x)
+    if(is.null(rownames(data@unlistData))){
+      return("rownames of aggregate data is not set.")
+    } else {
+      seqs <- .seqs_rl_strand(ranges(x))
+      if(any(any(seqs != IRanges::IntegerList(rownames(data))))){
+        return(paste0("Out of range rownames of aggregate data. The rownames ",
+                      "do not match the genomic coordinate covered by the ",
+                      "annotation data."))
+      }
+    }
+  }
   c(.valid_SequenceData(x), unlist(lapply(seqdata, .valid.SequenceData)))
 }
 S4Vectors::setValidity2(Class = "Modifier", .valid_Modifier)
@@ -678,7 +691,7 @@ setMethod("Modifier",
 # aggregate --------------------------------------------------------------------
 
 #' @name aggregate
-#' @aliases hasAggregateData aggregateData
+#' @aliases hasAggregateData aggregateData getAggregateData
 #' 
 #' @title Aggreagte data per positions
 #' 
@@ -706,8 +719,8 @@ setMethod("Modifier",
 #' returned as a \code{SplitDataFrameList} with an element per transcript, 
 #' whereas for a \code{Modifier} the modified input object is returned, 
 #' containing the aggregated data, which can be accessed using 
-#' \code{aggregateData}.}
-#' \item{\code{aggregateData}: }{only for \code{Modifier}: a 
+#' \code{getAggregateData}.}
+#' \item{\code{getAggregateData}: }{only for \code{Modifier}: a 
 #' \code{SplitDataFrameList} with an element per transcript is returned. If the 
 #' aggregated data is not stored in the object, it is generated on the fly, but 
 #' does not persist}
@@ -734,50 +747,64 @@ setMethod("Modifier",
 #' msi <- aggregate(msi)
 NULL
 
-#' @rdname aggregate
-#' @export
-setMethod(f = "aggregate", 
-          signature = signature(x = "Modifier"),
-          definition = 
-            function(x, force = FALSE){
-              if(is.null(x@aggregate)){
-                stop("This functions needs to be implemented by '",class(x),
-                     "'.",call. = FALSE)
-              }
-              .check_score_name(x@aggregate, x@score)
-              x@aggregateValidForCurrentArguments <- TRUE
-              x
-            }
-)
-
-.add_positions_as_rownames <- function(x){
-  if(is.null(rownames(x@aggregate@unlistData))){
-    seqs <- IRanges::CharacterList(.seqs_rl(ranges(x)))
-    rownames(x@aggregate@unlistData) <- unlist(seqs)
-  }
-  x
-}
-.check_score_name <- function(data,score){
+.check_aggregate_modifier <- function(data, x){
+  score <- x@score
   if(is(data,"CompressedSplitDataFrameList")){
     columns <- colnames(data@unlistData)
   } else {
-    columns <- colnames(data[[1]])
+    stop("aggregate data has to be a 'CompressedSplitDataFrameList' object. ",
+         "Contact the maintainer of the class used.",
+         call. = FALSE)
   }
   if(!(score %in% columns)){
     stop("The default score is not present in the aggregate data. Contact the ",
          "maintainer of the class used.",
          call. = FALSE)
   }
+  seqs <- .seqs_rl_strand(ranges(x))
+  if(any(any(seqs != IRanges::IntegerList(rownames(data))))){
+    stop("rownames() of aggregate data is not named or not named along the ",
+         "genomic coordinates. Contact the maintainer of the class used.",
+         call. = FALSE)
+  }
   data
 }
+
+#' @rdname aggregate
+#' @export
+setMethod(f = "aggregate", 
+          signature = signature(x = "Modifier"),
+          definition = 
+            function(x, force = FALSE){
+              if(missing(force)){
+                force <- FALSE
+              }
+              assertive::assert_is_a_bool(force)
+              if(!hasAggregateData(x) || force){
+                x@aggregate <- .check_aggregate_modifier(aggregateData(x), x)
+                x@aggregateValidForCurrentArguments <- TRUE
+              }
+              x
+            }
+)
+
 #' @rdname aggregate
 #' @export
 setMethod(f = "aggregateData", 
           signature = signature(x = "Modifier"),
+          definition = 
+            function(x){
+              stop("This functions needs to be implemented by '",class(x),
+                   "'.",call. = FALSE)
+            }
+)
+#' @rdname aggregate
+#' @export
+setMethod(f = "getAggregateData", 
+          signature = signature(x = "Modifier"),
           definition = function(x){
             x <- aggregate(x)
-            x <- .add_positions_as_rownames(x)
-            .check_score_name(x@aggregate, x@score)
+            x@aggregate
           })
 
 #' @rdname aggregate
@@ -803,7 +830,14 @@ setMethod(f = "hasAggregateData",
 #' @description 
 #' \code{modify} triggers the search for modifications for a 
 #' \code{\link[=Modifier-class]{Modifier}} class. Usually this is done 
-#' automatically during construction of a \code{Modifier} object.
+#' automatically during construction of a \code{Modifier} object. It also makes 
+#' sure that the aggregated data is valid for the current settings and stores
+#' the results inside the \code{Modifier} object. The results can be accessed
+#' via the \code{modifications()} function.
+#' 
+#' \code{findMod} just returns the found modifications as a \code{GRanges} 
+#' object. It does not check for validity of the aggregate data in side the
+#' \code{Modifier} object.
 #' 
 #' \code{modifications} is the accessor for the found modifications.
 #' 
@@ -834,12 +868,27 @@ NULL
 setMethod(f = "modify", 
           signature = signature(x = "Modifier"),
           definition = 
-            function(x, force){
-              if(is.null(x@modifications)){
-                stop("This functions needs to be implemented by '",class(x),
-                     "'.",call. = FALSE)
+            function(x, force = FALSE){
+              if(missing(force)){
+                force <- FALSE
               }
+              assertive::assert_is_a_bool(force)
+              if(!validAggregate(x) | force){
+                x <- aggregate(x, force = TRUE)
+              }
+              x@modifications <- findMod(x)
               x@modificationsValidForCurrentArguments <- TRUE
               x
+            }
+)
+
+#' @rdname modify
+#' @export
+setMethod(f = "findMod", 
+          signature = signature(x = "Modifier"),
+          definition = 
+            function(x){
+              stop("This functions needs to be implemented by '",class(x),
+                   "'.",call. = FALSE)
             }
 )

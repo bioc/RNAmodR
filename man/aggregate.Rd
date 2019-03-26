@@ -6,23 +6,30 @@
 \name{aggregate}
 \alias{aggregate}
 \alias{aggregateData}
+\alias{getAggregateData}
 \alias{hasAggregateData}
 \alias{aggregate,SequenceData-method}
+\alias{aggregateData,SequenceData-method}
 \alias{aggregate,SequenceDataSet-method}
 \alias{aggregate,SequenceDataList-method}
 \alias{aggregate,Modifier-method}
 \alias{aggregateData,Modifier-method}
+\alias{getAggregateData,Modifier-method}
 \alias{hasAggregateData,Modifier-method}
 \alias{aggregate,ModifierSet-method}
 \title{Aggreagte data per positions}
 \usage{
 aggregate(x, ...)
 
-aggregateData(x)
+aggregateData(x, ...)
 
-hasAggregateData(x, ...)
+getAggregateData(x)
 
-\S4method{aggregate}{SequenceData}(x, force)
+hasAggregateData(x)
+
+\S4method{aggregate}{SequenceData}(x, condition = c())
+
+\S4method{aggregateData}{SequenceData}(x, condition)
 
 \S4method{aggregate}{SequenceDataSet}(x, condition = "Treated")
 
@@ -31,6 +38,8 @@ hasAggregateData(x, ...)
 \S4method{aggregate}{Modifier}(x, force = FALSE)
 
 \S4method{aggregateData}{Modifier}(x)
+
+\S4method{getAggregateData}{Modifier}(x)
 
 \S4method{hasAggregateData}{Modifier}(x)
 
@@ -42,12 +51,12 @@ hasAggregateData(x, ...)
 
 \item{...}{additional arguments}
 
-\item{force}{whether to recreate the aggregated data, if it is already stored
-inside the \code{Modifier} object.}
-
 \item{condition}{character value, which selects, for which condition the data
 should be aggregated. One of the following values: \code{Both}, 
 \code{Control}, \code{Treated}}
+
+\item{force}{whether to recreate the aggregated data, if it is already stored
+inside the \code{Modifier} object.}
 }
 \value{
 \itemize{
@@ -55,8 +64,8 @@ should be aggregated. One of the following values: \code{Both},
 returned as a \code{SplitDataFrameList} with an element per transcript, 
 whereas for a \code{Modifier} the modified input object is returned, 
 containing the aggregated data, which can be accessed using 
-\code{aggregateData}.}
-\item{\code{aggregateData}: }{only for \code{Modifier}: a 
+\code{getAggregateData}.}
+\item{\code{getAggregateData}: }{only for \code{Modifier}: a 
 \code{SplitDataFrameList} with an element per transcript is returned. If the 
 aggregated data is not stored in the object, it is generated on the fly, but 
 does not persist}

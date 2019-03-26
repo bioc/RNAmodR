@@ -49,11 +49,16 @@ NULL
 #' }
 NULL
 
-.add_seqlengths_for_bigWig_export <- function(gr, x){
+.add_seqlengths_for_export <- function(gr, x){
   seqlengths <- GenomeInfoDb::seqlengths(seqinfo(x))
   f <- vapply(seqlengths, is.na, logical(1))
   if(any(f)){
-    seqlengths[f] <- lengths(gr)[f]
+    seqnames <- .get_unique_seqnames(gr@unlistData)
+    seqlengths[f][seqnames] <- vapply(seqnames,
+                                      function(sn){
+                                        max(end(gr@unlistData[.get_seqnames(gr@unlistData) == sn]))
+                                      },
+                                      integer(1))
   }
   GenomeInfoDb::seqlengths(gr) <- seqlengths
   gr
@@ -72,8 +77,9 @@ NULL
     },
     seqnames,
     positions))
-  gr <- .add_seqlengths_for_bigWig_export(gr, x)
+  gr <- .add_seqlengths_for_export(gr, x)
   gr <- unlist(gr, use.names = FALSE)
+  gr <- .rebase_GRanges(gr)
   gr
 }
 
@@ -82,7 +88,7 @@ NULL
 .get_GRanges_for_bigWig_export <- function(x, type){
   ranges <- ranges(x)
   if(is(x,"Modifier")){
-    data <- aggregateData(x)
+    data <- getAggregateData(x)
   } else {
     data <- aggregate(x)
   }
@@ -128,7 +134,7 @@ setMethod("export.bw","SequenceDataSet",
 .get_GRangesList_for_Wig_export <- function(x, type){
   ranges <- ranges(x)
   if(is(x,"Modifier")){
-    data <- aggregateData(x)
+    data <- getAggregateData(x)
   } else {
     data <- aggregate(x)
   }

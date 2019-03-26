@@ -4,19 +4,25 @@
 \docType{methods}
 \name{modify}
 \alias{modify}
+\alias{findMod}
 \alias{modifications,Modifier-method}
 \alias{modifications}
 \alias{modify,Modifier-method}
+\alias{findMod,Modifier-method}
 \alias{modify,ModifierSet-method}
 \title{Searching for modifications in \code{SequenceData}}
 \usage{
 modifications(x, ...)
 
-modify(x, force = FALSE)
+modify(x, ...)
+
+findMod(x)
 
 \S4method{modifications}{Modifier}(x, perTranscript = FALSE)
 
 \S4method{modify}{Modifier}(x, force = FALSE)
+
+\S4method{findMod}{Modifier}(x)
 
 \S4method{modify}{ModifierSet}(x, force = FALSE)
 }
@@ -25,11 +31,11 @@ modify(x, force = FALSE)
 
 \item{...}{additional arguments}
 
-\item{force}{force to run \code{aggregate} again, if data is already stored
-in \code{x}.}
-
 \item{perTranscript}{For \code{modifications>} \code{TRUE} or \code{FALSE}:
 Should the coordinates be returned as local per transcript coordinates?}
+
+\item{force}{force to run \code{aggregate} again, if data is already stored
+in \code{x}.}
 }
 \value{
 \itemize{
@@ -41,7 +47,14 @@ object.}
 \description{
 \code{modify} triggers the search for modifications for a 
 \code{\link[=Modifier-class]{Modifier}} class. Usually this is done 
-automatically during construction of a \code{Modifier} object.
+automatically during construction of a \code{Modifier} object. It also makes 
+sure that the aggregated data is valid for the current settings and stores
+the results inside the \code{Modifier} object. The results can be accessed
+via the \code{modifications()} function.
+
+\code{findMod} just returns the found modifications as a \code{GRanges} 
+object. It does not check for validity of the aggregate data in side the
+\code{Modifier} object.
 
 \code{modifications} is the accessor for the found modifications.
 }

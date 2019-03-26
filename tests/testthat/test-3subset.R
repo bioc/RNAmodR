@@ -184,13 +184,13 @@ test_that("Subsetting Modifier/ModifierSet:",{
   data(msi,package = "RNAmodR")
   # element names
   coord <- RNAmodR:::.norm_coord(modifications(msi)[[1]],NA)
-  expect_error(RNAmodR:::.get_element_names(aggregateData(msi[[1]]),coord),
+  expect_error(RNAmodR:::.get_element_names(getAggregateData(msi[[1]]),coord),
                'argument "type" is missing')
-  expect_error(RNAmodR:::.get_element_names(aggregateData(msi[[1]]),coord,NA),
+  expect_error(RNAmodR:::.get_element_names(getAggregateData(msi[[1]]),coord,NA),
                'argument "type" is missing')
-  actual <- RNAmodR:::.get_element_names(aggregateData(msi[[1]]),coord,NA,NA)
+  actual <- RNAmodR:::.get_element_names(getAggregateData(msi[[1]]),coord,NA,NA)
   expect_type(actual,"character")
-  actual <- RNAmodR:::.get_element_names(aggregateData(msi[[1]]),coord,"2",NA)
+  actual <- RNAmodR:::.get_element_names(getAggregateData(msi[[1]]),coord,"2",NA)
   expect_equal(actual,"2")
   # subsetting
   actual <- subsetByCoord(msi[[1]],coord)

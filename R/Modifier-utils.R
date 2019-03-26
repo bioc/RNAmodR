@@ -63,22 +63,23 @@ setMethod(f = "constructModRanges",
             if(!is.list(scores)){
               stop("result of 'scoreFun' must be a list.")
             }
-            if(any(length(positions) != 
-                   unique(vapply(scores, length, integer(1))))){
+            data_length <- unique(vapply(scores, length, integer(1)))
+            if(any(length(positions) != data_length)){
               stop("Number of positions and scores do not match.")
             }
-            mranges <- do.call(
-              GenomicRanges::GRanges,
-              c(list(seqnames = rep(as.character(GenomicRanges::seqnames(range)),
-                                    nrow(data)),
-                     ranges = IRanges::IRanges(start = positions,
-                                               width = 1L),
-                     strand = GenomicRanges::strand(range),
-                     seqinfo = GenomeInfoDb::seqinfo(range),
-                     mod = rep(modType,nrow(data))),
-                source = source,
-                type = type,
-                scores))
+            seqnames <- .get_unique_seqnames(range)
+            ranges <- IRanges::IRanges(start = positions,
+                                       width = 1L)
+            strand <- .get_unique_strand(range)
+            mranges <- 
+              GenomicRanges::GRanges(seqnames = seqnames,
+                                     ranges = ranges,
+                                     strand = strand,
+                                     seqinfo = GenomeInfoDb::seqinfo(range),
+                                     mod = rep(modType, data_length),
+                                     source = source,
+                                     type = type,
+                                     scores)
             mranges
           }
 )

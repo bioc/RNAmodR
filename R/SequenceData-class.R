@@ -659,6 +659,7 @@ setMethod("rownames", "SequenceData",
   grl <- grl[GenomicRanges::seqnames(grl) %in% GenomeInfoDb::seqnames(seqinfo)]
   grl <- grl[width(grl@partitioning) != 0L]
   GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(seqinfo)
+  grl@unlistData <- .rebase_GRanges(grl@unlistData)
   grl
 }
 
@@ -788,13 +789,31 @@ setMethod(f = "sequences",
 # dummy functions --------------------------------------------------------------
 # this needs to be implemented by each subclass
 
+.check_aggregate_seqdata <- function(data, x){
+  seqs <- .seqs_rl_strand(ranges(x))
+  if(any(any(seqs != IRanges::IntegerList(rownames(data))))){
+    stop("rownames() of aggregate data is not named or not named along the ",
+         "genomic coordinates. Contact the maintainer of the class used.",
+         call. = FALSE)
+  }
+  data
+}
+
 #' @rdname aggregate
 #' @export
 setMethod(f = "aggregate", 
           signature = signature(x = "SequenceData"),
           definition = 
-            function(x, force){
-              stop("This functions needs to be implemented by '",class(x),"'.",
-                   call. = FALSE)
+            function(x, condition = c()){
+              .check_aggregate_seqdata(aggregateData(x, condition), x)
             }
 )
+
+#' @rdname aggregate
+#' @export
+setMethod(f = "aggregateData", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x, condition){
+            stop("This functions needs to be implemented by '",class(x),"'.",
+                 call. = FALSE)
+          })

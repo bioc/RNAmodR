@@ -122,8 +122,17 @@ setGeneric(
 setGeneric( 
   name = "modify",
   signature = c("x"),
-  def = function(x, force = FALSE) standardGeneric("modify")
+  def = function(x, ...) standardGeneric("modify")
 )
+
+#' @rdname modify
+#' @export
+setGeneric( 
+  name = "findMod",
+  signature = c("x"),
+  def = function(x) standardGeneric("findMod")
+)
+
 
 # SequenceData/SequenceDataSet/SequenceDataList/Modifier functions -------------
 
@@ -138,14 +147,21 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "aggregateData",
-  def = function(x) standardGeneric("aggregateData")
+  def = function(x, ...) standardGeneric("aggregateData")
 ) 
+#' @rdname aggregate
+#' @export
+setGeneric( 
+  name = "getAggregateData",
+  signature = c("x"),
+  def = function(x) standardGeneric("getAggregateData")
+)
 #' @rdname aggregate
 #' @export
 setGeneric( 
   name = "hasAggregateData",
   signature = c("x"),
-  def = function(x, ...) standardGeneric("hasAggregateData")
+  def = function(x) standardGeneric("hasAggregateData")
 ) 
 
 # SequenceData/SequenceDataSet/SequenceDataList/Modifier/ModifierSet -----------

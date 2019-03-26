@@ -5,8 +5,8 @@
 \name{ModInosine-functions}
 \alias{ModInosine-functions}
 \alias{settings<-,ModInosine-method}
-\alias{aggregate,ModInosine-method}
-\alias{modify,ModInosine-method}
+\alias{aggregateData,ModInosine-method}
+\alias{findMod,ModInosine-method}
 \alias{getDataTrack,ModInosine-method}
 \alias{visualizeDataByCoord,ModInosine,GRanges-method}
 \alias{visualizeData,ModInosine-method}
@@ -16,9 +16,9 @@
 \usage{
 \S4method{settings}{ModInosine}(x) <- value
 
-\S4method{aggregate}{ModInosine}(x, force = FALSE)
+\S4method{aggregateData}{ModInosine}(x)
 
-\S4method{modify}{ModInosine}(x, force = FALSE)
+\S4method{findMod}{ModInosine}(x)
 
 \S4method{getDataTrack}{ModInosine}(x, name, type, ...)
 
@@ -41,10 +41,10 @@ see also the man pages for the functions mentioned below.}
 
 \item{value}{See \code{\link[RNAmodR:Modifier-functions]{settings}}}
 
-\item{force}{See \code{\link{aggregate}}}
-
 \item{coord, name, from, to, type, window.size, ...}{See 
 \code{\link{visualizeData}}}
+
+\item{force}{See \code{\link{aggregate}}}
 }
 \value{
 \itemize{

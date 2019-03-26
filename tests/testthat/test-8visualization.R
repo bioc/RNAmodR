@@ -7,6 +7,13 @@ test_that("Visualization:",{
   data(sds, package = "RNAmodR")
   data(sdl, package = "RNAmodR")
   getDefCoord <- function(){
+    GRanges(seqnames = "chr1",
+            ranges = IRanges::IRanges(start = 1510L,
+                                      end = 1545L),
+            strand = "+",
+            Parent = "2")
+  }
+  getDefCoord2 <- function(){
     GRanges(seqnames = "chr2",
             ranges = IRanges::IRanges(start = 10L,
                                       end = 45L),
@@ -45,7 +52,7 @@ test_that("Visualization:",{
   expect_error(RNAmodR:::.norm_viz_chromosome(ranges, "ab"),
                "Transcript name 'ab' not found in 'x'")
   expect_equal(RNAmodR:::.norm_viz_chromosome(ranges, "2"),
-               "chr2")
+               "chr1")
   # .norm_coord_for_visualization
   coord2 <- coord
   expect_error(RNAmodR:::.norm_coord_for_visualization(ranges, c(coord,coord)),
@@ -70,9 +77,9 @@ test_that("Visualization:",{
   expect_null(RNAmodR:::.norm_viz_name())
   expect_equal(RNAmodR:::.norm_viz_name("abc"),"abc")
   # .get_viz_from_to_coord
-  coord <- GRanges(seqnames = "chr2",
-                   ranges = IRanges::IRanges(start = 10L,
-                                             end = 10L),
+  coord <- GRanges(seqnames = "chr1",
+                   ranges = IRanges::IRanges(start = 1510L,
+                                             end = 1510L),
                    strand = "+",
                    Parent = "2")
   expect_error(RNAmodR:::.get_viz_from_to_coord(ranges, coord),
@@ -80,29 +87,29 @@ test_that("Visualization:",{
   actual <- RNAmodR:::.get_viz_from_to_coord(ranges, coord, 15L)
   expect_type(actual,"list")
   expect_named(actual,c("from","to"))
-  expect_equal(actual,list(from = 1L, to = 25L))
-  coord <- GRanges(seqnames = "chr2",
-                   ranges = IRanges::IRanges(start = 80L,
-                                             end = 80L),
+  expect_equal(actual,list(from = 1500L, to = 1525L))
+  coord <- GRanges(seqnames = "chr1",
+                   ranges = IRanges::IRanges(start = 1580L,
+                                             end = 1580L),
                    strand = "+",
                    Parent = "2")
   actual <- RNAmodR:::.get_viz_from_to_coord(ranges, coord, 15L)
   expect_type(actual,"list")
   expect_named(actual,c("from","to"))
-  expect_equal(actual,list(from = 65L, to = 85L))
+  expect_equal(actual,list(from = 1565L, to = 1595L))
   # .get_viz_from_to
   expect_error(RNAmodR:::.get_viz_from_to(ranges, "2"),
                'argument "from" is missing, with no default')
   expect_error(RNAmodR:::.get_viz_from_to(ranges, "", 1L),
                'argument "to" is missing, with no default')
-  actual <- RNAmodR:::.get_viz_from_to(ranges, "2", 1L, 30L)
+  actual <- RNAmodR:::.get_viz_from_to(ranges, "2", 1501L, 1530L)
   expect_type(actual,"list")
   expect_named(actual,c("from","to"))
-  expect_equal(actual,list(from = 1L, to = 30L))
-  actual <- RNAmodR:::.get_viz_from_to(ranges, "2", 1L, 1000L)
+  expect_equal(actual,list(from = 1501L, to = 1530L))
+  actual <- RNAmodR:::.get_viz_from_to(ranges, "2", 1L, 2000L)
   expect_type(actual,"list")
   expect_named(actual,c("from","to"))
-  expect_equal(actual,list(from = 1L, to = 85L))
+  expect_equal(actual,list(from = 1500L, to = 1600L))
   # .stitch_chromosome
   seq <- RNAStringSet(c("AGCU","AGCU"))
   chr <- "chr2"
@@ -153,9 +160,11 @@ test_that("Visualization:",{
   actual <- RNAmodR:::.get_viz_annotation_track(psd, args)
   expect_s4_class(actual,"AnnotationTrack")
   # .get_viz_sequence_track
-  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd), "chr2", args)
+  expect_error(RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd), "chr2", args),
+               "No ranges with seqnames = 'chr2' found")
+  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd), "chr1", args)
   expect_s4_class(actual,"RNASequenceTrack")
-  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd), "chr2", args)
+  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd), "chr1", args)
   expect_s4_class(actual,"RNASequenceTrack")
   # .get_data_for_visualization
   expect_error(RNAmodR:::.get_data_for_visualization(),
@@ -202,7 +211,7 @@ test_that("Visualization:",{
   expect_equal(unique(actual$mod),"I")
   # SequenceData
   coord <- getDefCoord()
-  actual <- visualizeData(psd, "2", from = 1L, to = 60L)
+  actual <- visualizeData(psd, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
   expect_s4_class(actual[[2]],"ImageMap")
@@ -213,7 +222,7 @@ test_that("Visualization:",{
   expect_equal(actual,actual2)
   # SequenceDataSet
   coord <- getDefCoord()
-  actual <- visualizeData(sds, "2", from = 1L, to = 60L)
+  actual <- visualizeData(sds, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
   expect_s4_class(actual[[4]],"ImageMap")
@@ -224,7 +233,7 @@ test_that("Visualization:",{
   expect_equal(actual,actual2)
   # SequenceDataList
   coord <- getDefCoord()
-  actual <- visualizeData(sdl, "2", from = 1L, to = 60L)
+  actual <- visualizeData(sdl, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
   expect_s4_class(actual[[6]],"ImageMap")
@@ -234,6 +243,7 @@ test_that("Visualization:",{
   expect_s4_class(actual2[[6]],"ImageMap")
   expect_equal(actual,actual2)
   # Modifier
+  coord <- getDefCoord2()
   actual <- visualizeData(msi[[1]], "2", from = 1L, to = 60L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
@@ -265,7 +275,8 @@ test_that("Visualization:",{
   data(csd, package = "RNAmodR")
   data(pesd, package = "RNAmodR")
   #
-  actual <- visualizeData(e5sd, "2", from = 1L, to = 60L)
+  coord <- getDefCoord()
+  actual <- visualizeData(e5sd, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
   expect_s4_class(actual[[2]],"ImageMap")
@@ -275,63 +286,63 @@ test_that("Visualization:",{
   expect_s4_class(actual2[[2]],"ImageMap")
   expect_equal(actual,actual2)
   #
-  actual <- visualizeData(e3sd, "2", from = 1L, to = 60L)
+  actual <- visualizeData(e3sd, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
-  expect_s4_class(actual[[3]],"ImageMap")
+  expect_s4_class(actual[[2]],"ImageMap")
   actual2 <- visualizeDataByCoord(e3sd, coord)
   expect_type(actual2,"list")
   expect_s4_class(actual2[[1]],"DataTrack")
-  expect_s4_class(actual2[[3]],"ImageMap")
+  expect_s4_class(actual2[[2]],"ImageMap")
   expect_equal(actual,actual2)
   #
-  actual <- visualizeData(esd, "2", from = 1L, to = 60L)
+  actual <- visualizeData(esd, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
-  expect_s4_class(actual[[3]],"ImageMap")
+  expect_s4_class(actual[[2]],"ImageMap")
   actual2 <- visualizeDataByCoord(esd, coord)
   expect_type(actual2,"list")
   expect_s4_class(actual2[[1]],"DataTrack")
-  expect_s4_class(actual2[[3]],"ImageMap")
+  expect_s4_class(actual2[[2]],"ImageMap")
   expect_equal(actual,actual2)
   #
-  actual <- visualizeData(ne3sd, "2", from = 1L, to = 60L)
+  actual <- visualizeData(ne3sd, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
-  expect_s4_class(actual[[5]],"ImageMap")
+  expect_s4_class(actual[[3]],"ImageMap")
   actual2 <- visualizeDataByCoord(ne3sd, coord)
   expect_type(actual2,"list")
   expect_s4_class(actual2[[1]],"DataTrack")
-  expect_s4_class(actual2[[5]],"ImageMap")
+  expect_s4_class(actual2[[3]],"ImageMap")
   expect_equal(actual,actual2)
   #
-  actual <- visualizeData(ne5sd, "2", from = 1L, to = 60L)
+  actual <- visualizeData(ne5sd, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
-  expect_s4_class(actual[[5]],"ImageMap")
+  expect_s4_class(actual[[3]],"ImageMap")
   actual2 <- visualizeDataByCoord(ne5sd, coord)
   expect_type(actual2,"list")
   expect_s4_class(actual2[[1]],"DataTrack")
-  expect_s4_class(actual2[[5]],"ImageMap")
+  expect_s4_class(actual2[[3]],"ImageMap")
   expect_equal(actual,actual2)
   #
-  actual <- visualizeData(csd, "2", from = 1L, to = 60L)
+  actual <- visualizeData(csd, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
-  expect_s4_class(actual[[3]],"ImageMap")
+  expect_s4_class(actual[[2]],"ImageMap")
   actual2 <- visualizeDataByCoord(csd, coord)
   expect_type(actual2,"list")
   expect_s4_class(actual2[[1]],"DataTrack")
-  expect_s4_class(actual2[[3]],"ImageMap")
+  expect_s4_class(actual2[[2]],"ImageMap")
   expect_equal(actual,actual2)
   #
-  actual <- visualizeData(pesd, "2", from = 1L, to = 60L)
+  actual <- visualizeData(pesd, "2", from = 1500L, to = 1560L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
-  expect_s4_class(actual[[3]],"ImageMap")
+  expect_s4_class(actual[[2]],"ImageMap")
   actual2 <- visualizeDataByCoord(pesd, coord)
   expect_type(actual2,"list")
   expect_s4_class(actual2[[1]],"DataTrack")
-  expect_s4_class(actual2[[3]],"ImageMap")
+  expect_s4_class(actual2[[2]],"ImageMap")
   expect_equal(actual,actual2)
 })

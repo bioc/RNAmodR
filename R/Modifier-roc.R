@@ -116,9 +116,9 @@ NULL
   if(!is.null(input[["score"]])){
     score <- input[["score"]]
     if(!assertive::is_a_string(score) ||
-       !(score %in% colnames(aggregateData(x)[[1]]))){
+       !(score %in% colnames(getAggregateData(x)[[1]]))){
       stop("'score' must a single character and a valid column name in ",
-           "aggregateData().",
+           "getAggregateData().",
            call. = FALSE)
     }
   }

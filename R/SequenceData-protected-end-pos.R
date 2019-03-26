@@ -93,7 +93,7 @@ setMethod("getData",
 
 #' @rdname ProtectedEndSequenceData-class
 #' @export
-setMethod("aggregate",
+setMethod("aggregateData",
           signature = c(x = "ProtectedEndSequenceData"),
           function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))

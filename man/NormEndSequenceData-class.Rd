@@ -9,8 +9,8 @@
 \alias{NormEnd3SequenceData-class}
 \alias{getData,NormEnd5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{getData,NormEnd3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
-\alias{aggregate,NormEnd5SequenceData-method}
-\alias{aggregate,NormEnd3SequenceData-method}
+\alias{aggregateData,NormEnd5SequenceData-method}
+\alias{aggregateData,NormEnd3SequenceData-method}
 \alias{getDataTrack,NormEnd5SequenceData-method}
 \alias{getDataTrack,NormEnd3SequenceData-method}
 \title{NormEnd5SequenceData/NormEnd3SequenceData}
@@ -27,10 +27,10 @@ NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
   \S4method{getData}{NormEnd3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
   bamfiles, grl, sequences, param, args)
 
-\S4method{aggregate}{NormEnd5SequenceData}(x, condition = c("Both",
+\S4method{aggregateData}{NormEnd5SequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 
-\S4method{aggregate}{NormEnd3SequenceData}(x, condition = c("Both",
+\S4method{aggregateData}{NormEnd3SequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 
 \S4method{getDataTrack}{NormEnd5SequenceData}(x, name, ...)

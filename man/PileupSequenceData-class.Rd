@@ -5,7 +5,7 @@
 \alias{PileupSequenceData-class}
 \alias{PileupSequenceData}
 \alias{getData,PileupSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
-\alias{aggregate,PileupSequenceData-method}
+\alias{aggregateData,PileupSequenceData-method}
 \alias{getDataTrack,PileupSequenceData-method}
 \title{PileupSequenceData}
 \usage{
@@ -15,7 +15,7 @@ PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
   \S4method{getData}{PileupSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
   bamfiles, grl, sequences, param, args)
 
-\S4method{aggregate}{PileupSequenceData}(x, condition = c("Both",
+\S4method{aggregateData}{PileupSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 
 \S4method{getDataTrack}{PileupSequenceData}(x, name, ...)

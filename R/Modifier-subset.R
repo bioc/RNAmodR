@@ -57,7 +57,7 @@ NULL
   }
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]]) 
-  data <- aggregateData(x)
+  data <- getAggregateData(x)
   names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
   data <- data[match(names, names(data))]
   coord <- coord[match(names, names(coord))]
@@ -78,7 +78,7 @@ NULL
   } else {
     lapply(x,
            function(z){
-             data <- aggregateData(z)
+             data <- getAggregateData(z)
              names <- .get_element_names(data, coord, args[["name"]],
                                          args[["type"]])
              data <- data[match(names, names(data))]
@@ -129,7 +129,7 @@ setMethod("subsetByCoord",
   args <- .norm_subset_args(list(...), x)
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
-  data <- aggregateData(x)
+  data <- getAggregateData(x)
   names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
   data <- data[match(names, names(data))]
   coord <- coord[match(names, names(coord))]

@@ -97,7 +97,7 @@ setMethod("summary",
           signature = "Modifier",
           function(object){
             bamfilesstats <- .get_bamfiles_stats(object)
-            datastats <- .get_data_stats(aggregateData(object))
+            datastats <- .get_data_stats(getAggregateData(object))
             return(list("bamfiles" = bamfilesstats,
                         "aggregated data" = datastats))
           })

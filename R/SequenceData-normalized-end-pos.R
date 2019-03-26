@@ -292,7 +292,7 @@ setMethod("getData",
 
 #' @rdname NormEndSequenceData-class
 #' @export
-setMethod("aggregate",
+setMethod("aggregateData",
           signature = c(x = "NormEnd5SequenceData"),
           function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
@@ -302,7 +302,7 @@ setMethod("aggregate",
 
 #' @rdname NormEndSequenceData-class
 #' @export
-setMethod("aggregate",
+setMethod("aggregateData",
           signature = c(x = "NormEnd3SequenceData"),
           function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))

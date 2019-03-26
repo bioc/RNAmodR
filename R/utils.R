@@ -23,10 +23,32 @@ NULL
   as.logical(.get_strand(x) == .get_unique_strand(gr)) 
 }
 
+# seqnames related functions
+
+.get_seqnames <- function(x){
+  as.character(GenomicRanges::seqnames(x))
+}
+.get_unique_seqnames <- function(x){
+  unique(.get_seqnames(x))
+}
+
 .rebase_seqnames <- function(gr, seqnames){
   GenomicRanges::GRanges(seqnames = seqnames,
                          ranges = ranges(gr),
                          strand = strand(gr),
+                         mcols(gr))
+}
+
+# seqlengths related functions
+.rebase_GRanges <- function(gr){
+  usn <- .get_unique_seqnames(gr)
+  seqnames <- Rle(factor(GenomicRanges::seqnames(gr), levels = usn))
+  seqlengths <- GenomeInfoDb::seqlengths(gr)[usn]
+  seqinfo <- GenomeInfoDb::Seqinfo(usn, seqlengths)
+  GenomicRanges::GRanges(seqnames = seqnames,
+                         ranges = IRanges::ranges(gr),
+                         strand = BiocGenerics::strand(gr),
+                         seqinfo = seqinfo,
                          mcols(gr))
 }
 

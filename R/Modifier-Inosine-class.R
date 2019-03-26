@@ -210,29 +210,23 @@ setReplaceMethod(f = "settings",
 }
 
 .aggregate_inosine <- function(x){
-  data <- sequenceData(x)
-  mod <- aggregate(data)
+  mod <- aggregate(sequenceData(x))
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   score <- .calculate_inosine_score(mod, letters)
   ans <- cbind(S4Vectors::DataFrame(score = unlist(score)$value,
                                     row.names = NULL))
-  relist(ans, mod@partitioning)
+  ans <- relist(ans, mod@partitioning)
+  rownames(ans) <- IRanges::CharacterList(.seqs_rl_strand(ranges(x)))
+  ans
 }
 
 #' @rdname ModInosine-functions
 #' @export
-setMethod(f = "aggregate", 
+setMethod(f = "aggregateData", 
           signature = signature(x = "ModInosine"),
           definition = 
-            function(x, force = FALSE){
-              if(missing(force)){
-                force <- FALSE
-              }
-              if(!hasAggregateData(x) || force){
-                x@aggregate <- .aggregate_inosine(x)
-              }
-              x <- callNextMethod()
-              x
+            function(x){
+              .aggregate_inosine(x)
             }
 )
 
@@ -246,14 +240,14 @@ setMethod(f = "aggregate",
   }
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   # get the aggregate data
-  mod <- aggregateData(x)
+  mod <- getAggregateData(x)
   coverage <- .aggregate_pile_up_to_coverage(sequenceData(x))
   # get arguments
   minCoverage <- settings(x,"minCoverage")
   minReplicate <- settings(x,"minReplicate")
   minScore <- settings(x,"minScore")
   # construct logical vector for passing the coverage threshold
-  coverage <- rowSums(as.data.frame(unlist(coverage))) >= minReplicate
+  coverage <- rowSums(as.data.frame(unlist(coverage))) >= minCoverage
   coverage <- relist(unname(coverage),mod@partitioning)
   # find inosine positions by looking for A to G conversion at position with 
   # enough coverage
@@ -291,15 +285,13 @@ setMethod(f = "aggregate",
 
 #' @rdname ModInosine-functions
 #' @export
-setMethod("modify",
+setMethod("findMod",
           signature = c(x = "ModInosine"),
-          function(x, force = FALSE){
-            # get the aggregate data
-            x@modifications <- .find_inosine(x)
-            x <- callNextMethod()
-            x
+          function(x){
+            .find_inosine(x)
           }
 )
+
 
 # ModSetInosine ----------------------------------------------------------------
 

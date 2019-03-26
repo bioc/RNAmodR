@@ -299,7 +299,7 @@ setMethod("getData",
 
 #' @rdname EndSequenceData-class
 #' @export
-setMethod("aggregate",
+setMethod("aggregateData",
           signature = c(x = "End5SequenceData"),
           function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
@@ -309,7 +309,7 @@ setMethod("aggregate",
 
 #' @rdname EndSequenceData-class
 #' @export
-setMethod("aggregate",
+setMethod("aggregateData",
           signature = c(x = "End3SequenceData"),
           function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
@@ -319,7 +319,7 @@ setMethod("aggregate",
 
 #' @rdname EndSequenceData-class
 #' @export
-setMethod("aggregate",
+setMethod("aggregateData",
           signature = c(x = "EndSequenceData"),
           function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))

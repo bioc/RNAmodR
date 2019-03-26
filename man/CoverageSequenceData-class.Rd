@@ -5,7 +5,7 @@
 \alias{CoverageSequenceData-class}
 \alias{CoverageSequenceData}
 \alias{getData,CoverageSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
-\alias{aggregate,CoverageSequenceData-method}
+\alias{aggregateData,CoverageSequenceData-method}
 \alias{getDataTrack,CoverageSequenceData-method}
 \title{CoverageSequenceData}
 \usage{
@@ -15,7 +15,7 @@ CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
   \S4method{getData}{CoverageSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
   bamfiles, grl, sequences, param, args)
 
-\S4method{aggregate}{CoverageSequenceData}(x, condition = c("Both",
+\S4method{aggregateData}{CoverageSequenceData}(x, condition = c("Both",
   "Treated", "Control"))
 
 \S4method{getDataTrack}{CoverageSequenceData}(x, name, ...)

@@ -83,7 +83,7 @@ aggregate data over replicates for all or one of the conditions. The resulting
 data is passed on to the `Modifier` class.
 
 ```{r}
-setMethod("aggregate",
+setMethod("aggregateData",
           signature = c(x = "ExampleSequenceData"),
           function(x, condition = c("Both","Treated","Control")){
             ###
@@ -127,19 +127,16 @@ setReplaceMethod(f = "settings",
 
 ```
 
-The `aggregate` function is used to take the aggregated data from the 
+The `aggregateData` function is used to take the aggregated data from the 
 `SequenceData` object and is used to calculate the specific scores, which are
 then stored in the `aggregate` slot.
 
 ```{r}
-setMethod(f = "aggregate", 
+setMethod(f = "aggregateData", 
           signature = signature(x = "ModExample"),
           definition = 
             function(x, force = FALSE){
-              some_data <- FUN(aggregate(sequenceData(x)))
-              x@aggregate <- SplitDataFrameList(some_data) # Some data with element per transcript
-              x <- callNextMethod()
-              x
+              # Some data with element per transcript
             }
 )
 
@@ -152,10 +149,7 @@ which are then returned as a GRanges object.
 setMethod("modify",
           signature = c(x = "ModExample"),
           function(x, force = FALSE){
-            some_data <- FUN(aggregateData(x))
-            x@modifications <- GRanges() # an element per modification found.
-            x <- callNextMethod()
-            x
+            # an element per modification found.
           }
 )
 

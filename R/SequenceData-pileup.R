@@ -270,7 +270,7 @@ setMethod("summary",
 
 #' @rdname PileupSequenceData-class
 #' @export
-setMethod("aggregate",
+setMethod("aggregateData",
           signature = c(x = "PileupSequenceData"),
           function(x, condition = c("Both","Treated","Control")){
             condition <- tolower(match.arg(condition))
