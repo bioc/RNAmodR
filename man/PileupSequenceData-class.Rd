@@ -7,6 +7,8 @@
 \alias{getData,PileupSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{aggregateData,PileupSequenceData-method}
 \alias{getDataTrack,PileupSequenceData-method}
+\alias{pileupToCoverage}
+\alias{pileupToCoverage,PileupSequenceData-method}
 \title{PileupSequenceData}
 \usage{
 PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
@@ -19,6 +21,10 @@ PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
   "Treated", "Control"))
 
 \S4method{getDataTrack}{PileupSequenceData}(x, name, ...)
+
+pileupToCoverage(x)
+
+\S4method{pileupToCoverage}{PileupSequenceData}(x)
 }
 \arguments{
 \item{bamfiles, annotation, seqinfo, grl, sequences, param, args, ...}{See 

@@ -380,3 +380,31 @@ setMethod(
     track
   }
 )
+
+# special funtions -------------------------------------------------------------
+
+#' @rdname PileupSequenceData-class
+#' @export
+setGeneric(name = "pileupToCoverage",
+           signature = c("x"),
+           def = function(x) standardGeneric("pileupToCoverage"))
+
+.aggregate_pile_up_to_coverage <- function(data){
+  df <- unlist(data)
+  replicates <- unique(data@replicate)
+  ans  <- IRanges::IntegerList(lapply(seq_along(replicates),
+                                      function(i){
+                                        rowSums(as.data.frame(df[,data@replicate == i]))
+                                      }))
+  names(ans) <- paste0("replicate.",replicates)
+  ans <- do.call(S4Vectors::DataFrame,ans)
+  relist(ans, data@partitioning)
+}
+
+#' @rdname PileupSequenceData-class
+#' @export
+setMethod("pileupToCoverage",
+          signature = "PileupSequenceData",
+          definition = function(x){
+            .aggregate_pile_up_to_coverage(x)
+          })

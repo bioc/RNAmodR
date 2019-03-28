@@ -185,28 +185,16 @@ setReplaceMethod(f = "settings",
 
 # functions --------------------------------------------------------------------
 
-.aggregate_pile_up_to_coverage <- function(data){
-  df <- data@unlistData
-  replicates <- unique(data@replicate)
-  ans  <- IRanges::IntegerList(lapply(seq_along(replicates),
-                                      function(i){
-                                        rowSums(as.data.frame(df[,data@replicate == i]))
-                                      }))
-  names(ans) <- paste0("replicate.",replicates)
-  ans <- do.call(S4Vectors::DataFrame,ans)
-  relist(ans, data@partitioning)
-}
-
 .calculate_inosine_score <- function(x, letters){
-  data <- x@unlistData
-  letters <- letters@unlistData
+  data <- unlist(x)
+  letters <- unlist(letters)
   scores <- 
     data$means.treated.G / (data$means.treated.A + data$means.treated.T + 
                               data$means.treated.C +data$means.treated.G)
   scores[is.infinite(scores) | is.na(scores)] <- 0
   scores[letters != "A"] <- 0
   ans <- S4Vectors::DataFrame(value = scores)
-  relist(ans, x@partitioning)
+  relist(ans, x)
 }
 
 .aggregate_inosine <- function(x){
@@ -215,8 +203,8 @@ setReplaceMethod(f = "settings",
   score <- .calculate_inosine_score(mod, letters)
   ans <- cbind(S4Vectors::DataFrame(score = unlist(score)$value,
                                     row.names = NULL))
-  ans <- relist(ans, mod@partitioning)
-  rownames(ans) <- IRanges::CharacterList(.seqs_rl_strand(ranges(x)))
+  ans <- relist(ans, mod)
+  rownames(ans) <- rownames(mod)
   ans
 }
 
@@ -241,7 +229,7 @@ setMethod(f = "aggregateData",
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   # get the aggregate data
   mod <- getAggregateData(x)
-  coverage <- .aggregate_pile_up_to_coverage(sequenceData(x))
+  coverage <- pileupToCoverage(sequenceData(x))
   # get arguments
   minCoverage <- settings(x,"minCoverage")
   minReplicate <- settings(x,"minReplicate")
