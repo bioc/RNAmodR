@@ -165,9 +165,8 @@ NULL
   m <- match(unique(names(from)),names(width_x))
   width_x <- width_x[m]
   width_ans <- sum(width_x)
-  part <- IRanges::PartitioningByWidth(width_ans, names = names(width_ans))
-  ans@partitioning <- as(part,"PartitioningByEnd")
-  ans
+  relist(unname(unlist(ans)),
+         IRanges::PartitioningByWidth(width_ans, names = names(width_ans)))
 }
 
 # DataFrame like helper functions ----------------------------------------------
