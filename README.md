@@ -57,7 +57,6 @@ modifications.
 
 For further details have a look at the vignette.
 
-
 # Literature
 
 - Carlile, Thomas M., Maria F. Rojas-Duran, Boris Zinshteyn, Hakyung Shin,
@@ -71,8 +70,9 @@ Methylations in Rna by High-Throughput Sequencing.” Angewandte Chemie
 (International Ed. In English) 54 (2): 451–55.
 https://doi.org/10.1002/anie.201408362.
 
-- Marchand, Virginie, Lilia Ayadi, Felix G. M. Ernst, Jasmin Hertler, Valérie
-Bourguignon-Igel, Adeline Galvanin, Annika Kotter, Mark Helm, Denis L. J.
-Lafontaine, and Yuri Motorin. 2018. “AlkAniline-Seq: Profiling of m7G and m3C
-Rna Modifications at Single Nucleotide Resolution.” Angewandte Chemie
-International Edition 57 (51): 16785–90. https://doi.org/10.1002/anie.201810946.
+- Marchand, Virginie, Lilia Ayadi, __Felix G. M. Ernst__, Jasmin Hertler,
+Valérie Bourguignon-Igel, Adeline Galvanin, Annika Kotter, Mark Helm, 
+__Denis L. J. Lafontaine__, and Yuri Motorin. 2018. “AlkAniline-Seq: Profiling 
+of m7G and m3C Rna Modifications at Single Nucleotide Resolution.” Angewandte 
+Chemie International Edition 57 (51): 16785–90. 
+https://doi.org/10.1002/anie.201810946.
