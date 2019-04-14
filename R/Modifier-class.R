@@ -28,9 +28,38 @@ NULL
 #' 
 #' \code{Modifier} objects are constructed centrally by calling 
 #' \code{Modifier()} with a \code{className} matching the specific class to be
-#' constructed. Thei will trigger the immediate analysis, if \code{findMod} is
+#' constructed. This will trigger the immediate analysis, if \code{findMod} is
 #' not set to \code{TRUE}.
 #' 
+#' 
+#' @section Creation: 
+#' \code{Modifier} objects can be created in two ways, either by providing a
+#' list of bamfiles or 
+#' \code{SequenceData}/\code{SequenceDataSet}/\code{SequenceDataList} objects, 
+#' which match the structure in \code{dataType()}.
+#' 
+#' \code{dataType()} can be a \code{character} vector or a \code{list} of
+#' \code{character} vectors and depending on this the input files have to 
+#' follow this structure:
+#' 
+#' \itemize{
+#' \item{a single \code{character}:} {a \code{SequenceData} is
+#' constructed/expected.}
+#' \item{a \code{character} vector:} {a \code{SequenceDataSet} is
+#' constructed/expected.}
+#' \item{a \code{list} of \code{character} vectors:} {a \code{SequenceDataList}
+#' is constructed/expected.}
+#' }
+#' 
+#' The cases for a \code{SequenceData} or \code{SequenceDataSet} are rather
+#' obvious, since the input remains the same. The last case is special, since
+#' it is a hypothetical option in case bam files from to different methods 
+#' have to be combined to reliably detect a single modification (The elements of
+#' a \code{SequenceDataList} don't have to be created from the bamfiles). 
+#' 
+#' For this example a \code{list} of \code{character} vectors is expected.
+#' Each element must be named according to the names of \code{dataType()} and 
+#' contain a \code{character} vector for creating a \code{SequenceData} object.
 #' 
 #' @param className The name of the class which should be constructed.
 #' @param x the input which can be of the following types
@@ -81,7 +110,7 @@ NULL
 #' @slot modificationsValidForCurrentArguments \code{TRUE} or \code{FALSE} 
 #' whether the modifications were found with the current arguments
 #' 
-#' @return a \code{Modifier} object of type 'className'
+#' @return a \code{Modifier} object of type \code{className}
 NULL
 
 #' @name Modifier-functions
@@ -175,15 +204,15 @@ setClass("Modifier",
    stop("Something went wrong.")
   }
   elementTypes <- vapply(list,class,character(1))
-  if(length(elementTypes) != length(x@dataType)){
+  if(length(elementTypes) != length(dataType(x))){
     stop("Number of 'SequenceData' elements does not match the requirements of",
-         " ",class(x),". '",paste(x@dataType, collapse = "','"),"' are ",
+         " ",class(x),". '",paste(dataType(x), collapse = "','"),"' are ",
          "required", call. = FALSE)
   }
-  elementTypes <- elementTypes[match(elementTypes,x@dataType)]
-  if(is.na(elementTypes) || any(elementTypes != x@dataType)){
+  elementTypes <- elementTypes[match(elementTypes,dataType(x))]
+  if(is.na(elementTypes) || any(elementTypes != dataType(x))){
     stop("Type of SequenceData elements does not match the requirements of ",
-         class(x),". '",paste(x@dataType, collapse = "','"),"' are ",
+         class(x),". '",paste(dataType(x), collapse = "','"),"' are ",
          "required", call. = FALSE)
   }
   NULL
@@ -290,7 +319,7 @@ setMethod(
   f = "show", 
   signature = signature(object = "Modifier"),
   definition = function(object) {
-    cat("A", class(object), "object containing",object@dataType,
+    cat("A", class(object), "object containing",dataType(object),
         "with",length(object@data),"elements.\n")
     files <- BiocGenerics::path(object@bamfiles)
     cat("| Input files:\n",paste0("  - ",names(files),": ",files,"\n"))
@@ -387,6 +416,11 @@ setMethod(f = "modifierType",
 setMethod(f = "modType", 
           signature = signature(x = "Modifier"),
           definition = function(x){x@mod})
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "dataType", 
+          signature = signature(x = "Modifier"),
+          definition = function(x){x@dataType})
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "names", 
@@ -608,7 +642,7 @@ setMethod(f = "validModification",
   annotation <- .load_annotation(annotation)
   annotation <- .subset_by_seqinfo(annotation, seqinfo)
   # get SequenceData
-  data <- .load_SequenceData(proto@dataType, bamfiles = bamfiles,
+  data <- .load_SequenceData(dataType(proto), bamfiles = bamfiles,
                              annotation = annotation, sequences = sequences,
                              seqinfo = seqinfo, args = settings(proto))
   .new_ModFromSequenceData(className, data, ...)

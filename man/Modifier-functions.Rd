@@ -8,6 +8,7 @@
 \alias{mainScore}
 \alias{modifierType}
 \alias{modType}
+\alias{dataType}
 \alias{sequenceData}
 \alias{sequences}
 \alias{settings}
@@ -20,6 +21,7 @@
 \alias{mainScore,Modifier-method}
 \alias{modifierType,Modifier-method}
 \alias{modType,Modifier-method}
+\alias{dataType,Modifier-method}
 \alias{names,Modifier-method}
 \alias{ranges,Modifier-method}
 \alias{replicates,Modifier-method}
@@ -37,6 +39,7 @@
 \alias{modifications,ModifierSet-method}
 \alias{modifierType,ModifierSet-method}
 \alias{modType,ModifierSet-method}
+\alias{dataType,ModifierSet-method}
 \alias{ranges,ModifierSet-method}
 \alias{replicates,ModifierSet-method}
 \alias{seqinfo,ModifierSet-method}
@@ -52,6 +55,8 @@ mainScore(x)
 modifierType(x)
 
 modType(x)
+
+dataType(x)
 
 sequenceData(x)
 
@@ -76,6 +81,8 @@ validModification(x)
 \S4method{modifierType}{Modifier}(x)
 
 \S4method{modType}{Modifier}(x)
+
+\S4method{dataType}{Modifier}(x)
 
 \S4method{names}{Modifier}(x)
 
@@ -110,6 +117,8 @@ validModification(x)
 \S4method{modifierType}{ModifierSet}(x)
 
 \S4method{modType}{ModifierSet}(x)
+
+\S4method{dataType}{ModifierSet}(x)
 
 \S4method{ranges}{ModifierSet}(x)
 

@@ -43,7 +43,17 @@ of \code{ranges(x)}}
 a \code{PileupSequenceData} object
 }
 \description{
-title
+The \code{PileupSequenceData} aggregates the pileup of called bases per 
+position.
+
+\code{PileupSequenceData} contains five columns per data file named using the
+following naming convention \code{pileup.condition.replicate}. The five
+columns are distinguished by additional identifiers \code{-}, \code{G},
+\code{A}, \code{T} and \code{C}.
+
+\code{aggregate} calculates the mean and sd for each nucleotide in the
+\code{control} and \code{treated} condition separatly. The results are then
+normalized to a rowSum of 1.
 }
 \examples{
 # Construct a End5SequenceData object

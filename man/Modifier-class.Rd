@@ -65,7 +65,7 @@ started by calling the \code{modify()} function.}
 All other arguments will be passed onto the \code{SequenceData} objects.}
 }
 \value{
-a \code{Modifier} object of type 'className'
+a \code{Modifier} object of type \code{className}
 }
 \description{
 The \code{Modifier} class is a virtual class, which provides the central 
@@ -85,7 +85,7 @@ recognize.
 
 \code{Modifier} objects are constructed centrally by calling 
 \code{Modifier()} with a \code{className} matching the specific class to be
-constructed. Thei will trigger the immediate analysis, if \code{findMod} is
+constructed. This will trigger the immediate analysis, if \code{findMod} is
 not set to \code{TRUE}.
 }
 \section{Slots}{
@@ -123,4 +123,35 @@ the aggregate data was constructed with the current arguments}
 \item{\code{modificationsValidForCurrentArguments}}{\code{TRUE} or \code{FALSE} 
 whether the modifications were found with the current arguments}
 }}
+
+\section{Creation}{
+ 
+\code{Modifier} objects can be created in two ways, either by providing a
+list of bamfiles or 
+\code{SequenceData}/\code{SequenceDataSet}/\code{SequenceDataList} objects, 
+which match the structure in \code{dataType()}.
+
+\code{dataType()} can be a \code{character} vector or a \code{list} of
+\code{character} vectors and depending on this the input files have to 
+follow this structure:
+
+\itemize{
+\item{a single \code{character}:} {a \code{SequenceData} is
+constructed/expected.}
+\item{a \code{character} vector:} {a \code{SequenceDataSet} is
+constructed/expected.}
+\item{a \code{list} of \code{character} vectors:} {a \code{SequenceDataList}
+is constructed/expected.}
+}
+
+The cases for a \code{SequenceData} or \code{SequenceDataSet} are rather
+obvious, since the input remains the same. The last case is special, since
+it is a hypothetical option in case bam files from to different methods 
+have to be combined to reliably detect a single modification (The elements of
+a \code{SequenceDataList} don't have to be created from the bamfiles). 
+
+For this example a \code{list} of \code{character} vectors is expected.
+Each element must be named according to the names of \code{dataType()} and 
+contain a \code{character} vector for creating a \code{SequenceData} object.
+}
 

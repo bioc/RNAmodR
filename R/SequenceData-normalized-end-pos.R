@@ -14,6 +14,11 @@ NULL
 #' transcript and to the overlapping reads. Per sample three separate columns
 #' are stored named \code{ends},\code{norm.tx} and \code{norm.ol}.
 #' 
+#' Both classes contain three columns per data file named using the
+#' following naming convention \code{(normend5/normend3).condition.replicate}.
+#' The three columns are distinguished by additional identifiers \code{ends},
+#' \code{norm.tx} and \code{norm.ol}.
+#' 
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
 #' and \code{treated} condition separatly. Similar to the stored results for 
 #' each of the two conditions six columns are returned (three for mean and sd 
@@ -195,7 +200,7 @@ setMethod("getData",
                            param = param,
                            type = "5prime",
                            args = args)
-            names(data) <- rep("norm.end5",length(data))
+            names(data) <- rep("normend5",length(data))
             data
           }
 )
@@ -215,7 +220,7 @@ setMethod("getData",
                            param = param,
                            type = "3prime",
                            args = args)
-            names(data) <- rep("norm.end3",length(data))
+            names(data) <- rep("normend3",length(data))
             data
           }
 )

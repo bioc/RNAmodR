@@ -23,9 +23,11 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' position. The \code{ProtectedEndSequenceData} class is specifically used
 #' for the RiboMethSeq method.
 #' 
+#' Both classes contain three columns per data file named using the
+#' following naming convention \code{protectedend.condition.replicate}.
+#' 
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
 #' and \code{treated} condition separatly.
-#' title
 #' 
 #' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
 #' \code{\link[=SequenceData-class]{SequenceData}} and

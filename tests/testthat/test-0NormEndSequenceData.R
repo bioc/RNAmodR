@@ -18,12 +18,12 @@ test_that("NormEndSequenceData:",{
   expect_length(colnames(ne5sd),2)
   expect_equal(lengths(colnames(ne5sd)),c(6,6))
   expect_equal(colnames(ne5sd)[[1]],colnames(ne5sd)[[2]])
-  expect_equal(colnames(ne5sd)[[1]],c("norm.end5.control.1.ends",
-                                      "norm.end5.control.1.norm.tx",
-                                      "norm.end5.control.1.norm.ol",
-                                      "norm.end5.treated.1.ends",
-                                      "norm.end5.treated.1.norm.tx",
-                                      "norm.end5.treated.1.norm.ol"))
+  expect_equal(colnames(ne5sd)[[1]],c("normend5.control.1.ends",
+                                      "normend5.control.1.norm.tx",
+                                      "normend5.control.1.norm.ol",
+                                      "normend5.treated.1.ends",
+                                      "normend5.treated.1.norm.tx",
+                                      "normend5.treated.1.norm.ol"))
   actual <- aggregate(ne5sd)
   expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")
@@ -74,12 +74,12 @@ test_that("NormEndSequenceData:",{
   expect_length(colnames(ne3sd),2)
   expect_equal(lengths(colnames(ne3sd)),c(6,6))
   expect_equal(colnames(ne3sd)[[1]],colnames(ne3sd)[[2]])
-  expect_equal(colnames(ne3sd)[[1]],c("norm.end3.control.1.ends",
-                                      "norm.end3.control.1.norm.tx",
-                                      "norm.end3.control.1.norm.ol",
-                                      "norm.end3.treated.1.ends",
-                                      "norm.end3.treated.1.norm.tx",
-                                      "norm.end3.treated.1.norm.ol"))
+  expect_equal(colnames(ne3sd)[[1]],c("normend3.control.1.ends",
+                                      "normend3.control.1.norm.tx",
+                                      "normend3.control.1.norm.ol",
+                                      "normend3.treated.1.ends",
+                                      "normend3.treated.1.norm.tx",
+                                      "normend3.treated.1.norm.ol"))
   actual <- aggregate(ne3sd)
   expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")

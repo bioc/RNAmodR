@@ -71,6 +71,11 @@ library(RNAmodR)
 
 ## SequenceData
 
+Each `SequenceData` object is created with a named character vector, which can
+be coerced to a `BamFileList`, or named `BamFileList`. The names must be either
+"treated" or "control" describing the condition the data file belongs to. 
+Multiple files can be given per condition and are used as replicates.
+
 ```{r example_files}
 RNAmodR.files <- RNAmodR.Data::RNAmodR.files
 annotation <- GFF3File(RNAmodR.files[["example1.gff3"]])
@@ -80,10 +85,10 @@ files <- c(Treated = RNAmodR.files[["example_wt_1.bam"]],
            Treated = RNAmodR.files[["example_wt_3.bam"]])
 ```
 
-Each `SequenceData` object is created with a named character vector, which can
-be coerced to a `BamFileList`, or named `BamFileList`. The names must be either
-"treated" or "control" describing the condition the data file b  elongs to. 
-Multiple files can be given per condition and are used as replicates.
+For `annotation` and `sequences` several input are accepted. `annotation` can
+be a `GRangeSList`, a `GFF3File` or a `TxDb` object. Internally, a `GFF3File`
+is converted to a `TxDb` object and a `GRangesList` is retrieved using 
+`exonsBy`.
 
 ```{r seqdata}
 seqdata <- End5SequenceData(files, annotation = annotation, 
@@ -91,9 +96,10 @@ seqdata <- End5SequenceData(files, annotation = annotation,
 seqdata
 ```
 
-Each `SequenceData` contains data per transcript alongside the annotation
-information and the sequence. The data stored within the `SequenceData` can be 
-accessed by several functions.
+`SequenceData` extends from a `CompressedSplitDataFrameList` and contains the
+data per transcript alongside the annotation information and the sequence. The
+additional data stored within the `SequenceData` can be accessed by several
+functions.
 
 ```{r seqdata_functions,include=FALSE}
 names(seqdata) # matches the transcript names as returned by a TxDb object
@@ -120,10 +126,12 @@ The data types and names of the columns are different for most of the
 the condition as defined in files input and the replicate. For more details
 please have a look at the man pages, e.g. `?End5SequenceData`.
 
-Upon subsetting of a `SequenceData` object, a `SequenceDataFrame` is returned
-independent of the class of `SequenceData`.
+`SequenceData` objects can be subset like a `CompressedSplitDataFrameList`. 
+Elements are returned as a `SequenceDataFrame` independent of the type of
+`SequenceData` used.
 
 ```{r seqdata2}
+seqdata[1]
 sdf <- seqdata[[1]]
 sdf
 ```
@@ -161,7 +169,7 @@ For more information on how to develop such a class and potentially a new
 corresponding `SequenceData` class, please have a look at the [vignette for
 creating a new analysis](RNAmodR.creation.html).
 
-Initially three `Modifier` classes are available:
+For now three `Modifier` classes are available:
 
  * `ModInosine`
  * `ModRiboMethSeq` from the `RNAmodR.RiboMethSeq` package
@@ -176,7 +184,8 @@ they are required to contain data for the same annotation and sequence data.
 and will start loading the necessary `SequenceData` objects from these. In
 addition they will start automatically start to calculate any additional scores 
 (aggregation) and then start to search for modifications, if the optional 
-argument `findMod` is not set to `FALSE`.
+argument `findMod` is not set to `FALSE`. For more informations on how to create
+a `Modifier` object, have a look at the man page.
 
 ```{r modifier1}
 annotation <- GFF3File(RNAmodR.files[["example_AAS.gff3"]])
@@ -185,8 +194,8 @@ mi <- ModInosine(files, annotation = annotation, sequences = sequences)
 ```
 
 (Hint: If you use an artificial genome, name the chromosomes chr1-chrN. It
-will make some things easier later on during visualization using the `Gviz`
-package)
+will make some things easier later on during visualization, which relies on the 
+`Gviz` package)
 
 Since the `Modifier` class wraps a `SequenceData` object the accessor to data
 contained withing work as well. What type of conditions the `Modifier` class 
@@ -201,6 +210,18 @@ seqinfo(mi)
 sequenceData(mi) # returns the SequenceData 
 ```
 
+### Settings
+
+The behavior of a `Modifier` class can be fine tuned, if the option is provided.
+The `settings()` function is a getter/setter for arguments used in the analysis.
+
+```{r settings}
+settings(mi)
+settings(mi,"minScore")
+settings(mi) <- list(minScore = 0.5)
+settings(mi,"minScore")
+```
+
 ## ModifierSet
 
 Each `Modifier` object is able to represent one sample set with multiple
@@ -210,7 +231,8 @@ class is implemented.
 The `ModifierSet` object is created from a named list of named character vectors
 or `BamFileList` objects. Each element in the list is a sample type with a
 corresponding name. Each entry in the character vector/`BamFileList` is a
-replicate.
+replicate (Alternatively a `ModifierSet` can also be created from a `list` of
+`Modifier` objects, if they are of the same type).
 
 ```{r modifierset1}
 files <- list("SampleSet1" = c(treated = RNAmodR.files[["example_wt_1.bam"]],
@@ -226,7 +248,7 @@ msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
 The creation of the `ModifierSet` will itself trigger the creation of a
 `Modifier` object each containing data from one sample set. This step is 
 parallelized using the functions from the `BiocParallel` package. If a 
-`Modifier` class itself uses the functionallity it is switched of unless
+`Modifier` class itself uses the functionallity, it is switched off unless
 `internalBP = TRUE` is set.
 
 ```{r modifierset2}
@@ -246,8 +268,8 @@ seqinfo(msi)
 # Analysis of detected modifications
 
 Found modifications can be retrieved from a `Modifier` or `ModifierSet` object
-via the `modifications()` function. The function returns a
-`GRanges`/`GRangesList` obejct, which contains the coordinates of the
+via the `modifications()` function. The function returns a `GRanges` and
+`GRangesList` object, respectively, which contains the coordinates of the
 modifications with respect to the genome used. For example if a transcript
 starts at position 100 and contains a modified nucleotide at position 50, the
 returned coordinate will 149.
@@ -258,7 +280,7 @@ mod[[1]]
 ```
 
 To retrieve the coordinates with respect to the transcript boundaries, use the
-optional argument `perTranscript = TRUE`. For this example this will yield the
+optional argument `perTranscript = TRUE`. In this example this will yield the
 same coordinates, since a custom genome was used for mapping of the example,
 which does not contain transcripts on the negative strand and per transcript
 chromosomes.
@@ -284,7 +306,7 @@ compareByCoord(msi,coord)
 
 The result can also by plotted using `plotCompareByCoord`, which accepts an
 optional argument `alias` to allow transcript ids to be converted to other 
-identifiers. For this is step it probably helpful to construct a `TxDb` object
+identifiers. For this step it is probably helpful to construct a `TxDb` object
 right at the beginning and use it for constructing the `Modifier`/`ModifierSet`
 object as the `annotation` argument.
 
@@ -348,19 +370,20 @@ The development of `RNAmodR` will continue. General ascpects of the analysis
 workflow will be addressed in the `RNAmodR` package, whereas additional 
 classes for new sequencing techniques targeted at detecting post-transcriptional
 will be wrapped in individual packages. This will allow general improvements
-to be propagate upstream, but not hinder individual requirements of each 
-detection strategy.
+to propagate upstream, but not hinder individual requirements of each detection
+strategy.
 
 For an example have a look at the `RNAmodR.RiboMethSeq` and 
 `RNAmodR.AlkAnilineSeq` packages.
 
 ![](RNAmodR.png)
 
-Feature, which might be added in the future:
+Features, which might be added in the future:
 
 - interaction with our packages for data aggregation (for example meta gene 
 aggregation)
 - interaction with our packages for downstream analysis for visualization
+- adapter for using machine learning models for modification detection
 
 We welcome contribution of any sort.
 

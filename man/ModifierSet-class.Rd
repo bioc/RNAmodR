@@ -59,7 +59,7 @@ should the creation of the \code{Modifier} objects be parallalized? (default:
 All other arguments will be passed onto the \code{Modifier} objects.}
 }
 \value{
-a \code{ModifierSet} object of type 'className'
+a \code{ModifierSet} object of type \code{className}
 }
 \description{
 The \code{ModifierSet} class allows multiple
@@ -71,5 +71,12 @@ the \code{ModifierSet} objects.
 
 The \code{ModifierSet} is a virtual class, which derives from the 
 \code{SimpleList} with the slot \code{elementType = "Modifier"}. As 
-the \code{Modifier} tt must be implemented for the specific analysis.
+the \code{Modifier} it must be implemented for the specific analysis.
 }
+\section{Creation}{
+
+The input files have to be provided as a \code{list} of elements. Each
+element in itself must be valid for the creation of \code{Modifier} object 
+(Have a look at the man page for more details) and must be named.
+}
+

@@ -47,8 +47,8 @@ already implemented, which are:
  * `NormEnd3SequenceData`
 
 If these cannot be reused, a new class can be implemented quite easily. First
-the class and a constructor has to defined. The only value to be provided is
-a default `minQuality` integer value.
+the class and a constructor has to defined. The only value, which has to be 
+provided, is a default `minQuality` integer value.
 
 ```{r}
 setClass(Class = "ExampleSequenceData",
@@ -61,9 +61,9 @@ ExampleSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 }
 ```
 
-Second, the `.getData` function has to be implemented. This is used to load
-the data from a bam file and must return a named list of `IntegerList`,
-`NumericList` or `DataFrame` per file.
+Second, the `getData` function has to be implemented. This is used to load
+the data from a bam file and must return a named list `IntegerList`,
+`NumericList` or `CompressedSplitDataFrameList` per file.
 
 ```{r}
 setMethod("getData",
@@ -98,7 +98,8 @@ implemented. Three variable have to be set. `mod` must be a single element from
 the `Modstrings::shortName(Modstrings::ModRNAString())`. `score` is the default
 score, which is used for several function. A column with this name should be 
 returned from the `aggregate` function. `dataType` defines the `SequenceData`
-class to be used.
+class to be used. `dataType` can contain multiple names of a `SequenceData` 
+class, which are then combined to form a `SequenceDataSet`. 
 
 ```{r}
 setClass("ModExample",
@@ -110,10 +111,16 @@ ModExample <- function(x, annotation, sequences, seqinfo, ...){
   RNAmodR:::Modifier("ModExample", x = x, annotation = annotation,
                      sequences = sequences, seqinfo = seqinfo, ...)
 }
-
 ```
 
-The `settings<-` function can be used to save specifc settings.
+`dataType` can also be a `list` of `character` vectors, which leads then to the
+creation of `SequenceDataList`. However, for now this is a hypothetical case and
+should only be used, if the detection of a modification requires bam files from
+two or more different methods to be used to detect one modification.
+
+The `settings<-` function can be amended to save specifc settings (
+`.norm_example_args` must be defined seperatly to normalize input arguments in
+any way one sees fit).
 
 ```{r}
 setReplaceMethod(f = "settings", 
@@ -124,12 +131,11 @@ setReplaceMethod(f = "settings",
                    x@arguments[names(value)] <- unname(.norm_example_args(value))
                    x
                  })
-
 ```
 
 The `aggregateData` function is used to take the aggregated data from the 
-`SequenceData` object and is used to calculate the specific scores, which are
-then stored in the `aggregate` slot.
+`SequenceData` object and to calculate the specific scores, which are then 
+stored in the `aggregate` slot.
 
 ```{r}
 setMethod(f = "aggregateData", 
@@ -139,20 +145,19 @@ setMethod(f = "aggregateData",
               # Some data with element per transcript
             }
 )
-
 ```
 
-The `modify` function takes the aggregate data and searches for modifications,
-which are then returned as a GRanges object.
+The `findMod` function takes the aggregate data and searches for modifications,
+which are then returned as a GRanges object and stored in the `modifications`
+slot.
 
 ```{r}
-setMethod("modify",
+setMethod("findMod",
           signature = c(x = "ModExample"),
           function(x, force = FALSE){
             # an element per modification found.
           }
 )
-
 ```
 
 ## A new `ModifierSet` class
@@ -218,13 +223,17 @@ setMethod(
 )
 ```
 
+If unsure, how to modify these functions, have a look a the code in the 
+`Modifier-Inosine-viz.R` file of this package.
+
 # Summary
 
-For a more detailed example have a look at the `ModInosine` class source code.
+As suggested directly above, for a more detailed example have a look at the 
+`ModInosine` class source code found in the `Modifier-Inosine-class.R` and
+`Modifier-Inosine-viz.R` files of this package.
 
 # Sessioninfo
 
 ```{r}
 sessioninfo::session_info()
 ```
-

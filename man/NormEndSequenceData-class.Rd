@@ -60,6 +60,11 @@ transcript. In addition the counts are then normalized to the length of the
 transcript and to the overlapping reads. Per sample three separate columns
 are stored named \code{ends},\code{norm.tx} and \code{norm.ol}.
 
+Both classes contain three columns per data file named using the
+following naming convention \code{(normend5/normend3).condition.replicate}.
+The three columns are distinguished by additional identifiers \code{ends},
+\code{norm.tx} and \code{norm.ol}.
+
 \code{aggregate} calculates the mean and sd for samples in the \code{control}
 and \code{treated} condition separatly. Similar to the stored results for 
 each of the two conditions six columns are returned (three for mean and sd 

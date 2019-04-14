@@ -13,6 +13,9 @@ NULL
 #' the first aggregate either the 5'-end or 3'-end, the \code{EndSequenceData}
 #' aggregates both.
 #' 
+#' All three classes contain one column per data file named using the following
+#' naming convention \code{(end5/end3/end).condition.replicate}.
+#' 
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
 #' and \code{treated} condition separatly.
 #' 

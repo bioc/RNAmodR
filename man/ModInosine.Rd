@@ -50,7 +50,7 @@ a \code{ModInosine} or \code{ModSetInosine} object
 \description{
 Inosine can be detected in RNA-Seq data by the conversion of A positions to 
 G. This conversion is detected by \code{ModInosine} and used to search for 
-Inosine positions.
+Inosine positions. \code{dataType} is \code{"PileupSequenceData"}.
 
 Only samples named \code{treated} are used for this analysis, since the
 A to G conversion is common feature among the reverse transcriptases usually

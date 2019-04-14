@@ -12,6 +12,9 @@ NULL
 #' \code{\link[=SequenceData-class]{SequenceData}} to contain and aggregate the
 #' coverage of reads per position along the transcripts.
 #' 
+#' \code{CoverageSequenceData} contains one column per data file named using the
+#' following naming convention \code{coverage.condition.replicate}.
+#' 
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
 #' and \code{treated} condition separatly.
 #' 

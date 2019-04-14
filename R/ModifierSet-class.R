@@ -17,7 +17,13 @@ NULL
 #' 
 #' The \code{ModifierSet} is a virtual class, which derives from the 
 #' \code{SimpleList} with the slot \code{elementType = "Modifier"}. As 
-#' the \code{Modifier} tt must be implemented for the specific analysis.
+#' the \code{Modifier} it must be implemented for the specific analysis.
+#' 
+#' 
+#' @section Creation:
+#' The input files have to be provided as a \code{list} of elements. Each
+#' element in itself must be valid for the creation of \code{Modifier} object 
+#' (Have a look at the man page for more details) and must be named.
 #' 
 #' @param className The name of the class which should be constructed.
 #' @param x the input which can be of the following types
@@ -49,7 +55,7 @@ NULL
 #' }
 #' All other arguments will be passed onto the \code{Modifier} objects.
 #' 
-#' @return a \code{ModifierSet} object of type 'className'
+#' @return a \code{ModifierSet} object of type \code{className}
 NULL
 
 #' @rdname ModifierSet-class
@@ -418,6 +424,12 @@ setMethod(f = "modifierType",
 setMethod(f = "modType", 
           signature = signature(x = "ModifierSet"),
           definition = function(x) modType(new(elementType(x)))
+)
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "dataType", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x){dataType(x[[1]])}
 )
 #' @rdname Modifier-functions
 #' @export

@@ -72,6 +72,12 @@ setGeneric(
   name = "modType",
   def = function(x) standardGeneric("modType")
 )
+#' @rdname Modifier-functions
+#' @export
+setGeneric( 
+  name = "dataType",
+  def = function(x) standardGeneric("dataType")
+)
 #' @rdname SequenceData-functions
 #' @export
 setGeneric( 
