@@ -13,9 +13,9 @@ With the increased availability of high throughput sequencing, these classical
 methods were adapted to high throughput methods allowing more RNA molecules to
 be accessed at the same time. With these advances post-transcriptional
 modifications were also detected on mRNA. Among these high throughput techniques
-are for example Pseudo-Seq [[@Carlile.2014]](#References), RiboMethSeq
-[[@Birkedal.2015]](#References) and AlkAnilineSeq
-[[@Marchand.2018]](#References) each able to detect a specific type of
+are for example Pseudo-Seq ([Carlile et al. 2014](#Literature)), RiboMethSeq
+([Birkedal et al. 2015](#Literature)) and AlkAnilineSeq 
+([Marchand et al. 2018](#Literature)) each able to detect a specific type of 
 modification from footprints in RNA-Seq data prepared with the selected methods.
 
 Since similar pattern can be observed from some of these techniques, overlaps of
@@ -57,13 +57,19 @@ modifications.
 
 For further details have a look at the vignette.
 
+
 # Literature
 
- - Birkedal, Ulf, Mikkel Christensen-Dalsgaard, Nicolai Krogh, Radhakrishnan
- Sabarinathan, Jan Gorodkin, and Henrik Nielsen. 2015. “Profiling of Ribose
- Methylations in Rna by High-Throughput Sequencing.” Angewandte Chemie
- (International Ed. In English) 54 (2): 451–55.
- https://doi.org/10.1002/anie.201408362.
+- Carlile, Thomas M., Maria F. Rojas-Duran, Boris Zinshteyn, Hakyung Shin,
+Kristen M. Bartoli, and Wendy V. Gilbert. 2014. “Pseudouridine Profiling Reveals
+Regulated mRNA Pseudouridylation in Yeast and Human Cells.” Nature 515 (7525):
+143–46.
+
+- Birkedal, Ulf, Mikkel Christensen-Dalsgaard, Nicolai Krogh, Radhakrishnan
+Sabarinathan, Jan Gorodkin, and Henrik Nielsen. 2015. “Profiling of Ribose
+Methylations in Rna by High-Throughput Sequencing.” Angewandte Chemie
+(International Ed. In English) 54 (2): 451–55.
+https://doi.org/10.1002/anie.201408362.
 
 - Marchand, Virginie, Lilia Ayadi, Felix G. M. Ernst, Jasmin Hertler, Valérie
 Bourguignon-Igel, Adeline Galvanin, Annika Kotter, Mark Helm, Denis L. J.
