@@ -58,10 +58,7 @@ NULL
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]]) 
   data <- getAggregateData(x)
-  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
-  data <- data[match(names, names(data))]
-  coord <- coord[match(names, names(coord))]
-  .perform_subset(data, coord, args[["flanking"]], args[["perTranscript"]])
+  .subset_SplitDataFrameList_by_GRangesList(data, coord, ...)
 }
 
 # subsetting ModifierSet -------------------------------------------------------
@@ -130,8 +127,39 @@ setMethod("subsetByCoord",
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
   data <- getAggregateData(x)
-  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
-  data <- data[match(names, names(data))]
-  coord <- coord[match(names, names(coord))]
-  .perform_label(data, coord)
+  .label_SplitDataFrameList_by_GRangesList(data, coord, ...)
 }
+
+
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "Modifier", coord = "GRanges"),
+          function(x, coord, ...){
+            .label_Modifier_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "Modifier", coord = "GRangesList"),
+          function(x, coord, ...){
+            .label_Modifier_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "ModifierSet", coord = "GRanges"),
+          function(x, coord, ...){
+            .label_Modifier_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "ModifierSet", coord = "GRangesList"),
+          function(x, coord, ...){
+            .label_Modifier_by_GRangesList(x, coord, ...)
+          }
+)

@@ -4,19 +4,34 @@
 \docType{methods}
 \name{subsetByCoord}
 \alias{subsetByCoord}
+\alias{labelByCoord}
 \alias{subsetByCoord,Modifier,GRanges-method}
 \alias{subsetByCoord,Modifier,GRangesList-method}
 \alias{subsetByCoord,ModifierSet,GRanges-method}
 \alias{subsetByCoord,ModifierSet,GRangesList-method}
+\alias{labelByCoord,Modifier,GRanges-method}
+\alias{labelByCoord,Modifier,GRangesList-method}
+\alias{labelByCoord,ModifierSet,GRanges-method}
+\alias{labelByCoord,ModifierSet,GRangesList-method}
+\alias{subsetByCoord,SplitDataFrameList,GRanges-method}
 \alias{subsetByCoord,SequenceData,GRanges-method}
 \alias{subsetByCoord,SequenceData,GRangesList-method}
 \alias{subsetByCoord,SequenceDataSet,GRanges-method}
 \alias{subsetByCoord,SequenceDataSet,GRangesList-method}
 \alias{subsetByCoord,SequenceDataList,GRanges-method}
 \alias{subsetByCoord,SequenceDataList,GRangesList-method}
+\alias{labelByCoord,SplitDataFrameList,GRanges-method}
+\alias{labelByCoord,SequenceData,GRanges-method}
+\alias{labelByCoord,SequenceData,GRangesList-method}
+\alias{labelByCoord,SequenceDataSet,GRanges-method}
+\alias{labelByCoord,SequenceDataSet,GRangesList-method}
+\alias{labelByCoord,SequenceDataList,GRanges-method}
+\alias{labelByCoord,SequenceDataList,GRangesList-method}
 \title{Subsetting data from a \code{Modifier} or \code{ModifierSet} object.}
 \usage{
 subsetByCoord(x, coord, ...)
+
+labelByCoord(x, coord, ...)
 
 \S4method{subsetByCoord}{Modifier,GRanges}(x, coord, ...)
 
@@ -25,6 +40,16 @@ subsetByCoord(x, coord, ...)
 \S4method{subsetByCoord}{ModifierSet,GRanges}(x, coord, ...)
 
 \S4method{subsetByCoord}{ModifierSet,GRangesList}(x, coord, ...)
+
+\S4method{labelByCoord}{Modifier,GRanges}(x, coord, ...)
+
+\S4method{labelByCoord}{Modifier,GRangesList}(x, coord, ...)
+
+\S4method{labelByCoord}{ModifierSet,GRanges}(x, coord, ...)
+
+\S4method{labelByCoord}{ModifierSet,GRangesList}(x, coord, ...)
+
+\S4method{subsetByCoord}{SplitDataFrameList,GRanges}(x, coord, ...)
 
 \S4method{subsetByCoord}{SequenceData,GRanges}(x, coord, ...)
 
@@ -37,6 +62,20 @@ subsetByCoord(x, coord, ...)
 \S4method{subsetByCoord}{SequenceDataList,GRanges}(x, coord, ...)
 
 \S4method{subsetByCoord}{SequenceDataList,GRangesList}(x, coord, ...)
+
+\S4method{labelByCoord}{SplitDataFrameList,GRanges}(x, coord, ...)
+
+\S4method{labelByCoord}{SequenceData,GRanges}(x, coord, ...)
+
+\S4method{labelByCoord}{SequenceData,GRangesList}(x, coord, ...)
+
+\S4method{labelByCoord}{SequenceDataSet,GRanges}(x, coord, ...)
+
+\S4method{labelByCoord}{SequenceDataSet,GRangesList}(x, coord, ...)
+
+\S4method{labelByCoord}{SequenceDataList,GRanges}(x, coord, ...)
+
+\S4method{labelByCoord}{SequenceDataList,GRangesList}(x, coord, ...)
 }
 \arguments{
 \item{x}{a \code{Modifier} or \code{ModifierSet} object.}

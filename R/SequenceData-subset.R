@@ -68,6 +68,14 @@ NULL
   args
 }
 
+.norm_data <- function(data){
+  rn <- rownames(data)
+  if(any(lengths(rn) != lengths(data))){
+    stop("rownames() of data has to be set.")
+  }
+  data
+}
+
 .norm_coord <- function(coord, type){
   if(is(coord,"GRanges")){
     if(is.null(coord$Parent)){
@@ -82,18 +90,22 @@ NULL
     stop("Something went wrong.")
   }
   if(unique(unlist(width(ranges(coord)))) != 1L){
-    stop("Elements of type 'RNAMOD' with a width != 1L are not supported.",
+    stop("Elements with a width != 1L are not supported.",
          call. = "FALSE")
   }
-  if(any(!is.na(type)) && 
-     "type" %in% colnames(S4Vectors::mcols(coord@unlistData))){
-    f <- IRanges::LogicalList(lapply(coord,function(c){c$mod %in% type}))
-    coord <- coord[f]
-    coord <- coord[vapply(coord,function(c){length(c) > 0L},logical(1))]
-    if(length(coord) == 0L){
-      stop("No modifications of type '",paste(type,collapse = "','"),"' ",
-           "found in 'coord'.",
-           call. = FALSE)
+  if("mod" %in% colnames(S4Vectors::mcols(coord@unlistData))){
+    unlisted_coord <- unlist(coord)
+    unlisted_coord <- unlisted_coord[!is.na(unlisted_coord$mod)]
+    coord <- split(unlisted_coord,unlisted_coord$Parent)
+    if(any(!is.na(type))){
+      f <- IRanges::LogicalList(lapply(coord,function(c){c$mod %in% type}))
+      coord <- coord[f]
+      coord <- coord[vapply(coord,function(c){length(c) > 0L},logical(1))]
+      if(length(coord) == 0L){
+        stop("No modifications of type '",paste(type,collapse = "','"),"' ",
+             "found in 'coord'.",
+             call. = FALSE)
+      }
     }
   }
   coord
@@ -160,7 +172,7 @@ NULL
   .check_for_invalid_positions(data,coord)
   # construct flanking vector
   flanking <- seq.int(from = -flanking,to = flanking, by = 1L)
-  f <- IRanges::IntegerList(lapply(start(ranges(coord)),
+  f <- IRanges::CharacterList(lapply(start(ranges(coord)),
                                    function(i){
                                      unique(unlist(lapply(i,
                                                           function(j){
@@ -171,9 +183,9 @@ NULL
   if(length(flanking) > 1L){
     f <- f[f > 0L & f <= lengths(data)]
   }
-  ans <- data[f]
+  ff <- IRanges::LogicalList(mapply(function(r,z){r %in% z},rownames(data),f))
+  ans <- data[ff]
   if(perTranscript){
-    f <- as(f,"CharacterList")
     pos <- IRanges::CharacterList(mapply(
       function(d,i){
         BiocGenerics::which(rownames(d) %in% i)
@@ -188,8 +200,19 @@ NULL
 
 # subsetting SequenceData ------------------------------------------------------
 
+.subset_SplitDataFrameList_by_GRangesList <- function(data, coord, ...){
+  args <- .norm_subset_args(list(...), NULL)
+  data <- .norm_data(data)
+  coord <- .norm_coord(coord, NA)
+  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
+  data <- data[match(names, names(data))]
+  coord <- coord[match(names, names(coord))]
+  .perform_subset(data, coord, args[["flanking"]], args[["perTranscript"]])
+}
+
 .subset_SequenceData_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...), x)
+  data <- .norm_data(data)
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
   if(args[["rawData"]]){
@@ -233,6 +256,14 @@ NULL
   ans
 }
 
+#' @rdname subsetByCoord
+#' @export
+setMethod("subsetByCoord",
+          signature = c(x = "SplitDataFrameList", coord = "GRanges"),
+          function(x, coord, ...){
+            .subset_SplitDataFrameList_by_GRangesList(x, coord, ...)
+          }
+)
 #' @rdname subsetByCoord
 #' @export
 setMethod("subsetByCoord",
@@ -286,27 +317,30 @@ setMethod("subsetByCoord",
 # This is used for ROC and shares functionality with subsetting
 .perform_label <- function(data, coord){
   .check_for_invalid_positions(data,coord)
-  # add positions as rownames
-  rownames(data@unlistData) <- unlist(lapply(lengths(data),seq_len),
-                                      use.names = FALSE)
   # 
   lengths <- lengths(data)
   positions <- start(ranges(coord))
-  labels <- IRanges::LogicalList(lapply(lengths,function(l){rep(FALSE,l)}))
-  labels <- IRanges::LogicalList(mapply(
-    function(l,p){
-      l[p] <- TRUE
-      l
-    },
-    labels,
-    positions,
-    SIMPLIFY = FALSE))
+  labels <- IRanges::LogicalList(mapply("%in%",
+                                        rownames(data),
+                                        positions,
+                                        SIMPLIFY = FALSE))
   data@unlistData$labels <- unlist(labels)
   return(data)
 }
 
+.label_SplitDataFrameList_by_GRangesList <- function(data, coord, ...){
+  args <- .norm_subset_args(list(...), NULL)
+  data <- .norm_data(data)
+  coord <- .norm_coord(coord, NA)
+  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
+  data <- data[match(names, names(data))]
+  coord <- coord[match(names, names(coord))]
+  .perform_label(data, coord)
+}
+
 .label_SequenceData_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...), x)
+  data <- .norm_data(data)
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
   if(args[["rawData"]]){
@@ -358,3 +392,60 @@ setMethod("subsetByCoord",
            })
   .keep_one_labels_column(ans)
 }
+
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "SplitDataFrameList", coord = "GRanges"),
+          function(x, coord, ...){
+            .label_SplitDataFrameList_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "SequenceData", coord = "GRanges"),
+          function(x, coord, ...){
+            .label_SequenceData_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "SequenceData", coord = "GRangesList"),
+          function(x, coord, ...){
+            .label_SequenceData_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "SequenceDataSet", coord = "GRanges"),
+          function(x, coord, ...){
+            .label_SequenceDataSet_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "SequenceDataSet", coord = "GRangesList"),
+          function(x, coord, ...){
+            .label_SequenceDataSet_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "SequenceDataList", coord = "GRanges"),
+          function(x, coord, ...){
+            .label_SequenceDataList_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("labelByCoord",
+          signature = c(x = "SequenceDataList", coord = "GRangesList"),
+          function(x, coord, ...){
+            .label_SequenceDataList_by_GRangesList(x, coord, ...)
+          }
+)

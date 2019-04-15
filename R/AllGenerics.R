@@ -180,6 +180,14 @@ setGeneric(
   def = function(x, coord, ...)
     standardGeneric("subsetByCoord")
 )
+#' @rdname subsetByCoord
+#' @export
+setGeneric( 
+  name = "labelByCoord",
+  signature = c("x", "coord"),
+  def = function(x, coord, ...)
+    standardGeneric("labelByCoord")
+)
 #' @rdname visualizeData
 #' @export
 setGeneric(

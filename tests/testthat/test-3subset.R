@@ -51,7 +51,7 @@ test_that("Subsetting SequenceData:",{
   coord2 <- coord
   width(coord2) <- 2
   expect_error(RNAmodR:::.norm_coord(coord2,NA),
-               "Elements of type 'RNAMOD' with a width != 1L are not supported")
+               "Elements with a width != 1L are not supported")
   coord2 <- coord
   coord2$Parent <- c("a","b","c","d","e","f")
   actual <- RNAmodR:::.norm_coord(coord,NA)
