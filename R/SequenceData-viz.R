@@ -389,7 +389,7 @@ setMethod(
     if(showAnnotation){
       atm <- .get_viz_annotation_track(x,args)
     }
-    if(showAnnotation){
+    if(showSequence){
       st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome, args)
     }
     dt <- getDataTrack(x, name = name, ...)
