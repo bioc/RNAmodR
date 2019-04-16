@@ -400,15 +400,18 @@ setGeneric(name = "pileupToCoverage",
            def = function(x) standardGeneric("pileupToCoverage"))
 
 .aggregate_pile_up_to_coverage <- function(data){
-  df <- unlist(data)
-  replicates <- unique(data@replicate)
-  ans  <- IRanges::IntegerList(lapply(seq_along(replicates),
-                                      function(i){
-                                        rowSums(as.data.frame(df[,data@replicate == i]))
-                                      }))
+  unlisted_data <- unlist(data)
+  replicates <- unique(replicates(data))
+  ans  <- IRanges::IntegerList(
+    lapply(seq_along(replicates),
+           function(i){
+             rowSums(as.data.frame(unlisted_data[,replicates(data) == i]))
+           }))
   names(ans) <- paste0("replicate.",replicates)
   ans <- do.call(S4Vectors::DataFrame,ans)
-  relist(ans, data@partitioning)
+  ans <- relist(ans, data)
+  rownames(ans) <- rownames(data)
+  ans
 }
 
 #' @rdname PileupSequenceData-class
