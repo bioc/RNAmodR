@@ -26,13 +26,15 @@ NULL
   }
   if(!is.null(input[["type"]])){
     type <- input[["type"]]
-    if(!is.character(type) || width(type) == 0L){
-      stop("'type' must be a character with a width > 0L.",
-           call. = FALSE)
-    }
-    if(!(type %in% Modstrings::shortName(Modstrings::ModRNAString()))){
-      stop("'type' must be one or more elements of shortName(ModRNAString()).",
-           call. = FALSE)
+    if(!is.na(type)){
+      if(!is.character(type) || width(type) == 0L){
+        stop("'type' must be a character with a width > 0L.",
+             call. = FALSE)
+      }
+      if(!(type %in% Modstrings::shortName(Modstrings::ModRNAString()))){
+        stop("'type' must be one or more elements of shortName(ModRNAString()).",
+             call. = FALSE)
+      }
     }
   }
   if(!is.null(input[["flanking"]])){
@@ -81,9 +83,8 @@ NULL
     if(is.null(coord$Parent)){
       stop("Parent column must be present.", call. = FALSE)
     }
-    coord <- split(coord, coord$Parent)
   } else if(is(coord,"GRangesList")){
-    coord <- unname(unlist(coord))
+    coord <- unlist(coord, use.names = FALSE)
     coord <- coord[!duplicated(coord)]
     return(.norm_coord(coord,type))
   } else {
@@ -93,14 +94,10 @@ NULL
     stop("Elements with a width != 1L are not supported.",
          call. = "FALSE")
   }
-  if("mod" %in% colnames(S4Vectors::mcols(coord@unlistData))){
-    unlisted_coord <- unlist(coord)
-    unlisted_coord <- unlisted_coord[!is.na(unlisted_coord$mod)]
-    coord <- split(unlisted_coord,unlisted_coord$Parent)
+  if("mod" %in% colnames(S4Vectors::mcols(coord))){
     if(any(!is.na(type))){
-      f <- IRanges::LogicalList(lapply(coord,function(c){c$mod %in% type}))
-      coord <- coord[f]
-      coord <- coord[vapply(coord,function(c){length(c) > 0L},logical(1))]
+      coord <- coord[!is.na(coord$mod)]
+      coord <- coord[coord$mod %in% type]
       if(length(coord) == 0L){
         stop("No modifications of type '",paste(type,collapse = "','"),"' ",
              "found in 'coord'.",
@@ -108,6 +105,7 @@ NULL
       }
     }
   }
+  coord <- split(coord, factor(coord$Parent, levels = unique(coord$Parent)))
   coord
 }
 
@@ -137,12 +135,13 @@ NULL
   names
 }
 
-.check_for_invalid_positions <- function(data,coord){
+.check_for_invalid_positions <- function(data, coord){
   lengths <- lengths(data)
   positions <- start(ranges(coord))
+  f_names <- names(lengths) %in% names(positions)
   f <- IRanges::LogicalList(mapply(function(i,j){i >= j},
                                    positions,
-                                   lengths,
+                                   lengths[f_names],
                                    SIMPLIFY = FALSE))
   if(!any(lengths(BiocGenerics::which(f)) > 0L )){
     return(NULL)
@@ -169,17 +168,18 @@ NULL
   if(!all(names(data) == names(coord))){
     stop("Length and/or order of data and coord do not match.")
   }
-  .check_for_invalid_positions(data,coord)
+  .check_for_invalid_positions(data, coord)
   # construct flanking vector
-  flanking <- seq.int(from = -flanking,to = flanking, by = 1L)
-  f <- IRanges::CharacterList(lapply(start(ranges(coord)),
-                                   function(i){
-                                     unique(unlist(lapply(i,
-                                                          function(j){
-                                                            j + flanking
-                                                          })
-                                     ))
-                                   }))
+  flanking <- seq.int(from = -flanking, to = flanking, by = 1L)
+  f <- IRanges::CharacterList(
+    lapply(start(ranges(coord)),
+           function(i){
+             unique(unlist(lapply(i,
+                                  function(j){
+                                    j + flanking
+                                  })
+             ))
+           }))
   if(length(flanking) > 1L){
     f <- f[f > 0L & f <= lengths(data)]
   }
@@ -212,7 +212,6 @@ NULL
 
 .subset_SequenceData_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...), x)
-  data <- .norm_data(data)
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
   if(args[["rawData"]]){
@@ -220,6 +219,7 @@ NULL
   } else {
     data <- .norm_aggregate_data(aggregate(x))
   }
+  data <- .norm_data(data)
   names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
   data <- data[match(names, names(data))]
   coord <- coord[match(names, names(coord))]
@@ -313,34 +313,37 @@ setMethod("subsetByCoord",
           }
 )
 
-################################################################################
-# This is used for ROC and shares functionality with subsetting
+
+# labeling ---------------------------------------------------------------------
+
 .perform_label <- function(data, coord){
   .check_for_invalid_positions(data,coord)
-  # 
-  lengths <- lengths(data)
   positions <- start(ranges(coord))
-  labels <- IRanges::LogicalList(mapply("%in%",
-                                        rownames(data),
-                                        positions,
-                                        SIMPLIFY = FALSE))
-  data@unlistData$labels <- unlist(labels)
-  return(data)
+  rn_d <- rownames(data)
+  f_rn <- names(rn_d) %in% names(positions)
+  f_p <- names(positions) %in% names(rn_d)[f_rn]
+  if(!all(names(rn_d)[f_rn] == names(positions)[f_p])){
+    stop("Length and/or order of data and coord do not match.")
+  }
+  labels <- IRanges::LogicalList(lapply(lengths(data),
+                                        function(l){rep(FALSE,l)}))
+  labels[f_rn] <- IRanges::LogicalList(mapply("%in%",
+                                              rn_d[f_rn],
+                                              positions[f_p],
+                                              SIMPLIFY = FALSE))
+  unlisted_data <- unlist(data, use.names = FALSE)
+  unlisted_data$labels <- unlist(labels)
+  return(relist(unlisted_data,data))
 }
 
 .label_SplitDataFrameList_by_GRangesList <- function(data, coord, ...){
-  args <- .norm_subset_args(list(...), NULL)
   data <- .norm_data(data)
   coord <- .norm_coord(coord, NA)
-  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
-  data <- data[match(names, names(data))]
-  coord <- coord[match(names, names(coord))]
   .perform_label(data, coord)
 }
 
 .label_SequenceData_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...), x)
-  data <- .norm_data(data)
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
   if(args[["rawData"]]){
@@ -348,9 +351,7 @@ setMethod("subsetByCoord",
   } else {
     data <- aggregate(x)
   }
-  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
-  data <- data[match(names, names(data))]
-  coord <- coord[match(names, names(coord))]
+  data <- .norm_data(data)
   .perform_label(data, coord)
 }
 

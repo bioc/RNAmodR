@@ -109,8 +109,16 @@ with elments per transcript.}
 }
 }
 \description{
-With \code{subsetByCoord} data from a \code{Modifier} or \code{ModifierSet} 
-object will be subset to position as defined in \code{coord}.
+With \code{subsetByCoord} data from a \code{Modifier} or \code{ModifierSet}
+object will be subset to position as defined in \code{coord}. If \code{coord}
+contains a column \code{mod} and \code{x} of type \coord{Modifier}, it will
+be filtered to identifiers matching the
+\code{\link[=Modifier-functions]{modType}} of \coord{x}. To disable remove
+the column \code{mod} from \code{coord} or set \code{type = NA}
+
+\code{labelByCoord} functions the same. It will return a
+\code{SplitDataFrameList}, which matches the dimensions of the aggregated
+data plus the \code{labels} column.
 }
 \examples{
 data(msi,package="RNAmodR")
