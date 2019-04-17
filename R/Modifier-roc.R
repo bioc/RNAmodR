@@ -203,7 +203,13 @@ NULL
 
 .get_prediction_data_Modifier <- function(x, coord, score){
   data <- .label_Modifier_by_GRangesList(x, coord)
-  colnames <- colnames(data@unlistData)
+  unlisted_data <- unlist(data)
+  # exempt character values
+  f_non_character <- vapply(unlisted_data,
+                            function(x) {
+                              !is.character(x)
+                            },logical(1))
+  colnames <- colnames(unlisted_data)[f_non_character]
   if(!is.null(score)){
     if(!all(score %in% colnames)){
       stop("Score identifier '",
