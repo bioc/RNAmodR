@@ -65,6 +65,9 @@ NULL
   if(missing(input)){
     input <- list()
   }
+  if(!is.list(input)){
+    stop("'prediction.args' must be a list.")
+  }
   if(length(input) > 0L && 
      (any(is.null(names(input))) || any(names(input) == ""))){
     warning("Unnamed list for 'prediction.args'. All values will be dropped.")
@@ -78,6 +81,9 @@ NULL
 .norm_performance_args <- function(input, x){
   if(missing(input)){
     input <- list()
+  }
+  if(!is.list(input)){
+    stop("'performance.args' must be a list.")
   }
   if(length(input) > 0L && 
      (any(is.null(names(input))) || any(names(input) == ""))){
@@ -132,6 +138,9 @@ NULL
 .norm_plot_args <- function(input){
   if(missing(input)){
     input <- list()
+  }
+  if(!is.list(input)){
+    stop("'plot.args' must be a list.")
   }
   if(length(input) > 0L && 
      (any(is.null(names(input))) || any(names(input) == ""))){
