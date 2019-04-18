@@ -322,6 +322,8 @@ setMethod("subsetByCoord",
   rn_d <- rownames(data)
   f_rn <- match(names(positions), names(rn_d))
   f_p <- match(names(rn_d)[f_rn], names(positions))
+  f_rn <- f_rn[!is.na(f_rn)]
+  f_p <- f_p[!is.na(f_p)]
   if(!all(names(rn_d)[f_rn] == names(positions)[f_p])){
     stop("Length and/or order of data and coord do not match.")
   }
@@ -333,7 +335,7 @@ setMethod("subsetByCoord",
                                               SIMPLIFY = FALSE))
   unlisted_data <- unlist(data, use.names = FALSE)
   unlisted_data$labels <- unlist(labels, use.names = FALSE)
-  return(relist(unlisted_data,data))
+  return(relist(unlisted_data, data))
 }
 
 .label_SplitDataFrameList_by_GRangesList <- function(data, coord, ...){

@@ -154,7 +154,7 @@ slot.
 ```{r}
 setMethod("findMod",
           signature = c(x = "ModExample"),
-          function(x, force = FALSE){
+          function(x){
             # an element per modification found.
           }
 )

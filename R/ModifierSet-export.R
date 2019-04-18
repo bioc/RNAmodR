@@ -258,6 +258,7 @@ setMethod("export.wig","SequenceDataSet",
                 ranges = ir,
                 strand = strand,
                 rowData[,colnames(rowData) != "positions"])
+  assayList <- list()
   ans <- SummarizedExperiment(assayList, rowRanges = gr)
   return(ans)
 }

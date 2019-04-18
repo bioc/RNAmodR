@@ -43,8 +43,6 @@ see also the man pages for the functions mentioned below.}
 
 \item{coord, name, from, to, type, window.size, ...}{See 
 \code{\link{visualizeData}}}
-
-\item{force}{See \code{\link{aggregate}}}
 }
 \value{
 \itemize{

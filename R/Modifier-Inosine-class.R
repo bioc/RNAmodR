@@ -103,7 +103,6 @@ NULL
 #' \code{\link[RNAmodR:ModifierSet-class]{ModifierSet}} object. For more details
 #' see also the man pages for the functions mentioned below.
 #' @param value See \code{\link[RNAmodR:Modifier-functions]{settings}}
-#' @param force See \code{\link{aggregate}}
 #' @param coord,name,from,to,type,window.size,... See 
 #' \code{\link{visualizeData}}
 #' 
