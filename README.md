@@ -60,19 +60,19 @@ For further details have a look at the vignette.
 # Literature
 
 - Carlile, Thomas M., Maria F. Rojas-Duran, Boris Zinshteyn, Hakyung Shin,
-Kristen M. Bartoli, and Wendy V. Gilbert. 2014. “Pseudouridine Profiling Reveals
+Kristen M. Bartoli, and Wendy V. Gilbert (2014): “Pseudouridine Profiling Reveals
 Regulated mRNA Pseudouridylation in Yeast and Human Cells.” Nature 515 (7525):
 143–46.
 
 - Birkedal, Ulf, Mikkel Christensen-Dalsgaard, Nicolai Krogh, Radhakrishnan
-Sabarinathan, Jan Gorodkin, and Henrik Nielsen. 2015. “Profiling of Ribose
+Sabarinathan, Jan Gorodkin, and Henrik Nielsen (2015): “Profiling of Ribose
 Methylations in Rna by High-Throughput Sequencing.” Angewandte Chemie
 (International Ed. In English) 54 (2): 451–55.
 https://doi.org/10.1002/anie.201408362.
 
 - Marchand, Virginie, Lilia Ayadi, __Felix G. M. Ernst__, Jasmin Hertler,
 Valérie Bourguignon-Igel, Adeline Galvanin, Annika Kotter, Mark Helm, 
-__Denis L. J. Lafontaine__, and Yuri Motorin. 2018. “AlkAniline-Seq: Profiling 
+__Denis L. J. Lafontaine__, and Yuri Motorin (2018): “AlkAniline-Seq: Profiling 
 of m7G and m3C Rna Modifications at Single Nucleotide Resolution.” Angewandte 
 Chemie International Edition 57 (51): 16785–90. 
 https://doi.org/10.1002/anie.201810946.
