@@ -33,6 +33,9 @@ NULL
 #' \code{mod} of \code{coord}}
 #' \item{flanking} {a single integer value how many flanking position should be
 #' included in the subset (default = \code{flanking = 0L}).}
+#' \item{merge} {\code{TRUE} or \code{FALSE}: Should the 
+#' overlapping selections by merge? This is particular important, if flanking
+#' value \code{!= 0L} are set. (default: \code{merge = TRUE}).}
 #' \item{\code{perTranscript}} {\code{TRUE} or \code{FALSE}: Should the 
 #' positions labeled per transcript and not per chromosome?
 #' (default: \code{perTranscript = FALSE}).}
@@ -74,7 +77,7 @@ NULL
 .subset_ModifierSet_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...),x)
   # converts everything to a GRangesList
-  coord <- .norm_coord(coord,args[["type"]])
+  coord <- .norm_coord(coord, args[["type"]], args[["merge"]])
   if(args[["sequenceData"]]){
     lapply(x,
            function(z){

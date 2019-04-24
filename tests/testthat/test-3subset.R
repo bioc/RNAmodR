@@ -22,12 +22,12 @@ test_that("Subsetting SequenceData:",{
   expect_error(RNAmodR:::.norm_subset_args(list(sequenceData = 1),msi),
                "'sequenceData' must be a single logical value")
   expect_type(actual,"list")
-  expect_named(actual,c("name","type","flanking","rawData","perTranscript",
-                        "sequenceData"))
+  expect_named(actual,c("name","type","merge","flanking","rawData",
+                        "perTranscript","sequenceData"))
   actual <- RNAmodR:::.norm_subset_args(list(),psd)
   expect_type(actual,"list")
-  expect_named(actual,c("name","type","flanking","rawData","perTranscript",
-                        "sequenceData"))
+  expect_named(actual,c("name","type","merge","flanking","rawData",
+                        "perTranscript","sequenceData"))
   expect_equal(RNAmodR:::.norm_subset_args(list(name = "abc"),msi)$name,"abc")
   expect_equal(RNAmodR:::.norm_subset_args(list(type = "I"),msi)$type,"I")
   expect_equal(RNAmodR:::.norm_subset_args(list(flanking = 1L),msi)$flanking,1L)

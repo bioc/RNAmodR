@@ -13,6 +13,7 @@ NULL
   } else {
     type <- NA_character_
   }
+  merge <- TRUE
   flanking <- 0L
   perTranscript <- FALSE
   sequenceData <- FALSE
@@ -35,6 +36,12 @@ NULL
         stop("'type' must be one or more elements of shortName(ModRNAString()).",
              call. = FALSE)
       }
+    }
+  }
+  if(!is.null(input[["merge"]])){
+    merge <- input[["merge"]]
+    if(!assertive::is_a_bool(merge)){
+      stop("'merge' must be a single logical value.", call. = FALSE)
     }
   }
   if(!is.null(input[["flanking"]])){
@@ -64,7 +71,7 @@ NULL
       stop("'sequenceData' must be a single logical value.")
     }
   }
-  args <- list(name = name, type = type, flanking = flanking,
+  args <- list(name = name, type = type, merge = merge, flanking = flanking,
                rawData = rawData, perTranscript = perTranscript,
                sequenceData = sequenceData)
   args
@@ -78,7 +85,7 @@ NULL
   data
 }
 
-.norm_coord <- function(coord, type){
+.norm_coord <- function(coord, type, merge = TRUE){
   if(is(coord,"GRanges")){
     if(is.null(coord$Parent)){
       stop("Parent column must be present.", call. = FALSE)
@@ -86,7 +93,7 @@ NULL
   } else if(is(coord,"GRangesList")){
     coord <- unlist(coord, use.names = FALSE)
     coord <- coord[!duplicated(coord)]
-    return(.norm_coord(coord,type))
+    return(.norm_coord(coord, type, merge))
   } else {
     stop("Something went wrong.")
   }
@@ -105,7 +112,13 @@ NULL
       }
     }
   }
-  coord <- split(coord, factor(coord$Parent, levels = unique(coord$Parent)))
+  if(merge){
+    coord <- split(coord, factor(coord$Parent, levels = unique(coord$Parent)))
+  } else {
+    coord <- coord[order(factor(coord$Parent,unique(coord$Parent)))]
+    coord <- split(coord, seq_along(coord))
+    names(coord) <- mcols(coord, level="within")[,"Parent"]
+  }
   coord
 }
 
@@ -165,13 +178,14 @@ NULL
 }
 
 .perform_subset <- function(data, coord, flanking = 0L, perTranscript = FALSE){
-  if(!all(names(data) == names(coord))){
+  if(!all(names(coord) %in% names(data))){
     stop("Length and/or order of data and coord do not match.")
   }
   .check_for_invalid_positions(data, coord)
+  m <- unlist(match(names(coord),names(data)))
   # construct flanking vector
   flanking <- seq.int(from = -flanking, to = flanking, by = 1L)
-  f <- IRanges::CharacterList(
+  flank <- IRanges::IntegerList(
     lapply(start(ranges(coord)),
            function(i){
              unique(unlist(lapply(i,
@@ -180,18 +194,21 @@ NULL
                                   })
              ))
            }))
-  if(length(flanking) > 1L){
-    f <- f[f > 0L & f <= lengths(data)]
+  if(length(flanking) > 0L){
+    l <- IRanges::IntegerList(as.list(lengths(data)))
+    flank <- flank[flank > 0L & flank <= l[m]]
   }
-  ff <- IRanges::LogicalList(mapply(function(r,z){r %in% z},rownames(data),f))
-  ans <- data[ff]
+  flank <- as(flank,"CharacterList")
+  ff <- IRanges::LogicalList(mapply(function(r,z){r %in% z},rownames(data)[m],
+                                    flank))
+  ans <- data[m][ff]
   if(perTranscript){
     pos <- IRanges::CharacterList(mapply(
       function(d,i){
         BiocGenerics::which(rownames(d) %in% i)
       },
-      data,
-      f,
+      data[m],
+      flank,
       SIMPLIFY = FALSE))
     rownames(ans) <- pos
   }
@@ -203,17 +220,17 @@ NULL
 .subset_SplitDataFrameList_by_GRangesList <- function(data, coord, ...){
   args <- .norm_subset_args(list(...), NULL)
   data <- .norm_data(data)
-  coord <- .norm_coord(coord, NA)
+  coord <- .norm_coord(coord, NA, args[["merge"]])
   names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
   data <- data[match(names, names(data))]
-  coord <- coord[match(names, names(coord))]
+  coord <- coord[names(coord) %in% names]
   .perform_subset(data, coord, args[["flanking"]], args[["perTranscript"]])
 }
 
 .subset_SequenceData_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...), x)
   # converts everything to a GRangesList
-  coord <- .norm_coord(coord, args[["type"]])
+  coord <- .norm_coord(coord, args[["type"]], args[["merge"]])
   if(args[["rawData"]]){
     data <- .norm_sequence_data(as(x,"SplitDataFrameList"))
   } else {
@@ -222,7 +239,7 @@ NULL
   data <- .norm_data(data)
   names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
   data <- data[match(names, names(data))]
-  coord <- coord[match(names, names(coord))]
+  coord <- coord[names(coord) %in% names]
   .perform_subset(data, coord, args[["flanking"]], args[["perTranscript"]])
 }
 
@@ -230,7 +247,7 @@ NULL
 
 .subset_SequenceDataSet_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...),x)
-  coord <- .norm_coord(coord,args[["type"]])
+  coord <- .norm_coord(coord, args[["type"]], args[["merge"]])
   ans <- lapply(x, .subset_SequenceData_by_GRangesList, coord, ...)
   ans <- do.call(cbind,ans)
   ans
@@ -240,7 +257,7 @@ NULL
 
 .subset_SequenceDataList_by_GRangesList <- function(x, coord, ...){
   args <- .norm_subset_args(list(...),x)
-  coord <- .norm_coord(coord,args[["type"]])
+  coord <- .norm_coord(coord, args[["type"]])
   ans <- 
     lapply(x,
            function(z){

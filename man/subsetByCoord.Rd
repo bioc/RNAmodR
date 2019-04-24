@@ -94,6 +94,9 @@ is derived from the \code{modType(x)}, but it can be overwritten using
 \code{mod} of \code{coord}}
 \item{flanking} {a single integer value how many flanking position should be
 included in the subset (default = \code{flanking = 0L}).}
+\item{merge} {\code{TRUE} or \code{FALSE}: Should the 
+overlapping selections by merge? This is particular important, if flanking
+value \code{!= 0L} are set. (default: \code{merge = TRUE}).}
 \item{\code{perTranscript}} {\code{TRUE} or \code{FALSE}: Should the 
 positions labeled per transcript and not per chromosome?
 (default: \code{perTranscript = FALSE}).}
