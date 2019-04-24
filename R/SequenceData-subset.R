@@ -151,7 +151,7 @@ NULL
 .check_for_invalid_positions <- function(data, coord){
   lengths <- lengths(data)
   positions <- start(ranges(coord))
-  f_names <- names(lengths) %in% names(positions)
+  f_names <- match(names(positions),names(lengths))
   f <- IRanges::LogicalList(mapply(function(i,j){i >= j},
                                    positions,
                                    lengths[f_names],
