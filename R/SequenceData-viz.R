@@ -122,7 +122,7 @@ NULL
 
 
 #' @importFrom grDevices col2rgb
-.is_colour <- function(x) {
+.are_colours <- function(x) {
   vapply(x,
          function(z) {
            tryCatch(is.matrix(grDevices::col2rgb(z)),
@@ -132,12 +132,12 @@ NULL
 }
 
 .norm_viz_colour <- function(colour, type = NA){
-  if(!is.character(colour) || !.is_colour(colour)){
+  if(!is.character(colour) || any(!.are_colours(colour))){
     stop("'colour' must be a character vector and contain valid colours, which",
          "can be interpreted by col2rgb().",
          call. = FALSE)
   }
-  if(length(type) > 1L || !is.na(type)){
+  if(length(type) > 1L || !anyNA(type)){
     if(length(colour) != 1){
       if(is.null(names(colour)) || !all(names(colour) %in% type)  ){
            stop("'colour' must be a named character vector parallel to 'type' ",

@@ -22,13 +22,13 @@ test_that("Visualization:",{
   }
   coord <- getDefCoord()
   # internal functions SequenceData
-  # .is_colour
-  expect_error(RNAmodR:::.is_colour(),
+  # .are_colours
+  expect_error(RNAmodR:::.are_colours(),
                'argument "x" is missing, with no default')
-  expect_false(RNAmodR:::.is_colour("abc"))
-  expect_true(RNAmodR:::.is_colour("red"))
-  expect_false(RNAmodR:::.is_colour("ABABAB"))
-  expect_true(RNAmodR:::.is_colour("#ABABAB"))
+  expect_false(RNAmodR:::.are_colours("abc"))
+  expect_true(RNAmodR:::.are_colours("red"))
+  expect_false(RNAmodR:::.are_colours("ABABAB"))
+  expect_true(RNAmodR:::.are_colours("#ABABAB"))
   # .norm_viz_colour
   expect_error(RNAmodR:::.norm_viz_colour(),
                'argument "colour" is missing, with no default')

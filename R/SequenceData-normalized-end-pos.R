@@ -36,8 +36,9 @@ NULL
 #' @return a \code{NormEnd5SequenceData} or \code{NormEnd3SequenceData} object
 #' 
 #' @examples
-#' # Construct a End5SequenceData object
-#' library(Rsamtools)
+#' # Construction of a NormEnd5SequenceData object
+#' library(RNAmodR.Data)
+#' library(rtracklayer)
 #' annotation <- GFF3File(RNAmodR.Data.example.gff3())
 #' sequences <- RNAmodR.Data.example.fasta()
 #' files <- c(control = RNAmodR.Data.example.bam.1(),

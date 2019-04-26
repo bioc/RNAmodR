@@ -847,7 +847,7 @@ setMethod(f = "hasAggregateData",
           signature = signature(x = "Modifier"),
           definition = 
             function(x){
-              if(is.null(x@aggregate) || nrow(x@aggregate) == 0L){
+              if(is.null(x@aggregate) || nrow(x@aggregate@unlistData) == 0L){
                 return(FALSE)
               }
               return(TRUE)

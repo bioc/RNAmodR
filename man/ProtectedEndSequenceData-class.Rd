@@ -52,8 +52,9 @@ following naming convention \code{protectedend.condition.replicate}.
 and \code{treated} condition separatly.
 }
 \examples{
-# Construct a ProtectedEndSequenceData object
-library(Rsamtools)
+# Construction of a ProtectedEndSequenceData object
+library(RNAmodR.Data)
+library(rtracklayer)
 annotation <- GFF3File(RNAmodR.Data.example.gff3())
 sequences <- RNAmodR.Data.example.fasta()
 files <- c(control = RNAmodR.Data.example.bam.1(),

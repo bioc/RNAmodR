@@ -58,6 +58,7 @@ NULL
 #' 
 #' @examples
 #' # construction of ModInosine object
+#' library(rtracklayer)
 #' sequences <- RNAmodR.Data.example.AAS.fasta()
 #' annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
 #' files <- c(treated = RNAmodR.Data.example.wt.1(),

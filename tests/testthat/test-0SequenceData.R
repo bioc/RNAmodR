@@ -3,7 +3,7 @@ context("CoverageSequenceData")
 test_that("CoverageSequenceData:",{
   # SequenceData using CoverageSequenceData as test case
   library(RNAmodR.Data)
-  library(Rsamtools)
+  library(rtracklayer)
   annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
   sequences <- RNAmodR.Data.example.man.fasta()
   files <- c(control = RNAmodR.Data.example.wt.1(),
@@ -54,7 +54,7 @@ test_that("CoverageSequenceData:",{
 context("PileupSequenceData")
 test_that("PileupSequenceData:",{
   library(RNAmodR.Data)
-  library(Rsamtools)
+  library(rtracklayer)
   annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
   sequences <- RNAmodR.Data.example.man.fasta()
   files <- c(control = RNAmodR.Data.example.wt.1(),
@@ -127,7 +127,7 @@ test_that("PileupSequenceData:",{
 context("ProtectedEndSequenceData")
 test_that("ProtectedEndSequenceData:",{
   library(RNAmodR.Data)
-  library(Rsamtools)
+  library(rtracklayer)
   annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
   sequences <- RNAmodR.Data.example.man.fasta()
   files <- c(control = RNAmodR.Data.example.wt.1(),

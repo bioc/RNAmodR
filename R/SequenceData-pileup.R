@@ -32,8 +32,9 @@ NULL
 #' @return a \code{PileupSequenceData} object
 #' 
 #' @examples
-#' # Construct a End5SequenceData object
-#' library(Rsamtools)
+#' # Construction of a PileupSequenceData object
+#' library(RNAmodR.Data)
+#' library(rtracklayer)
 #' annotation <- GFF3File(RNAmodR.Data.example.gff3())
 #' sequences <- RNAmodR.Data.example.fasta()
 #' files <- c(control = RNAmodR.Data.example.bam.1(),

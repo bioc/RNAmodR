@@ -2,7 +2,7 @@
 context("NormEndSequenceData")
 test_that("NormEndSequenceData:",{
   # SequenceData using CoverageSequenceData as test case
-  library(Rsamtools)
+  library(rtracklayer)
   library(RNAmodR.Data)
   annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
   sequences <- RNAmodR.Data.example.man.fasta()

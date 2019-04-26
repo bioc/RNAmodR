@@ -41,8 +41,9 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' @return a \code{ProtectedEndSequenceData} object
 #' 
 #' @examples 
-#' # Construct a ProtectedEndSequenceData object
-#' library(Rsamtools)
+#' # Construction of a ProtectedEndSequenceData object
+#' library(RNAmodR.Data)
+#' library(rtracklayer)
 #' annotation <- GFF3File(RNAmodR.Data.example.gff3())
 #' sequences <- RNAmodR.Data.example.fasta()
 #' files <- c(control = RNAmodR.Data.example.bam.1(),
