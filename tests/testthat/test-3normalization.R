@@ -1,8 +1,10 @@
 context("argument normalization")
 test_that("argument normalization:",{
-  gff <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
-  fasta <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
-  bam <- system.file("extdata","example_wt_1.bam",package = "RNAmodR.Data")
+  library(RNAmodR.Data)
+  library(Rsamtools)
+  gff <- GFF3File(RNAmodR.Data.example.man.gff3())
+  fasta <- unname(path(RNAmodR.Data.example.man.fasta()))
+  bam <- unname(path(RNAmodR.Data.example.wt.1()))
   # .norm_gff
   expect_error(RNAmodR:::.norm_gff(),'argument "x" is missing')
   expect_error(RNAmodR:::.norm_gff(""),"The gff3 file does not exist")
@@ -41,7 +43,7 @@ test_that("argument normalization:",{
   expect_error(RNAmodR:::.norm_bamfiles(""),"Bam files do not exists at")
   expect_error(RNAmodR:::.norm_bamfiles(bam),
                "Names of BamFileList must either be 'treated' or 'control'")
-  actual <- RNAmodR:::.norm_bamfiles(c(treated = bam))
+  actual <- RNAmodR:::.norm_bamfiles(c(treated = unname(bam)))
   expect_s4_class(actual,"BamFileList")
   expect_named(actual,c("treated"))
   bf <- Rsamtools::BamFile(c(treated = bam))

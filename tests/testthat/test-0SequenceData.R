@@ -2,12 +2,12 @@
 context("CoverageSequenceData")
 test_that("CoverageSequenceData:",{
   # SequenceData using CoverageSequenceData as test case
-  annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
-  sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
-  files <- c(control = system.file("extdata","example_wt_1.bam",
-                                   package = "RNAmodR.Data"),
-             treated = system.file("extdata","example_wt_2.bam",
-                                   package = "RNAmodR.Data"))
+  library(RNAmodR.Data)
+  library(Rsamtools)
+  annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+  sequences <- RNAmodR.Data.example.man.fasta()
+  files <- c(control = RNAmodR.Data.example.wt.1(),
+             treated = RNAmodR.Data.example.wt.2())
   csd <- CoverageSequenceData(files, annotation = annotation,
                               sequences = sequences)
   expect_false(any(lengths(rownames(csd)) == 0L))
@@ -53,12 +53,12 @@ test_that("CoverageSequenceData:",{
 })
 context("PileupSequenceData")
 test_that("PileupSequenceData:",{
-  annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
-  sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
-  files <- c(control = system.file("extdata","example_wt_1.bam",
-                                   package = "RNAmodR.Data"),
-             treated = system.file("extdata","example_wt_2.bam",
-                                   package = "RNAmodR.Data"))
+  library(RNAmodR.Data)
+  library(Rsamtools)
+  annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+  sequences <- RNAmodR.Data.example.man.fasta()
+  files <- c(control = RNAmodR.Data.example.wt.1(),
+             treated = RNAmodR.Data.example.wt.2())
   #
   psd <- PileupSequenceData(files, annotation = annotation,
                             sequences = sequences)
@@ -126,12 +126,12 @@ test_that("PileupSequenceData:",{
 
 context("ProtectedEndSequenceData")
 test_that("ProtectedEndSequenceData:",{
-  annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
-  sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
-  files <- c(control = system.file("extdata","example_wt_1.bam",
-                                   package = "RNAmodR.Data"),
-             treated = system.file("extdata","example_wt_2.bam",
-                                   package = "RNAmodR.Data"))
+  library(RNAmodR.Data)
+  library(Rsamtools)
+  annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+  sequences <- RNAmodR.Data.example.man.fasta()
+  files <- c(control = RNAmodR.Data.example.wt.1(),
+             treated = RNAmodR.Data.example.wt.2())
   #
   pesd <- ProtectedEndSequenceData(files, annotation = annotation,
                                    sequences = sequences)

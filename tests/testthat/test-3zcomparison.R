@@ -16,10 +16,10 @@ test_that("Comparing data:",{
   expect_type(actual,"list")
   expect_named(actual,"alias")
   library(RNAmodR.Data)
+  library(Rsamtools)
   library(GenomicFeatures)
-  RNAmodR.files <- RNAmodR.Data::RNAmodR.files
-  annotation <- rtracklayer::GFF3File(RNAmodR.files[["example_AAS.gff3"]])
-  txdb <- makeTxDbFromGFF(path(annotation))
+  annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
+  txdb <- makeTxDbFromGFF(annotation)
   alias <- data.frame(tx_id = names(id2name(txdb)),
                       name = id2name(txdb))
   expect_error(RNAmodR:::.norm_alias(list(alias = alias)),

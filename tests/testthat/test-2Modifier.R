@@ -64,13 +64,13 @@ test_that("Modifier/ModifierSet:",{
   expect_equal(conditions(msi[[1]]),factor(rep("treated",ncol(sequenceData(msi[[1]]))[1])))
   # Modifier creation
   library(rtracklayer)
+  library(RNAmodR.Data)
   library(Rsamtools)
-  RNAmodR.files <- RNAmodR.Data::RNAmodR.files
-  annotation <- GFF3File(RNAmodR.files[["example_AAS.gff3"]])
-  sequences <- FaFile(RNAmodR.files[["example_AAS.fasta"]])
-  files <- c(Treated = RNAmodR.files[["example_wt_1.bam"]],
-             Treated = RNAmodR.files[["example_wt_2.bam"]],
-             Treated = RNAmodR.files[["example_wt_3.bam"]])
+  sequences <- RNAmodR.Data.example.AAS.fasta()
+  annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
+  files <- c(treated = RNAmodR.Data.example.wt.1(),
+             treated = RNAmodR.Data.example.wt.2(),
+             treated = RNAmodR.Data.example.wt.3())
   mi <- ModInosine(files, annotation = annotation, sequences = sequences)
   expect_s4_class(mi,"ModInosine")
   mi2 <- ModInosine(sequenceData(mi))
@@ -123,13 +123,13 @@ test_that("Modifier/ModifierSet:",{
     RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type("ModSetInosine"),
     "ModSetInosine")
   # ModifierSet creation
-  files <- list("SampleSet1" = c(treated = RNAmodR.files[["example_wt_1.bam"]],
-                                 treated = RNAmodR.files[["example_wt_2.bam"]],
-                                 treated = RNAmodR.files[["example_wt_3.bam"]]),
-                "SampleSet2" = c(treated = RNAmodR.files[["example_bud23_1.bam"]],
-                                 treated = RNAmodR.files[["example_bud23_2.bam"]]),
-                "SampleSet3" = c(treated = RNAmodR.files[["example_trm8_1.bam"]],
-                                 treated = RNAmodR.files[["example_trm8_2.bam"]]))
+  files <- list("SampleSet1" = c(treated = RNAmodR.Data.example.wt.1(),
+                                 treated = RNAmodR.Data.example.wt.2(),
+                                 treated = RNAmodR.Data.example.wt.3()),
+                "SampleSet2" = c(treated = RNAmodR.Data.example.bud23.1(),
+                                 treated = RNAmodR.Data.example.bud23.2()),
+                "SampleSet3" = c(treated = RNAmodR.Data.example.trm8.1(),
+                                 treated = RNAmodR.Data.example.trm8.2()))
   msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
   expect_s4_class(msi,"ModSetInosine")
   msi2 <- ModSetInosine(msi[[1]])

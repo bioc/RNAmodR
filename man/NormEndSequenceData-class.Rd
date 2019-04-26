@@ -72,13 +72,11 @@ each) ending in \code{ends}, \code{tx} and \code{ol}.
 }
 \examples{
 # Construct a End5SequenceData object
-RNAmodR.files <- RNAmodR.Data::RNAmodR.files
-annotation <- rtracklayer::GFF3File(RNAmodR.files[["example1.gff3"]])
-sequences <- Rsamtools::FaFile(RNAmodR.files[["example1.fasta"]])
-files <- c(control = RNAmodR.files[["example_wt_1.bam"]],
-           treated = RNAmodR.files[["example_wt_2.bam"]])
+library(Rsamtools)
+annotation <- GFF3File(RNAmodR.Data.example.gff3())
+sequences <- RNAmodR.Data.example.fasta()
+files <- c(control = RNAmodR.Data.example.bam.1(),
+           treated = RNAmodR.Data.example.bam.2())
 ne5sd <- NormEnd5SequenceData(files, annotation = annotation,
                              sequences = sequences)
-# aggregate data
-aggregate(ne5sd)
 }

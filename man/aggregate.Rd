@@ -93,8 +93,8 @@ modifications and visualization of the results.
 \examples{
 data(e5sd,package="RNAmodR")
 data(msi,package="RNAmodR")
-# modify() triggers the search for modifications in the data contained in
-# the Modifier or ModifierSet object
+# aggregate() triggers the aggregation of data contained in a SequenceData,
+# Modifier or ModifierSet objects
 sdfl <- aggregate(e5sd)
 mi <- aggregate(msi[[1]])
 msi <- aggregate(msi)

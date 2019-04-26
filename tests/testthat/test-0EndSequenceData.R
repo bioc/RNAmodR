@@ -2,12 +2,12 @@
 context("EndSequenceData")
 test_that("EndSequenceData:",{
   # SequenceData using CoverageSequenceData as test case
-  annotation <- system.file("extdata","example1.gff3",package = "RNAmodR.Data")
-  sequences <- system.file("extdata","example1.fasta",package = "RNAmodR.Data")
-  files <- c(control = system.file("extdata","example_wt_1.bam",
-                                   package = "RNAmodR.Data"),
-             treated = system.file("extdata","example_wt_2.bam",
-                                   package = "RNAmodR.Data"))
+  library(RNAmodR.Data)
+  library(Rsamtools)
+  annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+  sequences <- RNAmodR.Data.example.man.fasta()
+  files <- c(control = RNAmodR.Data.example.wt.1(),
+             treated = RNAmodR.Data.example.wt.2())
   #
   e5sd <- End5SequenceData(files, annotation = annotation,
                               sequences = sequences)

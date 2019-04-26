@@ -53,13 +53,11 @@ and \code{treated} condition separatly.
 }
 \examples{
 # Construct a ProtectedEndSequenceData object
-RNAmodR.files <- RNAmodR.Data::RNAmodR.files
-annotation <- rtracklayer::GFF3File(RNAmodR.files[["example_RMS.gff3"]])
-sequences <- Rsamtools::FaFile(RNAmodR.files[["example_RMS.fasta"]])
-files <- c(control = RNAmodR.files[["example_RMS1.bam"]],
-           treated = RNAmodR.files[["example_RMS2.bam"]])
+library(Rsamtools)
+annotation <- GFF3File(RNAmodR.Data.example.gff3())
+sequences <- RNAmodR.Data.example.fasta()
+files <- c(control = RNAmodR.Data.example.bam.1(),
+           treated = RNAmodR.Data.example.bam.2())
 pesd <- ProtectedEndSequenceData(files, annotation = annotation,
                                  sequences = sequences)
-# aggregate data
-aggregate(pesd)
 }
