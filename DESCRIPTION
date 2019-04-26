@@ -80,7 +80,6 @@ Collate:
     'Modifier-subset.R'
     'Modifier-viz.R'
     'ModifierSet-comparison.R'
-    'ModifierSet-export.R'
     'ModifierSet-viz.R'
     'RNAmodR-external-functions.R'
     'RNAmodR-summary.R'
