@@ -39,7 +39,6 @@ Imports:
     GenomicFeatures,
     GenomicAlignments,
     Biostrings,
-    SummarizedExperiment,
     GenomeInfoDb,
     rtracklayer,
     Rsamtools,

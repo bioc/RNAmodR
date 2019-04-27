@@ -67,6 +67,7 @@ between 0 and 1. They are calculated as the relative amount of called G bases
 }
 \examples{
 # construction of ModInosine object
+library(RNAmodR.Data)
 library(rtracklayer)
 sequences <- RNAmodR.Data.example.AAS.fasta()
 annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
