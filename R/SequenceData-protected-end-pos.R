@@ -34,7 +34,7 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' \code{\link[=SequenceData-class]{SequenceData}} and
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{ProtectedEndSequenceData}
-#' @param name For \code{\link[=visualizeByCoord]{getDataTrack}}: a valid 
+#' @param name For \code{\link[=visualizeDataByCoord]{getDataTrack}}: a valid 
 #' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.

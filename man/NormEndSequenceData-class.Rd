@@ -47,7 +47,7 @@ NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
 
-\item{name}{For \code{\link[=visualizeByCoord]{getDataTrack}}: a valid 
+\item{name}{For \code{\link[=visualizeDataByCoord]{getDataTrack}}: a valid 
 transcript name. Must be a name of \code{ranges(x)}}
 }
 \value{
