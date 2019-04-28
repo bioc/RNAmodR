@@ -9,10 +9,9 @@ NULL
 #' 
 #' @description
 #' The \code{NormEnd5SequenceData}/\code{NormEnd3SequenceData}
-#' aggregate the counts of read ends (Either 5' or 3') at each position along 
-#' transcript. In addition the counts are then normalized to the length of the
-#' transcript and to the overlapping reads. Per sample three separate columns
-#' are stored named \code{ends},\code{norm.tx} and \code{norm.ol}.
+#' aggregate the counts of read ends (Either 5' or 3') at each position along a
+#' transcript. In addition, the number of counts are then normalized to the
+#' length of the transcript and to the overlapping reads.
 #' 
 #' Both classes contain three columns per data file named using the
 #' following naming convention \code{(normend5/normend3).condition.replicate}.
@@ -28,8 +27,8 @@ NULL
 #' \code{\link[=SequenceData-class]{SequenceData}} and
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{CoverageSequenceData}
-#' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
-#' of \code{ranges(x)}
+#' @param name For \code{\link[=visualizeByCoord]{getDataTrack}}: a valid 
+#' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 

@@ -11,15 +11,15 @@ NULL
 #' @title The Modifier class
 #' 
 #' @description
-#' The \code{Modifier} class is a virtual class, which provides the central 
-#' functionality for searching for patterns of post-transcriptional RNA 
-#' modifications in high throughput sequencing data.
+#' The \code{Modifier} class is a virtual class, which provides the central
+#' functionality to search for post-transcriptional RNA modification patterns in
+#' high throughput sequencing data.
 #' 
 #' Each subclass has to implement the following functions:
 #' 
 #' \itemize{
-#' \item{\code{\link{aggregate}}: }{used for specific data aggregation}
-#' \item{\code{\link{modify}}: }{used for specific search for modifications}
+#' \item{\code{\link{aggregateData}}: }{used for specific data aggregation}
+#' \item{\code{\link{findMod}}: }{used for specific search for modifications}
 #' }
 #' 
 #' Optionally the function \code{\link[=Modifier-functions]{settings<-}} can be
@@ -28,8 +28,8 @@ NULL
 #' 
 #' \code{Modifier} objects are constructed centrally by calling 
 #' \code{Modifier()} with a \code{className} matching the specific class to be
-#' constructed. This will trigger the immediate analysis, if \code{findMod} is
-#' not set to \code{TRUE}.
+#' constructed. This will trigger the immediate analysis, if \code{find.mod} is
+#' not set to \code{FALSE}.
 #' 
 #' 
 #' @section Creation: 
@@ -51,11 +51,12 @@ NULL
 #' is constructed/expected.}
 #' }
 #' 
-#' The cases for a \code{SequenceData} or \code{SequenceDataSet} are rather
-#' obvious, since the input remains the same. The last case is special, since
-#' it is a hypothetical option in case bam files from to different methods 
-#' have to be combined to reliably detect a single modification (The elements of
-#' a \code{SequenceDataList} don't have to be created from the bamfiles). 
+#' The cases for a \code{SequenceData} or \code{SequenceDataSet} are straight
+#' forward, since the input remains the same. The last case is special, since it
+#' is a hypothetical option, in which bam files from two or more different
+#' methods have to be combined to reliably detect a single modification (The
+#' elements of a \code{SequenceDataList} don't have to be created from the
+#' bamfiles, whereas from a \code{SequenceDataSet} they have to be).
 #' 
 #' For this example a \code{list} of \code{character} vectors is expected.
 #' Each element must be named according to the names of \code{dataType()} and 
@@ -64,30 +65,34 @@ NULL
 #' @param className The name of the class which should be constructed.
 #' @param x the input which can be of the following types
 #' \itemize{
-#' \item{\code{SequenceData}:} {a single \code{SequenceData} or a list containg
-#' only \code{SequenceData} objects. The input will just be used as elements of
-#' the \code{Modifier} and must match the requirements of specific
-#' \code{Modifier} class }
+#' \item{\code{SequenceData}:} {a single \code{SequenceData} or a list
+#' containing only \code{SequenceData} objects. The input will just be used to
+#' file the \code{data} slot of the \code{Modifier} and must match the
+#' requirements of specific \code{Modifier} class.}
 #' \item{\code{BamFileList}:} {a named \code{BamFileList}}
 #' \item{\code{character}:} {a \code{character} vector, which must be coercible
 #' to a named \code{BamFileList} referencing existing bam files. Valid names are
 #' \code{control} and \code{treated} to define conditions and replicates}
 #' }
 #' @param annotation annotation data, which must match the information contained
-#' in the BAM files. This is parameter is only required if \code{x} if not a 
-#' \code{Modifier} object.
-#' @param sequences sequences matching the target sequences the reads were 
-#' mapped onto. This must match the information contained in the BAM files. This
-#' is parameter is only required if \code{x} if not a \code{Modifier} object.
-#' @param seqinfo optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
-#' subset the transcripts analyzed on a chromosome basis.
+#' in the BAM files. This parameter is only required if \code{x} is not a 
+#' \code{SequenceData} object or a list of \code{SequenceData} objects.
+#' @param sequences sequences matching the target sequences the reads were
+#'   mapped onto. This must match the information contained in the BAM files.
+#'   TThis parameter is only required if \code{x} is not a \code{SequenceData}
+#'   object or a list of \code{SequenceData} objects.
+#' @param seqinfo An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
+#' argument or character vector, which can be coerced to one, to subset the 
+#' sequences to be analyzed on a per chromosome basis.
 #' @param ... Additional otpional parameters:
 #' \itemize{
-#' \item{findMod: }{\code{TRUE} or \code{FALSE}: should the search for for 
+#' \item{find.mod: }{\code{TRUE} or \code{FALSE}: should the search for for 
 #' modifications be triggered upon construction? If not the search can be 
 #' started by calling the \code{modify()} function.}
 #' }
-#' All other arguments will be passed onto the \code{SequenceData} objects.
+#' All other arguments will be passed onto the \code{SequenceData} objects, if
+#' \code{x} is not a \code{SequenceData} object or a list of \code{SequenceData}
+#' objects.
 #' 
 #' @slot mod a \code{character} value, which needs to contain one or more 
 #' elements from the alphabet of a 
@@ -134,19 +139,18 @@ NULL
 #' 
 #' @return
 #' \itemize{
-#' \item{\code{modifierType}} {a character vector with the appropriate class
-#' Name of a \code{\link[=Modifier-class]{Modifier}}. Works for both 
-#' \code{Modifier} and \code{ModifierSet} objects.}
-#' \item{\code{mainScore}} {a character vector}
-#' \item{\code{settings}} {a \code{Seqinfo} object}
-#' \item{\code{sequenceData}} {a \code{SequenceData} object}
-#' \item{\code{modifications}} {a \code{GRanges} or \code{GRangesList} object
+#' \item{\code{modifierType}:} {a character vector with the appropriate class
+#' Name of a \code{\link[=Modifier-class]{Modifier}}.}
+#' \item{\code{mainScore}:} {a character vector.}
+#' \item{\code{settings}:} {a \code{Seqinfo} object.}
+#' \item{\code{sequenceData}:} {a \code{SequenceData} object.}
+#' \item{\code{modifications}:} {a \code{GRanges} or \code{GRangesList} object
 #' describing the found modifications.}
-#' \item{\code{seqinfo}} {a \code{Seqinfo} object}
-#' \item{\code{sequences}} {a \code{RNAStingSet} object}
-#' \item{\code{ranges}} {a \code{GRangesList} object with each element per 
-#' transcript}
-#' \item{\code{bamfiles}} {a \code{BamFileList} object}
+#' \item{\code{seqinfo}:} {a \code{Seqinfo} object.}
+#' \item{\code{sequences}:} {a \code{RNAStingSet} object.}
+#' \item{\code{ranges}:} {a \code{GRangesList} object with each element per 
+#' transcript.}
+#' \item{\code{bamfiles}:} {a \code{BamFileList} object.}
 #' }
 #' 
 #' @examples
@@ -672,6 +676,15 @@ setMethod(f = "validModification",
 
 #' @rdname Modifier-class
 #' @export
+setGeneric( 
+  name = "Modifier",
+  signature = c("x"),
+  def = function(className, x, annotation, sequences, seqinfo, ...)
+    standardGeneric("Modifier")
+) 
+
+#' @rdname Modifier-class
+#' @export
 setMethod("Modifier",
           signature = c(x = "SequenceData"),
           function(className, x, annotation = NULL, sequences = NULL, 
@@ -727,19 +740,35 @@ setMethod("Modifier",
 #' @name aggregate
 #' @aliases hasAggregateData aggregateData getAggregateData
 #' 
-#' @title Aggreagte data per positions
+#' @title Aggregate data per positions
 #' 
 #' @description 
-#' The aggregate function is defined per
-#' \code{\link[=SequenceData-class]{SequenceData}} object and can be triggered
-#' by either using the a \code{\link[=SequenceData-class]{SequenceData}} or
-#' \code{\link[=Modifier-class]{Modifier}}. For the letter it will just redirect
-#' to the \code{\link[=SequenceData-class]{SequenceData}} object, but will store
-#' the result. The data is then used for subsequent tasks, such as search for
-#' modifications and visualization of the results.
+#' The \code{aggregate} function is defined for each
+#' \code{\link[=SequenceData-class]{SequenceData}} object and can be used
+#' directly on a \code{\link[=SequenceData-class]{SequenceData}} object or
+#' indirectly via a \code{\link[=Modifier-class]{Modifier}} object.
 #' 
-#' @param x a \code{\link[=SequenceData-class]{SequenceData}} or
-#'   \code{\link[=Modifier-class]{Modifier}} object.
+#' For the letter the call is redirect to the
+#' \code{\link[=SequenceData-class]{SequenceData}} object, the result summarized
+#' as defined for the individual \code{Modifier} class and stored in the
+#' \code{aggregate} slot of the \code{Modifier} object. The data is then used
+#' for subsequent tasks, such as search for modifications and visualization of
+#' the results.
+#' 
+#' The summarization is implemented in the \code{aggregateData} for each type of
+#' \code{Modifier} class. The stored data from the \code{aggregate} slot can be
+#' retrieved using the \code{getAggregateData} function.
+#' 
+#' Whether the aggrgeated data is already present in the \code{aggregate} slot
+#' can be checked using the \code{hasAggregateData} function.
+#' 
+#' For \code{SequenceDataSet}, \code{SequenceDataList} and \code{ModfierSet} 
+#' classes wrapper of the \code{aggregate} function exist as well.
+#' 
+#' @param x a \code{\link[=SequenceData-class]{SequenceData}}, 
+#' \code{SequenceDataSet}, \code{SequenceDataList}, 
+#' \code{\link[=Modifier-class]{Modifier}} or 
+#' \code{\link[=Modifier-class]{ModfierSet}}  object.
 #' @param force whether to recreate the aggregated data, if it is already stored
 #' inside the \code{Modifier} object.
 #' @param condition character value, which selects, for which condition the data
@@ -749,15 +778,15 @@ setMethod("Modifier",
 #' 
 #' @return 
 #' \itemize{
-#' \item{\code{aggregate}: }{for \code{SequenceData} the aggregated data is
-#' returned as a \code{SplitDataFrameList} with an element per transcript, 
-#' whereas for a \code{Modifier} the modified input object is returned, 
-#' containing the aggregated data, which can be accessed using 
+#' \item{\code{aggregate}: }{for \code{SequenceData} object the aggregated data
+#' is returned as a \code{SplitDataFrameList} with an element per transcript,
+#' whereas for a \code{Modifier} the modified input object is returned,
+#' containing the aggregated data, which can be accessed using
 #' \code{getAggregateData}.}
 #' \item{\code{getAggregateData}: }{only for \code{Modifier}: a 
 #' \code{SplitDataFrameList} with an element per transcript is returned. If the 
 #' aggregated data is not stored in the object, it is generated on the fly, but 
-#' does not persist}
+#' does not persist.}
 #' \item{\code{hasAggregateData}: }{TRUE or FALSE. Does the \code{Modifier} 
 #' object already contain aggregated data?}
 #' }
@@ -767,7 +796,11 @@ setMethod("Modifier",
 #' \itemize{
 #' \item{\code{\link[=SequenceData-class]{SequenceData}}} {a 
 #' \code{SplitDataFrameList} with elments per transcript.}
-#' \item{\code{\link[=Modifier-class]{Modifier}}} {an updated \code{Modifier}
+#' \item{\code{\link[=SequenceDataSet-class]{SequenceDataSet}} or
+#' \code{\link[=SequenceDataList-class]{SequenceDataList}}} {a \code{SimpleList}
+#' with \code{SplitDataFrameList} as elements.}
+#' \item{\code{\link[=Modifier-class]{Modifier}} or
+#' \code{\link[=ModifierSet-class]{ModifierSet}}} {an updated \code{Modifier}
 #' object. The data can be accessed by using the \code{aggregateData} function.}
 #' }
 #' 
@@ -862,18 +895,17 @@ setMethod(f = "hasAggregateData",
 #' @title Searching for modifications in \code{SequenceData}
 #' 
 #' @description 
-#' \code{modify} triggers the search for modifications for a 
+#' The \code{modify} function executes the search for modifications for a 
 #' \code{\link[=Modifier-class]{Modifier}} class. Usually this is done 
-#' automatically during construction of a \code{Modifier} object. It also makes 
-#' sure that the aggregated data is valid for the current settings and stores
-#' the results inside the \code{Modifier} object. The results can be accessed
-#' via the \code{modifications()} function.
+#' automatically during construction of a \code{Modifier} object.
 #' 
-#' \code{findMod} just returns the found modifications as a \code{GRanges} 
-#' object. It does not check for validity of the aggregate data in side the
-#' \code{Modifier} object.
+#' When the \code{modify} functions is called the aggregated data is checked for
+#' validity for the current settings and stores the results in the
+#' \code{modification} slot of the \code{Modifier} object, which is returned.
+#' The results can be accessed via the \code{modifications()} function.
 #' 
-#' \code{modifications} is the accessor for the found modifications.
+#' \code{findMod} returns the found modifications as a \code{GRanges} 
+#' object and has to implemented for each individual \code{Modifier} class.
 #' 
 #' @param x a \code{Modifier} object.
 #' @param force force to run \code{aggregate} again, if data is already stored

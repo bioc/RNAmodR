@@ -3,9 +3,9 @@
 %   R/SequenceData-class.R, R/SequenceDataSet-class.R,
 %   R/SequenceDataList-class.R
 \docType{methods}
-\name{replicates}
-\alias{replicates}
+\name{SequenceData-functions}
 \alias{SequenceData-functions}
+\alias{replicates}
 \alias{show,SequenceDataFrame-method}
 \alias{sequences,SequenceDataFrame-method}
 \alias{ranges,SequenceDataFrame-method}
@@ -118,19 +118,19 @@ object}
 }
 \value{
 \itemize{
-\item{\code{seqinfo}} {a \code{Seqinfo} object ()}
-\item{\code{sequences}} {a \code{RNAStingSet} object or a \code{RNAString} 
-object for a \code{SequenceDataFrame}}
-\item{\code{ranges}} {a \code{GRangesList} object with each element per 
-transcript or a \code{GRanges} object for a \code{SequenceDataFrame}}
-\item{\code{bamfiles}} {a \code{BamFileList} object or a SimpleList of 
-\code{BamFileList} objects for a \code{SequenceDataList}}
+\item{\code{seqinfo}:} {a \code{Seqinfo} object ().}
+\item{\code{sequences}:} {a \code{RNAStingSet} object or a \code{RNAString} 
+object for a \code{SequenceDataFrame}.}
+\item{\code{ranges}:} {a \code{GRangesList} object with each element per 
+transcript or a \code{GRanges} object for a \code{SequenceDataFrame}.}
+\item{\code{bamfiles}:} {a \code{BamFileList} object or a SimpleList of 
+\code{BamFileList} objects for a \code{SequenceDataList}.}
 }
 }
 \description{
 The \code{SequenceData}, \code{SequenceDataSet}, \code{SequenceDataList} and
-\code{SequenceDataFrame} share functionality. Have a look at the elements
-listed under Usage.
+\code{SequenceDataFrame} classes share functionality. Have a look at the 
+elements listed directly below.
 }
 \examples{
 data(e5sd,package="RNAmodR")

@@ -17,7 +17,7 @@
 \alias{getAggregateData,Modifier-method}
 \alias{hasAggregateData,Modifier-method}
 \alias{aggregate,ModifierSet-method}
-\title{Aggreagte data per positions}
+\title{Aggregate data per positions}
 \usage{
 aggregate(x, ...)
 
@@ -46,8 +46,10 @@ hasAggregateData(x)
 \S4method{aggregate}{ModifierSet}(x, force = FALSE)
 }
 \arguments{
-\item{x}{a \code{\link[=SequenceData-class]{SequenceData}} or
-\code{\link[=Modifier-class]{Modifier}} object.}
+\item{x}{a \code{\link[=SequenceData-class]{SequenceData}}, 
+\code{SequenceDataSet}, \code{SequenceDataList}, 
+\code{\link[=Modifier-class]{Modifier}} or 
+\code{\link[=Modifier-class]{ModfierSet}}  object.}
 
 \item{...}{additional arguments}
 
@@ -60,15 +62,15 @@ inside the \code{Modifier} object.}
 }
 \value{
 \itemize{
-\item{\code{aggregate}: }{for \code{SequenceData} the aggregated data is
-returned as a \code{SplitDataFrameList} with an element per transcript, 
-whereas for a \code{Modifier} the modified input object is returned, 
-containing the aggregated data, which can be accessed using 
+\item{\code{aggregate}: }{for \code{SequenceData} object the aggregated data
+is returned as a \code{SplitDataFrameList} with an element per transcript,
+whereas for a \code{Modifier} the modified input object is returned,
+containing the aggregated data, which can be accessed using
 \code{getAggregateData}.}
 \item{\code{getAggregateData}: }{only for \code{Modifier}: a 
 \code{SplitDataFrameList} with an element per transcript is returned. If the 
 aggregated data is not stored in the object, it is generated on the fly, but 
-does not persist}
+does not persist.}
 \item{\code{hasAggregateData}: }{TRUE or FALSE. Does the \code{Modifier} 
 object already contain aggregated data?}
 }
@@ -77,18 +79,36 @@ If 'x' is a
 \itemize{
 \item{\code{\link[=SequenceData-class]{SequenceData}}} {a 
 \code{SplitDataFrameList} with elments per transcript.}
-\item{\code{\link[=Modifier-class]{Modifier}}} {an updated \code{Modifier}
+\item{\code{\link[=SequenceDataSet-class]{SequenceDataSet}} or
+\code{\link[=SequenceDataList-class]{SequenceDataList}}} {a \code{SimpleList}
+with \code{SplitDataFrameList} as elements.}
+\item{\code{\link[=Modifier-class]{Modifier}} or
+\code{\link[=ModifierSet-class]{ModifierSet}}} {an updated \code{Modifier}
 object. The data can be accessed by using the \code{aggregateData} function.}
 }
 }
 \description{
-The aggregate function is defined per
-\code{\link[=SequenceData-class]{SequenceData}} object and can be triggered
-by either using the a \code{\link[=SequenceData-class]{SequenceData}} or
-\code{\link[=Modifier-class]{Modifier}}. For the letter it will just redirect
-to the \code{\link[=SequenceData-class]{SequenceData}} object, but will store
-the result. The data is then used for subsequent tasks, such as search for
-modifications and visualization of the results.
+The \code{aggregate} function is defined for each
+\code{\link[=SequenceData-class]{SequenceData}} object and can be used
+directly on a \code{\link[=SequenceData-class]{SequenceData}} object or
+indirectly via a \code{\link[=Modifier-class]{Modifier}} object.
+
+For the letter the call is redirect to the
+\code{\link[=SequenceData-class]{SequenceData}} object, the result summarized
+as defined for the individual \code{Modifier} class and stored in the
+\code{aggregate} slot of the \code{Modifier} object. The data is then used
+for subsequent tasks, such as search for modifications and visualization of
+the results.
+
+The summarization is implemented in the \code{aggregateData} for each type of
+\code{Modifier} class. The stored data from the \code{aggregate} slot can be
+retrieved using the \code{getAggregateData} function.
+
+Whether the aggrgeated data is already present in the \code{aggregate} slot
+can be checked using the \code{hasAggregateData} function.
+
+For \code{SequenceDataSet}, \code{SequenceDataList} and \code{ModfierSet} 
+classes wrapper of the \code{aggregate} function exist as well.
 }
 \examples{
 data(e5sd,package="RNAmodR")

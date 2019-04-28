@@ -18,14 +18,14 @@ NULL
 #' 
 #' \code{aggregate} calculates the mean and sd for each nucleotide in the
 #' \code{control} and \code{treated} condition separatly. The results are then
-#' normalized to a rowSum of 1.
+#' normalized to a row sum of 1.
 #' 
 #' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
 #' \code{\link[=SequenceData-class]{SequenceData}} and
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{PileupSequenceData}
-#' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
-#' of \code{ranges(x)}
+#' @param name For \code{\link[=visualizeByCoord]{getDataTrack}}: a valid 
+#' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 

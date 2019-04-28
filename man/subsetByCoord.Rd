@@ -27,7 +27,8 @@
 \alias{labelByCoord,SequenceDataSet,GRangesList-method}
 \alias{labelByCoord,SequenceDataList,GRanges-method}
 \alias{labelByCoord,SequenceDataList,GRangesList-method}
-\title{Subsetting data from a \code{Modifier} or \code{ModifierSet} object.}
+\title{Subsetting data from a \code{SequenceData}, \code{SequenceDataSet},
+\code{SequenceDataList}, \code{Modifier} or \code{ModifierSet} object.}
 \usage{
 subsetByCoord(x, coord, ...)
 
@@ -78,26 +79,28 @@ labelByCoord(x, coord, ...)
 \S4method{labelByCoord}{SequenceDataList,GRangesList}(x, coord, ...)
 }
 \arguments{
-\item{x}{a \code{Modifier} or \code{ModifierSet} object.}
+\item{x}{a \code{SequenceData}, \code{SequenceDataSet},
+\code{SequenceDataList}, \code{Modifier} or \code{ModifierSet} object.}
 
 \item{coord}{coordinates of position to subset to. Either a \code{GRanges} or
-a \code{GRangesList} object. For both types the Parent column is expected to
-match the gene or transcript name.}
+a \code{GRangesList} object. For both types the 'Parent' column is expected to
+match the transcript name.}
 
 \item{...}{optional parameters:
 \itemize{
-\item{\code{name}} {Limit results to one specific gene or transcript}
-\item{\code{type}} {the modification type used for subsetting. By default this
-is derived from the \code{modType(x)}, but it can be overwritten using 
+\item{\code{name}:} {Limit results to one specific transcript.}
+\item{\code{type}:} {the modification type used for subsetting. By default 
+this is derived from the \code{modType(x)}, but it can be overwritten using 
 \code{type}. It must be a valid shortName for a modification according to
-\code{shortName(ModRNAString())} and of course present in metadata column 
-\code{mod} of \code{coord}}
-\item{flanking} {a single integer value how many flanking position should be
-included in the subset (default = \code{flanking = 0L}).}
-\item{merge} {\code{TRUE} or \code{FALSE}: Should the 
-overlapping selections by merge? This is particular important, if flanking
+\code{shortName(ModRNAString())} and of course be present in metadata column 
+\code{mod} of \code{coord}. To disable subsetting based on type, set 
+\code{type = NA}.}
+\item{\code{flanking}:} {a single integer value to select how many flanking
+position should be included in the subset (default = \code{flanking = 0L}).}
+\item{\code{merge}:} {\code{TRUE} or \code{FALSE}: Should the 
+overlapping selections be merged? This is particular important, if flanking
 value \code{!= 0L} are set. (default: \code{merge = TRUE}).}
-\item{\code{perTranscript}} {\code{TRUE} or \code{FALSE}: Should the 
+\item{\code{perTranscript}:} {\code{TRUE} or \code{FALSE}: Should the 
 positions labeled per transcript and not per chromosome?
 (default: \code{perTranscript = FALSE}).}
 }}
@@ -105,23 +108,31 @@ positions labeled per transcript and not per chromosome?
 \value{
 If 'x' is a
 \itemize{
-\item{\code{\link[=Modifier-class]{Modifier}}} {a \code{SplitDataFrameList}
+\item{\code{\link[=SequenceData-class]{SequenceData}} or 
+\code{\link[=Modifier-class]{Modifier}}} {a \code{SplitDataFrameList}
 with elments per transcript.}
-\item{\code{\link[=ModifierSet-class]{ModifierSet}}} {a \code{SimpleList} of
+\item{\code{\link[=SequenceDataSet-class]{SequenceDataSet}},
+\code{\link[=SequenceDataList-class]{SequenceDataList}} or
+\code{\link[=ModifierSet-class]{ModifierSet}}} {a \code{SimpleList} of
 \code{SplitDataFrameList} with elments per transcript.}
 }
 }
 \description{
-With \code{subsetByCoord} data from a \code{Modifier} or \code{ModifierSet}
-object will be subset to position as defined in \code{coord}. If \code{coord}
-contains a column \code{mod} and \code{x} of type \code{Modifier}, it will
-be filtered to identifiers matching the
-\code{\link[=Modifier-functions]{modType}} of \code{x}. To disable remove
-the column \code{mod} from \code{coord} or set \code{type = NA}
+With the \code{subsetByCoord} function data from a \code{SequenceData},
+\code{SequenceDataSet}, \code{SequenceDataList}, \code{Modifier} or
+\code{ModifierSet} object can be subset to positions as defined in
+\code{coord}.
 
-\code{labelByCoord} functions the same. It will return a
+If \code{coord} contains a column \code{mod} and \code{x} is a
+\code{Modifier} object, it will be filtered to identifiers matching the
+\code{\link[=Modifier-functions]{modType}} of \code{x}. To disable this
+behaviour remove the column \code{mod} from \code{coord} or set \code{type =
+NA}
+
+\code{labelByCoord} functions similarly. It will return a
 \code{SplitDataFrameList}, which matches the dimensions of the aggregated
-data plus the \code{labels} column.
+data plus the \code{labels} column, which contains logical values to indicate
+selected positions.
 }
 \examples{
 data(msi,package="RNAmodR")

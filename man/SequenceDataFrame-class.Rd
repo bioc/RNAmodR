@@ -33,12 +33,16 @@ individual conditions}
 a \code{SequenceDataFrame} object
 }
 \description{
-The \code{SequenceDataFrame} class contains data for positions along a 
-transcripts. It is used to describe elements from a \code{SequenceData}
+The \code{SequenceDataFrame} class contains data for positions along a single
+transcript. It is used to describe elements from a \code{SequenceData}
 object.
 
-It is derived from the \code{\link[S4Vectors:DataFrame-class]{DataFrame}} 
-class.
+The \code{SequenceDataFrame} class is derived from the
+\code{\link[S4Vectors:DataFrame-class]{DataFrame}} class.
+
+Subsetting of a \code{SequenceDataFrame} returns a \code{SequenceDataFrame} or 
+\code{DataFrame}, if it is subset by a column or row, respectively. The 
+\code{drop} argument is ignored for column subsetting.
 }
 \examples{
 data(e5sd,package="RNAmodR")

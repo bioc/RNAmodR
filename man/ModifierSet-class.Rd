@@ -10,6 +10,8 @@
 \alias{ModifierSet,Modifier-method}
 \title{The ModifierSet class}
 \usage{
+ModifierSet(className, x, annotation, sequences, seqinfo, ...)
+
 \S4method{ModifierSet}{list}(className, x, annotation = NULL,
   sequences = NULL, seqinfo = NULL, ...)
 
@@ -39,22 +41,26 @@ existing bam files. Valid names are \code{control} and \code{treated}}
 }}
 
 \item{annotation}{annotation data, which must match the information contained
-in the BAM files. This is parameter is only required if \code{x} if not a 
+in the BAM files. This is parameter is only required, if \code{x} is not a 
 \code{Modifier} object.}
 
 \item{sequences}{sequences matching the target sequences the reads were 
 mapped onto. This must match the information contained in the BAM files. This
-is parameter is only required if \code{x} if not a \code{Modifier} object.}
+is parameter is only required, if \code{x} is not a \code{Modifier} object.}
 
-\item{seqinfo}{optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
-subset the transcripts analyzed on a chromosome basis.}
+\item{seqinfo}{An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
+argument or character vector, which can be coerced to one, to subset the 
+sequences to be analyzed on a per chromosome basis.}
 
 \item{...}{Additional otpional parameters:
 \itemize{
-\item{internalBP} {\code{TRUE} or \code{FALSE}: should 
-parallilazation used internally during creation of each \code{Modifier} or
-should the creation of the \code{Modifier} objects be parallalized? (default:
-\code{internalBP = FALSE})}
+\item{internalBP} {\code{TRUE} or \code{FALSE}: should parallelization used
+internally during creation of each \code{Modifier} or should the creation of
+the \code{Modifier} objects be parallalized? (default: \code{internalBP =
+FALSE}). Setting \code{internalBP} only makes sense, if the
+\code{\link{getData}} function for \code{\link{SequenceData}} class, the
+\code{\link[=aggregate]{aggregateData}} or the \code{\link[=modify]{findMod}}
+function contains parallelized code.}
 }
 All other arguments will be passed onto the \code{Modifier} objects.}
 }
@@ -70,13 +76,13 @@ In addition the comparison of samples is also done via calling functions on
 the \code{ModifierSet} objects.
 
 The \code{ModifierSet} is a virtual class, which derives from the 
-\code{SimpleList} with the slot \code{elementType = "Modifier"}. As 
-the \code{Modifier} it must be implemented for the specific analysis.
+\code{SimpleList} class with the slot \code{elementType = "Modifier"}. The
+\code{ModifierSet} class has to be implemented for each specific analysis.#'
 }
 \section{Creation}{
 
 The input files have to be provided as a \code{list} of elements. Each
-element in itself must be valid for the creation of \code{Modifier} object 
-(Have a look at the man page for more details) and must be named.
+element in itself must be valid for the creation of \code{\link{Modifier}}
+object (Have a look at the man page for more details) and must be named.
 }
 

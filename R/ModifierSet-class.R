@@ -16,14 +16,13 @@ NULL
 #' the \code{ModifierSet} objects.
 #' 
 #' The \code{ModifierSet} is a virtual class, which derives from the 
-#' \code{SimpleList} with the slot \code{elementType = "Modifier"}. As 
-#' the \code{Modifier} it must be implemented for the specific analysis.
-#' 
+#' \code{SimpleList} class with the slot \code{elementType = "Modifier"}. The
+#' \code{ModifierSet} class has to be implemented for each specific analysis.#' 
 #' 
 #' @section Creation:
 #' The input files have to be provided as a \code{list} of elements. Each
-#' element in itself must be valid for the creation of \code{Modifier} object 
-#' (Have a look at the man page for more details) and must be named.
+#' element in itself must be valid for the creation of \code{\link{Modifier}}
+#' object (Have a look at the man page for more details) and must be named.
 #' 
 #' @param className The name of the class which should be constructed.
 #' @param x the input which can be of the following types
@@ -39,19 +38,23 @@ NULL
 #' existing bam files. Valid names are \code{control} and \code{treated}}
 #' }
 #' @param annotation annotation data, which must match the information contained
-#' in the BAM files. This is parameter is only required if \code{x} if not a 
+#' in the BAM files. This is parameter is only required, if \code{x} is not a 
 #' \code{Modifier} object.
 #' @param sequences sequences matching the target sequences the reads were 
 #' mapped onto. This must match the information contained in the BAM files. This
-#' is parameter is only required if \code{x} if not a \code{Modifier} object.
-#' @param seqinfo optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
-#' subset the transcripts analyzed on a chromosome basis.
+#' is parameter is only required, if \code{x} is not a \code{Modifier} object.
+#' @param seqinfo An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
+#' argument or character vector, which can be coerced to one, to subset the 
+#' sequences to be analyzed on a per chromosome basis.
 #' @param ... Additional otpional parameters:
 #' \itemize{
-#' \item{internalBP} {\code{TRUE} or \code{FALSE}: should 
-#' parallilazation used internally during creation of each \code{Modifier} or
-#' should the creation of the \code{Modifier} objects be parallalized? (default:
-#' \code{internalBP = FALSE})}
+#' \item{internalBP} {\code{TRUE} or \code{FALSE}: should parallelization used
+#' internally during creation of each \code{Modifier} or should the creation of
+#' the \code{Modifier} objects be parallalized? (default: \code{internalBP =
+#' FALSE}). Setting \code{internalBP} only makes sense, if the
+#' \code{\link{getData}} function for \code{\link{SequenceData}} class, the
+#' \code{\link[=aggregate]{aggregateData}} or the \code{\link[=modify]{findMod}}
+#' function contains parallelized code.}
 #' }
 #' All other arguments will be passed onto the \code{Modifier} objects.
 #' 
@@ -274,6 +277,15 @@ setMethod(f = "relistToClass",
   }
   .ModifierSet(className, x)
 }
+
+#' @rdname ModifierSet-class
+#' @export
+setGeneric( 
+  name = "ModifierSet",
+  signature = c("x"),
+  def = function(className, x, annotation, sequences, seqinfo, ...)
+    standardGeneric("ModifierSet")
+)
 
 #' @rdname ModifierSet-class
 #' @export

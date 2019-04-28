@@ -23,12 +23,12 @@ the \code{\link[RNAmodR:Modifier-class]{Modifier}} and
 \code{\link[RNAmodR:ModifierSet-class]{ModifierSet}} classes.}
 
 \item{annotation}{annotation data, which must match the information contained
-in the BAM files. This is parameter is only required if \code{x} if not a 
+in the BAM files. This is parameter is only required, if \code{x} is not a 
 \code{Modifier} object.}
 
 \item{sequences}{sequences matching the target sequences the reads were 
 mapped onto. This must match the information contained in the BAM files. This
-is parameter is only required if \code{x} if not a \code{Modifier} object.}
+is parameter is only required, if \code{x} is not a \code{Modifier} object.}
 
 \item{seqinfo}{An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
 argument or character vector, which can be coerced to one, to subset the 
@@ -52,10 +52,10 @@ Inosine can be detected in RNA-Seq data by the conversion of A positions to
 G. This conversion is detected by \code{ModInosine} and used to search for 
 Inosine positions. \code{dataType} is \code{"PileupSequenceData"}.
 
-Only samples named \code{treated} are used for this analysis, since the
-A to G conversion is common feature among the reverse transcriptases usually
-emploied. Let us know, if that is not the case, and the class needs to be
-modified.
+Only samples labeled with the condition \code{treated} are used for this
+analysis, since the A to G conversion is common feature among the reverse
+transcriptases usually emploied. Let us know, if that is not the case, and
+the class needs to be modified.
 
 Further information on \code{\link[=ModInosine-functions]{Functions}} of 
 \code{ModInosine}.
@@ -63,7 +63,7 @@ Further information on \code{\link[=ModInosine-functions]{Functions}} of
 \details{
 \code{ModInosine} score: the scores for reported Inosine positions are 
 between 0 and 1. They are calculated as the relative amount of called G bases 
-(\code{(G / N)}) and only kept for A positions.
+(\code{(G / N)}) and only saved for genomic A positions.
 }
 \examples{
 # construction of ModInosine object

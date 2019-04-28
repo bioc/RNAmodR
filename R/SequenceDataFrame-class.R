@@ -9,8 +9,8 @@ NULL
 #' 
 #' @description 
 #' The \code{SequenceData}, \code{SequenceDataSet}, \code{SequenceDataList} and
-#' \code{SequenceDataFrame} share functionality. Have a look at the elements
-#' listed under Usage.
+#' \code{SequenceDataFrame} classes share functionality. Have a look at the 
+#' elements listed directly below.
 #' 
 #' @param x,object a \code{SequenceData}, \code{SequenceDataSet}, 
 #' \code{SequenceDataList} or a \code{SequenceDataFrame} object.
@@ -24,13 +24,13 @@ NULL
 #' 
 #' @return 
 #' \itemize{
-#' \item{\code{seqinfo}} {a \code{Seqinfo} object ()}
-#' \item{\code{sequences}} {a \code{RNAStingSet} object or a \code{RNAString} 
-#' object for a \code{SequenceDataFrame}}
-#' \item{\code{ranges}} {a \code{GRangesList} object with each element per 
-#' transcript or a \code{GRanges} object for a \code{SequenceDataFrame}}
-#' \item{\code{bamfiles}} {a \code{BamFileList} object or a SimpleList of 
-#' \code{BamFileList} objects for a \code{SequenceDataList}}
+#' \item{\code{seqinfo}:} {a \code{Seqinfo} object ().}
+#' \item{\code{sequences}:} {a \code{RNAStingSet} object or a \code{RNAString} 
+#' object for a \code{SequenceDataFrame}.}
+#' \item{\code{ranges}:} {a \code{GRangesList} object with each element per 
+#' transcript or a \code{GRanges} object for a \code{SequenceDataFrame}.}
+#' \item{\code{bamfiles}:} {a \code{BamFileList} object or a SimpleList of 
+#' \code{BamFileList} objects for a \code{SequenceDataList}.}
 #' }
 #' 
 #' @examples 
@@ -48,12 +48,16 @@ NULL
 #' @title The SequenceDataFrame class
 #' 
 #' @description 
-#' The \code{SequenceDataFrame} class contains data for positions along a 
-#' transcripts. It is used to describe elements from a \code{SequenceData}
+#' The \code{SequenceDataFrame} class contains data for positions along a single
+#' transcript. It is used to describe elements from a \code{SequenceData}
 #' object.
 #' 
-#' It is derived from the \code{\link[S4Vectors:DataFrame-class]{DataFrame}} 
-#' class.
+#' The \code{SequenceDataFrame} class is derived from the
+#' \code{\link[S4Vectors:DataFrame-class]{DataFrame}} class.
+#' 
+#' Subsetting of a \code{SequenceDataFrame} returns a \code{SequenceDataFrame} or 
+#' \code{DataFrame}, if it is subset by a column or row, respectively. The 
+#' \code{drop} argument is ignored for column subsetting.
 #' 
 #' @param df the data as a \code{DataFrame}.
 #' @param ranges a \code{GRanges} object containing all annotation elements

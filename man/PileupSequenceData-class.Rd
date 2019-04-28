@@ -36,8 +36,8 @@ pileupToCoverage(x)
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
 
-\item{name}{For \code{getDataTrack}: a valid transcript name. Must be a name
-of \code{ranges(x)}}
+\item{name}{For \code{\link[=visualizeByCoord]{getDataTrack}}: a valid 
+transcript name. Must be a name of \code{ranges(x)}}
 }
 \value{
 a \code{PileupSequenceData} object
@@ -53,7 +53,7 @@ columns are distinguished by additional identifiers \code{-}, \code{G},
 
 \code{aggregate} calculates the mean and sd for each nucleotide in the
 \code{control} and \code{treated} condition separatly. The results are then
-normalized to a rowSum of 1.
+normalized to a row sum of 1.
 }
 \examples{
 # Construction of a PileupSequenceData object

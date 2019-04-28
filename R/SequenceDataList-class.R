@@ -11,7 +11,7 @@ NULL
 #' @description 
 #' The \code{SequenceDataList} class is used to hold \code{SequenceData} or 
 #' \code{SequenceDataSet} objects as its elements. It is derived from the 
-#' \code{\link[S4Vectors:List-class]{List}}.
+#' \code{\link[S4Vectors:List-class]{List}} class.
 #' 
 #' The \code{SequenceDataList} is used to hold data from different sets of
 #' aligned reads. This allows multiple methods to be aggregated into one

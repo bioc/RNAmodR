@@ -62,8 +62,8 @@ EndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
 
-\item{name}{For \code{getDataTrack}: a valid transcript name. Must be a name
-of \code{ranges(x)}}
+\item{name}{For \code{\link[=visualizeByCoord]{getDataTrack}}: a valid 
+transcript name. Must be a name of \code{ranges(x)}}
 }
 \value{
 a \code{End5SequenceData}, a \code{End3SequenceData} or a 
@@ -71,9 +71,9 @@ a \code{End5SequenceData}, a \code{End3SequenceData} or a
 }
 \description{
 The \code{End5SequenceData}/\code{End3SequenceData}/\code{EndSequenceData}
-aggregate the counts of read ends at each position along transcript. Whereas
-the first aggregate either the 5'-end or 3'-end, the \code{EndSequenceData}
-aggregates both.
+classes aggregate the counts of read ends at each position along a
+transcript. \code{End5SequenceData}/\code{End3SequenceData} classes aggregate
+either the 5'-end or 3'-end, the \code{EndSequenceData} aggregates both.
 
 All three classes contain one column per data file named using the following
 naming convention \code{(end5/end3/end).condition.replicate}.

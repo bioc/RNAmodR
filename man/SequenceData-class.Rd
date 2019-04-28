@@ -41,10 +41,10 @@ read quality. Reads with a lower quality are discarded (default:
 }
 \description{
 The \code{SequenceData} class is implemented to contain data on each position
-along a transcripts and holds the corresponding annotation data and
+along transcripts and holds the corresponding annotation data and
 nucleotide sequence of these transcripts. To access this data several
 \code{\link[=SequenceData-functions]{functions}} are available. The
-\code{SequenceData} class is a virtual class, from which specific class can
+\code{SequenceData} class is a virtual class, from which specific classes can
 be extended. Currently the following classes are implemented:
 
 \itemize{
@@ -58,13 +58,13 @@ be extended. Currently the following classes are implemented:
 \item{\code{\link[=ProtectedEndSequenceData-class]{ProtectedEndSequenceData}}}
 }
 
-The annotation and sequence data can be accessed through \code{ranges} and
-\code{sequences}, respectively. Beaware, that the data is always given 
-according to genomic position with increasing \code{rownames}, but the
-sequence is given as the actual sequence of the transcript. Therefore, it 
-is necessary to treat the minus strand accordingly.
+The annotation and sequence data can be accessed through the functions
+\code{ranges} and \code{sequences}, respectively. Beaware, that the data is
+always provided according to genomic positions with increasing
+\code{rownames}, but the sequence is given as the actual sequence of the
+transcript. Therefore, it is necessary to treat the minus strand accordingly.
 
-It is derived from the
+The \code{SequenceData} class is derived from the
 \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} class
 with additional slots for annotation and sequence data. Some functionality is
 not inherited and not available, e.g. \code{cbind}, \code{rbind} amd
@@ -76,7 +76,10 @@ not inherited and not available, e.g. \code{cbind}, \code{rbind} amd
 \item{\code{ranges}}{a \code{\link[GenomicRanges:GRangesList-class]{GRangesList}} 
 object each element describing a transcript including its element. The 
 \code{GRangesList} is constructed from the 
-\code{\link[GenomicFeatures:transcriptsBy]{exonsBy(x, by="tx")}}.}
+\code{\link[GenomicFeatures:transcriptsBy]{exonsBy(x, by="tx")}} function.
+If during construction a \code{GRangesList} is provided instead of a 
+character value pointing to a gff3 file or a \code{TxDb} object, it must have
+a comparable structure.}
 
 \item{\code{sequences}}{a \code{\link[Biostrings:XStringSet-class]{XStringSet}} of 
 type \code{sequencesType}.}

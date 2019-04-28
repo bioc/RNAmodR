@@ -9,9 +9,9 @@ NULL
 #' 
 #' @description
 #' The \code{End5SequenceData}/\code{End3SequenceData}/\code{EndSequenceData}
-#' aggregate the counts of read ends at each position along transcript. Whereas
-#' the first aggregate either the 5'-end or 3'-end, the \code{EndSequenceData}
-#' aggregates both.
+#' classes aggregate the counts of read ends at each position along a
+#' transcript. \code{End5SequenceData}/\code{End3SequenceData} classes aggregate
+#' either the 5'-end or 3'-end, the \code{EndSequenceData} aggregates both.
 #' 
 #' All three classes contain one column per data file named using the following
 #' naming convention \code{(end5/end3/end).condition.replicate}.
@@ -23,8 +23,8 @@ NULL
 #' \code{\link[=SequenceData-class]{SequenceData}} and 
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{CoverageSequenceData}
-#' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
-#' of \code{ranges(x)}
+#' @param name For \code{\link[=visualizeByCoord]{getDataTrack}}: a valid 
+#' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 

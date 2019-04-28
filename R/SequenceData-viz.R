@@ -2,54 +2,6 @@
 #' @include SequenceData-class.R
 NULL
 
-#' @name visualizeData
-#' @aliases visualizeData visualizeDataByCoord
-#' 
-#' @title visualizeData
-#' 
-#' @description 
-#' title
-#' 
-#' @param x a \code{Modifier} or \code{ModifierSet} object.
-#' @param coord coordinates of a positions to subset to as a 
-#' \code{GRanges} object. The Parent column is expected to match the gene or 
-#' transcript name.
-#' @param name Only for \code{visualizeData}: the transcript name
-#' @param from Only for \code{visualizeData}: start position
-#' @param to Only for \code{visualizeData}: end position
-#' @param type the data type of data show as data tracks.
-#' @param showSequenceData \code{TRUE} or \code{FALSE}: should the sequence data
-#' be shown? (default: \code{seqdata = FALSE})
-#' @param showSequence \code{TRUE} or \code{FALSE}: should a sequence track be 
-#' shown? (default: \code{seqdata = TRUE})
-#' @param showAnnotation \code{TRUE} or \code{FALSE}: should a annotation track 
-#' be shown? (default: \code{seqdata = FALSE})
-#' @param window.size integer value for the number of positions on the left and 
-#' right site of the selected positions included in the plotting (default: 
-#' \code{window.size = 15L})
-#' @param perTranscript \code{TRUE} or \code{FALSE}: Should the positions shown
-#' per transcript? (default: \code{perTranscript = FALSE})
-#' @param ... optional parameters:
-#' \itemize{
-#' \item{\code{modified.seq}} {\code{TRUE} or \code{FALSE}. Should the sequence 
-#' shown with modified nucleotide positions? (default: 
-#' \code{modified.seq = FALSE})}
-#' \item{\code{additional.mod}} {other modifications, which should be shown
-#' in the annotation and sequence track. The must be a \code{GRanges} compatible
-#' with \code{\link[Modstrings:separate]{combineIntoModstrings}}.}
-#' \item{\code{annotation.track.pars}} {Parameters passed onto the 
-#' \code{\link[Gviz:AnnotationTrack-class]{AnnotationTrack}}.}
-#' \item{\code{sequence.track.pars}} {Parameters passed onto the 
-#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
-#' }
-#' 
-#' @return a plot send to the active graphic device
-#' 
-#' @examples 
-#' data(msi,package="RNAmodR")
-#' visualizeData(msi, "2", from = 10L, to = 45L)
-NULL
-
 # normalization functions for visualizations -----------------------------------
 
 .norm_coord_for_visualization <- function(ranges, coord){
