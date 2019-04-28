@@ -828,8 +828,8 @@ setMethod(f = "aggregateData",
           signature = signature(x = "Modifier"),
           definition = 
             function(x){
-              stop("This functions needs to be implemented by '",class(x),
-                   "'.",call. = FALSE)
+              stop("The 'aggregateData' functions needs to be implemented by 
+                   '",class(x),"'.",call. = FALSE)
             }
 )
 #' @rdname aggregate
@@ -922,7 +922,7 @@ setMethod(f = "findMod",
           signature = signature(x = "Modifier"),
           definition = 
             function(x){
-              stop("This functions needs to be implemented by '",class(x),
-                   "'.",call. = FALSE)
+              stop("The 'findMod' functions needs to be implemented by 
+                   '",class(x),"'.",call. = FALSE)
             }
 )
