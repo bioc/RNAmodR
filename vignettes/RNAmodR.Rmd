@@ -78,7 +78,7 @@ be coerced to a `BamFileList`, or named `BamFileList`. The names must be either
 "treated" or "control" describing the condition the data file belongs to. 
 Multiple files can be given per condition and are used as replicates.
 
-```{r example_files, echo=FALSE}
+```{r example_files, include=FALSE}
 annotation <- GFF3File(RNAmodR.Data.example.gff3())
 sequences <- RNAmodR.Data.example.fasta()
 files <- c(Treated = RNAmodR.Data.example.bam.1(),
@@ -233,7 +233,7 @@ corresponding name. Each entry in the character vector/`BamFileList` is a
 replicate (Alternatively a `ModifierSet` can also be created from a `list` of
 `Modifier` objects, if they are of the same type).
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 sequences <- RNAmodR.Data.example.AAS.fasta()
 annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
 files <- list("SampleSet1" = c(treated = RNAmodR.Data.example.wt.1(),
@@ -393,7 +393,7 @@ We welcome contribution of any sort.
 # Sessioninfo
 
 ```{r}
-sessioninfo::session_info()
+sessionInfo()
 ```
 
 <a name="References"></a>

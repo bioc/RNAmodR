@@ -45,10 +45,10 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' # Construction of a ProtectedEndSequenceData object
 #' library(RNAmodR.Data)
 #' library(rtracklayer)
-#' annotation <- GFF3File(RNAmodR.Data.example.gff3())
-#' sequences <- RNAmodR.Data.example.fasta()
-#' files <- c(control = RNAmodR.Data.example.bam.1(),
-#'            treated = RNAmodR.Data.example.bam.2())
+#' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+#' sequences <- RNAmodR.Data.example.man.fasta()
+#' files <- c(control = RNAmodR.Data.example.wt.1(),
+#'            treated = RNAmodR.Data.example.wt.2())
 #' pesd <- ProtectedEndSequenceData(files, annotation = annotation,
 #'                                  sequences = sequences)
 NULL

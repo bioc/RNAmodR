@@ -60,12 +60,13 @@ NULL
 #' # construction of ModInosine object
 #' library(RNAmodR.Data)
 #' library(rtracklayer)
-#' sequences <- RNAmodR.Data.example.AAS.fasta()
-#' annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
+#' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+#' sequences <- RNAmodR.Data.example.man.fasta()
 #' files <- c(treated = RNAmodR.Data.example.wt.1(),
 #'            treated = RNAmodR.Data.example.wt.2(),
 #'            treated = RNAmodR.Data.example.wt.3())
 #' mi <- ModInosine(files,annotation = annotation ,sequences = sequences)
+#' \dontrun{
 #' # construction of ModSetInosine object
 #' files <- list("SampleSet1" = c(treated = RNAmodR.Data.example.wt.1(),
 #'                                treated = RNAmodR.Data.example.wt.2(),
@@ -75,6 +76,7 @@ NULL
 #'               "SampleSet3" = c(treated = RNAmodR.Data.example.trm8.1(),
 #'                                treated = RNAmodR.Data.example.trm8.2()))
 #' msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
+#' }
 NULL
 
 #' @name ModInosine-internals

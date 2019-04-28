@@ -66,8 +66,8 @@ test_that("Modifier/ModifierSet:",{
   library(rtracklayer)
   library(RNAmodR.Data)
   library(rtracklayer)
-  sequences <- RNAmodR.Data.example.AAS.fasta()
-  annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
+  annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+  sequences <- RNAmodR.Data.example.man.fasta()
   files <- c(treated = RNAmodR.Data.example.wt.1(),
              treated = RNAmodR.Data.example.wt.2(),
              treated = RNAmodR.Data.example.wt.3())
