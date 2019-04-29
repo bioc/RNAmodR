@@ -66,9 +66,125 @@ additional package development.
 implented for all \code{SequenceData} classes. The results must match the
 requirements outlined in the value section.
 
+In addition the following functions should be implemented for complete
+functionality:
+
+\code{aggregateData} for each \code{SequenceData} and \code{Modifier} class.
+See also \code{\link[=aggregate]{aggregateData}}
+
+\code{findMod} for each \code{Modifier} class. See also 
+\code{\link[=modify]{findMod}}.
+
+\code{visualizeData}/\code{visualizeDataByCoord} for each \code{Modifier} 
+and \code{ModifierSet} class. See also 
+\code{\link[=visualizeData]{visualizeData}}.
+
+The following helper function can be called from within \code{findMod} to
+construct a coordinate for each modification found:
+
 \code{constructModRanges} constructs a \code{GRanges} object describing the
-location, type and associated scores of a modification. 
-\code{constructModRanges} is typically called from the \code{modify} 
-function, which must be implemented for all 
+location, type and associated scores of a modification.
+\code{constructModRanges} is typically called from the \code{modify}
+function, which must be implemented for all
 \code{\link[RNAmodR:Modifier-class]{Modifier}} classes.
+}
+\examples{
+# new SequenceData class
+setClass(Class = "ExampleSequenceData",
+         contains = "SequenceData",
+         prototype = list(minQuality = 5L))
+ExampleSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
+  RNAmodR:::SequenceData("Example", bamfiles = bamfiles, 
+                         annotation = annotation, sequences = sequences,
+                         seqinfo = seqinfo, ...)
+}
+setMethod("getData",
+          signature = c(x = "ExampleSequenceData",
+                        bamfiles = "BamFileList",
+                        grl = "GRangesList",
+                        sequences = "XStringSet",
+                        param = "ScanBamParam"),
+          definition = function(x, bamfiles, grl, sequences, param, args){
+            ###
+          }
+)
+setMethod("aggregateData",
+          signature = c(x = "ExampleSequenceData"),
+          function(x, condition = c("Both","Treated","Control")){
+            ###
+          }
+)
+setMethod(
+  f = "getDataTrack",
+  signature = signature(x = "ExampleSequenceData"),
+  definition = function(x, name, ...) {
+    ###
+  }
+)
+
+# new Modifier class
+setClass("ModExample",
+         contains = c("Modifier"),
+         prototype = list(mod = "X",
+                          score = "score",
+                          dataType = "ExampleSequenceData"))
+ModExample <- function(x, annotation, sequences, seqinfo, ...){
+  RNAmodR:::Modifier("ModExample", x = x, annotation = annotation,
+                     sequences = sequences, seqinfo = seqinfo, ...)
+}
+
+setMethod(f = "aggregateData",
+          signature = signature(x = "ModExample"),
+          definition =
+            function(x, force = FALSE){
+              # Some data with element per transcript
+            }
+)
+
+setMethod("findMod",
+          signature = c(x = "ModExample"),
+          function(x){
+            # an element per modification found.
+          }
+)
+setMethod(
+  f = "getDataTrack",
+  signature = signature(x = "ModExample"),
+  definition = function(x, name, type, ...) {
+  }
+)
+setMethod(
+  f = "visualizeDataByCoord",
+  signature = signature(x = "ModExample", coord = "GRanges"),
+  definition = function(x, coord, type = "score", window.size = 15L, ...) {
+  }
+)
+setMethod(
+  f = "visualizeData",
+  signature = signature(x = "ModExample"),
+  definition = function(x, name, from, to, type = "score", ...) {
+  }
+)
+ 
+# new ModifierSet class
+setClass("ModSetExample",
+         contains = "ModifierSet",
+         prototype = list(elementType = "ModExample"))
+ModSetExample <- function(x, annotation, sequences, seqinfo, ...){
+  RNAmodR:::ModifierSet("ModExample", x = x, annotation = annotation,
+                        sequences = sequences, seqinfo = seqinfo, ...)
+}
+
+setMethod(
+  f = "visualizeDataByCoord",
+  signature = signature(x = "ModSetExample", coord = "GRanges"),
+  definition = function(x, coord, type = "score", window.size = 15L, ...) {
+  }
+)
+setMethod(
+  f = "visualizeData",
+  signature = signature(x = "ModSetExample"),
+  definition = function(x, name, from, to, type = "score", ...) {
+  }
+)
 }

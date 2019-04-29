@@ -1,6 +1,6 @@
 Package: RNAmodR
 Title: RNAmodR: Detection of post-transcriptional modifications
-Version: 0.99.9
+Version: 0.99.10
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
                     email = "felix.gm.ernst@outlook.com", 
