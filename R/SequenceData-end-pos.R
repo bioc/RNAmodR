@@ -22,7 +22,8 @@ NULL
 #' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
 #' \code{\link[=SequenceData-class]{SequenceData}} and 
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
-#' @param x a \code{CoverageSequenceData}
+#' @param x a \code{End5SequenceData}, \code{End3SequenceData} or
+#' \code{EndSequenceData} object
 #' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
 #' of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 

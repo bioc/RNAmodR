@@ -58,7 +58,7 @@ subset the transcripts analyzed on a chromosome basis.}
 
 \item{...}{Additional otpional parameters:
 \itemize{
-\item{findMod: }{\code{TRUE} or \code{FALSE}: should the search for for 
+\item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for for 
 modifications be triggered upon construction? If not the search can be 
 started by calling the \code{modify()} function.}
 }
@@ -85,7 +85,7 @@ recognize.
 
 \code{Modifier} objects are constructed centrally by calling 
 \code{Modifier()} with a \code{className} matching the specific class to be
-constructed. This will trigger the immediate analysis, if \code{findMod} is
+constructed. This will trigger the immediate analysis, if \code{find.mod} is
 not set to \code{TRUE}.
 }
 \section{Slots}{

@@ -28,7 +28,7 @@ NULL
 #' 
 #' \code{Modifier} objects are constructed centrally by calling 
 #' \code{Modifier()} with a \code{className} matching the specific class to be
-#' constructed. This will trigger the immediate analysis, if \code{findMod} is
+#' constructed. This will trigger the immediate analysis, if \code{find.mod} is
 #' not set to \code{TRUE}.
 #' 
 #' 
@@ -83,7 +83,7 @@ NULL
 #' subset the transcripts analyzed on a chromosome basis.
 #' @param ... Additional otpional parameters:
 #' \itemize{
-#' \item{findMod: }{\code{TRUE} or \code{FALSE}: should the search for for 
+#' \item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for for 
 #' modifications be triggered upon construction? If not the search can be 
 #' started by calling the \code{modify()} function.}
 #' }
@@ -476,7 +476,7 @@ setMethod(f = "seqinfo",
 .norm_args <- function(input){
   minCoverage <- 10L
   minReplicate <- 1L
-  findMod <- TRUE
+  find.mod <- TRUE
   if(!is.null(input[["minCoverage"]])){
     minCoverage <- input[["minCoverage"]]
     if(!is.integer(minCoverage) || 
@@ -493,15 +493,15 @@ setMethod(f = "seqinfo",
       stop("'minReplicate' must be a single positive integer value.")
     }
   }
-  if(!is.null(input[["findMod"]])){
-    findMod <- input[["findMod"]]
-    if(!assertive::is_a_bool(findMod)){
-      stop("'findMod' must be a single logical value.")
+  if(!is.null(input[["find.mod"]])){
+    find.mod <- input[["find.mod"]]
+    if(!assertive::is_a_bool(find.mod)){
+      stop("'find.mod' must be a single logical value.")
     }
   }
   args <- list(minCoverage = minCoverage,
                minReplicate = minReplicate,
-               findMod = findMod)
+               find.mod = find.mod)
   args
 }
 
@@ -657,7 +657,7 @@ setMethod(f = "validModification",
   message("Aggregating data and calculating scores ... ", appendLF = FALSE)
   ans <- aggregate(ans)
   # search for modifications
-  if(settings(ans,"findMod")){
+  if(settings(ans,"find.mod")){
     f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
     modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
     message("Starting to search for '", paste(tools::toTitleCase(modName), 
@@ -774,8 +774,8 @@ setMethod("Modifier",
 #' @examples 
 #' data(e5sd,package="RNAmodR")
 #' data(msi,package="RNAmodR")
-#' # aggregate() triggers the aggregation of data contained in a SequenceData,
-#' # Modifier or ModifierSet objects
+#' # modify() triggers the search for modifications in the data contained in
+#' # the Modifier or ModifierSet object
 #' sdfl <- aggregate(e5sd)
 #' mi <- aggregate(msi[[1]])
 #' msi <- aggregate(msi)
@@ -869,11 +869,12 @@ setMethod(f = "hasAggregateData",
 #' the results inside the \code{Modifier} object. The results can be accessed
 #' via the \code{modifications()} function.
 #' 
+#' \code{modifications} is the accessor for the found modifications.
+#' 
 #' \code{findMod} just returns the found modifications as a \code{GRanges} 
 #' object. It does not check for validity of the aggregate data in side the
-#' \code{Modifier} object.
-#' 
-#' \code{modifications} is the accessor for the found modifications.
+#' \code{Modifier} object. This function should only used internally or when
+#' developing a new \code{Modifier} class.
 #' 
 #' @param x a \code{Modifier} object.
 #' @param force force to run \code{aggregate} again, if data is already stored

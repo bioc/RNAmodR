@@ -57,7 +57,8 @@ EndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \code{\link[=SequenceData-class]{SequenceData}} and 
 \code{\link[=SequenceData-functions]{SequenceData-functions}}}
 
-\item{x}{a \code{CoverageSequenceData}}
+\item{x}{a \code{End5SequenceData}, \code{End3SequenceData} or
+\code{EndSequenceData} object}
 
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
