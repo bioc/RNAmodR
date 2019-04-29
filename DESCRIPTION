@@ -1,6 +1,6 @@
 Package: RNAmodR
 Title: RNAmodR: Detection of post-transcriptional modifications
-Version: 0.99.2
+Version: 0.99.3
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
                     email = "felix.gm.ernst@outlook.com", 
@@ -20,7 +20,7 @@ License: Artistic-2.0
 Encoding: UTF-8
 LazyData: false
 Depends:
-    R (>= 3.5),
+    R (>= 3.6),
     IRanges,
     GenomicRanges,
     Modstrings
