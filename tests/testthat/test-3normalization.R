@@ -1,5 +1,6 @@
 context("argument normalization")
 test_that("argument normalization:",{
+  skip_on_bioc()
   library(RNAmodR.Data)
   library(rtracklayer)
   gff <- GFF3File(RNAmodR.Data.example.man.gff3())

@@ -16,7 +16,9 @@ test_that("SequenceDataFrame:",{
                             replicates(sdf),
                             conditions(sdf))
   expect_equal(sdf,sdf2)
+  ##############################################################################
   # errors
+  skip_on_bioc()
   expect_error(SequenceDataFrame(as(sdf,"DataFrame"),
                                  BString(),
                                  sequences(sdf),

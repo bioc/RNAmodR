@@ -1,6 +1,7 @@
 
 context("ROC")
 test_that("ROC:",{
+  skip_on_bioc()
   data(msi, package = "RNAmodR")
   # arguments
   actual <- RNAmodR:::.norm_prediction_args()

@@ -1,6 +1,7 @@
 
 context("Comparing data")
 test_that("Comparing data:",{
+  skip_on_bioc()
   data(msi, package = "RNAmodR")
   getDefCoord <- function(){
     GRanges(seqnames = "chr2",

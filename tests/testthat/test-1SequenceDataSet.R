@@ -53,6 +53,8 @@ test_that("SequenceDataList:",{
   expect_equal(names(sdl),names(sdl[[1]]))
   expect_named(bamfiles(sdl),names)
   expect_s4_class(bamfiles(sdl),"SimpleList")
+  ##############################################################################
+  skip_on_bioc()
   actual <- conditions(sdl)
   expect_s4_class(actual,"SimpleList")
   expect_s4_class(actual[[1]],"FactorList")

@@ -1,6 +1,7 @@
 
 context("Subsetting SequenceData")
 test_that("Subsetting SequenceData:",{
+  skip_on_bioc()
   data(msi,package = "RNAmodR")
   data(psd,package = "RNAmodR")
   # arguments
