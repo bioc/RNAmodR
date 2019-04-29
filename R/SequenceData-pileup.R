@@ -18,26 +18,27 @@ NULL
 #' 
 #' \code{aggregate} calculates the mean and sd for each nucleotide in the
 #' \code{control} and \code{treated} condition separatly. The results are then
-#' normalized to a rowSum of 1.
+#' normalized to a row sum of 1.
 #' 
 #' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
 #' \code{\link[=SequenceData-class]{SequenceData}} and
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{PileupSequenceData}
-#' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
-#' of \code{ranges(x)}
+#' @param name For \code{\link[=visualizeDataByCoord]{getDataTrack}}: a valid 
+#' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 
 #' @return a \code{PileupSequenceData} object
 #' 
 #' @examples
-#' # Construct a End5SequenceData object
-#' library(Rsamtools)
-#' annotation <- GFF3File(RNAmodR.Data.example.gff3())
-#' sequences <- RNAmodR.Data.example.fasta()
-#' files <- c(control = RNAmodR.Data.example.bam.1(),
-#'            treated = RNAmodR.Data.example.bam.2())
+#' # Construction of a PileupSequenceData object
+#' library(RNAmodR.Data)
+#' library(rtracklayer)
+#' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+#' sequences <- RNAmodR.Data.example.man.fasta()
+#' files <- c(control = RNAmodR.Data.example.wt.1(),
+#'            treated = RNAmodR.Data.example.wt.2())
 #' psd <- PileupSequenceData(files, annotation = annotation,
 #'                           sequences = sequences)
 NULL

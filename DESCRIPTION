@@ -1,6 +1,6 @@
 Package: RNAmodR
-Title: Detection of post-transcriptional modifications
-Version: 0.98.0
+Title: RNAmodR: Detection of post-transcriptional modifications
+Version: 0.99.2
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
                     email = "felix.gm.ernst@outlook.com", 
@@ -39,7 +39,6 @@ Imports:
     GenomicFeatures,
     GenomicAlignments,
     Biostrings,
-    SummarizedExperiment,
     GenomeInfoDb,
     rtracklayer,
     Rsamtools,
@@ -58,7 +57,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat,
-    sessioninfo,
     RNAmodR.Data
 VignetteBuilder: knitr
 Collate:

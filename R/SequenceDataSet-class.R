@@ -10,7 +10,7 @@ NULL
 #' @description 
 #' The \code{SequenceDataSet} class is used to hold \code{SequenceData} objects
 #' as its elements. It is derived from the 
-#' \code{\link[S4Vectors:List-class]{List}}.
+#' \code{\link[S4Vectors:List-class]{List}} class.
 #' 
 #' The \code{SequenceDataSet} is used to hold different data types from the of
 #' same aligned reads. The same dataset can be used to generate multiple sets of

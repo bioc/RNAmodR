@@ -43,8 +43,8 @@ a plot send to the active graphic device
 }
 \description{
 \code{plotROC} streamlines labeling, prediction, performance and plotting
-to test the peformance of a \code{Modifier} object and the data analyzed via
-the functionallity from the \code{ROCR} package.
+functions to test the peformance of a \code{Modifier} object and the data 
+analyzed via the functionallity from the \code{ROCR} package.
 
 The data from \code{x} will be labeled as positive using the \code{coord}
 arguments. The other arguments will be passed on to the specific \code{ROCR}

@@ -12,6 +12,8 @@
 \alias{Modifier,BamFileList-method}
 \title{The Modifier class}
 \usage{
+Modifier(className, x, annotation, sequences, seqinfo, ...)
+
 \S4method{Modifier}{SequenceData}(className, x, annotation = NULL,
   sequences = NULL, seqinfo = NULL, ...)
 
@@ -35,10 +37,10 @@
 
 \item{x}{the input which can be of the following types
 \itemize{
-\item{\code{SequenceData}:} {a single \code{SequenceData} or a list containg
-only \code{SequenceData} objects. The input will just be used as elements of
-the \code{Modifier} and must match the requirements of specific
-\code{Modifier} class }
+\item{\code{SequenceData}:} {a single \code{SequenceData} or a list
+containing only \code{SequenceData} objects. The input will just be used to
+file the \code{data} slot of the \code{Modifier} and must match the
+requirements of specific \code{Modifier} class.}
 \item{\code{BamFileList}:} {a named \code{BamFileList}}
 \item{\code{character}:} {a \code{character} vector, which must be coercible
 to a named \code{BamFileList} referencing existing bam files. Valid names are
@@ -46,53 +48,57 @@ to a named \code{BamFileList} referencing existing bam files. Valid names are
 }}
 
 \item{annotation}{annotation data, which must match the information contained
-in the BAM files. This is parameter is only required if \code{x} if not a 
-\code{Modifier} object.}
+in the BAM files. This parameter is only required if \code{x} is not a
+\code{SequenceData} object or a list of \code{SequenceData} objects.}
 
-\item{sequences}{sequences matching the target sequences the reads were 
-mapped onto. This must match the information contained in the BAM files. This
-is parameter is only required if \code{x} if not a \code{Modifier} object.}
+\item{sequences}{sequences matching the target sequences the reads were
+mapped onto. This must match the information contained in the BAM files.
+TThis parameter is only required if \code{x} is not a \code{SequenceData}
+object or a list of \code{SequenceData} objects.}
 
-\item{seqinfo}{optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
-subset the transcripts analyzed on a chromosome basis.}
+\item{seqinfo}{An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}}
+argument or character vector, which can be coerced to one, to subset the
+sequences to be analyzed on a per chromosome basis.}
 
 \item{...}{Additional otpional parameters:
 \itemize{
-\item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for for 
-modifications be triggered upon construction? If not the search can be 
+\item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for
+for modifications be triggered upon construction? If not the search can be
 started by calling the \code{modify()} function.}
 }
-All other arguments will be passed onto the \code{SequenceData} objects.}
+All other arguments will be passed onto the \code{SequenceData} objects, if
+\code{x} is not a \code{SequenceData} object or a list of \code{SequenceData}
+objects.}
 }
 \value{
 a \code{Modifier} object of type \code{className}
 }
 \description{
-The \code{Modifier} class is a virtual class, which provides the central 
-functionality for searching for patterns of post-transcriptional RNA 
-modifications in high throughput sequencing data.
+The \code{Modifier} class is a virtual class, which provides the central
+functionality to search for post-transcriptional RNA modification patterns in
+high throughput sequencing data.
 
 Each subclass has to implement the following functions:
 
 \itemize{
-\item{\code{\link{aggregate}}: }{used for specific data aggregation}
-\item{\code{\link{modify}}: }{used for specific search for modifications}
+\item{\code{\link{aggregateData}}: }{used for specific data aggregation}
+\item{\code{\link{findMod}}: }{used for specific search for modifications}
 }
 
 Optionally the function \code{\link[=Modifier-functions]{settings<-}} can be
 implemented to store additional arguments, which the base class does not
 recognize.
 
-\code{Modifier} objects are constructed centrally by calling 
+\code{Modifier} objects are constructed centrally by calling
 \code{Modifier()} with a \code{className} matching the specific class to be
 constructed. This will trigger the immediate analysis, if \code{find.mod} is
-not set to \code{TRUE}.
+not set to \code{FALSE}.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{mod}}{a \code{character} value, which needs to contain one or more 
-elements from the alphabet of a 
+\item{\code{mod}}{a \code{character} value, which needs to contain one or more
+elements from the alphabet of a
 \code{\link[Modstrings:ModRNAString]{ModRNAString}} class.}
 
 \item{\code{score}}{the main score identifier used for visualizations}
@@ -101,14 +107,14 @@ elements from the alphabet of a
 
 \item{\code{bamfiles}}{the input bam files as \code{BamFileList}}
 
-\item{\code{condition}}{conditions along the \code{BamFileList}: Either 
+\item{\code{condition}}{conditions along the \code{BamFileList}: Either
 \code{control} or \code{treated}}
 
 \item{\code{replicate}}{replicate number along the \code{BamFileList} for each of the
 condition types.}
 
-\item{\code{data}}{The sequence data object: Either a \code{SequenceData}, 
-\code{SequenceDataSet} or a \code{SequenceDataList} object, if more than one 
+\item{\code{data}}{The sequence data object: Either a \code{SequenceData},
+\code{SequenceDataSet} or a \code{SequenceDataList} object, if more than one
 \code{dataType} is used.}
 
 \item{\code{aggregate}}{the aggregated data as a \code{SplitDataFrameList}}
@@ -120,19 +126,19 @@ condition types.}
 \item{\code{aggregateValidForCurrentArguments}}{\code{TRUE} or \code{FALSE} whether
 the aggregate data was constructed with the current arguments}
 
-\item{\code{modificationsValidForCurrentArguments}}{\code{TRUE} or \code{FALSE} 
+\item{\code{modificationsValidForCurrentArguments}}{\code{TRUE} or \code{FALSE}
 whether the modifications were found with the current arguments}
 }}
 
 \section{Creation}{
- 
+
 \code{Modifier} objects can be created in two ways, either by providing a
-list of bamfiles or 
-\code{SequenceData}/\code{SequenceDataSet}/\code{SequenceDataList} objects, 
+list of bamfiles or
+\code{SequenceData}/\code{SequenceDataSet}/\code{SequenceDataList} objects,
 which match the structure in \code{dataType()}.
 
 \code{dataType()} can be a \code{character} vector or a \code{list} of
-\code{character} vectors and depending on this the input files have to 
+\code{character} vectors and depending on this the input files have to
 follow this structure:
 
 \itemize{
@@ -144,14 +150,15 @@ constructed/expected.}
 is constructed/expected.}
 }
 
-The cases for a \code{SequenceData} or \code{SequenceDataSet} are rather
-obvious, since the input remains the same. The last case is special, since
-it is a hypothetical option in case bam files from to different methods 
-have to be combined to reliably detect a single modification (The elements of
-a \code{SequenceDataList} don't have to be created from the bamfiles). 
+The cases for a \code{SequenceData} or \code{SequenceDataSet} are straight
+forward, since the input remains the same. The last case is special, since it
+is a hypothetical option, in which bam files from two or more different
+methods have to be combined to reliably detect a single modification (The
+elements of a \code{SequenceDataList} don't have to be created from the
+bamfiles, whereas from a \code{SequenceDataSet} they have to be).
 
 For this example a \code{list} of \code{character} vectors is expected.
-Each element must be named according to the names of \code{dataType()} and 
+Each element must be named according to the names of \code{dataType()} and
 contain a \code{character} vector for creating a \code{SequenceData} object.
 }
 

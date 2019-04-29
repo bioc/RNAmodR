@@ -7,41 +7,41 @@ NULL
 
 #' @name Modifier-class
 #' @aliases Modifier
-#' 
+#'
 #' @title The Modifier class
-#' 
+#'
 #' @description
-#' The \code{Modifier} class is a virtual class, which provides the central 
-#' functionality for searching for patterns of post-transcriptional RNA 
-#' modifications in high throughput sequencing data.
-#' 
+#' The \code{Modifier} class is a virtual class, which provides the central
+#' functionality to search for post-transcriptional RNA modification patterns in
+#' high throughput sequencing data.
+#'
 #' Each subclass has to implement the following functions:
-#' 
+#'
 #' \itemize{
-#' \item{\code{\link{aggregate}}: }{used for specific data aggregation}
-#' \item{\code{\link{modify}}: }{used for specific search for modifications}
+#' \item{\code{\link{aggregateData}}: }{used for specific data aggregation}
+#' \item{\code{\link{findMod}}: }{used for specific search for modifications}
 #' }
-#' 
+#'
 #' Optionally the function \code{\link[=Modifier-functions]{settings<-}} can be
 #' implemented to store additional arguments, which the base class does not
 #' recognize.
-#' 
-#' \code{Modifier} objects are constructed centrally by calling 
+#'
+#' \code{Modifier} objects are constructed centrally by calling
 #' \code{Modifier()} with a \code{className} matching the specific class to be
 #' constructed. This will trigger the immediate analysis, if \code{find.mod} is
-#' not set to \code{TRUE}.
-#' 
-#' 
-#' @section Creation: 
+#' not set to \code{FALSE}.
+#'
+#'
+#' @section Creation:
 #' \code{Modifier} objects can be created in two ways, either by providing a
-#' list of bamfiles or 
-#' \code{SequenceData}/\code{SequenceDataSet}/\code{SequenceDataList} objects, 
+#' list of bamfiles or
+#' \code{SequenceData}/\code{SequenceDataSet}/\code{SequenceDataList} objects,
 #' which match the structure in \code{dataType()}.
-#' 
+#'
 #' \code{dataType()} can be a \code{character} vector or a \code{list} of
-#' \code{character} vectors and depending on this the input files have to 
+#' \code{character} vectors and depending on this the input files have to
 #' follow this structure:
-#' 
+#'
 #' \itemize{
 #' \item{a single \code{character}:} {a \code{SequenceData} is
 #' constructed/expected.}
@@ -50,105 +50,109 @@ NULL
 #' \item{a \code{list} of \code{character} vectors:} {a \code{SequenceDataList}
 #' is constructed/expected.}
 #' }
-#' 
-#' The cases for a \code{SequenceData} or \code{SequenceDataSet} are rather
-#' obvious, since the input remains the same. The last case is special, since
-#' it is a hypothetical option in case bam files from to different methods 
-#' have to be combined to reliably detect a single modification (The elements of
-#' a \code{SequenceDataList} don't have to be created from the bamfiles). 
-#' 
+#'
+#' The cases for a \code{SequenceData} or \code{SequenceDataSet} are straight
+#' forward, since the input remains the same. The last case is special, since it
+#' is a hypothetical option, in which bam files from two or more different
+#' methods have to be combined to reliably detect a single modification (The
+#' elements of a \code{SequenceDataList} don't have to be created from the
+#' bamfiles, whereas from a \code{SequenceDataSet} they have to be).
+#'
 #' For this example a \code{list} of \code{character} vectors is expected.
-#' Each element must be named according to the names of \code{dataType()} and 
+#' Each element must be named according to the names of \code{dataType()} and
 #' contain a \code{character} vector for creating a \code{SequenceData} object.
-#' 
+#'
 #' @param className The name of the class which should be constructed.
 #' @param x the input which can be of the following types
 #' \itemize{
-#' \item{\code{SequenceData}:} {a single \code{SequenceData} or a list containg
-#' only \code{SequenceData} objects. The input will just be used as elements of
-#' the \code{Modifier} and must match the requirements of specific
-#' \code{Modifier} class }
+#' \item{\code{SequenceData}:} {a single \code{SequenceData} or a list
+#' containing only \code{SequenceData} objects. The input will just be used to
+#' file the \code{data} slot of the \code{Modifier} and must match the
+#' requirements of specific \code{Modifier} class.}
 #' \item{\code{BamFileList}:} {a named \code{BamFileList}}
 #' \item{\code{character}:} {a \code{character} vector, which must be coercible
 #' to a named \code{BamFileList} referencing existing bam files. Valid names are
 #' \code{control} and \code{treated} to define conditions and replicates}
 #' }
 #' @param annotation annotation data, which must match the information contained
-#' in the BAM files. This is parameter is only required if \code{x} if not a 
-#' \code{Modifier} object.
-#' @param sequences sequences matching the target sequences the reads were 
-#' mapped onto. This must match the information contained in the BAM files. This
-#' is parameter is only required if \code{x} if not a \code{Modifier} object.
-#' @param seqinfo optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
-#' subset the transcripts analyzed on a chromosome basis.
+#' in the BAM files. This parameter is only required if \code{x} is not a
+#' \code{SequenceData} object or a list of \code{SequenceData} objects.
+#' @param sequences sequences matching the target sequences the reads were
+#'   mapped onto. This must match the information contained in the BAM files.
+#'   TThis parameter is only required if \code{x} is not a \code{SequenceData}
+#'   object or a list of \code{SequenceData} objects.
+#' @param seqinfo An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}}
+#' argument or character vector, which can be coerced to one, to subset the
+#' sequences to be analyzed on a per chromosome basis.
 #' @param ... Additional otpional parameters:
 #' \itemize{
-#' \item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for for 
-#' modifications be triggered upon construction? If not the search can be 
+#' \item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for
+#' for modifications be triggered upon construction? If not the search can be
 #' started by calling the \code{modify()} function.}
 #' }
-#' All other arguments will be passed onto the \code{SequenceData} objects.
-#' 
-#' @slot mod a \code{character} value, which needs to contain one or more 
-#' elements from the alphabet of a 
+#' All other arguments will be passed onto the \code{SequenceData} objects, if
+#' \code{x} is not a \code{SequenceData} object or a list of \code{SequenceData}
+#' objects.
+#'
+#' @slot mod a \code{character} value, which needs to contain one or more
+#' elements from the alphabet of a
 #' \code{\link[Modstrings:ModRNAString]{ModRNAString}} class.
 #' @slot score the main score identifier used for visualizations
-#' @slot dataType the class name(s) of the \code{SequenceData} class used 
+#' @slot dataType the class name(s) of the \code{SequenceData} class used
 #' @slot bamfiles the input bam files as \code{BamFileList}
-#' @slot condition conditions along the \code{BamFileList}: Either 
+#' @slot condition conditions along the \code{BamFileList}: Either
 #' \code{control} or \code{treated}
 #' @slot replicate replicate number along the \code{BamFileList} for each of the
 #' condition types.
-#' @slot data The sequence data object: Either a \code{SequenceData}, 
-#' \code{SequenceDataSet} or a \code{SequenceDataList} object, if more than one 
+#' @slot data The sequence data object: Either a \code{SequenceData},
+#' \code{SequenceDataSet} or a \code{SequenceDataList} object, if more than one
 #' \code{dataType} is used.
 #' @slot aggregate the aggregated data as a \code{SplitDataFrameList}
 #' @slot modifications the found modifications as a \code{GRanges} object
 #' @slot arguments arguments used for the analysis as a \code{list}
 #' @slot aggregateValidForCurrentArguments \code{TRUE} or \code{FALSE} whether
 #' the aggregate data was constructed with the current arguments
-#' @slot modificationsValidForCurrentArguments \code{TRUE} or \code{FALSE} 
+#' @slot modificationsValidForCurrentArguments \code{TRUE} or \code{FALSE}
 #' whether the modifications were found with the current arguments
-#' 
+#'
 #' @return a \code{Modifier} object of type \code{className}
 NULL
 
 #' @name Modifier-functions
-#' 
+#'
 #' @title Modifier/ModifierSet functions
-#' 
+#'
 #' @description
 #' For the \code{Modifier} and  \code{ModifierSet} classes a number of functions
 #' are implemented to access the data stored by the object.
-#' 
+#'
 #' @param x,object a \code{Modifier} or \code{ModifierSet} class
 #' @param name For \code{settings}: name of the setting to be returned or set
 #' @param value For \code{settings}: value of the setting to be set
 #' @param modified For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
-#' the sequences be returned as a \code{ModRNAString} with the found 
-#' modifications added on top of the \code{RNAString}? See 
+#' the sequences be returned as a \code{ModRNAString} with the found
+#' modifications added on top of the \code{RNAString}? See
 #' \code{\link[Modstrings:separate]{combineIntoModstrings}}.
 #' @param perTranscript \code{TRUE} or \code{FALSE}: Should the positions shown
 #' per transcript? (default: \code{perTranscript = FALSE})
-#' @param ... Additional arguments. 
-#' 
+#' @param ... Additional arguments.
+#'
 #' @return
 #' \itemize{
-#' \item{\code{modifierType}} {a character vector with the appropriate class
-#' Name of a \code{\link[=Modifier-class]{Modifier}}. Works for both 
-#' \code{Modifier} and \code{ModifierSet} objects.}
-#' \item{\code{mainScore}} {a character vector}
-#' \item{\code{settings}} {a \code{Seqinfo} object}
-#' \item{\code{sequenceData}} {a \code{SequenceData} object}
-#' \item{\code{modifications}} {a \code{GRanges} or \code{GRangesList} object
+#' \item{\code{modifierType}:} {a character vector with the appropriate class
+#' Name of a \code{\link[=Modifier-class]{Modifier}}.}
+#' \item{\code{mainScore}:} {a character vector.}
+#' \item{\code{settings}:} {a \code{Seqinfo} object.}
+#' \item{\code{sequenceData}:} {a \code{SequenceData} object.}
+#' \item{\code{modifications}:} {a \code{GRanges} or \code{GRangesList} object
 #' describing the found modifications.}
-#' \item{\code{seqinfo}} {a \code{Seqinfo} object}
-#' \item{\code{sequences}} {a \code{RNAStingSet} object}
-#' \item{\code{ranges}} {a \code{GRangesList} object with each element per 
-#' transcript}
-#' \item{\code{bamfiles}} {a \code{BamFileList} object}
+#' \item{\code{seqinfo}:} {a \code{Seqinfo} object.}
+#' \item{\code{sequences}:} {a \code{RNAStingSet} object.}
+#' \item{\code{ranges}:} {a \code{GRangesList} object with each element per
+#' transcript.}
+#' \item{\code{bamfiles}:} {a \code{BamFileList} object.}
 #' }
-#' 
+#'
 #' @examples
 #' data(msi,package="RNAmodR")
 #' mi <- msi[[1]]
@@ -229,7 +233,7 @@ setClass("Modifier",
 .check_Modifier_data_elements <- function(x, data){
   if(is(data,"SequenceData") || is(data,"SequenceDataSet")){
     return(.check_SequenceData_elements(x, data))
-  } 
+  }
   .check_SequenceDataList_data_elements(x, data)
 }
 
@@ -316,7 +320,7 @@ S4Vectors::setValidity2(Class = "Modifier", .valid_Modifier)
 #' @rdname Modifier-functions
 #' @importFrom BiocGenerics path
 setMethod(
-  f = "show", 
+  f = "show",
   signature = signature(object = "Modifier"),
   definition = function(object) {
     cat("A", class(object), "object containing",dataType(object),
@@ -354,19 +358,19 @@ setMethod(
 
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "bamfiles", 
+setMethod(f = "bamfiles",
           signature = signature(x = "Modifier"),
           definition = function(x){x@bamfiles})
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "conditions", 
+setMethod(f = "conditions",
           signature = signature(object = "Modifier"),
           definition = function(object){
             conditions(sequenceData(object))
           })
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "mainScore", 
+setMethod(f = "mainScore",
           signature = signature(x = "Modifier"),
           definition = function(x){x@score})
 
@@ -393,9 +397,9 @@ setMethod(f = "mainScore",
 
 #' @rdname modify
 #' @export
-setMethod(f = "modifications", 
+setMethod(f = "modifications",
           signature = signature(x = "Modifier"),
-          definition = 
+          definition =
             function(x, perTranscript = FALSE){
               if(!assertive::is_a_bool(perTranscript)){
                 stop("'perTranscript' has to be a single logical value.")
@@ -408,46 +412,46 @@ setMethod(f = "modifications",
 )
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "modifierType", 
+setMethod(f = "modifierType",
           signature = signature(x = "Modifier"),
           definition = function(x){class(x)[[1]]})
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "modType", 
+setMethod(f = "modType",
           signature = signature(x = "Modifier"),
           definition = function(x){x@mod})
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "dataType", 
+setMethod(f = "dataType",
           signature = signature(x = "Modifier"),
           definition = function(x){x@dataType})
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "names", 
+setMethod(f = "names",
           signature = signature(x = "Modifier"),
           definition = function(x){names(sequenceData(x))})
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "ranges", 
+setMethod(f = "ranges",
           signature = signature(x = "Modifier"),
           definition = function(x){ranges(sequenceData(x))})
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "replicates", 
+setMethod(f = "replicates",
           signature = signature(x = "Modifier"),
           definition = function(x){
             replicates(sequenceData(x))
           })
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "sequenceData", 
+setMethod(f = "sequenceData",
           signature = signature(x = "Modifier"),
           definition = function(x){x@data})
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "sequences", 
+setMethod(f = "sequences",
           signature = signature(x = "Modifier"),
-          definition = 
+          definition =
             function(x, modified = FALSE){
               if(!assertive::is_a_bool(modified)){
                 stop("'modified' has to be a single logical value.",
@@ -462,14 +466,14 @@ setMethod(f = "sequences",
               ans <- ModRNAStringSet(sequences(sequenceData(x)))
               modSeqList <- ans[names(ans) %in% names(mod)]
               mod <- mod[match(names(mod),names(modSeqList))]
-              ans[names(ans) %in% names(mod)] <- 
+              ans[names(ans) %in% names(mod)] <-
                 Modstrings::combineIntoModstrings(modSeqList, mod)
               ans
             }
 )
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "seqinfo", 
+setMethod(f = "seqinfo",
           signature = signature(x = "Modifier"),
           definition = function(x){seqinfo(sequenceData(x))})
 
@@ -479,7 +483,7 @@ setMethod(f = "seqinfo",
   find.mod <- TRUE
   if(!is.null(input[["minCoverage"]])){
     minCoverage <- input[["minCoverage"]]
-    if(!is.integer(minCoverage) || 
+    if(!is.integer(minCoverage) ||
        minCoverage < 0L ||
        length(minCoverage) != 1){
       stop("'minCoverage' must be a single positive integer value.")
@@ -487,7 +491,7 @@ setMethod(f = "seqinfo",
   }
   if(!is.null(input[["minReplicate"]])){
     minReplicate <- input[["minReplicate"]]
-    if(!is.integer(minReplicate) || 
+    if(!is.integer(minReplicate) ||
        minReplicate < 0L ||
        length(minReplicate) != 1){
       stop("'minReplicate' must be a single positive integer value.")
@@ -507,7 +511,7 @@ setMethod(f = "seqinfo",
 
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "settings", 
+setMethod(f = "settings",
           signature = signature(x = "Modifier"),
           definition = function(x, name){
             if(missing(name) || is.null(name)){
@@ -521,7 +525,7 @@ setMethod(f = "settings",
 )
 #' @rdname Modifier-functions
 #' @export
-setReplaceMethod(f = "settings", 
+setReplaceMethod(f = "settings",
           signature = signature(x = "Modifier"),
           definition = function(x, value){
             if(is.null(names(value)) && length(value) > 0L){
@@ -539,13 +543,13 @@ setReplaceMethod(f = "settings",
 
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "validAggregate", 
+setMethod(f = "validAggregate",
           signature = signature(x = "Modifier"),
           definition = function(x) x@aggregateValidForCurrentArguments
 )
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "validModification", 
+setMethod(f = "validModification",
           signature = signature(x = "Modifier"),
           definition = function(x) x@modificationsValidForCurrentArguments
 )
@@ -572,7 +576,7 @@ setMethod(f = "validModification",
   condition <- factor(names(bamfiles))
   new2(className,
        mod = .norm_mod(proto@mod, className),
-       bamfiles = bamfiles, 
+       bamfiles = bamfiles,
        condition = condition,
        replicate = .get_replicate_number(bamfiles, condition),
        data = data)
@@ -598,11 +602,11 @@ setMethod(f = "validModification",
              call. = FALSE)
       }
       bamfiles <- bamfiles[match(class,names(bamfiles))]
-      data <- BiocParallel::bpmapply(.load_SequenceData, classes, bamfiles, 
-                                     MoreArgs = list(annotation, sequences, 
+      data <- BiocParallel::bpmapply(.load_SequenceData, classes, bamfiles,
+                                     MoreArgs = list(annotation, sequences,
                                                      seqinfo, args))
     } else {
-      data <- BiocParallel::bplapply(classes, .load_SequenceData, bamfiles, 
+      data <- BiocParallel::bplapply(classes, .load_SequenceData, bamfiles,
                                      annotation, sequences, seqinfo, args)
     }
     data <- as(data,"SequenceDataList")
@@ -627,7 +631,7 @@ setMethod(f = "validModification",
   # Check that external classes are implemented correctly
   className <- .norm_modifiertype(className)
   # create prototype object for mod normalization and settings only
-  proto <- new(className) 
+  proto <- new(className)
   # short cut for creating an empty object
   if(is.null(x)){
     return(new2(className, mod = .norm_mod(proto@mod, className)))
@@ -660,7 +664,7 @@ setMethod(f = "validModification",
   if(settings(ans,"find.mod")){
     f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
     modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
-    message("Starting to search for '", paste(tools::toTitleCase(modName), 
+    message("Starting to search for '", paste(tools::toTitleCase(modName),
                                               collapse = "', '"),
             "' ... ", appendLF = FALSE)
     ans <- modify(ans)
@@ -672,9 +676,18 @@ setMethod(f = "validModification",
 
 #' @rdname Modifier-class
 #' @export
+setGeneric(
+  name = "Modifier",
+  signature = c("x"),
+  def = function(className, x, annotation, sequences, seqinfo, ...)
+    standardGeneric("Modifier")
+)
+
+#' @rdname Modifier-class
+#' @export
 setMethod("Modifier",
           signature = c(x = "SequenceData"),
-          function(className, x, annotation = NULL, sequences = NULL, 
+          function(className, x, annotation = NULL, sequences = NULL,
                    seqinfo = NULL, ...){
             .new_ModFromSequenceData(className, x, ...)
           })
@@ -682,7 +695,7 @@ setMethod("Modifier",
 #' @export
 setMethod("Modifier",
           signature = c(x = "SequenceDataSet"),
-          function(className, x, annotation = NULL, sequences = NULL, 
+          function(className, x, annotation = NULL, sequences = NULL,
                    seqinfo = NULL, ...){
             .new_ModFromSequenceData(className, x, ...)
           })
@@ -690,7 +703,7 @@ setMethod("Modifier",
 #' @export
 setMethod("Modifier",
           signature = c(x = "SequenceDataList"),
-          function(className, x, annotation = NULL, sequences = NULL, 
+          function(className, x, annotation = NULL, sequences = NULL,
                    seqinfo = NULL, ...){
             .new_ModFromSequenceData(className, x, ...)
           })
@@ -698,7 +711,7 @@ setMethod("Modifier",
 #' @export
 setMethod("Modifier",
           signature = c(x = "character"),
-          function(className, x, annotation = NULL, sequences = NULL, 
+          function(className, x, annotation = NULL, sequences = NULL,
                    seqinfo = NULL, ...){
             .new_ModFromCharacter(className, x, annotation, sequences, seqinfo,
                                   ...)
@@ -707,7 +720,7 @@ setMethod("Modifier",
 #' @export
 setMethod("Modifier",
           signature = c(x = "list"),
-          function(className, x, annotation = NULL, sequences = NULL, 
+          function(className, x, annotation = NULL, sequences = NULL,
                    seqinfo = NULL, ...){
             .new_ModFromCharacter(className, x, annotation, sequences, seqinfo,
                                   ...)
@@ -716,7 +729,7 @@ setMethod("Modifier",
 #' @export
 setMethod("Modifier",
           signature = c(x = "BamFileList"),
-          function(className, x, annotation = NULL, sequences = NULL, 
+          function(className, x, annotation = NULL, sequences = NULL,
                    seqinfo = NULL, ...){
             .new_ModFromCharacter(className, x, annotation, sequences, seqinfo,
                                   ...)
@@ -726,52 +739,72 @@ setMethod("Modifier",
 
 #' @name aggregate
 #' @aliases hasAggregateData aggregateData getAggregateData
-#' 
-#' @title Aggreagte data per positions
-#' 
-#' @description 
-#' The aggregate function is defined per
-#' \code{\link[=SequenceData-class]{SequenceData}} object and can be triggered
-#' by either using the a \code{\link[=SequenceData-class]{SequenceData}} or
-#' \code{\link[=Modifier-class]{Modifier}}. For the letter it will just redirect
-#' to the \code{\link[=SequenceData-class]{SequenceData}} object, but will store
-#' the result. The data is then used for subsequent tasks, such as search for
-#' modifications and visualization of the results.
-#' 
-#' @param x a \code{\link[=SequenceData-class]{SequenceData}} or
-#'   \code{\link[=Modifier-class]{Modifier}} object.
+#'
+#' @title Aggregate data per positions
+#'
+#' @description
+#' The \code{aggregate} function is defined for each
+#' \code{\link[=SequenceData-class]{SequenceData}} object and can be used
+#' directly on a \code{\link[=SequenceData-class]{SequenceData}} object or
+#' indirectly via a \code{\link[=Modifier-class]{Modifier}} object.
+#'
+#' For the letter the call is redirect to the
+#' \code{\link[=SequenceData-class]{SequenceData}} object, the result summarized
+#' as defined for the individual \code{Modifier} class and stored in the
+#' \code{aggregate} slot of the \code{Modifier} object. The data is then used
+#' for subsequent tasks, such as search for modifications and visualization of
+#' the results.
+#'
+#' The summarization is implemented in the \code{aggregateData} for each type of
+#' \code{Modifier} class. The stored data from the \code{aggregate} slot can be
+#' retrieved using the \code{getAggregateData} function.
+#'
+#' Whether the aggrgeated data is already present in the \code{aggregate} slot
+#' can be checked using the \code{hasAggregateData} function.
+#'
+#' For \code{SequenceDataSet}, \code{SequenceDataList} and \code{ModfierSet}
+#' classes wrapper of the \code{aggregate} function exist as well.
+#'
+#' @param x a \code{\link[=SequenceData-class]{SequenceData}},
+#' \code{SequenceDataSet}, \code{SequenceDataList},
+#' \code{\link[=Modifier-class]{Modifier}} or
+#' \code{\link[=Modifier-class]{ModfierSet}}  object.
 #' @param force whether to recreate the aggregated data, if it is already stored
 #' inside the \code{Modifier} object.
 #' @param condition character value, which selects, for which condition the data
-#' should be aggregated. One of the following values: \code{Both}, 
-#' \code{Control}, \code{Treated} 
+#' should be aggregated. One of the following values: \code{Both},
+#' \code{Control}, \code{Treated}
 #' @param ... additional arguments
-#' 
-#' @return 
+#'
+#' @return
 #' \itemize{
-#' \item{\code{aggregate}: }{for \code{SequenceData} the aggregated data is
-#' returned as a \code{SplitDataFrameList} with an element per transcript, 
-#' whereas for a \code{Modifier} the modified input object is returned, 
-#' containing the aggregated data, which can be accessed using 
+#' \item{\code{aggregate}: }{for \code{SequenceData} object the aggregated data
+#' is returned as a \code{SplitDataFrameList} with an element per transcript,
+#' whereas for a \code{Modifier} the modified input object is returned,
+#' containing the aggregated data, which can be accessed using
 #' \code{getAggregateData}.}
-#' \item{\code{getAggregateData}: }{only for \code{Modifier}: a 
-#' \code{SplitDataFrameList} with an element per transcript is returned. If the 
-#' aggregated data is not stored in the object, it is generated on the fly, but 
-#' does not persist}
-#' \item{\code{hasAggregateData}: }{TRUE or FALSE. Does the \code{Modifier} 
+#' \item{\code{getAggregateData}: }{only for \code{Modifier}: a
+#' \code{SplitDataFrameList} with an element per transcript is returned. If the
+#' aggregated data is not stored in the object, it is generated on the fly, but
+#' does not persist.}
+#' \item{\code{hasAggregateData}: }{TRUE or FALSE. Does the \code{Modifier}
 #' object already contain aggregated data?}
 #' }
-#' 
-#' @return 
+#'
+#' @return
 #' If 'x' is a
 #' \itemize{
-#' \item{\code{\link[=SequenceData-class]{SequenceData}}} {a 
+#' \item{\code{\link[=SequenceData-class]{SequenceData}}} {a
 #' \code{SplitDataFrameList} with elments per transcript.}
-#' \item{\code{\link[=Modifier-class]{Modifier}}} {an updated \code{Modifier}
+#' \item{\code{\link[=SequenceDataSet-class]{SequenceDataSet}} or
+#' \code{\link[=SequenceDataList-class]{SequenceDataList}}} {a \code{SimpleList}
+#' with \code{SplitDataFrameList} as elements.}
+#' \item{\code{\link[=Modifier-class]{Modifier}} or
+#' \code{\link[=ModifierSet-class]{ModifierSet}}} {an updated \code{Modifier}
 #' object. The data can be accessed by using the \code{aggregateData} function.}
 #' }
-#' 
-#' @examples 
+#'
+#' @examples
 #' data(e5sd,package="RNAmodR")
 #' data(msi,package="RNAmodR")
 #' # modify() triggers the search for modifications in the data contained in
@@ -806,9 +839,9 @@ NULL
 
 #' @rdname aggregate
 #' @export
-setMethod(f = "aggregate", 
+setMethod(f = "aggregate",
           signature = signature(x = "Modifier"),
-          definition = 
+          definition =
             function(x, force = FALSE){
               if(missing(force)){
                 force <- FALSE
@@ -824,17 +857,17 @@ setMethod(f = "aggregate",
 
 #' @rdname aggregate
 #' @export
-setMethod(f = "aggregateData", 
+setMethod(f = "aggregateData",
           signature = signature(x = "Modifier"),
-          definition = 
+          definition =
             function(x){
-              stop("This functions needs to be implemented by '",class(x),
-                   "'.",call. = FALSE)
+              stop("The 'aggregateData' functions needs to be implemented by
+                   '",class(x),"'.",call. = FALSE)
             }
 )
 #' @rdname aggregate
 #' @export
-setMethod(f = "getAggregateData", 
+setMethod(f = "getAggregateData",
           signature = signature(x = "Modifier"),
           definition = function(x){
             x <- aggregate(x)
@@ -843,11 +876,11 @@ setMethod(f = "getAggregateData",
 
 #' @rdname aggregate
 #' @export
-setMethod(f = "hasAggregateData", 
+setMethod(f = "hasAggregateData",
           signature = signature(x = "Modifier"),
-          definition = 
+          definition =
             function(x){
-              if(is.null(x@aggregate) || nrow(x@aggregate) == 0L){
+              if(is.null(x@aggregate) || nrow(x@aggregate@unlistData) == 0L){
                 return(FALSE)
               }
               return(TRUE)
@@ -858,39 +891,39 @@ setMethod(f = "hasAggregateData",
 
 #' @name modify
 #' @aliases modifications
-#' 
+#'
 #' @title Searching for modifications in \code{SequenceData}
-#' 
-#' @description 
-#' \code{modify} triggers the search for modifications for a 
-#' \code{\link[=Modifier-class]{Modifier}} class. Usually this is done 
-#' automatically during construction of a \code{Modifier} object. It also makes 
-#' sure that the aggregated data is valid for the current settings and stores
-#' the results inside the \code{Modifier} object. The results can be accessed
-#' via the \code{modifications()} function.
-#' 
-#' \code{modifications} is the accessor for the found modifications.
-#' 
-#' \code{findMod} just returns the found modifications as a \code{GRanges} 
-#' object. It does not check for validity of the aggregate data in side the
-#' \code{Modifier} object. This function should only used internally or when
-#' developing a new \code{Modifier} class.
-#' 
+#'
+#' @description
+#' The \code{modify} function executes the search for modifications for a
+#' \code{\link[=Modifier-class]{Modifier}} class. Usually this is done
+#' automatically during construction of a \code{Modifier} object.
+#'
+#' When the \code{modify} functions is called, the aggregated data is checked
+#' for validity for the current settings and the search for modifications is
+#' performed using the \code{findMod}. The results are stored in the
+#' \code{modification} slot of the \code{Modifier} object, which is returned by
+#' \code{modify}. The results can be accessed via the \code{modifications()}
+#' function.
+#'
+#' \code{findMod} returns the found modifications as a \code{GRanges}
+#' object and has to be implemented for each individual \code{Modifier} class.
+#'
 #' @param x a \code{Modifier} object.
 #' @param force force to run \code{aggregate} again, if data is already stored
 #' in \code{x}.
 #' @param perTranscript For \code{modifications>} \code{TRUE} or \code{FALSE}:
 #'   Should the coordinates be returned as local per transcript coordinates?
 #' @param ... additional arguments
-#' 
-#' @return 
+#'
+#' @return
 #' \itemize{
 #' \item{\code{modify}: }{the updated \code{Modifier} object.}
 #' \item{\code{modifications}: }{the modifications found as a \code{GRanges}
 #' object.}
 #' }
-#' 
-#' @examples 
+#'
+#' @examples
 #' data(msi,package="RNAmodR")
 #' # modify() triggers the search for modifications in the data contained in
 #' # the Modifier or ModifierSet object
@@ -900,9 +933,9 @@ NULL
 
 #' @rdname modify
 #' @export
-setMethod(f = "modify", 
+setMethod(f = "modify",
           signature = signature(x = "Modifier"),
-          definition = 
+          definition =
             function(x, force = FALSE){
               if(missing(force)){
                 force <- FALSE
@@ -919,11 +952,11 @@ setMethod(f = "modify",
 
 #' @rdname modify
 #' @export
-setMethod(f = "findMod", 
+setMethod(f = "findMod",
           signature = signature(x = "Modifier"),
-          definition = 
+          definition =
             function(x){
-              stop("This functions needs to be implemented by '",class(x),
-                   "'.",call. = FALSE)
+              stop("The 'findMod' functions needs to be implemented by
+                   '",class(x),"'.",call. = FALSE)
             }
 )

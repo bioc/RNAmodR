@@ -45,19 +45,19 @@ object.}
 }
 }
 \description{
-\code{modify} triggers the search for modifications for a 
-\code{\link[=Modifier-class]{Modifier}} class. Usually this is done 
-automatically during construction of a \code{Modifier} object. It also makes 
-sure that the aggregated data is valid for the current settings and stores
-the results inside the \code{Modifier} object. The results can be accessed
-via the \code{modifications()} function.
+The \code{modify} function executes the search for modifications for a
+\code{\link[=Modifier-class]{Modifier}} class. Usually this is done
+automatically during construction of a \code{Modifier} object.
 
-\code{modifications} is the accessor for the found modifications.
+When the \code{modify} functions is called, the aggregated data is checked
+for validity for the current settings and the search for modifications is
+performed using the \code{findMod}. The results are stored in the
+\code{modification} slot of the \code{Modifier} object, which is returned by
+\code{modify}. The results can be accessed via the \code{modifications()}
+function.
 
-\code{findMod} just returns the found modifications as a \code{GRanges} 
-object. It does not check for validity of the aggregate data in side the
-\code{Modifier} object. This function should only used internally or when
-developing a new \code{Modifier} class.
+\code{findMod} returns the found modifications as a \code{GRanges}
+object and has to be implemented for each individual \code{Modifier} class.
 }
 \examples{
 data(msi,package="RNAmodR")

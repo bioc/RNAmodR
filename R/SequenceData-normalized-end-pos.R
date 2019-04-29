@@ -9,10 +9,9 @@ NULL
 #' 
 #' @description
 #' The \code{NormEnd5SequenceData}/\code{NormEnd3SequenceData}
-#' aggregate the counts of read ends (Either 5' or 3') at each position along 
-#' transcript. In addition the counts are then normalized to the length of the
-#' transcript and to the overlapping reads. Per sample three separate columns
-#' are stored named \code{ends},\code{norm.tx} and \code{norm.ol}.
+#' aggregate the counts of read ends (Either 5' or 3') at each position along a
+#' transcript. In addition, the number of counts are then normalized to the
+#' length of the transcript and to the overlapping reads.
 #' 
 #' Both classes contain three columns per data file named using the
 #' following naming convention \code{(normend5/normend3).condition.replicate}.
@@ -28,22 +27,25 @@ NULL
 #' \code{\link[=SequenceData-class]{SequenceData}} and
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{CoverageSequenceData}
-#' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
-#' of \code{ranges(x)}
+#' @param name For \code{\link[=visualizeDataByCoord]{getDataTrack}}: a valid 
+#' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 
 #' @return a \code{NormEnd5SequenceData} or \code{NormEnd3SequenceData} object
 #' 
 #' @examples
-#' # Construct a End5SequenceData object
-#' library(Rsamtools)
-#' annotation <- GFF3File(RNAmodR.Data.example.gff3())
-#' sequences <- RNAmodR.Data.example.fasta()
-#' files <- c(control = RNAmodR.Data.example.bam.1(),
-#'            treated = RNAmodR.Data.example.bam.2())
+#' # Construction of a NormEnd5SequenceData object
+#' library(RNAmodR.Data)
+#' library(rtracklayer)
+#' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+#' sequences <- RNAmodR.Data.example.man.fasta()
+#' files <- c(control = RNAmodR.Data.example.wt.1(),
+#'            treated = RNAmodR.Data.example.wt.2())
+#' \dontrun{
 #' ne5sd <- NormEnd5SequenceData(files, annotation = annotation,
-#'                              sequences = sequences)
+#'                               sequences = sequences)
+#' }
 NULL
 
 #' @rdname NormEndSequenceData-class

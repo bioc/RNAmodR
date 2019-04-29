@@ -5,28 +5,10 @@ NULL
 #' @title Modifier/ModifierSet functions
 NULL
 
-# Class constructors -----------------------------------------------------------
-
-setGeneric( 
-  name = "SequenceData",
-  signature = c("annotation","sequences"),
-  def = function(dataType, bamfiles, annotation, sequences, seqinfo, ...)
-    standardGeneric("SequenceData")
-) 
-
-setGeneric( 
-  name = "Modifier",
-  signature = c("x"),
-  def = function(className, x, annotation, sequences, seqinfo, ...)
-    standardGeneric("Modifier")
-) 
-
-setGeneric( 
-  name = "ModifierSet",
-  signature = c("x"),
-  def = function(className, x, annotation, sequences, seqinfo, ...)
-    standardGeneric("ModifierSet")
-)
+#' @name SequenceData-functions
+#' @title SequenceData/SequenceDataSet/SequenceDataList/SequenceDataFrame 
+#' functions
+NULL
 
 # ROC functions ----------------------------------------------------------------
 

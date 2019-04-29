@@ -17,14 +17,15 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' @description
 #' \code{ProtectedEndSequenceData} implements
 #' \code{\link[=SequenceData-class]{SequenceData}} to contain and aggregate the
-#' start and ends of reads per position along the transcripts. 
-#' \code{ProtectedEndSequenceData} behaves specially and offsets the start 
-#' position by -1 to align the information on the 5'-3'-phosphate bonds to one
-#' position. The \code{ProtectedEndSequenceData} class is specifically used
-#' for the RiboMethSeq method.
+#' start and ends of reads per position along a transcript.
+#' \code{ProtectedEndSequenceData} offsets the start position by -1 to align the
+#' information on the 5'-3'-phosphate bonds to one position. The
+#' \code{ProtectedEndSequenceData} class is implemented specifically as required
+#' for the \code{RiboMethSeq} method.
 #' 
-#' Both classes contain three columns per data file named using the
-#' following naming convention \code{protectedend.condition.replicate}.
+#' The objects of type \code{ProtectedEndSequenceData} contain three columns per
+#' data file named using the following naming convention
+#' \code{protectedend.condition.replicate}.
 #' 
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
 #' and \code{treated} condition separatly.
@@ -33,20 +34,21 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' \code{\link[=SequenceData-class]{SequenceData}} and
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{ProtectedEndSequenceData}
-#' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
-#' of \code{ranges(x)}
+#' @param name For \code{\link[=visualizeDataByCoord]{getDataTrack}}: a valid 
+#' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
 #' 
 #' @return a \code{ProtectedEndSequenceData} object
 #' 
 #' @examples 
-#' # Construct a ProtectedEndSequenceData object
-#' library(Rsamtools)
-#' annotation <- GFF3File(RNAmodR.Data.example.gff3())
-#' sequences <- RNAmodR.Data.example.fasta()
-#' files <- c(control = RNAmodR.Data.example.bam.1(),
-#'            treated = RNAmodR.Data.example.bam.2())
+#' # Construction of a ProtectedEndSequenceData object
+#' library(RNAmodR.Data)
+#' library(rtracklayer)
+#' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+#' sequences <- RNAmodR.Data.example.man.fasta()
+#' files <- c(control = RNAmodR.Data.example.wt.1(),
+#'            treated = RNAmodR.Data.example.wt.2())
 #' pesd <- ProtectedEndSequenceData(files, annotation = annotation,
 #'                                  sequences = sequences)
 NULL

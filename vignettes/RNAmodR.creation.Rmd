@@ -235,5 +235,5 @@ As suggested directly above, for a more detailed example have a look at the
 # Sessioninfo
 
 ```{r}
-sessioninfo::session_info()
+sessionInfo()
 ```

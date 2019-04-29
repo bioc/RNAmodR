@@ -16,7 +16,7 @@ test_that("Comparing data:",{
   expect_type(actual,"list")
   expect_named(actual,"alias")
   library(RNAmodR.Data)
-  library(Rsamtools)
+  library(rtracklayer)
   library(GenomicFeatures)
   annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
   txdb <- makeTxDbFromGFF(annotation)

@@ -21,7 +21,9 @@
 \alias{getDataTrack,SequenceDataSet-method}
 \alias{visualizeDataByCoord,SequenceDataSet,GRanges-method}
 \alias{visualizeData,SequenceDataSet-method}
-\title{visualizeData}
+\title{Visualizing data data from a \code{SequenceData}, 
+\code{SequenceDataSet}, \code{SequenceDataList}, \code{Modifier} or 
+\code{ModifierSet} object.}
 \usage{
 visualizeDataByCoord(x, coord, type, window.size = 15L, ...)
 
@@ -73,10 +75,11 @@ getDataTrack(x, name, ...)
   ...)
 }
 \arguments{
-\item{x}{a \code{Modifier} or \code{ModifierSet} object.}
+\item{x}{a \code{SequenceData}, \code{SequenceDataSet},
+\code{SequenceDataList}, \code{Modifier} or \code{ModifierSet} object.}
 
 \item{coord}{coordinates of a positions to subset to as a 
-\code{GRanges} object. The Parent column is expected to match the gene or 
+\code{GRanges} object. The 'Parent' column is expected to match the 
 transcript name.}
 
 \item{type}{the data type of data show as data tracks.}
@@ -121,7 +124,17 @@ per transcript? (default: \code{perTranscript = FALSE})}
 a plot send to the active graphic device
 }
 \description{
-title
+With the \code{visualizeData} and \code{visualizeDataByCoord} functions data
+from a \code{SequenceData}, \code{SequenceDataSet}, \code{SequenceDataList},
+\code{Modifier} or \code{ModifierSet} object can be visualized.
+
+Internally the functionality of the \code{Gviz} package is used. For each
+\code{SequenceData} and \code{Modifier} class the \code{getDataTrack} is
+implemented returning a \code{\link[Gviz:DataTrack-class]{DataTrack}} object
+from the \code{Gviz} package.
+
+Positions to be visualized are selected by defining a genomic coordinate,
+for which \code{x} has to contain data.
 }
 \examples{
 data(msi,package="RNAmodR")

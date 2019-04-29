@@ -97,43 +97,45 @@ NULL
 #' @name RNAmodR-datasets
 #' @title Example data in the RNAmodR package
 #' @description 
-#' This contains an example ModifierSet object
+#' The following datasets are contained in the RNAmodR package. They are used
+#' in the man page examples.
 #' @docType data
 #' @usage msi
-#' @usage psd
-#' @usage e5sd
-#' @format a \code{ModSetInosine} instance
+#' @format 
+#' \itemize{
+#' \item{msi} {a \code{ModSetInosine} instance}
+#' \item{sds} {a \code{SequenceDataSet} instance}
+#' \item{sdl} {a \code{SequenceDataList} instance}
+#' \item{psd} {a \code{PileupSequenceData} instance}
+#' \item{e5sd} {a \code{End5SequenceData} instance}
+#' \item{e3sd} {a \code{End3SequenceData} instance}
+#' \item{esd} {a \code{EndSequenceData} instance}
+#' \item{csd} {a \code{CoverageSequenceData} instance}
+#' \item{ne3sd} {a \code{NormEnd3SequenceData} instance}
+#' \item{ne5sd} {a \code{NormEnd5SequenceData} instance}
+#' \item{pesd} {a \code{ProtectedEndSequenceData} instance}
+#' }
 #' @keywords datasets
 "msi"
 #' @rdname RNAmodR-datasets
-#' @format a \code{SequenceDataSet} instance
 "sds"
 #' @rdname RNAmodR-datasets
-#' @format a \code{SequenceDataList} instance
 "sdl"
 #' @rdname RNAmodR-datasets
-#' @format a \code{PileupSequenceData} instance
 "psd"
 #' @rdname RNAmodR-datasets
-#' @format a \code{End5SequenceData} instance
 "e5sd"
 #' @rdname RNAmodR-datasets
-#' @format a \code{End3SequenceData} instance
 "e3sd"
 #' @rdname RNAmodR-datasets
-#' @format a \code{EndSequenceData} instance
 "esd"
 #' @rdname RNAmodR-datasets
-#' @format a \code{CoverageSequenceData} instance
 "csd"
 #' @rdname RNAmodR-datasets
-#' @format a \code{NormEnd3SequenceData} instance
 "ne3sd"
 #' @rdname RNAmodR-datasets
-#' @format a \code{NormEnd5SequenceData} instance
 "ne5sd"
 #' @rdname RNAmodR-datasets
-#' @format a \code{ProtectedEndSequenceData} instance
 "pesd"
 
 #' @name RNAmodR-development

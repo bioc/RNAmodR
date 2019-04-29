@@ -6,7 +6,7 @@ NULL
   colours <- NA
   if(!is.null(input[["colours"]])){
     colours <- input[["colours"]]
-    if(!is.character(colours) || any(!.is_colour(colours))){
+    if(!is.character(colours) || any(!.are_colours(colours))){
       stop("'colours' must be valid colour representation, which can be ",
            "interpreted by col2rgb().",
            call. = FALSE)

@@ -1,7 +1,7 @@
 context("argument normalization")
 test_that("argument normalization:",{
   library(RNAmodR.Data)
-  library(Rsamtools)
+  library(rtracklayer)
   gff <- GFF3File(RNAmodR.Data.example.man.gff3())
   fasta <- unname(path(RNAmodR.Data.example.man.fasta()))
   bam <- unname(path(RNAmodR.Data.example.wt.1()))

@@ -9,10 +9,10 @@ NULL
 #' 
 #' @description 
 #' To compare data of different samples, a
-#' \code{\link[=ModifierSet-class]{ModifierSet}} is used. To select the data
+#' \code{\link[=ModifierSet-class]{ModifierSet}} can be used. To select the data
 #' alongside the transcripts and their positions a
 #' \code{\link[GenomicRanges:GRanges-class]{GRanges}} or a
-#' \code{\link[GenomicRanges:GRanges-class]{GRangesList}} needs to be supplied.
+#' \code{\link[GenomicRanges:GRanges-class]{GRangesList}} needs to be provided.
 #' In case of a \code{GRanges} object, the parent column must match the
 #' transcript names as defined by the out put of \code{ranges(x)}, whereas in
 #' case of a \code{GRangesList} the element names must match the transcript
@@ -20,9 +20,9 @@ NULL
 #' 
 #' @param x a \code{Modifier} or \code{ModifierSet} object.
 #' @param coord coordinates of position to subset to. Either a \code{GRanges} or
-#' a \code{GRangesList} object. For both types the Parent column is expected to
-#' match the gene or transcript name. The \code{GRangesList} object is unlisted
-#' and only non duplicated entries are retained.
+#'   a \code{GRangesList} object. For both types the 'Parent' column is expected
+#'   to match the transcript name. The \code{GRangesList} object is
+#'   unlisted and only non duplicated entries are retained.
 #' @param name Only for \code{compare}: the transcript name
 #' @param from Only for \code{compare}: start position
 #' @param to Only for \code{compare}: end position
@@ -45,13 +45,13 @@ NULL
 #' \item{...} {passed on to \code{\link{subsetByCoord}}}
 #' }
 #' 
-#' @return \code{compareByCoord} returns a 
-#' \code{\link[IRanges:DataFrameList-class]{DataFrameList}} and
-#' \code{plotCompareByCoord} returns a \code{ggplot} object, which can be
-#' modified further. The \code{\link{DataFrameList}} contains columns per sample
-#' as well as \code{names}, \code{positions} and \code{mod} incorporated from
-#' the \code{coord} input. If \code{coord} contains a column \code{Activity}
-#' this is included in the results as well.
+#' @return \code{compareByCoord} returns a
+#'   \code{\link[S4Vectors:DataFrame-class]{DataFrame}} and
+#'   \code{plotCompareByCoord} returns a \code{ggplot} object, which can be
+#'   modified further. The \code{DataFrame} contains columns per sample as well
+#'   as the columns \code{names}, \code{positions} and \code{mod} incorporated
+#'   from the \code{coord} input. If \code{coord} contains a column
+#'   \code{Activity} this is included in the results as well.
 #' 
 #' @examples
 #' data(msi,package="RNAmodR")

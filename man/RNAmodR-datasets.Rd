@@ -15,7 +15,19 @@
 \alias{ne5sd}
 \alias{pesd}
 \title{Example data in the RNAmodR package}
-\format{a \code{ModSetInosine} instance}
+\format{\itemize{
+\item{msi} {a \code{ModSetInosine} instance}
+\item{sds} {a \code{SequenceDataSet} instance}
+\item{sdl} {a \code{SequenceDataList} instance}
+\item{psd} {a \code{PileupSequenceData} instance}
+\item{e5sd} {a \code{End5SequenceData} instance}
+\item{e3sd} {a \code{End3SequenceData} instance}
+\item{esd} {a \code{EndSequenceData} instance}
+\item{csd} {a \code{CoverageSequenceData} instance}
+\item{ne3sd} {a \code{NormEnd3SequenceData} instance}
+\item{ne5sd} {a \code{NormEnd5SequenceData} instance}
+\item{pesd} {a \code{ProtectedEndSequenceData} instance}
+}}
 \usage{
 msi
 
@@ -40,6 +52,7 @@ ne5sd
 pesd
 }
 \description{
-This contains an example ModifierSet object
+The following datasets are contained in the RNAmodR package. They are used
+in the man page examples.
 }
 \keyword{datasets}

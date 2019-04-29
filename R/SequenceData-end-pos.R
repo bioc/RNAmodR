@@ -4,41 +4,42 @@ NULL
 
 #' @name EndSequenceData-class
 #' @aliases End5SequenceData End3SequenceData EndSequenceData
-#' 
+#'
 #' @title End5SequenceData/End3SequenceData/EndSequenceData
-#' 
+#'
 #' @description
 #' The \code{End5SequenceData}/\code{End3SequenceData}/\code{EndSequenceData}
-#' aggregate the counts of read ends at each position along transcript. Whereas
-#' the first aggregate either the 5'-end or 3'-end, the \code{EndSequenceData}
-#' aggregates both.
-#' 
+#' classes aggregate the counts of read ends at each position along a
+#' transcript. \code{End5SequenceData}/\code{End3SequenceData} classes aggregate
+#' either the 5'-end or 3'-end, the \code{EndSequenceData} aggregates both.
+#'
 #' All three classes contain one column per data file named using the following
 #' naming convention \code{(end5/end3/end).condition.replicate}.
-#' 
+#'
 #' \code{aggregate} calculates the mean and sd for samples in the \code{control}
 #' and \code{treated} condition separatly.
-#' 
-#' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See 
-#' \code{\link[=SequenceData-class]{SequenceData}} and 
+#'
+#' @param bamfiles,annotation,seqinfo,grl,sequences,param,args,... See
+#' \code{\link[=SequenceData-class]{SequenceData}} and
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{End5SequenceData}, \code{End3SequenceData} or
 #' \code{EndSequenceData} object
-#' @param name For \code{getDataTrack}: a valid transcript name. Must be a name
-#' of \code{ranges(x)}
-#' @param condition For \code{\link{aggregate}}: condition for which the data 
+#' @param name For \code{\link[=visualizeDataByCoord]{getDataTrack}}: a valid
+#' transcript name. Must be a name of \code{ranges(x).}
+#' @param condition For \code{\link{aggregate}}: condition for which the data
 #' should be aggregated.
-#' 
-#' @return a \code{End5SequenceData}, a \code{End3SequenceData} or a 
+#'
+#' @return a \code{End5SequenceData}, a \code{End3SequenceData} or a
 #' \code{EndSequenceData} object
-#' 
+#'
 #' @examples
-#' # Construct a End5SequenceData object
-#' library(Rsamtools)
-#' annotation <- GFF3File(RNAmodR.Data.example.gff3())
-#' sequences <- RNAmodR.Data.example.fasta()
-#' files <- c(control = RNAmodR.Data.example.bam.1(),
-#'            treated = RNAmodR.Data.example.bam.2())
+#' # Construction of a End5SequenceData object
+#' library(RNAmodR.Data)
+#' library(rtracklayer)
+#' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+#' sequences <- RNAmodR.Data.example.man.fasta()
+#' files <- c(control = RNAmodR.Data.example.wt.1(),
+#'            treated = RNAmodR.Data.example.wt.2())
 #' e5sd <- End5SequenceData(files, annotation = annotation,
 #'                         sequences = sequences)
 NULL
@@ -272,7 +273,7 @@ setMethod("getData",
   f <- .subset_to_condition(x@condition, condition)
   df <- x@unlistData[f]
   conditions <- unique(x@condition[f])
-  # set up some base values. replicates is here the same as the number of 
+  # set up some base values. replicates is here the same as the number of
   # columns, since a list per replicate is assumed
   # get means
   means <- IRanges::NumericList(
