@@ -60,7 +60,10 @@ NULL
 #' 
 #' @examples 
 #' data(msi,package="RNAmodR")
+#' visualizeData(msi[[1]], "2", from = 10L, to = 45L)
+#' \dontrun{
 #' visualizeData(msi, "2", from = 10L, to = 45L)
+#' }
 NULL
 
 .norm_show_argument <- function(show_arg, default = FALSE){

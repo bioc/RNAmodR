@@ -6,8 +6,7 @@ test_that("SequenceData:",{
   library(rtracklayer)
   annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
   sequences <- RNAmodR.Data.example.man.fasta()
-  files <- c(control = RNAmodR.Data.example.wt.1(),
-             treated = RNAmodR.Data.example.wt.2())
+  files <- c(treated = RNAmodR.Data.example.wt.2())
   #
   e5sd <- End5SequenceData(files, annotation = annotation,
                               sequences = sequences)
@@ -16,11 +15,26 @@ test_that("SequenceData:",{
   expect_named(e5sd,c("1","2"))
   expect_s4_class(colnames(e5sd),"CharacterList")
   expect_length(colnames(e5sd),2)
+  expect_equal(lengths(colnames(e5sd)),c(1,1))
+  expect_equal(colnames(e5sd)[[1]],colnames(e5sd)[[2]])
+  expect_equal(colnames(e5sd)[[1]],c("end5.treated.1"))
+  ##############################################################################
+  skip_on_bioc()
+  annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+  sequences <- RNAmodR.Data.example.man.fasta()
+  files <- c(control = RNAmodR.Data.example.wt.1(),
+             treated = RNAmodR.Data.example.wt.2())
+  #
+  e5sd <- End5SequenceData(files, annotation = annotation,
+                           sequences = sequences)
+  expect_false(any(lengths(rownames(e5sd)) == 0L))
+  expect_s4_class(e5sd,"End5SequenceData")
+  expect_named(e5sd,c("1","2"))
+  expect_s4_class(colnames(e5sd),"CharacterList")
+  expect_length(colnames(e5sd),2)
   expect_equal(lengths(colnames(e5sd)),c(2,2))
   expect_equal(colnames(e5sd)[[1]],colnames(e5sd)[[2]])
   expect_equal(colnames(e5sd)[[1]],c("end5.control.1","end5.treated.1"))
-  ##############################################################################
-  skip_on_bioc()
   actual <- aggregate(e5sd)
   expect_false(any(lengths(rownames(actual)) == 0L))
   expect_s4_class(actual,"CompressedSplitDataFrameList")

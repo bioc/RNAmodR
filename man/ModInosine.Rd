@@ -67,13 +67,13 @@ between 0 and 1. They are calculated as the relative amount of called G bases
 }
 \examples{
 # construction of ModInosine object
+\dontrun{
 library(RNAmodR.Data)
 library(rtracklayer)
 annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
 sequences <- RNAmodR.Data.example.man.fasta()
 files <- c(treated = RNAmodR.Data.example.wt.1())
 mi <- ModInosine(files,annotation = annotation ,sequences = sequences)
-\dontrun{
 # construction of ModSetInosine object
 files <- list("SampleSet1" = c(treated = RNAmodR.Data.example.wt.1(),
                                treated = RNAmodR.Data.example.wt.2(),

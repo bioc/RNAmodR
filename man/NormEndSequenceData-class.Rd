@@ -71,9 +71,9 @@ each) ending in \code{ends}, \code{tx} and \code{ol}.
 }
 \examples{
 # Construction of a NormEnd5SequenceData object
+\dontrun{
 library(RNAmodR.Data)
 library(rtracklayer)
-\dontrun{
 annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
 sequences <- RNAmodR.Data.example.man.fasta()
 files <- c(treated = RNAmodR.Data.example.wt.1())

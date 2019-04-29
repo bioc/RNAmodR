@@ -3,9 +3,9 @@
 %   R/ModifierSet-viz.R, R/SequenceData-viz.R, R/SequenceDataList-viz.R,
 %   R/SequenceDataSet-viz.R
 \docType{methods}
-\name{visualizeDataByCoord}
-\alias{visualizeDataByCoord}
+\name{visualizeData}
 \alias{visualizeData}
+\alias{visualizeDataByCoord}
 \alias{getDataTrack}
 \alias{visualizeDataByCoord,Modifier,GRanges-method}
 \alias{visualizeData,Modifier-method}
@@ -25,9 +25,9 @@
 \code{SequenceDataSet}, \code{SequenceDataList}, \code{Modifier} or 
 \code{ModifierSet} object.}
 \usage{
-visualizeDataByCoord(x, coord, type, window.size = 15L, ...)
-
 visualizeData(x, name, from = 1L, to = 30L, type, ...)
+
+visualizeDataByCoord(x, coord, type, window.size = 15L, ...)
 
 getDataTrack(x, name, ...)
 
@@ -78,15 +78,13 @@ getDataTrack(x, name, ...)
 \item{x}{a \code{SequenceData}, \code{SequenceDataSet},
 \code{SequenceDataList}, \code{Modifier} or \code{ModifierSet} object.}
 
-\item{coord}{coordinates of a positions to subset to as a 
-\code{GRanges} object. The 'Parent' column is expected to match the 
-transcript name.}
+\item{name}{Only for \code{visualizeData}: the transcript name}
+
+\item{from}{Only for \code{visualizeData}: start position}
+
+\item{to}{Only for \code{visualizeData}: end position}
 
 \item{type}{the data type of data show as data tracks.}
-
-\item{window.size}{integer value for the number of positions on the left and 
-right site of the selected positions included in the plotting (default: 
-\code{window.size = 15L})}
 
 \item{...}{optional parameters:
 \itemize{
@@ -102,11 +100,13 @@ with \code{\link[Modstrings:separate]{combineIntoModstrings}}.}
 \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
 }}
 
-\item{name}{Only for \code{visualizeData}: the transcript name}
+\item{coord}{coordinates of a positions to subset to as a 
+\code{GRanges} object. The 'Parent' column is expected to match the 
+transcript name.}
 
-\item{from}{Only for \code{visualizeData}: start position}
-
-\item{to}{Only for \code{visualizeData}: end position}
+\item{window.size}{integer value for the number of positions on the left and 
+right site of the selected positions included in the plotting (default: 
+\code{window.size = 15L})}
 
 \item{showSequenceData}{\code{TRUE} or \code{FALSE}: should the sequence data
 be shown? (default: \code{seqdata = FALSE})}
@@ -138,5 +138,8 @@ for which \code{x} has to contain data.
 }
 \examples{
 data(msi,package="RNAmodR")
+visualizeData(msi[[1]], "2", from = 10L, to = 45L)
+\dontrun{
 visualizeData(msi, "2", from = 10L, to = 45L)
+}
 }

@@ -173,18 +173,18 @@ setGeneric(
 #' @rdname visualizeData
 #' @export
 setGeneric(
-  name = "visualizeDataByCoord",
-  signature = c("x","coord"),
-  def = function(x, coord, type, window.size = 15L, ...)
-    standardGeneric("visualizeDataByCoord")
-)
-#' @rdname visualizeData
-#' @export
-setGeneric(
   name = "visualizeData",
   signature = c("x"),
   def = function(x, name, from = 1L, to = 30L, type, ...)
     standardGeneric("visualizeData")
+)
+#' @rdname visualizeData
+#' @export
+setGeneric(
+  name = "visualizeDataByCoord",
+  signature = c("x","coord"),
+  def = function(x, coord, type, window.size = 15L, ...)
+    standardGeneric("visualizeDataByCoord")
 )
 #' @rdname visualizeData
 #' @export
