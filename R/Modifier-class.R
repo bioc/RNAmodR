@@ -811,7 +811,6 @@ setMethod("Modifier",
 #' # the Modifier or ModifierSet object
 #' sdfl <- aggregate(e5sd)
 #' mi <- aggregate(msi[[1]])
-#' msi <- aggregate(msi)
 NULL
 
 .check_aggregate_modifier <- function(data, x){
@@ -927,7 +926,6 @@ setMethod(f = "hasAggregateData",
 #' data(msi,package="RNAmodR")
 #' # modify() triggers the search for modifications in the data contained in
 #' # the Modifier or ModifierSet object
-#' msi <- modify(msi)
 #' mi <- modify(msi[[1]])
 NULL
 

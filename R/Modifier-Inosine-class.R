@@ -133,8 +133,10 @@ NULL
 #' data(msi,package="RNAmodR")
 #' mi <- msi[[1]]
 #' settings(mi)
+#' \dontrun{
 #' aggregate(mi)
 #' modify(mi)
+#' }
 #' getDataTrack(mi, "1", mainScore(mi))
 NULL
 

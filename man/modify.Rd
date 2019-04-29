@@ -63,6 +63,5 @@ object and has to be implemented for each individual \code{Modifier} class.
 data(msi,package="RNAmodR")
 # modify() triggers the search for modifications in the data contained in
 # the Modifier or ModifierSet object
-msi <- modify(msi)
 mi <- modify(msi[[1]])
 }

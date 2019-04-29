@@ -117,5 +117,4 @@ data(msi,package="RNAmodR")
 # the Modifier or ModifierSet object
 sdfl <- aggregate(e5sd)
 mi <- aggregate(msi[[1]])
-msi <- aggregate(msi)
 }
