@@ -9,15 +9,15 @@ test_that("Modifier/ModifierSet:",{
                'argument "input" is missing, with no default')
   actual <- RNAmodR:::.norm_args(list())
   expect_type(actual,"list")
-  expect_named(actual,c("minCoverage","minReplicate","findMod"))
+  expect_named(actual,c("minCoverage","minReplicate","find.mod"))
   expect_error(RNAmodR:::.norm_args(list(minCoverage = 1)),
                "'minCoverage' must be a single positive integer value")
   expect_error(RNAmodR:::.norm_args(list(minReplicate = 1)),
                "'minReplicate' must be a single positive integer value")
   expect_error(RNAmodR:::.norm_args(list(minReplicate = -1L)),
                "'minReplicate' must be a single positive integer value")
-  expect_error(RNAmodR:::.norm_args(list(findMod = 1)),
-               "'findMod' must be a single logical value")
+  expect_error(RNAmodR:::.norm_args(list(find.mod = 1)),
+               "'find.mod' must be a single logical value")
   # .norm_SequenceData_elements
   expect_error(RNAmodR:::.check_SequenceData_elements(),
                'argument "list" is missing, with no default')
@@ -35,11 +35,11 @@ test_that("Modifier/ModifierSet:",{
                "'minReplicate' must be a single positive integer value")
   expect_error(settings(msi[[1]]) <- list(minReplicate = -1L),
                "'minReplicate' must be a single positive integer value")
-  expect_error(settings(msi[[1]]) <- list(findMod = 1),
-               "'findMod' must be a single logical value")
+  expect_error(settings(msi[[1]]) <- list(find.mod = 1),
+               "'find.mod' must be a single logical value")
   actual <- settings(msi[[1]])
   expect_type(actual,"list")
-  expect_named(actual,c("minCoverage","minReplicate","findMod","minScore"))
+  expect_named(actual,c("minCoverage","minReplicate","find.mod","minScore"))
   # Modifier accessors
   expect_type(names(msi[[1]]),"character")
   expect_type(modifierType(msi[[1]]),"character")
@@ -78,7 +78,7 @@ test_that("Modifier/ModifierSet:",{
   expect_s4_class(mi,"ModInosine")
   mi2 <- ModInosine(sequenceData(mi))
   expect_equal(mi,mi2)
-  mi2 <- ModInosine(sequenceData(mi), findMod = FALSE)
+  mi2 <- ModInosine(sequenceData(mi), find.mod = FALSE)
   expect_false(validModification(mi2))
   expect_true(validAggregate(mi2))
   mix <- new("ModInosine")
