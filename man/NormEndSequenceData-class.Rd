@@ -73,11 +73,10 @@ each) ending in \code{ends}, \code{tx} and \code{ol}.
 # Construction of a NormEnd5SequenceData object
 library(RNAmodR.Data)
 library(rtracklayer)
+\dontrun{
 annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
 sequences <- RNAmodR.Data.example.man.fasta()
-files <- c(control = RNAmodR.Data.example.wt.1(),
-           treated = RNAmodR.Data.example.wt.2())
-\dontrun{
+files <- c(treated = RNAmodR.Data.example.wt.1())
 ne5sd <- NormEnd5SequenceData(files, annotation = annotation,
                               sequences = sequences)
 }

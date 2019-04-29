@@ -37,7 +37,7 @@ NULL
 #' library(rtracklayer)
 #' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
 #' sequences <- RNAmodR.Data.example.man.fasta()
-#' files <- c(treated = RNAmodR.Data.example.bam.1())
+#' files <- c(treated = RNAmodR.Data.example.wt.1())
 #' psd <- PileupSequenceData(files, annotation = annotation,
 #'                           sequences = sequences)
 NULL

@@ -33,10 +33,9 @@ NULL
 #' \dontrun{
 #' library(RNAmodR.Data)
 #' library(rtracklayer)
-#' annotation <- GFF3File(RNAmodR.Data.example.gff3())
-#' sequences <- RNAmodR.Data.example.fasta()
-#' files <- c(control = RNAmodR.Data.example.bam.1(),
-#'            treated = RNAmodR.Data.example.bam.2())
+#' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
+#' sequences <- RNAmodR.Data.example.man.fasta()
+#' files <- c(treated = RNAmodR.Data.example.wt.1())
 #' csd <- CoverageSequenceData(files, annotation = annotation,
 #'                             sequences = sequences)
 #' }

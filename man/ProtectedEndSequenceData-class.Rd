@@ -58,8 +58,7 @@ library(RNAmodR.Data)
 library(rtracklayer)
 annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
 sequences <- RNAmodR.Data.example.man.fasta()
-files <- c(control = RNAmodR.Data.example.wt.1(),
-           treated = RNAmodR.Data.example.wt.2())
+files <- c(treated = RNAmodR.Data.example.wt.1())
 pesd <- ProtectedEndSequenceData(files, annotation = annotation,
                                  sequences = sequences)
 }
