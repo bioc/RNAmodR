@@ -58,7 +58,6 @@ NULL
 #' 
 #' @examples
 #' # construction of ModInosine object
-#' \dontrun{
 #' library(RNAmodR.Data)
 #' library(rtracklayer)
 #' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
@@ -66,6 +65,7 @@ NULL
 #' files <- c(treated = RNAmodR.Data.example.wt.1())
 #' mi <- ModInosine(files,annotation = annotation ,sequences = sequences)
 #' # construction of ModSetInosine object
+#' \dontrun{
 #' files <- list("SampleSet1" = c(treated = RNAmodR.Data.example.wt.1(),
 #'                                treated = RNAmodR.Data.example.wt.2(),
 #'                                treated = RNAmodR.Data.example.wt.3()),

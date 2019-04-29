@@ -30,7 +30,6 @@ NULL
 #' 
 #' @examples
 #' # Construction of a CoverageSequenceData objectobject
-#' \dontrun{
 #' library(RNAmodR.Data)
 #' library(rtracklayer)
 #' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
@@ -38,7 +37,6 @@ NULL
 #' files <- c(treated = RNAmodR.Data.example.wt.1())
 #' csd <- CoverageSequenceData(files, annotation = annotation,
 #'                             sequences = sequences)
-#' }
 NULL
 
 #' @rdname CoverageSequenceData-class
