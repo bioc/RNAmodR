@@ -189,8 +189,8 @@ NULL
   }
   # convert ids to names for labeling if present
   if(!is.null(alias)){
-    m <- match(as.character(alias$tx_id),names(data))
-    names(data)[m[!is.na(m)]] <- as.character(alias$name)[!is.na(m)]
+    m <- match(data$names,as.character(alias$tx_id))
+    data$names <- as.character(alias$name)[m[!is.na(m)]]
   }
   #
   data <- .normlize_data_against_one_sample(data, normalize)
