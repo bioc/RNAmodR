@@ -283,7 +283,7 @@ NULL
   }
   ranges <- ranges[name]
   if(is(x,"Modifier")){
-    data <- aggregateData(x)[name]
+    data <- getAggregateData(x)[name]
   } else if(is(x,"SequenceData")){
     x <- x[name]
     data <- aggregate(x)
