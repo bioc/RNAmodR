@@ -24,7 +24,7 @@ NULL
 #' \code{\link[=SequenceData-class]{SequenceData}} and
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{PileupSequenceData}
-#' @param name For \code{\link[=visualizeDataByCoord]{getDataTrack}}: a valid 
+#' @param name For \code{\link[=plotDataByCoord]{getDataTrack}}: a valid 
 #' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
@@ -138,7 +138,7 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   # object and using it to relist
   pileup <- .splitPileupAsList_transcript(pileup, grl)
   if(length(pileup) != length(grl)){
-    stop("Something went wrong.")
+    stop("")
   }
   # sanitize pilup data
   # - keep only data for correct strand
@@ -146,7 +146,7 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   strands_u <- .get_strand_u_GRangesList(grl)
   seqs <- .seqs_rl(grl)
   pileup <- IRanges::SplitDataFrameList(
-    mapply(
+    Map(
       function(d,seq,strand){
         ans <- NULL
         d <- d[d$strand == strand,]
@@ -165,8 +165,7 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
       },
       pileup,
       seqs,
-      strands_u,
-      SIMPLIFY = FALSE))
+      strands_u))
   names(pileup) <- names(grl)
   pileup
 }
@@ -394,7 +393,7 @@ setMethod(
 #' @rdname PileupSequenceData-class
 #' @export
 setGeneric(name = "pileupToCoverage",
-           signature = c("x"),
+           signature = "x",
            def = function(x) standardGeneric("pileupToCoverage"))
 
 .aggregate_pile_up_to_coverage <- function(data){

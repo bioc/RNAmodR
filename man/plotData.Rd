@@ -3,54 +3,54 @@
 %   R/ModifierSet-viz.R, R/SequenceData-viz.R, R/SequenceDataList-viz.R,
 %   R/SequenceDataSet-viz.R
 \docType{methods}
-\name{visualizeData}
-\alias{visualizeData}
-\alias{visualizeDataByCoord}
+\name{plotData}
+\alias{plotData}
+\alias{plotDataByCoord}
 \alias{getDataTrack}
-\alias{visualizeDataByCoord,Modifier,GRanges-method}
-\alias{visualizeData,Modifier-method}
+\alias{plotDataByCoord,Modifier,GRanges-method}
+\alias{plotData,Modifier-method}
 \alias{getDataTrack,Modifier-method}
-\alias{visualizeDataByCoord,ModifierSet,GRanges-method}
-\alias{visualizeData,ModifierSet-method}
-\alias{visualizeDataByCoord,SequenceData,GRanges-method}
-\alias{visualizeData,SequenceData-method}
+\alias{plotDataByCoord,ModifierSet,GRanges-method}
+\alias{plotData,ModifierSet-method}
+\alias{plotDataByCoord,SequenceData,GRanges-method}
+\alias{plotData,SequenceData-method}
 \alias{getDataTrack,SequenceData-method}
 \alias{getDataTrack,SequenceDataList-method}
-\alias{visualizeDataByCoord,SequenceDataList,GRanges-method}
-\alias{visualizeData,SequenceDataList-method}
+\alias{plotDataByCoord,SequenceDataList,GRanges-method}
+\alias{plotData,SequenceDataList-method}
 \alias{getDataTrack,SequenceDataSet-method}
-\alias{visualizeDataByCoord,SequenceDataSet,GRanges-method}
-\alias{visualizeData,SequenceDataSet-method}
+\alias{plotDataByCoord,SequenceDataSet,GRanges-method}
+\alias{plotData,SequenceDataSet-method}
 \title{Visualizing data data from a \code{SequenceData}, 
 \code{SequenceDataSet}, \code{SequenceDataList}, \code{Modifier} or 
 \code{ModifierSet} object.}
 \usage{
-visualizeData(x, name, from = 1L, to = 30L, type, ...)
+plotData(x, name, from = 1L, to = 30L, type, ...)
 
-visualizeDataByCoord(x, coord, type, window.size = 15L, ...)
+plotDataByCoord(x, coord, type, window.size = 15L, ...)
 
 getDataTrack(x, name, ...)
 
-\S4method{visualizeDataByCoord}{Modifier,GRanges}(x, coord, type = NA,
+\S4method{plotDataByCoord}{Modifier,GRanges}(x, coord, type = NA,
   window.size = 15L, ...)
 
-\S4method{visualizeData}{Modifier}(x, name, from, to, type = NA,
+\S4method{plotData}{Modifier}(x, name, from, to, type = NA,
   showSequenceData = FALSE, showSequence = TRUE,
   showAnnotation = FALSE, ...)
 
 \S4method{getDataTrack}{Modifier}(x, name = name, ...)
 
-\S4method{visualizeDataByCoord}{ModifierSet,GRanges}(x, coord, type = NA,
+\S4method{plotDataByCoord}{ModifierSet,GRanges}(x, coord, type = NA,
   window.size = 15L, ...)
 
-\S4method{visualizeData}{ModifierSet}(x, name, from, to, type = NA,
+\S4method{plotData}{ModifierSet}(x, name, from, to, type = NA,
   showSequenceData = FALSE, showSequence = TRUE,
   showAnnotation = FALSE, ...)
 
-\S4method{visualizeDataByCoord}{SequenceData,GRanges}(x, coord,
-  type = NA, window.size = 15L, ...)
+\S4method{plotDataByCoord}{SequenceData,GRanges}(x, coord, type = NA,
+  window.size = 15L, ...)
 
-\S4method{visualizeData}{SequenceData}(x, name, from, to,
+\S4method{plotData}{SequenceData}(x, name, from, to,
   perTranscript = FALSE, showSequence = TRUE, showAnnotation = FALSE,
   ...)
 
@@ -58,19 +58,19 @@ getDataTrack(x, name, ...)
 
 \S4method{getDataTrack}{SequenceDataList}(x, name = name, ...)
 
-\S4method{visualizeDataByCoord}{SequenceDataList,GRanges}(x, coord,
-  type = NA, window.size = 15L, ...)
+\S4method{plotDataByCoord}{SequenceDataList,GRanges}(x, coord, type = NA,
+  window.size = 15L, ...)
 
-\S4method{visualizeData}{SequenceDataList}(x, name, from, to,
+\S4method{plotData}{SequenceDataList}(x, name, from, to,
   perTranscript = FALSE, showSequence = TRUE, showAnnotation = FALSE,
   ...)
 
 \S4method{getDataTrack}{SequenceDataSet}(x, name = name, ...)
 
-\S4method{visualizeDataByCoord}{SequenceDataSet,GRanges}(x, coord,
-  type = NA, window.size = 15L, ...)
+\S4method{plotDataByCoord}{SequenceDataSet,GRanges}(x, coord, type = NA,
+  window.size = 15L, ...)
 
-\S4method{visualizeData}{SequenceDataSet}(x, name, from, to,
+\S4method{plotData}{SequenceDataSet}(x, name, from, to,
   perTranscript = FALSE, showSequence = TRUE, showAnnotation = FALSE,
   ...)
 }
@@ -78,11 +78,11 @@ getDataTrack(x, name, ...)
 \item{x}{a \code{SequenceData}, \code{SequenceDataSet},
 \code{SequenceDataList}, \code{Modifier} or \code{ModifierSet} object.}
 
-\item{name}{Only for \code{visualizeData}: the transcript name}
+\item{name}{Only for \code{plotData}: the transcript name}
 
-\item{from}{Only for \code{visualizeData}: start position}
+\item{from}{Only for \code{plotData}: start position}
 
-\item{to}{Only for \code{visualizeData}: end position}
+\item{to}{Only for \code{plotData}: end position}
 
 \item{type}{the data type of data show as data tracks.}
 
@@ -124,7 +124,7 @@ per transcript? (default: \code{perTranscript = FALSE})}
 a plot send to the active graphic device
 }
 \description{
-With the \code{visualizeData} and \code{visualizeDataByCoord} functions data
+With the \code{plotData} and \code{plotDataByCoord} functions data
 from a \code{SequenceData}, \code{SequenceDataSet}, \code{SequenceDataList},
 \code{Modifier} or \code{ModifierSet} object can be visualized.
 
@@ -138,8 +138,8 @@ for which \code{x} has to contain data.
 }
 \examples{
 data(msi,package="RNAmodR")
-visualizeData(msi[[1]], "2", from = 10L, to = 45L)
+plotData(msi[[1]], "2", from = 10L, to = 45L)
 \dontrun{
-visualizeData(msi, "2", from = 10L, to = 45L)
+plotData(msi, "2", from = 10L, to = 45L)
 }
 }

@@ -2,10 +2,10 @@
 #' @include Modifier-Inosine-class.R
 NULL
 
-RNAMODR_I_PLOT_DATA <- c("score")
-RNAMODR_I_PLOT_DATA_DEFAULT <- c("score")
+RNAMODR_I_PLOT_DATA <- "score"
+RNAMODR_I_PLOT_DATA_DEFAULT <- "score"
 
-RNAMODR_I_PLOT_DATA_COLOURS <- c("score" = "#ABABAB") 
+RNAMODR_I_PLOT_DATA_COLOURS <- c(score = "#ABABAB") 
 RNAMODR_I_PLOT_DATA_NAMES <- c(score = "Score Inosine")
 
 .norm_viz_mod_inosine_args <- function(input, type){
@@ -66,7 +66,7 @@ setMethod(
 #' @rdname ModInosine-functions
 #' @export
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "ModInosine", coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
     if(missing(type)){
@@ -80,7 +80,7 @@ setMethod(
 #' @rdname ModInosine-functions
 #' @export
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "ModInosine"),
   definition = function(x, name, from, to, type = "score", ...) {
     if(missing(type)){
@@ -94,7 +94,7 @@ setMethod(
 #' @rdname ModInosine-functions
 #' @export
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "ModSetInosine", coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
     if(missing(type)){
@@ -108,7 +108,7 @@ setMethod(
 #' @rdname ModInosine-functions
 #' @export
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "ModSetInosine"),
   definition = function(x, name, from, to, type = "score", ...) {
     if(missing(type)){

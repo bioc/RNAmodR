@@ -2,7 +2,7 @@
 #' @include SequenceDataSet-class.R
 NULL
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setMethod(
   f = "getDataTrack",
@@ -18,25 +18,25 @@ setMethod(
 )
 
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "SequenceDataList", coord = "GRanges"),
   definition = function(x, coord, type = NA, window.size = 15L, ...) {
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
     from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
-    visualizeData(x, name = coord$Parent, from = from_to$from,
+    plotData(x, name = coord$Parent, from = from_to$from,
                   to = from_to$to, type = type, ...)
   }
 )
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @importFrom Gviz plotTracks
 #' @export
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "SequenceDataList"),
   definition = function(x, name, from, to, perTranscript = FALSE, 
                         showSequence = TRUE, showAnnotation = FALSE, ...) {

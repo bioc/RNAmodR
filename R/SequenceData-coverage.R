@@ -62,13 +62,12 @@ CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   coverage <- as(coverage,"IntegerList")
   # subset per transcript
   seqs <- .seqs_rl_strand(grl, force_continous = TRUE)
-  coverage <- IRanges::IntegerList(mapply(
+  coverage <- IRanges::IntegerList(Map(
     function(gr,s){
       coverage[[unique(GenomicRanges::seqnames(gr))]][s]
     },
     grl,
-    seqs,
-    SIMPLIFY = FALSE))
+    seqs))
   coverage
 }
 

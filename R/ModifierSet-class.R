@@ -174,9 +174,9 @@ setMethod(f = "relistToClass",
     return(FALSE)
   }
   namedRequired <- x[classNames %in% c("character","list")]
-  names <- unique(names(unlist(namedRequired)))
-  if(is.null(names) || 
-     !all(tolower(names) %in% c("treated","control"))){
+  namedRequired_names <- unique(names(unlist(namedRequired)))
+  if(is.null(namedRequired_names) || 
+     !all(tolower(namedRequired_names) %in% c("treated","control"))){
     return(FALSE)
   }
   x <- lapply(x,.norm_bamfiles)
@@ -193,27 +193,24 @@ setMethod(f = "relistToClass",
 
 #' @importFrom BiocParallel SerialParam register bpmapply bplapply
 .bamfiles_to_ModifierSet <- function(className, x, annotation, sequences,
-                                     seqinfo, ...){
+                                     seqinfo = NULL, ...){
   # check and normalize input
   args <- .norm_ModifierSet_args(list(...))
   className <- .norm_modifiertype(className)
   if(!is.list(x)){
     x <- list(x)
   }
-  names <- as.list(names(x))
-  if(length(names) == 0L){
-    names <- vector(mode = "list", length = length(x))
+  x_names <- as.list(names(x))
+  if(length(x_names) == 0L){
+    x_names <- vector(mode = "list", length = length(x))
   }
   x <- lapply(x, .norm_bamfiles, className)
   annotation <- .norm_annotation(annotation, className)
   annotation <- .load_annotation(annotation)
   sequences <- .norm_sequences(sequences, className)
-  if(missing(seqinfo)){
-    seqinfo <- NA
-  }
   ni <- seq_along(x)
   # choose were to use parallelization
-  if(args[["internalBP"]] == TRUE){
+  if(args[["internalBP"]]){
     BiocParallel::register(BiocParallel::SerialParam())
   }
   # do analysis by calling the Modifier classes
@@ -228,7 +225,7 @@ setMethod(f = "relistToClass",
       message(i,". ",className," analysis:")
     }
     # choose were to use parallelization
-    if(args[["internalBP"]] == FALSE){
+    if(!args[["internalBP"]]){
       BiocParallel::register(BiocParallel::SerialParam())
     }
     # do not pass this argument along to objects
@@ -243,7 +240,7 @@ setMethod(f = "relistToClass",
   PACKAGE <- getClass(className)@package
   CLASSFUN <- get(className)
   x <- BiocParallel::bpmapply(FUN,
-                              ni, x, names,
+                              ni, x, x_names,
                               MoreArgs = list(args = args, 
                                               className = className, 
                                               PACKAGE = PACKAGE,
@@ -253,9 +250,9 @@ setMethod(f = "relistToClass",
                                               seqinfo = seqinfo,
                                               ...),
                               SIMPLIFY = FALSE)
-  f <- vapply(names,is.null,logical(1))
-  names[f] <- as.list(as.character(seq_along(x))[f])
-  names(x) <- unlist(names)
+  f <- vapply(x_names,is.null,logical(1))
+  x_names[f] <- as.list(as.character(seq_along(x))[f])
+  names(x) <- unlist(x_names)
   # pass results to ModifierSet object
   .ModifierSet(className, x)
 }
@@ -267,7 +264,7 @@ setMethod(f = "relistToClass",
   elementType <- modifierType(x[[1]])
   className <- .get_classname_for_ModifierSet_from_modifier_type(className)
   if(className != .norm_classname_ModifierSet(elementType)){
-    stop("Something went wrong.")
+    stop("")
   }
   if (!all(vapply(x,
                   function(xi) extends(class(xi), elementType),
@@ -282,7 +279,7 @@ setMethod(f = "relistToClass",
 #' @export
 setGeneric( 
   name = "ModifierSet",
-  signature = c("x"),
+  signature = "x",
   def = function(className, x, annotation, sequences, seqinfo, ...)
     standardGeneric("ModifierSet")
 )
@@ -358,7 +355,7 @@ setMethod(
                                           optional = TRUE)))
     colnames(out) <- rep(" ",ncol(mf))
     if(is.null(names(object))){
-      rownames(out) <- c("| Modifications found:")
+      rownames(out) <- "| Modifications found:"
     } else {
       rownames(out) <- c("                      ",
                          "| Modifications found:")
@@ -469,26 +466,6 @@ setMethod(f = "seqinfo",
 )
 #' @rdname Modifier-functions
 #' @export
-setMethod(f = "settings", 
-          signature = signature(x = "ModifierSet"),
-          definition = function(x, name){
-            ans <- lapply(x,settings,name)
-            names(ans) <- names(x)
-            ans
-          }
-)
-#' @rdname Modifier-functions
-#' @export
-setReplaceMethod(f = "settings", 
-                 signature = signature(x = "ModifierSet"),
-                 definition = function(x, value){
-                   for(i in seq_along(x)){
-                     settings(x[[i]]) <- value
-                   }
-                   x
-                 })
-#' @rdname Modifier-functions
-#' @export
 setMethod(f = "sequences", 
           signature = signature(x = "ModifierSet"),
           definition = 
@@ -497,7 +474,7 @@ setMethod(f = "sequences",
                 stop("'modified' has to be a single logical value.",
                      call. = FALSE)
               }
-              if(modified == FALSE){
+              if(!modified){
                 return(sequences(sequenceData(x[[1]])))
               }
               mod <- .get_modifications_per_transcript(x)
@@ -511,6 +488,29 @@ setMethod(f = "sequences",
               ans
             }
 )
+
+# settings ---------------------------------------------------------------------
+
+#' @rdname settings
+#' @export
+setMethod(f = "settings", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x, name){
+            ans <- lapply(x,settings,name)
+            names(ans) <- names(x)
+            ans
+          }
+)
+#' @rdname settings
+#' @export
+setReplaceMethod(f = "settings", 
+                 signature = signature(x = "ModifierSet"),
+                 definition = function(x, value){
+                   for(i in seq_along(x)){
+                     settings(x[[i]]) <- value
+                   }
+                   x
+                 })
 
 # aggregate/modify -------------------------------------------------------------
 

@@ -47,8 +47,7 @@ test_that("Subsetting SequenceData:",{
   # coords
   coord <- modifications(msi)[[1]]
   expect_error(RNAmodR:::.norm_coord(coord),'argument "type" is missing')
-  expect_error(actual <- RNAmodR:::.norm_coord(DataFrame(),NA),
-               "Something went wrong")
+  expect_error(actual <- RNAmodR:::.norm_coord(DataFrame(),NA))
   coord2 <- coord
   width(coord2) <- 2
   expect_error(RNAmodR:::.norm_coord(coord2,NA),

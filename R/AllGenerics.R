@@ -16,7 +16,7 @@ NULL
 #' @export
 setGeneric( 
   name = "plotROC",
-  signature = c("x"),
+  signature = "x",
   def = function(x, coord, ...)
     standardGeneric("plotROC")
 )
@@ -81,18 +81,6 @@ setGeneric(
 #' @rdname Modifier-functions
 #' @export
 setGeneric( 
-  name = "settings",
-  def = function(x, name = NULL) standardGeneric("settings")
-)
-#' @rdname Modifier-functions
-#' @export
-setGeneric( 
-  name = "settings<-",
-  def = function(x, name, value) standardGeneric("settings<-")
-)
-#' @rdname Modifier-functions
-#' @export
-setGeneric( 
   name = "validAggregate",
   def = function(x) standardGeneric("validAggregate")
 )
@@ -103,13 +91,25 @@ setGeneric(
   def = function(x) standardGeneric("validModification")
 )
 
+#' @rdname settings
+#' @export
+setGeneric( 
+  name = "settings",
+  def = function(x, name = NULL) standardGeneric("settings")
+)
+#' @rdname settings
+#' @export
+setGeneric( 
+  name = "settings<-",
+  def = function(x, name, value) standardGeneric("settings<-")
+)
 # Modifier/ModifierSet functions -----------------------------------------------
 
 #' @rdname modify
 #' @export
 setGeneric( 
   name = "modify",
-  signature = c("x"),
+  signature = "x",
   def = function(x, ...) standardGeneric("modify")
 )
 
@@ -117,7 +117,7 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "findMod",
-  signature = c("x"),
+  signature = "x",
   def = function(x) standardGeneric("findMod")
 )
 
@@ -128,7 +128,7 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "aggregate",
-  signature = c("x"),
+  signature = "x",
   def = function(x, ...) standardGeneric("aggregate")
 )
 #' @rdname aggregate
@@ -141,14 +141,14 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "getAggregateData",
-  signature = c("x"),
+  signature = "x",
   def = function(x) standardGeneric("getAggregateData")
 )
 #' @rdname aggregate
 #' @export
 setGeneric( 
   name = "hasAggregateData",
-  signature = c("x"),
+  signature = "x",
   def = function(x) standardGeneric("hasAggregateData")
 ) 
 
@@ -170,27 +170,27 @@ setGeneric(
   def = function(x, coord, ...)
     standardGeneric("labelByCoord")
 )
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setGeneric(
-  name = "visualizeData",
-  signature = c("x"),
+  name = "plotData",
+  signature = "x",
   def = function(x, name, from = 1L, to = 30L, type, ...)
-    standardGeneric("visualizeData")
+    standardGeneric("plotData")
 )
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setGeneric(
-  name = "visualizeDataByCoord",
+  name = "plotDataByCoord",
   signature = c("x","coord"),
   def = function(x, coord, type, window.size = 15L, ...)
-    standardGeneric("visualizeDataByCoord")
+    standardGeneric("plotDataByCoord")
 )
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setGeneric(
   name = "getDataTrack",
-  signature = c("x"),
+  signature = "x",
   def = function(x, name, ...)
     standardGeneric("getDataTrack")
 )
@@ -201,7 +201,7 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "compare",
-  signature = c("x"),
+  signature = "x",
   def = function(x, name, from = 1L, to = 30L, ...)
     standardGeneric("compare")
 ) 
@@ -217,7 +217,7 @@ setGeneric(
 #' @export
 setGeneric( 
   name = "plotCompare",
-  signature = c("x"),
+  signature = "x",
   def = function(x, name, from = 1L, to = 30L, normalize, ...)
     standardGeneric("plotCompare")
 ) 

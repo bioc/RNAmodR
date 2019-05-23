@@ -28,13 +28,6 @@ NULL
   window.size
 }
 
-.norm_viz_name <- function(name){
-  if(missing(name)){
-    name <- NULL
-  }
-  name
-}
-
 .get_viz_from_to_coord <- function(ranges, coord, window.size){
   window.size <- .norm_viz_windows.size(window.size)
   start <- start(coord) - window.size
@@ -185,8 +178,8 @@ NULL
   if(length(ranges) == 0L){
     stop("No ranges with seqnames = '",chromosome,"' found.")
   }
-  names <- names(ranges)
-  seq <- seq[names(seq) %in% names]
+  ranges_names <- names(ranges)
+  seq <- seq[names(seq) %in% ranges_names]
   if(length(seq) == 0L){
     stop("No sequences for seqnames = '",chromosome,"' found.")
   }
@@ -268,7 +261,7 @@ NULL
   } else if(is(seq,"ModRNAStringSet")){
     st <- FUN("ModRNASequenceTrack","ModRNAStringSet", seq, args)
   } else {
-    stop("Something went wrong.")
+    stop("")
   }
   st
 }
@@ -288,14 +281,14 @@ NULL
     x <- x[name]
     data <- aggregate(x)
   } else {
-    stop("Something went wrong.")
+    stop("")
   }
   strand_u <- .get_strand_u_GRangesList(ranges)
   seqs <- .seqs_rl(ranges)
   seqs[strand_u == "-"] <- rev(seqs[strand_u == "-"])
-  seqnames <- .seqnames_rl(ranges)
+  ranges_seqnames <- .seqnames_rl(ranges)
   strands <- .strands_rl(ranges)
-  ans <- GenomicRanges::GRanges(seqnames = unlist(seqnames),
+  ans <- GenomicRanges::GRanges(seqnames = unlist(ranges_seqnames),
                                 ranges = IRanges::IRanges(start = unlist(seqs),
                                                           width = 1),
                                 strand = unlist(strands),
@@ -307,25 +300,25 @@ NULL
 
 ################################################################################
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "SequenceData", coord = "GRanges"),
   definition = function(x, coord, type = NA, window.size = 15L, ...) {
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
     from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
-    visualizeData(x, name = coord$Parent, from = from_to$from,
+    plotData(x, name = coord$Parent, from = from_to$from,
                   to = from_to$to, type = type, ...)
   }
 )
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @importFrom Gviz plotTracks
 #' @export
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "SequenceData"),
   definition = function(x, name, from, to, perTranscript = FALSE, 
                         showSequence = TRUE, showAnnotation = FALSE, ...) {
@@ -358,7 +351,7 @@ setMethod(
   }
 )
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setMethod(
   f = "getDataTrack",

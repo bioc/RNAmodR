@@ -31,9 +31,9 @@ NULL
 #' @importFrom Rsamtools idxstatsBam
 # Extracts sequence names aka. chromosome identifier from list of bam files
 .get_acceptable_chrom_ident <- function(bamFiles){
-  seqnames <- lapply(bamFiles, function(file){
+  bf_seqnames <- lapply(bamFiles, function(file){
     res <- Rsamtools::idxstatsBam(file)
     return(as.character(res$seqnames))
   })
-  return(unique(unlist(seqnames)))
+  return(unique(unlist(bf_seqnames)))
 }

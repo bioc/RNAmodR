@@ -9,11 +9,13 @@
 \usage{
 plotROC(x, coord, ...)
 
-\S4method{plotROC}{Modifier}(x, coord, score = NULL, prediction.args,
-  performance.args, plot.args)
+\S4method{plotROC}{Modifier}(x, coord, score = NULL,
+  prediction.args = list(), performance.args = list(),
+  plot.args = list())
 
-\S4method{plotROC}{ModifierSet}(x, coord, score = NULL, prediction.args,
-  performance.args, plot.args)
+\S4method{plotROC}{ModifierSet}(x, coord, score = NULL,
+  prediction.args = list(), performance.args = list(),
+  plot.args = list())
 }
 \arguments{
 \item{x}{a \code{Modifier} or a \code{ModifierSet} object}

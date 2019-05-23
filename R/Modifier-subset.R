@@ -98,10 +98,10 @@ NULL
     lapply(x,
            function(z){
              data <- getAggregateData(z)
-             names <- .get_element_names(data, coord, args[["name"]],
+             element_names <- .get_element_names(data, coord, args[["name"]],
                                          args[["type"]])
-             data <- data[match(names, names(data))]
-             coord <- coord[match(names, names(coord))]
+             data <- data[match(element_names, names(data))]
+             coord <- coord[match(element_names, names(coord))]
              .perform_subset(data, coord, args[["flanking"]], 
                              args[["perTranscript"]])
            })

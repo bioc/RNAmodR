@@ -20,6 +20,14 @@ BiocStyle::markdown(css.files = c('custom.css'))
 ```
 
 # Introduction
+
+For users interested in the general aspect of any `RNAmodR` based package please
+have a look at the [main vignette](RNAmodR.html) of the package.
+
+This vignette is aimed at developers and researchers, who want to use the 
+functionality of the `RNAmodR` package to develop a new modification strategy
+based on high throughput sequencing data.
+
 ```{r, echo=FALSE}
 suppressPackageStartupMessages({
   library(RNAmodR)
@@ -179,7 +187,7 @@ ModSetExample <- function(x, annotation, sequences, seqinfo, ...){
 
 Additional functions, which need to be implemented, are `getDataTrack` for the 
 new `SequenceData` and new `Modifier` classes and 
-`visualizeData`/`visualizeDataByCoord` for the new `Modifier` and `ModifierSet`
+`plotData`/`plotDataByCoord` for the new `Modifier` and `ModifierSet`
 classes. `name` defines a transcript name found in `names(ranges(x))` and
 `type` is the data type typically found as a column in the `aggregate` slot.
 
@@ -198,25 +206,25 @@ setMethod(
   }
 )
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "ModExample", coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
   }
 )
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "ModExample"),
   definition = function(x, name, from, to, type = "score", ...) {
   }
 )
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "ModSetExample", coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
   }
 )
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "ModSetExample"),
   definition = function(x, name, from, to, type = "score", ...) {
   }

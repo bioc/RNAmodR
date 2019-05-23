@@ -75,9 +75,9 @@ See also \code{\link[=aggregate]{aggregateData}}
 \code{findMod} for each \code{Modifier} class. See also 
 \code{\link[=modify]{findMod}}.
 
-\code{visualizeData}/\code{visualizeDataByCoord} for each \code{Modifier} 
+\code{plotData}/\code{plotDataByCoord} for each \code{Modifier} 
 and \code{ModifierSet} class. See also 
-\code{\link[=visualizeData]{visualizeData}}.
+\code{\link[=plotData]{plotData}}.
 
 The following helper function can be called from within \code{findMod} to
 construct a coordinate for each modification found:
@@ -116,7 +116,7 @@ setMethod("aggregateData",
 )
 setMethod(
   f = "getDataTrack",
-  signature = signature(x = "ExampleSequenceData"),
+  signature = c(x = "ExampleSequenceData"),
   definition = function(x, name, ...) {
     ###
   }
@@ -124,7 +124,7 @@ setMethod(
 
 # new Modifier class
 setClass("ModExample",
-         contains = c("Modifier"),
+         contains = "Modifier",
          prototype = list(mod = "X",
                           score = "score",
                           dataType = "ExampleSequenceData"))
@@ -134,7 +134,7 @@ ModExample <- function(x, annotation, sequences, seqinfo, ...){
 }
 
 setMethod(f = "aggregateData",
-          signature = signature(x = "ModExample"),
+          signature = c(x = "ModExample"),
           definition =
             function(x, force = FALSE){
               # Some data with element per transcript
@@ -154,13 +154,13 @@ setMethod(
   }
 )
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "ModExample", coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
   }
 )
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "ModExample"),
   definition = function(x, name, from, to, type = "score", ...) {
   }
@@ -176,13 +176,13 @@ ModSetExample <- function(x, annotation, sequences, seqinfo, ...){
 }
 
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "ModSetExample", coord = "GRanges"),
   definition = function(x, coord, type = "score", window.size = 15L, ...) {
   }
 )
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "ModSetExample"),
   definition = function(x, name, from, to, type = "score", ...) {
   }

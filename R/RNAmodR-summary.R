@@ -35,12 +35,12 @@ NULL
 }
 
 .merge_summary_data <- function(bamfilesstats,datastats){
-  names <- c(rownames(bamfilesstats),rownames(datastats))
+  bf_d_names <- c(rownames(bamfilesstats),rownames(datastats))
   stats <- data.frame(mapply(c,
                              as.list(bamfilesstats),
                              as.list(datastats)),
                       stringsAsFactors = FALSE)
-  rownames(stats) <- names
+  rownames(stats) <- bf_d_names
   colnames(stats) <- colnames(bamfilesstats)
   stats
 }

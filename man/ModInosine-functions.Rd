@@ -8,10 +8,10 @@
 \alias{aggregateData,ModInosine-method}
 \alias{findMod,ModInosine-method}
 \alias{getDataTrack,ModInosine-method}
-\alias{visualizeDataByCoord,ModInosine,GRanges-method}
-\alias{visualizeData,ModInosine-method}
-\alias{visualizeDataByCoord,ModSetInosine,GRanges-method}
-\alias{visualizeData,ModSetInosine-method}
+\alias{plotDataByCoord,ModInosine,GRanges-method}
+\alias{plotData,ModInosine-method}
+\alias{plotDataByCoord,ModSetInosine,GRanges-method}
+\alias{plotData,ModSetInosine-method}
 \title{Functions for ModInosine}
 \usage{
 \S4method{settings}{ModInosine}(x) <- value
@@ -22,16 +22,16 @@
 
 \S4method{getDataTrack}{ModInosine}(x, name, type, ...)
 
-\S4method{visualizeDataByCoord}{ModInosine,GRanges}(x, coord,
-  type = "score", window.size = 15L, ...)
+\S4method{plotDataByCoord}{ModInosine,GRanges}(x, coord, type = "score",
+  window.size = 15L, ...)
 
-\S4method{visualizeData}{ModInosine}(x, name, from = 1L, to = 30L,
+\S4method{plotData}{ModInosine}(x, name, from = 1L, to = 30L,
   type = "score", ...)
 
-\S4method{visualizeDataByCoord}{ModSetInosine,GRanges}(x, coord,
+\S4method{plotDataByCoord}{ModSetInosine,GRanges}(x, coord,
   type = "score", window.size = 15L, ...)
 
-\S4method{visualizeData}{ModSetInosine}(x, name, from = 1L, to = 30L,
+\S4method{plotData}{ModSetInosine}(x, name, from = 1L, to = 30L,
   type = "score", ...)
 }
 \arguments{
@@ -42,7 +42,7 @@ see also the man pages for the functions mentioned below.}
 \item{value}{See \code{\link[RNAmodR:Modifier-functions]{settings}}}
 
 \item{coord, name, from, to, type, window.size, ...}{See 
-\code{\link{visualizeData}}}
+\code{\link{plotData}}}
 }
 \value{
 \itemize{
@@ -51,9 +51,9 @@ see also the man pages for the functions mentioned below.}
 \item{\code{modify}} {See \code{\link{modify}}.}
 \item{\code{getDataTrack}} {a list of 
 \code{\link[Gviz:DataTrack-class]{DataTrack}} objects. See 
-\code{\link{visualizeDataByCoord}}.}
-\item{\code{visualizeData}} {See \code{\link{visualizeDataByCoord}}.}
-\item{\code{visualizeDataByCoord}} {See \code{\link{visualizeDataByCoord}}.}
+\code{\link{plotDataByCoord}}.}
+\item{\code{plotData}} {See \code{\link{plotDataByCoord}}.}
+\item{\code{plotDataByCoord}} {See \code{\link{plotDataByCoord}}.}
 }
 }
 \description{
@@ -64,7 +64,7 @@ inherited by the \code{ModInosine} and \code{ModSetInosine} classes.
 Check below for the specifically implemented functions.
 }
 \details{
-\code{ModInosine} specific arguments for \link{visualizeData}:
+\code{ModInosine} specific arguments for \link{plotData}:
 \itemize{
 \item{\code{colour.bases} - }{a named character vector of \code{length = 4} 
 for the colours of the individual bases. The names are expected to be 

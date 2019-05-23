@@ -20,9 +20,8 @@ test_that("Modifier/ModifierSet:",{
                "'find.mod' must be a single logical value")
   # .norm_SequenceData_elements
   expect_error(RNAmodR:::.check_SequenceData_elements(),
-               'argument "list" is missing, with no default')
-  expect_error(RNAmodR:::.check_SequenceData_elements(msi[[1]],character()),
-               "Something went wrong")
+               'argument "data" is missing, with no default')
+  expect_error(RNAmodR:::.check_SequenceData_elements(msi[[1]],character()))
   expect_error(RNAmodR:::.check_SequenceData_elements(msi[[1]],list()),
                "Number of 'SequenceData' elements does not match")
   expect_error(RNAmodR:::.check_SequenceData_elements(msi[[1]],e5sd),

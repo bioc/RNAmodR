@@ -31,7 +31,7 @@ NULL
 #' @rdname SequenceDataList-class
 #' @export
 setClass("SequenceDataList",
-         contains = c("List"),
+         contains = "List",
          slots = c(listData = "list"),
          prototype = list(elementType = "SD_or_SDS"))
 

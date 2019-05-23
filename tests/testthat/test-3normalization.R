@@ -71,9 +71,9 @@ test_that("argument normalization:",{
   # 
   expect_error(RNAmodR:::.norm_seqnames(),'argument "bamfiles" is missing')
   expect_error(RNAmodR:::.norm_seqnames(""),"BamFileList required")
-  expect_error(RNAmodR:::.norm_seqnames(bf,""),"Something went wrong.")
+  expect_error(RNAmodR:::.norm_seqnames(bf,""))
   expect_error(RNAmodR:::.norm_seqnames(bf,grl),'argument "sequences" is missing')
-  expect_error(RNAmodR:::.norm_seqnames(bf,grl,fasta),"Something went wrong.")
+  expect_error(RNAmodR:::.norm_seqnames(bf,grl,fasta))
   actual <- RNAmodR:::.norm_seqnames(bf,grl,fafile)
   expect_equal(actual,seqinfo)
   seqinfo2 <- seqinfo[c("chr1","chr2","chr3"),]

@@ -123,8 +123,8 @@ SAMPLE_TYPES <- c("treated","control")
     stop("Names of BamFileList must either be 'treated' or 'control' (case ",
          "insensitive). No names found.")
   }
-  names <- tolower(unique(names(x)))
-  if(!all(names %in% SAMPLE_TYPES)){
+  x_names <- tolower(unique(names(x)))
+  if(!all(x_names %in% SAMPLE_TYPES)){
     stop("Names of BamFileList must either be 'treated' or 'control' (case ",
          "insensitive).",
          call. = FALSE)
@@ -185,9 +185,12 @@ SAMPLE_TYPES <- c("treated","control")
 #' @importFrom BSgenome seqnames
 #' @importFrom Rsamtools scanFa
 .norm_seqnames <- function(bamfiles, annotation, sequences, seqinfo, className){
+  if(missing(seqinfo)){
+    seqinfo <- NULL
+  }
   # norm seqinfo
-  if(missing(seqinfo) || 
-     (!is(seqinfo,"Seqinfo") && (is.na(seqinfo) || is.null(seqinfo)))){
+  if(is.null(seqinfo) || 
+     (!is(seqinfo,"Seqinfo") && (is.na(seqinfo)))){
     seqinfo <- .bam_header_to_seqinfo(bamfiles)
   }
   if(!is(seqinfo,"Seqinfo") && 
@@ -199,19 +202,21 @@ SAMPLE_TYPES <- c("treated","control")
   }
   # norm annotation
   if(!is(annotation,"GRangesList") & !is(annotation,"TxDb")){
-    stop("Something went wrong.")
+    stop("")
   }
   if(!is(sequences,"FaFile") & !is(sequences,"BSgenome")){
-    stop("Something went wrong.")
+    stop("")
   }
   # norm sequences input
   if(is(sequences,"FaFile")){
-    seqnames <- names(Rsamtools::scanFa(sequences))
+    seq_seqnames <- names(Rsamtools::scanFa(sequences))
   } else {
-    seqnames <- BSgenome::seqnames(sequences)
+    seq_seqnames <- BSgenome::seqnames(sequences)
   }
-  seqnames <- seqnames[seqnames %in% GenomeInfoDb::seqlevels(annotation)]
-  seqnames <- seqnames[seqnames %in% GenomeInfoDb::seqnames(seqinfo)]
+  seq_seqnames <- 
+    seq_seqnames[seq_seqnames %in% GenomeInfoDb::seqlevels(annotation)]
+  seq_seqnames <- 
+    seq_seqnames[seq_seqnames %in% GenomeInfoDb::seqnames(seqinfo)]
   if( length(seqnames) == 0L ) {
     stop("No intersection between chromosome names in fasta, ",
          "annotation and seqinfo data.", 

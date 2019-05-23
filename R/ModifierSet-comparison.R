@@ -84,8 +84,8 @@ NULL
       stop("Values in 'tx_id' have to be unique.",
            call. = FALSE)
     }
-    names <- names(ranges(x))
-    if(!all(alias$tx_id %in% names)){
+    ranges_names <- names(ranges(x))
+    if(!all(alias$tx_id %in% ranges_names)){
       stop("All values in 'tx_id' have to be valid transcript ids used as ",
            "names for the data.", call. = FALSE)
     }
@@ -161,10 +161,10 @@ NULL
   coord <- coord[match(names(data), names(coord))]
   # keep rownames/names and unlist data
   positions <- rownames(data)
-  names <- as.character(S4Vectors::Rle(names(data), lengths(data)))
+  data_names <- as.character(S4Vectors::Rle(names(data), lengths(data)))
   data <- unlist(data)
   # add names and positions column as factors
-  data$names <- factor(names)
+  data$names <- factor(data_names)
   data$positions <- factor(as.integer(unlist(positions)))
   rownames(data) <- NULL
   # add activity information if present
@@ -245,7 +245,6 @@ setMethod("compareByCoord",
 )
 
 .normlize_data_against_one_sample <- function(data, normalize){
-  
   if(!missing(normalize)){
     colnames <- colnames(data)
     colnames <- colnames[!(colnames %in% c("positions","names","mod","Activity"))]
@@ -260,7 +259,7 @@ setMethod("compareByCoord",
         data[,normalize]
     } else if(is.logical(normalize)){
       assertive::assert_is_a_bool(normalize)
-      if(normalize == TRUE){
+      if(normalize){
         data[,colnames] <- as.data.frame(data[,colnames,drop = FALSE]) - 
           apply(data[,colnames],1,max)
       }
@@ -289,10 +288,10 @@ setMethod("compareByCoord",
   if(is.factor(positions)){
     positions <- as.numeric(as.character(positions))
   }
-  list <- list(as.character(positions),
-               mod,
-               activity)
-  spacer <- lapply(list,
+  tmp <- list(as.character(positions),
+              mod,
+              activity)
+  spacer <- lapply(tmp,
                    function(el){
                      if(is.null(el)) return(NULL)
                      length <- nchar(el)
@@ -302,15 +301,15 @@ setMethod("compareByCoord",
                                      paste0(rep(" ",n),collapse = "")
                                    }))
                    })
-  sep <- lapply(seq_along(list),
+  sep <- lapply(seq_along(tmp),
                    function(i){
                      if(i > 1L){
-                       rep(" - ",length(list[[i]]))
+                       rep(" - ",length(tmp[[i]]))
                      } else {
-                       rep("",length(list[[i]]))
+                       rep("",length(tmp[[i]]))
                      }
                    })
-  labels <- mapply(paste0, spacer, list, sep, SIMPLIFY = FALSE)
+  labels <- Map(paste0, spacer, tmp, sep)
   labels <- Reduce(paste0, rev(labels))
   f <- factor(labels, levels = unique(labels))
   stats::reorder(f,positions)

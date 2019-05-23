@@ -337,11 +337,11 @@ of the sequence data in addition to the score data can be triggered by setting
 it to `TRUE`.
 
 ```{r plot3, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine.", fig.asp=1}
-visualizeData(msi, "2", from = 10L, to = 45L, alias = alias) # showSequenceData = FALSE
+plotData(msi, "2", from = 10L, to = 45L, alias = alias) # showSequenceData = FALSE
 ```
 
 ```{r plot4, fig.cap="Scores along a transcript containing a A to G conversion indicating the presence of Inosine. This figure includes the detailed pileup sequence data.", fig.asp=1.2}
-visualizeData(msi[1:2], "2", from = 10L, to = 45L, showSequenceData = TRUE, alias = alias)
+plotData(msi[1:2], "2", from = 10L, to = 45L, showSequenceData = TRUE, alias = alias)
 ```
 
 # Performance measurements

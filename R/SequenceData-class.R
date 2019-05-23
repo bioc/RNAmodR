@@ -458,7 +458,7 @@ setMethod("rownames", "SequenceData",
     }
     data <- do.call(cbind,data)
   } else {
-    stop("Something went wrong.")
+    stop("")
   }
   data
 }
@@ -490,8 +490,8 @@ setMethod("rownames", "SequenceData",
   ##############################################################################
   # setup additional variables
   ##############################################################################
-  if(missing(args) || !is.list(args)){
-    args <- list()
+  if(!is.list(args)){
+    args <- as.list(args)
   }
   proto <- new(className)
   minQuality <- .norm_min_quality(args, proto@minQuality)
@@ -545,7 +545,7 @@ setMethod("rownames", "SequenceData",
   names(data) <- names(ranges)
   if(any(names(ranges) != names(sequences)) || 
      any(names(ranges) != names(data))){
-    stop("Something went wrong.")
+    stop("")
   }
   message("OK")
   ##############################################################################

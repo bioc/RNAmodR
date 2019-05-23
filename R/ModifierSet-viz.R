@@ -32,7 +32,7 @@ NULL
 }
 
 .add_viz_colours <- function(dts, colours){
-  dts <- mapply(
+  dts <- Map(
     function(dt, colour){
       if(is.list(dt)){
         dt <- lapply(dt,
@@ -48,13 +48,12 @@ NULL
       dt
     },
     dts,
-    colours,
-    SIMPLIFY = FALSE)
+    colours)
   dts
 }
 
 .add_viz_names <- function(dts, names){
-  dts <- mapply(
+  dts <- Map(
     function(dt, name){
       if(is.list(dt)){
         dt <- lapply(dt,
@@ -68,8 +67,7 @@ NULL
       dt
     },
     dts,
-    names,
-    SIMPLIFY = FALSE)
+    names)
   dts
 }
 
@@ -94,7 +92,7 @@ NULL
       max
     })
   names(max) <- types
-  dts <- mapply(
+  dts <- Map(
     function(dt,t){
       ylim <- c(0,max[[t]])
       if(sum(ylim) != 0L){
@@ -107,25 +105,25 @@ NULL
   dts
 }
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "ModifierSet", coord = "GRanges"),
   definition = function(x, coord, type = NA, window.size = 15L, ...) {
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
     from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
-    visualizeData(x, name = coord$Parent, from = from_to$from,
+    plotData(x, name = coord$Parent, from = from_to$from,
                   to = from_to$to, type = type, ...)
     
   }
 )
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "ModifierSet"),
   definition = function(x, name, from, to, type = NA, showSequenceData = FALSE, 
                         showSequence = TRUE, showAnnotation = FALSE, ...) {

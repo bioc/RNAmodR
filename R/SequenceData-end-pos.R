@@ -24,7 +24,7 @@ NULL
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{End5SequenceData}, \code{End3SequenceData} or
 #' \code{EndSequenceData} object
-#' @param name For \code{\link[=visualizeDataByCoord]{getDataTrack}}: a valid
+#' @param name For \code{\link[=plotDataByCoord]{getDataTrack}}: a valid
 #' transcript name. Must be a name of \code{ranges(x).}
 #' @param condition For \code{\link{aggregate}}: condition for which the data
 #' should be aggregated.
@@ -175,7 +175,7 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   # calculate tables and add empty positions
   # also remove overhanging read data
   seqs <- .seqs_rl(grl)
-  data <- IRanges::IntegerList(mapply(
+  data <- IRanges::IntegerList(Map(
     function(d,s){
       bg <- table(s) - 1L
       d <- d[d %in% s]
@@ -189,16 +189,14 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
       as.integer(d)
     },
     data,
-    seqs[f],
-    SIMPLIFY = FALSE))
+    seqs[f]))
   # get data for empty transcripts
-  data_not_found <- IRanges::IntegerList(mapply(
+  data_not_found <- IRanges::IntegerList(Map(
     function(s){
       d <- table(s) - 1
       as.integer(d)
     },
-    seqs[f_not_found],
-    SIMPLIFY = FALSE))
+    seqs[f_not_found]))
   # merge and order
   data <- c(data,data_not_found)
   data <- data[match(names(grl),names(data))]

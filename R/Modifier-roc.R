@@ -62,9 +62,6 @@ NULL
 NULL
 
 .norm_prediction_args <- function(input){
-  if(missing(input)){
-    input <- list()
-  }
   if(!is.list(input)){
     stop("'prediction.args' must be a list.")
   }
@@ -79,9 +76,6 @@ NULL
 
 .rocr_exclusive_functions <- c("rch","auc","prbe","mxe","rmse","ecost")
 .norm_performance_args <- function(input, x){
-  if(missing(input)){
-    input <- list()
-  }
   if(!is.list(input)){
     stop("'performance.args' must be a list.")
   }
@@ -102,11 +96,8 @@ NULL
     }
   }
   if(!is.null(input[["x.measure"]])){
-    if(length(input[["x.measure"]]) == 0L){
-      x.measure <- "cutoff"
-    } else if(is.na(input[["x.measure"]])){
-      x.measure <- "cutoff"
-    } else if(input[["x.measure"]] == ""){
+    if(length(input[["x.measure"]]) == 0L || is.na(input[["x.measure"]]) || 
+       input[["x.measure"]] == ""){
       x.measure <- "cutoff"
     } else {
       x.measure <- input[["x.measure"]]
@@ -136,9 +127,6 @@ NULL
 }
 
 .norm_plot_args <- function(input){
-  if(missing(input)){
-    input <- list()
-  }
   if(!is.list(input)){
     stop("'plot.args' must be a list.")
   }
@@ -232,9 +220,9 @@ NULL
   colnames <- colnames[colnames != "labels"]
   data <- lapply(seq_along(colnames),
                  function(i){
-                   c <- colnames[i]
-                   c <- c("labels",c)
-                   d <- data[,c]
+                   cn <- colnames[i]
+                   cn <- c("labels",cn)
+                   d <- data[,cn]
                    colnames(d) <- c("labels","predictions")
                    d <- unlist(d)
                    rownames(d) <- NULL
@@ -246,8 +234,8 @@ NULL
 
 .get_prediction_data_ModifierSet <- function(x, coord, score){
   data <- lapply(x, .get_prediction_data_Modifier, coord, score)
-  names <- names(data[[1]])
-  data <- lapply(names,
+  data_names <- names(data[[1]])
+  data <- lapply(data_names,
                  function(name){
                    lapply(data,"[[",name)
                  })
@@ -260,7 +248,7 @@ NULL
                    list(predictions = predictions,
                         labels = labels)
                  })
-  names(data) <- names
+  names(data) <- data_names
   data
 }
 
@@ -289,7 +277,7 @@ NULL
     plot.args[["add"]] <- FALSE
   }
   #
-  mapply(
+  Map(
     function(d, name, colour, prediction.args, performance.args, plot.args){
       pred <- do.call(ROCR::prediction, c(list(predictions = d$predictions, 
                                                labels = d$labels), 
@@ -301,10 +289,10 @@ NULL
         stop("Error during plotting of performance object: ",tmp)
       }
       graphics::title(main = name)
-      if(plot.args[["abline"]] == TRUE){
+      if(plot.args[["abline"]]){
         graphics::abline(a = 0, b = 1)
       }
-      if(plot.args[["AUC"]] == TRUE){
+      if(plot.args[["AUC"]]){
         auc <- unlist(slot(performance(pred,"auc"),"y.values"))
         auc <- paste(c("AUC = "), round(auc,2L), sep = "")
         graphics::legend(0.55, 0.25, auc, bty = "n", cex = 1)
@@ -314,8 +302,7 @@ NULL
     names(data),
     MoreArgs = list(prediction.args = prediction.args,
                     performance.args = performance.args,
-                    plot.args = plot.args),
-    SIMPLIFY = FALSE)
+                    plot.args = plot.args))
   for(i in seq_len(n_remaining)){
     graphics::plot.new()
   }
@@ -328,11 +315,8 @@ NULL
 setMethod(
   f = "plotROC", 
   signature = signature(x = "Modifier"),
-  definition = function(x, coord, score = NULL, prediction.args, 
-                        performance.args, plot.args){
-    if(missing(score)){
-      score <- NULL
-    }
+  definition = function(x, coord, score = NULL, prediction.args = list(), 
+                        performance.args = list(), plot.args = list()){
     coord <- .norm_coord(coord, modType(x))
     data <- .get_prediction_data_Modifier(x, coord, score)
     .plot_ROCR(data,
@@ -348,11 +332,8 @@ setMethod(
 setMethod(
   f = "plotROC", 
   signature = signature(x = "ModifierSet"),
-  definition = function(x, coord, score = NULL, prediction.args,
-                        performance.args, plot.args){
-    if(missing(score)){
-      score <- NULL
-    }
+  definition = function(x, coord, score = NULL, prediction.args = list(), 
+                        performance.args = list(), plot.args = list()){
     coord <- .norm_coord(coord, modType(x))
     data <- .get_prediction_data_ModifierSet(x, coord, score)
     .plot_ROCR(data,

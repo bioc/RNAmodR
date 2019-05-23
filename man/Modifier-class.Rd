@@ -65,10 +65,12 @@ sequences to be analyzed on a per chromosome basis.}
 \item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for
 for modifications be triggered upon construction? If not the search can be
 started by calling the \code{modify()} function.}
+\item{additional parameters depending on the specific \code{Modifier} class}
 }
-All other arguments will be passed onto the \code{SequenceData} objects, if
-\code{x} is not a \code{SequenceData} object or a list of \code{SequenceData}
-objects.}
+All additional options must be named and will be passed to the
+\code{\link[=settings]{settings}} function and onto the \code{SequenceData}
+objects, if \code{x} is not a \code{SequenceData} object or a list of
+\code{SequenceData} objects.}
 }
 \value{
 a \code{Modifier} object of type \code{className}
@@ -160,5 +162,10 @@ bamfiles, whereas from a \code{SequenceDataSet} they have to be).
 For this example a \code{list} of \code{character} vectors is expected.
 Each element must be named according to the names of \code{dataType()} and
 contain a \code{character} vector for creating a \code{SequenceData} object.
+
+All additional options must be named and will be passed to the
+\code{\link[=settings]{settings}} function and onto the \code{SequenceData}
+objects, if \code{x} is not a \code{SequenceData} object or a list of
+\code{SequenceData} objects.
 }
 

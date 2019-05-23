@@ -105,10 +105,10 @@ NULL
 #' see also the man pages for the functions mentioned below.
 #' @param value See \code{\link[RNAmodR:Modifier-functions]{settings}}
 #' @param coord,name,from,to,type,window.size,... See 
-#' \code{\link{visualizeData}}
+#' \code{\link{plotData}}
 #' 
 #' @details 
-#' \code{ModInosine} specific arguments for \link{visualizeData}:
+#' \code{ModInosine} specific arguments for \link{plotData}:
 #' \itemize{
 #' \item{\code{colour.bases} - }{a named character vector of \code{length = 4} 
 #' for the colours of the individual bases. The names are expected to be 
@@ -122,9 +122,9 @@ NULL
 #' \item{\code{modify}} {See \code{\link{modify}}.}
 #' \item{\code{getDataTrack}} {a list of 
 #' \code{\link[Gviz:DataTrack-class]{DataTrack}} objects. See 
-#' \code{\link{visualizeDataByCoord}}.}
-#' \item{\code{visualizeData}} {See \code{\link{visualizeDataByCoord}}.}
-#' \item{\code{visualizeDataByCoord}} {See \code{\link{visualizeDataByCoord}}.}
+#' \code{\link{plotDataByCoord}}.}
+#' \item{\code{plotData}} {See \code{\link{plotDataByCoord}}.}
+#' \item{\code{plotDataByCoord}} {See \code{\link{plotDataByCoord}}.}
 #' }
 #' 
 #' @examples 
@@ -227,7 +227,7 @@ setMethod(f = "aggregateData",
 
 .find_inosine <- function(x){
   if(!hasAggregateData(x)){
-    stop("Something went wrong.")
+    stop("")
   }
   letters <- IRanges::CharacterList(strsplit(as.character(sequences(x)),""))
   # get the aggregate data
@@ -243,7 +243,7 @@ setMethod(f = "aggregateData",
   # find inosine positions by looking for A to G conversion at position with 
   # enough coverage
   grl <- ranges(x)
-  modifications <- mapply(
+  modifications <- Map(
     function(m,c,l,r){
       m <- m[l == "A" &
                m$score >= minScore & 
@@ -257,19 +257,17 @@ setMethod(f = "aggregateData",
     mod,
     coverage,
     letters,
-    grl,
-    SIMPLIFY = FALSE)
+    grl)
   f <- !vapply(modifications,
                is.null,
                logical(1))
-  modifications <- mapply(
+  modifications <- Map(
     function(m,name){
       m$Parent <- name
       m
     },
     modifications[f],
-    names(grl)[f],
-    SIMPLIFY = FALSE)
+    names(grl)[f])
   modifications <- GenomicRanges::GRangesList(modifications)
   unname(unlist(modifications))
 }

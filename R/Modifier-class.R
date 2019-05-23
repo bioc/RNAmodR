@@ -5,6 +5,10 @@
 #' @include Modifier-utils.R
 NULL
 
+invalidMessage <- paste0("Settings were changed after data aggregation or ",
+                         "modification search. Rerun with modify(x,force = ",
+                         "TRUE) to update with current settings.")
+
 #' @name Modifier-class
 #' @aliases Modifier
 #'
@@ -61,6 +65,11 @@ NULL
 #' For this example a \code{list} of \code{character} vectors is expected.
 #' Each element must be named according to the names of \code{dataType()} and
 #' contain a \code{character} vector for creating a \code{SequenceData} object.
+#' 
+#' All additional options must be named and will be passed to the
+#' \code{\link[=settings]{settings}} function and onto the \code{SequenceData}
+#' objects, if \code{x} is not a \code{SequenceData} object or a list of
+#' \code{SequenceData} objects.
 #'
 #' @param className The name of the class which should be constructed.
 #' @param x the input which can be of the following types
@@ -89,10 +98,12 @@ NULL
 #' \item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for
 #' for modifications be triggered upon construction? If not the search can be
 #' started by calling the \code{modify()} function.}
+#' \item{additional parameters depending on the specific \code{Modifier} class}
 #' }
-#' All other arguments will be passed onto the \code{SequenceData} objects, if
-#' \code{x} is not a \code{SequenceData} object or a list of \code{SequenceData}
-#' objects.
+#' All additional options must be named and will be passed to the
+#' \code{\link[=settings]{settings}} function and onto the \code{SequenceData}
+#' objects, if \code{x} is not a \code{SequenceData} object or a list of
+#' \code{SequenceData} objects.
 #'
 #' @slot mod a \code{character} value, which needs to contain one or more
 #' elements from the alphabet of a
@@ -125,10 +136,13 @@ NULL
 #' @description
 #' For the \code{Modifier} and  \code{ModifierSet} classes a number of functions
 #' are implemented to access the data stored by the object.
+#' 
+#' The \code{validAggregate} and \code{validModification} functions check if
+#' \code{\link[=settings]{settings}} have been modified, after the data was 
+#' loaded. This potentially invalidates them. To update the data, run the
+#' \code{aggregate} or the \code{modify} function.
 #'
 #' @param x,object a \code{Modifier} or \code{ModifierSet} class
-#' @param name For \code{settings}: name of the setting to be returned or set
-#' @param value For \code{settings}: value of the setting to be set
 #' @param modified For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
 #' the sequences be returned as a \code{ModRNAString} with the found
 #' modifications added on top of the \code{RNAString}? See
@@ -142,7 +156,6 @@ NULL
 #' \item{\code{modifierType}:} {a character vector with the appropriate class
 #' Name of a \code{\link[=Modifier-class]{Modifier}}.}
 #' \item{\code{mainScore}:} {a character vector.}
-#' \item{\code{settings}:} {a \code{Seqinfo} object.}
 #' \item{\code{sequenceData}:} {a \code{SequenceData} object.}
 #' \item{\code{modifications}:} {a \code{GRanges} or \code{GRangesList} object
 #' describing the found modifications.}
@@ -151,7 +164,13 @@ NULL
 #' \item{\code{ranges}:} {a \code{GRangesList} object with each element per
 #' transcript.}
 #' \item{\code{bamfiles}:} {a \code{BamFileList} object.}
+#' \item{\code{validAggregate}:} {\code{TRUE} or \code{FALSE}. Checks if current
+#' settings are the same for which the data was aggregate}
+#' \item{\code{validModification}:} {\code{TRUE} or \code{FALSE}. Checks if 
+#' current settings are the same for which modification were found}
 #' }
+#' 
+#' @seealso \code{\link[=settings]{settings}}
 #'
 #' @examples
 #' data(msi,package="RNAmodR")
@@ -159,7 +178,6 @@ NULL
 #' modifierType(mi) # The class name of the Modifier object
 #' modifierType(msi) #
 #' mainScore(mi)
-#' settings(mi)
 #' sequenceData(mi)
 #' modifications(mi)
 #' # general accessors
@@ -196,18 +214,18 @@ setClass("Modifier",
 
 # validity ---------------------------------------------------------------------
 
-.check_SequenceData_elements <- function(x, list){
-  if(is(list,"SequenceData")){
-    list <- list(list)
-  } else if(is(list,"list")){
-    elementTypeMatch <- !vapply(list,is,logical(1),"SequenceData")
+.check_SequenceData_elements <- function(x, data){
+  if(is(data,"SequenceData")){
+    data <- list(data)
+  } else if(is(data,"list")){
+    elementTypeMatch <- !vapply(data,is,logical(1),"SequenceData")
     if(any(elementTypeMatch)){
       stop("Not all elements are 'SequenceData' objects.", call. = FALSE)
     }
-  } else if(!is(list,"SequenceDataSet")){
-   stop("Something went wrong.")
+  } else if(!is(data,"SequenceDataSet")){
+    stop("")
   }
-  elementTypes <- vapply(list,class,character(1))
+  elementTypes <- vapply(data,class,character(1))
   if(length(elementTypes) != length(dataType(x))){
     stop("Number of 'SequenceData' elements does not match the requirements of",
          " ",class(x),". '",paste(dataType(x), collapse = "','"),"' are ",
@@ -222,8 +240,8 @@ setClass("Modifier",
   NULL
 }
 
-.check_SequenceDataList_data_elements <- function(x, list){
-  ans <- lapply(list, .check_SequenceData_elements, x)
+.check_SequenceDataList_data_elements <- function(x, data){
+  ans <- lapply(data, .check_SequenceData_elements, x)
   if(all(vapply(ans,is.null))) {
     return(NULL)
   }
@@ -296,9 +314,9 @@ S4Vectors::setValidity2(Class = "Modifier", .valid_Modifier)
                        settings[,f,drop = FALSE]
                      })
   if(is.null(rownames(settings[[1]]))){
-    names <- rep(" ",nrow(settings[[1]]))
+    setting_names <- rep(" ",nrow(settings[[1]]))
   } else {
-    names <- rownames(settings[[1]])
+    setting_names <- rownames(settings[[1]])
   }
   for(i in seq_along(settings)){
     out <-
@@ -312,7 +330,7 @@ S4Vectors::setValidity2(Class = "Modifier", .valid_Modifier)
       }), use.names = FALSE), nrow = 1,
       dimnames = list("", colnames(out)))
     out <- rbind(classinfo, out)
-    rownames(out) <- c(" ",names)
+    rownames(out) <- c(" ",setting_names)
     print(out, quote = FALSE, right = TRUE)
   }
 }
@@ -347,9 +365,7 @@ setMethod(
     .show_settings(settings)
     valid <- c(validAggregate(object), validModification(object))
     if(!all(valid)){
-      warning("Settings were changed after data aggregation or modification ",
-              "search. Rerun with modify(x,force = TRUE) to update with ",
-              "current settings.", call. = FALSE)
+      warning(invalidMessage, call. = FALSE)
     }
   }
 )
@@ -404,6 +420,10 @@ setMethod(f = "modifications",
               if(!assertive::is_a_bool(perTranscript)){
                 stop("'perTranscript' has to be a single logical value.")
               }
+              valid <- c(validAggregate(x), validModification(x))
+              if(!all(valid)){
+                warning(invalidMessage, call. = FALSE)
+              }
               if(perTranscript){
                 return(.get_modifications_per_transcript(x))
               }
@@ -457,7 +477,7 @@ setMethod(f = "sequences",
                 stop("'modified' has to be a single logical value.",
                      call. = FALSE)
               }
-              if(modified == FALSE){
+              if(!modified){
                 return(sequences(sequenceData(x)))
               }
               mod <- .get_modifications_per_transcript(x)
@@ -511,6 +531,59 @@ setMethod(f = "seqinfo",
 
 #' @rdname Modifier-functions
 #' @export
+setMethod(f = "validAggregate",
+          signature = signature(x = "Modifier"),
+          definition = function(x) x@aggregateValidForCurrentArguments
+)
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "validModification",
+          signature = signature(x = "Modifier"),
+          definition = function(x) x@modificationsValidForCurrentArguments
+)
+
+# settings ---------------------------------------------------------------------
+
+#' @name settings
+#' 
+#' @title Settings for \code{Modifier} objects
+#' 
+#' @description 
+#' Depending on data prepation, quality and desired stringency of a modification
+#' strategy, settings for cut off parameters or other variables may need to be 
+#' adjusted. This should be rarely the case, but a function for changing these
+#' settings, is implemented as the... \code{settings} function.
+#' 
+#' For changing values the input can be either a \code{list} or something 
+#' coercible to a \code{list}. Upon changing a setting, the validity of the
+#' value in terms of type(!) and dimensions will be checked. 
+#' 
+#' If settings have been modified after the data was loaded, the data is 
+#' potentially invalid. To update the data, run the \code{aggregate} or the 
+#' \code{modify} function.
+#' 
+#' @param x a \code{Modifier} or \code{ModifierSet} class
+#' @param name name of the setting to be returned or set
+#' @param value value of the setting to be set
+#' 
+#' @return 
+#' If \code{name} is omitted, \code{settings} returns a list of all settings.
+#' If \code{name} is set, \code{settings} returns a single settings or 
+#' \code{NULL}, if a value for \code{name} is not available. 
+#' 
+#' @examples 
+#' data(msi,package="RNAmodR")
+#' mi <- msi[[1]]
+#' # returns a list of all settings
+#' settings(mi)
+#' # accesses a specific setting
+#' settings(mi,"minCoverage")
+#' # modification of setting
+#' settings(mi) <- list(minCoverage = 11L)
+NULL
+
+#' @rdname settings
+#' @export
 setMethod(f = "settings",
           signature = signature(x = "Modifier"),
           definition = function(x, name){
@@ -523,36 +596,24 @@ setMethod(f = "settings",
             x@arguments[[name]]
           }
 )
-#' @rdname Modifier-functions
+
+#' @rdname settings
 #' @export
 setReplaceMethod(f = "settings",
-          signature = signature(x = "Modifier"),
-          definition = function(x, value){
-            if(is.null(names(value)) && length(value) > 0L){
-              stop("'value' has to be a named.")
-            }
-            if(!is.list(value)){
-              value <- as.list(value)
-            }
-            value <- .norm_args(value)
-            x@arguments[names(value)] <- unname(value)
-            x@aggregateValidForCurrentArguments <- FALSE
-            x@modificationsValidForCurrentArguments <- FALSE
-            x
-          })
-
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "validAggregate",
-          signature = signature(x = "Modifier"),
-          definition = function(x) x@aggregateValidForCurrentArguments
-)
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "validModification",
-          signature = signature(x = "Modifier"),
-          definition = function(x) x@modificationsValidForCurrentArguments
-)
+                 signature = signature(x = "Modifier"),
+                 definition = function(x, value){
+                   if(is.null(names(value)) && length(value) > 0L){
+                     stop("'value' has to be a named.")
+                   }
+                   if(!is.list(value)){
+                     value <- as.list(value)
+                   }
+                   value <- .norm_args(value)
+                   x@arguments[names(value)] <- unname(value)
+                   x@aggregateValidForCurrentArguments <- FALSE
+                   x@modificationsValidForCurrentArguments <- FALSE
+                   x
+                 })
 
 # constructors -----------------------------------------------------------------
 
@@ -560,7 +621,7 @@ setMethod(f = "validModification",
   if(is(ans,"character") && extends(ans,"Modifier")){
     ans <- getClass(ans)@prototype
   } else if(!is(ans,"Modifier")) {
-    stop("Something went wrong.")
+    stop("")
   }
   .check_Modifier_data_elements(ans, list)
   if(length(list) == 1L){
@@ -604,7 +665,8 @@ setMethod(f = "validModification",
       bamfiles <- bamfiles[match(class,names(bamfiles))]
       data <- BiocParallel::bpmapply(.load_SequenceData, classes, bamfiles,
                                      MoreArgs = list(annotation, sequences,
-                                                     seqinfo, args))
+                                                     seqinfo, args),
+                                     SIMPLIFY = FALSE)
     } else {
       data <- BiocParallel::bplapply(classes, .load_SequenceData, bamfiles,
                                      annotation, sequences, seqinfo, args)
@@ -621,7 +683,7 @@ setMethod(f = "validModification",
                    })
     data <- as(data,"SequenceDataSet")
   } else {
-    stop("Something went wrong.")
+    stop("")
   }
   data
 }
@@ -678,7 +740,7 @@ setMethod(f = "validModification",
 #' @export
 setGeneric(
   name = "Modifier",
-  signature = c("x"),
+  signature = "x",
   def = function(className, x, annotation, sequences, seqinfo, ...)
     standardGeneric("Modifier")
 )
@@ -842,9 +904,6 @@ setMethod(f = "aggregate",
           signature = signature(x = "Modifier"),
           definition =
             function(x, force = FALSE){
-              if(missing(force)){
-                force <- FALSE
-              }
               assertive::assert_is_a_bool(force)
               if(!hasAggregateData(x) || force){
                 x@aggregate <- .check_aggregate_modifier(aggregateData(x), x)
@@ -935,9 +994,6 @@ setMethod(f = "modify",
           signature = signature(x = "Modifier"),
           definition =
             function(x, force = FALSE){
-              if(missing(force)){
-                force <- FALSE
-              }
               assertive::assert_is_a_bool(force)
               if(!validAggregate(x) | force){
                 x <- aggregate(x, force = TRUE)

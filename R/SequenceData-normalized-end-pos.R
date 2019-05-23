@@ -27,7 +27,7 @@ NULL
 #' \code{\link[=SequenceData-class]{SequenceData}} and
 #' \code{\link[=SequenceData-functions]{SequenceData-functions}}
 #' @param x a \code{CoverageSequenceData}
-#' @param name For \code{\link[=visualizeDataByCoord]{getDataTrack}}: a valid 
+#' @param name For \code{\link[=plotDataByCoord]{getDataTrack}}: a valid 
 #' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
@@ -126,7 +126,7 @@ setMethod("summary",
   enddata <- .summarize_to_position_data(data, strands_u[f], type)
   # tabulate the counts per position
   seqs <- .seqs_rl_strand(grl, force_continous = TRUE)
-  enddata <- IRanges::IntegerList(mapply(
+  enddata <- IRanges::IntegerList(Map(
     function(d,s){
       bg <- table(s) - 1L
       d <- d[d %in% s]
@@ -140,12 +140,11 @@ setMethod("summary",
       as.integer(d)
     },
     enddata,
-    seqs[f],
-    SIMPLIFY = FALSE))
+    seqs[f]))
   # noralize against total number transcript or against the overlap per position
   normTranscript <- (enddata / lengths(data)) * 1000
   normTranscript <- IRanges::NumericList(lapply(normTranscript,unname))
-  normOverlap <- IRanges::NumericList(mapply(
+  normOverlap <- IRanges::NumericList(Map(
     function(d,end,pos){
       gr <- GenomicRanges::GRanges(
         seqnames = as.character(unique(seqnames(d))),
@@ -155,16 +154,14 @@ setMethod("summary",
     },
     data,
     enddata,
-    seqs[f],
-    SIMPLIFY = FALSE))
+    seqs[f]))
   # calculate tables and add empty positions
-  data_not_found <- IRanges::IntegerList(mapply(
+  data_not_found <- IRanges::IntegerList(Map(
     function(s){
       d <- table(s) - 1
       as.integer(d)
     },
-    seqs[f_not_found],
-    SIMPLIFY = FALSE))
+    seqs[f_not_found]))
   # merge data with empty data and order based on factor numbers
   enddata <- c(enddata,data_not_found)
   enddata@unlistData[is.na(enddata@unlistData)] <- 0L

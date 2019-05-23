@@ -95,7 +95,7 @@ NULL
     coord <- coord[!duplicated(coord)]
     return(.norm_coord(coord, type, merge))
   } else {
-    stop("Something went wrong.")
+    stop("")
   }
   if(unique(unlist(width(ranges(coord)))) != 1L){
     stop("Elements with a width != 1L are not supported.",
@@ -132,30 +132,29 @@ NULL
                           paste(type, collapse = "','"), "'")
   }
   if(is.na(name)){
-    names <- intersect(namesData, namesCoord)
+    intersect_names <- intersect(namesData, namesCoord)
     message <- c("No intersection between names in data of 'x' and Parent in ",
                  "'coord'\n ",messageType)
   } else {
-    names <- Reduce(intersect,
-                    list(namesData,namesCoord),name)
+    intersect_names <- Reduce(intersect,
+                              list(namesData,namesCoord),name)
     message <- c("No intersection between names in data of 'x', Parent in ",
                  "'coord'\n ",messageType," and the selected name.")
   }
-  if(length(names) == 0L){
+  if(length(intersect_names) == 0L){
     stop(message,
          call. = FALSE)
   }
-  names
+  intersect_names
 }
 
 .check_for_invalid_positions <- function(data, coord){
   lengths <- lengths(data)
   positions <- start(ranges(coord))
   f_names <- match(names(positions),names(lengths))
-  f <- IRanges::LogicalList(mapply(function(i,j){i >= j},
-                                   positions,
-                                   lengths[f_names],
-                                   SIMPLIFY = FALSE))
+  f <- IRanges::LogicalList(Map(function(i,j){i >= j},
+                                positions,
+                                lengths[f_names]))
   if(!any(lengths(BiocGenerics::which(f)) > 0L )){
     return(NULL)
   }
@@ -203,13 +202,12 @@ NULL
                                     flank))
   ans <- data[m][ff]
   if(perTranscript){
-    pos <- IRanges::CharacterList(mapply(
+    pos <- IRanges::CharacterList(Map(
       function(d,i){
         BiocGenerics::which(rownames(d) %in% i)
       },
       data[m],
-      flank,
-      SIMPLIFY = FALSE))
+      flank))
     rownames(ans) <- pos
   }
   return(ans)
@@ -221,9 +219,10 @@ NULL
   args <- .norm_subset_args(list(...), NULL)
   data <- .norm_data(data)
   coord <- .norm_coord(coord, NA, args[["merge"]])
-  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
-  data <- data[match(names, names(data))]
-  coord <- coord[names(coord) %in% names]
+  element_names <- .get_element_names(data, coord, args[["name"]],
+                                      args[["type"]])
+  data <- data[match(element_names, names(data))]
+  coord <- coord[names(coord) %in% element_names]
   .perform_subset(data, coord, args[["flanking"]], args[["perTranscript"]])
 }
 
@@ -237,9 +236,10 @@ NULL
     data <- .norm_aggregate_data(aggregate(x))
   }
   data <- .norm_data(data)
-  names <- .get_element_names(data, coord, args[["name"]], args[["type"]])
-  data <- data[match(names, names(data))]
-  coord <- coord[names(coord) %in% names]
+  element_names <- .get_element_names(data, coord, args[["name"]],
+                                      args[["type"]])
+  data <- data[match(element_names, names(data))]
+  coord <- coord[names(coord) %in% element_names]
   .perform_subset(data, coord, args[["flanking"]], args[["perTranscript"]])
 }
 
@@ -266,7 +266,7 @@ NULL
              } else if(is(z,"SequenceDataSet")) {
                return(.subset_SequenceDataSet_by_GRangesList(z, coord, ...))
              } else {
-               stop("Something went wrong.")
+               stop("")
              }
            })
   ans <- do.call(cbind,ans)
@@ -346,10 +346,9 @@ setMethod("subsetByCoord",
   }
   labels <- IRanges::LogicalList(lapply(lengths(data),
                                         function(l){rep(FALSE,l)}))
-  labels[f_rn] <- IRanges::LogicalList(mapply("%in%",
-                                              rn_d[f_rn],
-                                              positions[f_p],
-                                              SIMPLIFY = FALSE))
+  labels[f_rn] <- IRanges::LogicalList(Map("%in%",
+                                           rn_d[f_rn],
+                                           positions[f_p]))
   unlisted_data <- unlist(data, use.names = FALSE)
   unlisted_data$labels <- unlist(labels, use.names = FALSE)
   return(relist(unlisted_data, data))
@@ -407,7 +406,7 @@ setMethod("subsetByCoord",
              } else if(is(z,"SequenceDataSet")) {
                return(.label_SequenceDataSet_by_GRangesList(z, coord,...))
              } else {
-               stop("Something went wrong.")
+               stop("")
              }
            })
   .keep_one_labels_column(ans)

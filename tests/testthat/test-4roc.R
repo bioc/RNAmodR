@@ -1,10 +1,11 @@
-
 context("ROC")
 test_that("ROC:",{
   skip_on_bioc()
   data(msi, package = "RNAmodR")
   # arguments
-  actual <- RNAmodR:::.norm_prediction_args()
+  expect_error(RNAmodR:::.norm_prediction_args(),
+               'argument "input" is missing, with no default')
+  actual <- RNAmodR:::.norm_prediction_args(list())
   pred <- actual
   expect_type(actual,"list")
   expect_equal(actual,list())
@@ -12,7 +13,7 @@ test_that("ROC:",{
                  "Unnamed list for 'prediction.args'")
   #
   expect_error(RNAmodR:::.norm_performance_args(),
-               'argument "x" is missing, with no default')
+               'argument "input" is missing, with no default')
   expect_error(RNAmodR:::.norm_performance_args(list()),
                'argument "x" is missing, with no default')
   actual <- RNAmodR:::.norm_performance_args(list(), msi)
@@ -28,7 +29,9 @@ test_that("ROC:",{
   expect_error(RNAmodR:::.norm_performance_args(list(score = 1), msi),
                "'score' must a single character and a valid column")
   #
-  actual <- RNAmodR:::.norm_plot_args()
+  expect_error(RNAmodR:::.norm_plot_args(),
+               'argument "input" is missing, with no default')
+  actual <- RNAmodR:::.norm_plot_args(list())
   plot <- actual
   expect_type(actual,"list")
   expect_named(actual,c("colorize","lwd","colorize.palette","abline","AUC"))

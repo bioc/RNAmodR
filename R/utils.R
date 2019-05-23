@@ -42,10 +42,10 @@ NULL
 # seqlengths related functions
 .rebase_GRanges <- function(gr){
   usn <- .get_unique_seqnames(gr)
-  seqnames <- Rle(factor(GenomicRanges::seqnames(gr), levels = usn))
+  gr_seqnames <- Rle(factor(GenomicRanges::seqnames(gr), levels = usn))
   seqlengths <- GenomeInfoDb::seqlengths(gr)[usn]
   seqinfo <- GenomeInfoDb::Seqinfo(usn, seqlengths)
-  GenomicRanges::GRanges(seqnames = seqnames,
+  GenomicRanges::GRanges(seqnames = gr_seqnames,
                          ranges = IRanges::ranges(gr),
                          strand = BiocGenerics::strand(gr),
                          seqinfo = seqinfo,
@@ -75,27 +75,25 @@ NULL
 # per positions of each element
 
 .seqnames_rl <- function(rl){
-  seqnames <- as.character(seqnames(rl@unlistData))
+  ul_seqnames <- as.character(seqnames(rl@unlistData))
   width <- as.integer(width(rl@unlistData))
-  seqnames <- mapply(rep,seqnames,width,SIMPLIFY = FALSE)
-  seqnames <- IRanges::CharacterList(lapply(mapply(seq.int,
+  ul_seqnames <- Map(rep,ul_seqnames,width)
+  ul_seqnames <- IRanges::CharacterList(lapply(Map(seq.int,
                                                    start(rl@partitioning),
-                                                   end(rl@partitioning),
-                                                   SIMPLIFY = FALSE),
-                                            function(i){
-                                              unname(unlist(seqnames[i]))
-                                            }))
-  seqnames
+                                                   end(rl@partitioning)),
+                                               function(i){
+                                                 unname(unlist(ul_seqnames[i]))
+                                               }))
+  ul_seqnames
 }
 
 .strands_rl <- function(rl){
   strands <- as.character(strand(rl@unlistData))
   width <- as.integer(width(rl@unlistData))
-  strands <- mapply(rep,strands,width,SIMPLIFY = FALSE)
-  strands <- IRanges::CharacterList(lapply(mapply(seq.int,
-                                                  start(rl@partitioning),
-                                                  end(rl@partitioning),
-                                                  SIMPLIFY = FALSE),
+  strands <- Map(rep,strands,width)
+  strands <- IRanges::CharacterList(lapply(Map(seq.int,
+                                               start(rl@partitioning),
+                                               end(rl@partitioning)),
                                            function(i){
                                              unname(unlist(strands[i]))
                                            }))
@@ -152,13 +150,12 @@ NULL
     from <- tmp
     rm(tmp)
   }
-  ans <- mapply(
+  ans <- Map(
     function(f,t){
       seq.int(f,t,by)
     },
     from,
-    to,
-    SIMPLIFY = FALSE)
+    to)
   ans <- IRanges::IntegerList(ans)
   width_x <- IRanges::IntegerList(split(width(ans@partitioning),
                                         names(ans@partitioning)))
@@ -201,7 +198,7 @@ NULL
 .subset_to_condition <- function(conditions, condition){
   if(condition != "both"){
     f <- conditions == condition
-    if(all(f == FALSE)){
+    if(all(!f)){
       stop("No data for condition '",condition,"' found.")
     }
   } else {

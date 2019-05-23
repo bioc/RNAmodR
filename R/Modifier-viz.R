@@ -2,15 +2,15 @@
 #' @include Modifier-class.R
 NULL
 
-#' @name visualizeData
-#' @aliases visualizeData visualizeDataByCoord getDataTrack
+#' @name plotData
+#' @aliases plotData plotDataByCoord getDataTrack
 #' 
 #' @title Visualizing data data from a \code{SequenceData}, 
 #' \code{SequenceDataSet}, \code{SequenceDataList}, \code{Modifier} or 
 #' \code{ModifierSet} object.
 #' 
 #' @description 
-#' With the \code{visualizeData} and \code{visualizeDataByCoord} functions data
+#' With the \code{plotData} and \code{plotDataByCoord} functions data
 #' from a \code{SequenceData}, \code{SequenceDataSet}, \code{SequenceDataList},
 #' \code{Modifier} or \code{ModifierSet} object can be visualized.
 #' 
@@ -27,9 +27,9 @@ NULL
 #' @param coord coordinates of a positions to subset to as a 
 #' \code{GRanges} object. The 'Parent' column is expected to match the 
 #' transcript name.
-#' @param name Only for \code{visualizeData}: the transcript name
-#' @param from Only for \code{visualizeData}: start position
-#' @param to Only for \code{visualizeData}: end position
+#' @param name Only for \code{plotData}: the transcript name
+#' @param from Only for \code{plotData}: start position
+#' @param to Only for \code{plotData}: end position
 #' @param type the data type of data show as data tracks.
 #' @param showSequenceData \code{TRUE} or \code{FALSE}: should the sequence data
 #' be shown? (default: \code{seqdata = FALSE})
@@ -60,14 +60,14 @@ NULL
 #' 
 #' @examples 
 #' data(msi,package="RNAmodR")
-#' visualizeData(msi[[1]], "2", from = 10L, to = 45L)
+#' plotData(msi[[1]], "2", from = 10L, to = 45L)
 #' \dontrun{
-#' visualizeData(msi, "2", from = 10L, to = 45L)
+#' plotData(msi, "2", from = 10L, to = 45L)
 #' }
 NULL
 
 .norm_show_argument <- function(show_arg, default = FALSE){
-  if(missing(show_arg) || !assertive::is_a_bool(show_arg)){
+  if(!assertive::is_a_bool(show_arg)){
     show_arg <- default
   }
   show_arg
@@ -143,23 +143,23 @@ NULL
 
 # ------------------------------------------------------------------------------
 
-#' @rdname visualizeData
+#' @rdname plotData
 setMethod(
-  f = "visualizeDataByCoord",
+  f = "plotDataByCoord",
   signature = signature(x = "Modifier", coord = "GRanges"),
   definition = function(x, coord, type = NA, window.size = 15L, ...) {
     # input check
     coord <- .norm_coord_for_visualization(ranges(x), coord)
     from_to <- .get_viz_from_to_coord(ranges(x), coord, window.size)
-    visualizeData(x, name = coord$Parent, from = from_to$from,
+    plotData(x, name = coord$Parent, from = from_to$from,
                   to = from_to$to, type = type, ...)
   }
 )
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setMethod(
-  f = "visualizeData",
+  f = "plotData",
   signature = signature(x = "Modifier"),
   definition = function(x, name, from, to, type = NA, showSequenceData = FALSE, 
                         showSequence = TRUE, showAnnotation = FALSE, ...) {
@@ -203,7 +203,7 @@ setMethod(
   }
 )
 
-#' @rdname visualizeData
+#' @rdname plotData
 #' @export
 setMethod(
   f = "getDataTrack",

@@ -30,7 +30,7 @@ NULL
 #' @rdname SequenceDataSet-class
 #' @export
 setClass("SequenceDataSet",
-         contains = c("List"),
+         contains = "List",
          slots = c(listData = "list"),
          prototype = list(elementType = "SequenceData"))
 

@@ -11,8 +11,6 @@
 \alias{dataType}
 \alias{sequenceData}
 \alias{sequences}
-\alias{settings}
-\alias{settings<-}
 \alias{validAggregate}
 \alias{validModification}
 \alias{show,Modifier-method}
@@ -28,8 +26,6 @@
 \alias{sequenceData,Modifier-method}
 \alias{sequences,Modifier-method}
 \alias{seqinfo,Modifier-method}
-\alias{settings,Modifier-method}
-\alias{settings<-,Modifier-method}
 \alias{validAggregate,Modifier-method}
 \alias{validModification,Modifier-method}
 \alias{show,ModifierSet-method}
@@ -43,8 +39,6 @@
 \alias{ranges,ModifierSet-method}
 \alias{replicates,ModifierSet-method}
 \alias{seqinfo,ModifierSet-method}
-\alias{settings,ModifierSet-method}
-\alias{settings<-,ModifierSet-method}
 \alias{sequences,ModifierSet-method}
 \title{Modifier/ModifierSet functions}
 \usage{
@@ -61,10 +55,6 @@ dataType(x)
 sequenceData(x)
 
 sequences(x, ...)
-
-settings(x, name = NULL)
-
-settings(x, name) <- value
 
 validAggregate(x)
 
@@ -96,10 +86,6 @@ validModification(x)
 
 \S4method{seqinfo}{Modifier}(x)
 
-\S4method{settings}{Modifier}(x, name = NULL)
-
-\S4method{settings}{Modifier}(x) <- value
-
 \S4method{validAggregate}{Modifier}(x)
 
 \S4method{validModification}{Modifier}(x)
@@ -126,20 +112,12 @@ validModification(x)
 
 \S4method{seqinfo}{ModifierSet}(x)
 
-\S4method{settings}{ModifierSet}(x, name = NULL)
-
-\S4method{settings}{ModifierSet}(x) <- value
-
 \S4method{sequences}{ModifierSet}(x, modified = FALSE)
 }
 \arguments{
 \item{x, object}{a \code{Modifier} or \code{ModifierSet} class}
 
 \item{...}{Additional arguments.}
-
-\item{name}{For \code{settings}: name of the setting to be returned or set}
-
-\item{value}{For \code{settings}: value of the setting to be set}
 
 \item{modified}{For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
 the sequences be returned as a \code{ModRNAString} with the found
@@ -154,7 +132,6 @@ per transcript? (default: \code{perTranscript = FALSE})}
 \item{\code{modifierType}:} {a character vector with the appropriate class
 Name of a \code{\link[=Modifier-class]{Modifier}}.}
 \item{\code{mainScore}:} {a character vector.}
-\item{\code{settings}:} {a \code{Seqinfo} object.}
 \item{\code{sequenceData}:} {a \code{SequenceData} object.}
 \item{\code{modifications}:} {a \code{GRanges} or \code{GRangesList} object
 describing the found modifications.}
@@ -163,11 +140,20 @@ describing the found modifications.}
 \item{\code{ranges}:} {a \code{GRangesList} object with each element per
 transcript.}
 \item{\code{bamfiles}:} {a \code{BamFileList} object.}
+\item{\code{validAggregate}:} {\code{TRUE} or \code{FALSE}. Checks if current
+settings are the same for which the data was aggregate}
+\item{\code{validModification}:} {\code{TRUE} or \code{FALSE}. Checks if 
+current settings are the same for which modification were found}
 }
 }
 \description{
 For the \code{Modifier} and  \code{ModifierSet} classes a number of functions
 are implemented to access the data stored by the object.
+
+The \code{validAggregate} and \code{validModification} functions check if
+\code{\link[=settings]{settings}} have been modified, after the data was 
+loaded. This potentially invalidates them. To update the data, run the
+\code{aggregate} or the \code{modify} function.
 }
 \examples{
 data(msi,package="RNAmodR")
@@ -175,7 +161,6 @@ mi <- msi[[1]]
 modifierType(mi) # The class name of the Modifier object
 modifierType(msi) #
 mainScore(mi)
-settings(mi)
 sequenceData(mi)
 modifications(mi)
 # general accessors
@@ -183,4 +168,7 @@ seqinfo(mi)
 sequences(mi)
 ranges(mi)
 bamfiles(mi)
+}
+\seealso{
+\code{\link[=settings]{settings}}
 }
