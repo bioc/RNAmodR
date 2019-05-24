@@ -75,6 +75,20 @@ NULL
 }
 
 .rocr_exclusive_functions <- c("rch","auc","prbe","mxe","rmse","ecost")
+.rocr_performance_settings <- data.frame(
+  variable = c("measure",
+               "x.measure",
+               "score"),
+  testFUN = c(".is_a_string",
+              ".is_a_string",
+              ".is_a_string"),
+  errorValue = c(FALSE,
+                 FALSE,
+                 FALSE),
+  errorMessage = c("'measure' must a single character compatible with ?ROCR::performance.",
+                   "'x.measure' must a single character compatible with ?ROCR::performance.",
+                   "'score' must a single character and a valid column name in getAggregateData()."),
+  stringsAsFactors = FALSE)
 .norm_performance_args <- function(input, x){
   if(!is.list(input)){
     stop("'performance.args' must be a list.")
@@ -87,45 +101,48 @@ NULL
   measure <- "tpr"
   x.measure <- "fpr"
   score <- mainScore(x)
-  if(!is.null(input[["measure"]])){
-    measure <- input[["measure"]]
-    if(!assertive::is_a_string(measure)){
-      stop("'measure' must a single character compatible with ",
-           "?ROCR::performance.",
-           call. = FALSE)
-    }
+  args <- .norm_settings(input, .rocr_performance_settings, measure, x.measure,
+                         score)
+  if(args[["measure"]] %in% .rocr_exclusive_functions){
+    args[["x.measure"]] <- "cutoff"
   }
-  if(!is.null(input[["x.measure"]])){
-    if(length(input[["x.measure"]]) == 0L || is.na(input[["x.measure"]]) || 
-       input[["x.measure"]] == ""){
-      x.measure <- "cutoff"
-    } else {
-      x.measure <- input[["x.measure"]]
-      if(!assertive::is_a_string(x.measure)){
-        stop("'x.measure' must a single character compatible with ",
-             "?ROCR::performance.",
-             call. = FALSE)
-      }
-    }
-  } else if(measure %in% .rocr_exclusive_functions){
-    x.measure <- "cutoff"
+  if(is(x,"Modifier")){
+    cn <- colnames(getAggregateData(x)[[1]])
+  } else if(is(x,"ModifierSet")) {
+    cn <- colnames(getAggregateData(x[[1]])[[1]])
+  } else {
+    stop("")
   }
-  if(!is.null(input[["score"]])){
-    score <- input[["score"]]
-    if(!assertive::is_a_string(score) ||
-       !(score %in% colnames(getAggregateData(x)[[1]]))){
-      stop("'score' must a single character and a valid column name in ",
-           "getAggregateData().",
-           call. = FALSE)
-    }
+  if(!(args[["score"]] %in% cn)){
+    stop(.rocr_performance_settings[.rocr_performance_settings$variable == "score","errorMessage"],
+         call. = FALSE)
   }
-  args <- list(measure = measure,
-               x.measure = x.measure,
-               score = score)
   args <- c(args, input[!(names(input) %in% names(args))])
   args
 }
 
+.rocr_plot_settings <- data.frame(
+  variable = c("colorize",
+               "lwd",
+               "colorize.palette",
+               "abline",
+               "AUC"),
+  testFUN = c(".is_a_bool",
+              ".is_numeric_string",
+              ".is_a_string",
+              ".is_a_bool",
+              ".is_a_bool"),
+  errorValue = c(FALSE,
+                 FALSE,
+                 FALSE,
+                 FALSE,
+                 FALSE),
+  errorMessage = c("'colorize' must a single logical value.",
+                   "'lwd' must be a single numeric value.",
+                   "'colorize.palette' must a single character compatible with ?ROCR::plot.performance.",
+                   "'abline' must a single logical value.",
+                   "'AUC' must a single logical value."),
+  stringsAsFactors = FALSE)
 .norm_plot_args <- function(input){
   if(!is.list(input)){
     stop("'plot.args' must be a list.")
@@ -140,47 +157,8 @@ NULL
   colorize.palette <- NULL
   abline <- FALSE
   AUC <- FALSE
-  if(!is.null(input[["colorize.palette"]])){
-    colorize.palette <- input[["colorize.palette"]]
-    if(!assertive::is_a_string(colorize.palette)){
-      stop("'colorize.palette' must a single character compatible with ",
-           "?ROCR::plot.performance.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["abline"]])){
-    abline <- input[["abline"]]
-    if(!assertive::is_a_bool(abline)){
-      stop("'abline' must a single logical value.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["AUC"]])){
-    AUC <- input[["AUC"]]
-    if(!assertive::is_a_bool(AUC)){
-      stop("'AUC' must a single logical value.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["colorize"]])){
-    colorize <- input[["colorize"]]
-    if(!assertive::is_a_bool(colorize)){
-      stop("'colorize' must a single logical value.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["lwd"]])){
-    lwd <- input[["lwd"]]
-    if(!assertive::is_numeric_string(lwd)){
-      stop("'lwd' must be a single numeric value.",
-           call. = FALSE)
-    }
-  }
-  args <- list(colorize = colorize,
-               lwd = lwd,
-               colorize.palette = colorize.palette,
-               abline = abline,
-               AUC = AUC)
+  args <- .norm_settings(input, .rocr_plot_settings, colorize, lwd,
+                         colorize.palette, abline, AUC)
   args <- c(args, input[!(names(input) %in% names(args))])
   args
 }

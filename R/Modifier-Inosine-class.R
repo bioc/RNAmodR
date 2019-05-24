@@ -160,18 +160,16 @@ ModInosine <- function(x, annotation, sequences, seqinfo, ...){
 
 # settings ---------------------------------------------------------------------
 
-.norm_inosine_args <- function(input){
+.ModInosine_settings <- data.frame(
+  variable = c("minScore"),
+  testFUN = c(".not_numeric_between_0_100"),
+  errorValue = c(TRUE),
+  errorMessage = c("'minScore' must be numeric with a value between 0 and 100."),
+  stringsAsFactors = FALSE)
+
+.norm_ModInosine_settings <- function(input){
   minScore <- 0.4
-  if(!is.null(input[["minScore"]])){
-    minScore <- input[["minScore"]]
-    if(!is.numeric(minScore) | minScore < 0 | minScore > 100){
-      stop("'minScore' must be numeric with a value between 0 and 100.",
-           call. = FALSE)
-    }
-  }
-  args <- .norm_args(input)
-  args <- c(args,
-            list(minScore = minScore))
+  args <- .norm_settings(input, .ModInosine_settings, minScore)
   args
 }
 
@@ -181,8 +179,8 @@ setReplaceMethod(f = "settings",
                  signature = signature(x = "ModInosine"),
                  definition = function(x, value){
                    x <- callNextMethod()
-                   value <- .norm_inosine_args(value)
-                   x@arguments[names(value)] <- unname(value)
+                   value <- .norm_ModInosine_settings(value)
+                   x@settings[names(value)] <- unname(value)
                    x
                  })
 

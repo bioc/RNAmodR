@@ -1,7 +1,7 @@
 Package: RNAmodR
 Type: Package
 Title: Detection of post-transcriptional modifications
-Version: 0.99.12
+Version: 0.99.13
 Date: 2019-05-21
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
@@ -66,6 +66,7 @@ Collate:
     'AllGenerics.R'
     'Gviz-ModifiedSequenceTrack-class.R'
     'Gviz-functions.R'
+    'settings.R'
     'Modifier-utils.R'
     'SequenceDataFrame-class.R'
     'normalization.R'

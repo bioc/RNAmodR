@@ -136,7 +136,7 @@ setReplaceMethod(f = "settings",
                  definition = function(x, value){
                    x <- callNextMethod()
                    # validate special setting here
-                   x@arguments[names(value)] <- unname(.norm_example_args(value))
+                   x@settings[names(value)] <- unname(.norm_example_args(value))
                    x
                  })
 ```

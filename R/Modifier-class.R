@@ -3,6 +3,7 @@
 #' @include SequenceDataSet-class.R
 #' @include SequenceDataList-class.R
 #' @include Modifier-utils.R
+#' @include settings.R
 NULL
 
 invalidMessage <- paste0("Settings were changed after data aggregation or ",
@@ -120,7 +121,7 @@ invalidMessage <- paste0("Settings were changed after data aggregation or ",
 #' \code{dataType} is used.
 #' @slot aggregate the aggregated data as a \code{SplitDataFrameList}
 #' @slot modifications the found modifications as a \code{GRanges} object
-#' @slot arguments arguments used for the analysis as a \code{list}
+#' @slot settings arguments used for the analysis as a \code{list}
 #' @slot aggregateValidForCurrentArguments \code{TRUE} or \code{FALSE} whether
 #' the aggregate data was constructed with the current arguments
 #' @slot modificationsValidForCurrentArguments \code{TRUE} or \code{FALSE}
@@ -206,7 +207,7 @@ setClass("Modifier",
                    data = "SD_or_SDS_or_SDL",
                    aggregate = "CompressedSplitDataFrameList",
                    modifications = "GRanges",
-                   arguments = "list",
+                   settings = "list",
                    aggregateValidForCurrentArguments = "logical",
                    modificationsValidForCurrentArguments = "logical"),
          prototype = list(aggregateValidForCurrentArguments = FALSE,
@@ -495,40 +496,8 @@ setMethod(f = "sequences",
 #' @export
 setMethod(f = "seqinfo",
           signature = signature(x = "Modifier"),
-          definition = function(x){seqinfo(sequenceData(x))})
-
-.norm_args <- function(input){
-  minCoverage <- 10L
-  minReplicate <- 1L
-  find.mod <- TRUE
-  if(!is.null(input[["minCoverage"]])){
-    minCoverage <- input[["minCoverage"]]
-    if(!is.integer(minCoverage) ||
-       minCoverage < 0L ||
-       length(minCoverage) != 1){
-      stop("'minCoverage' must be a single positive integer value.")
-    }
-  }
-  if(!is.null(input[["minReplicate"]])){
-    minReplicate <- input[["minReplicate"]]
-    if(!is.integer(minReplicate) ||
-       minReplicate < 0L ||
-       length(minReplicate) != 1){
-      stop("'minReplicate' must be a single positive integer value.")
-    }
-  }
-  if(!is.null(input[["find.mod"]])){
-    find.mod <- input[["find.mod"]]
-    if(!assertive::is_a_bool(find.mod)){
-      stop("'find.mod' must be a single logical value.")
-    }
-  }
-  args <- list(minCoverage = minCoverage,
-               minReplicate = minReplicate,
-               find.mod = find.mod)
-  args
-}
-
+          definition = function(x){seqinfo(sequenceData(x))}
+)
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "validAggregate",
@@ -582,18 +551,42 @@ setMethod(f = "validModification",
 #' settings(mi) <- list(minCoverage = 11L)
 NULL
 
+.Modifier_settings <- data.frame(
+  variable = c("minCoverage",
+               "minReplicate",
+               "find.mod"),
+  testFUN = c(".not_integer_bigger_than_zero",
+              ".not_integer_bigger_than_zero",
+              ".is_a_bool"),
+  errorValue = c(TRUE,
+                 TRUE,
+                 FALSE),
+  errorMessage = c("'minCoverage' must be a single positive integer value.",
+                   "'minReplicate' must be a single positive integer value.",
+                   "'find.mod' must be a single logical value."),
+  stringsAsFactors = FALSE)
+
+.norm_Modifier_settings <- function(input){
+  minCoverage <- 10L
+  minReplicate <- 1L
+  find.mod <- TRUE
+  args <- .norm_settings(input, .Modifier_settings, minCoverage, minReplicate,
+                         find.mod)
+  args
+}
+
 #' @rdname settings
 #' @export
 setMethod(f = "settings",
           signature = signature(x = "Modifier"),
           definition = function(x, name){
             if(missing(name) || is.null(name)){
-              return(x@arguments)
+              return(x@settings)
             }
             if(!assertive::is_a_string(name)){
               stop("'name' must be a single character value.")
             }
-            x@arguments[[name]]
+            x@settings[[name]]
           }
 )
 
@@ -608,8 +601,8 @@ setReplaceMethod(f = "settings",
                    if(!is.list(value)){
                      value <- as.list(value)
                    }
-                   value <- .norm_args(value)
-                   x@arguments[names(value)] <- unname(value)
+                   value <- .norm_Modifier_settings(value)
+                   x@settings[names(value)] <- unname(value)
                    x@aggregateValidForCurrentArguments <- FALSE
                    x@modificationsValidForCurrentArguments <- FALSE
                    x

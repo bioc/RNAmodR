@@ -2,18 +2,17 @@
 #' @include Modifier-viz.R
 NULL
 
+.viz_ModifierSet_settings <- data.frame(
+  variable = c("colours"),
+  testFUN = c(".not_colours"),
+  errorValue = c(TRUE),
+  errorMessage = c("'colours' must be valid colour representation, which can be interpreted by col2rgb()."),
+  stringsAsFactors = FALSE)
 .norm_viz_args_ModifierSet <- function(input, x){
   colours <- NA
-  if(!is.null(input[["colours"]])){
-    colours <- input[["colours"]]
-    if(!is.character(colours) || any(!.are_colours(colours))){
-      stop("'colours' must be valid colour representation, which can be ",
-           "interpreted by col2rgb().",
-           call. = FALSE)
-    }
-  }
+  args <- .norm_settings(input, .viz_ModifierSet_settings, colours)
   args <- c(.norm_viz_args_Modifier(input, x),
-            list(colours = colours))
+            args)
   args
 }
 

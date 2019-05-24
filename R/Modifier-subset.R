@@ -1,5 +1,6 @@
 #' @include RNAmodR.R
 #' @include Modifier-class.R
+#' @include settings.R
 NULL
 
 #' @name subsetByCoord

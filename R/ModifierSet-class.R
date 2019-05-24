@@ -131,16 +131,16 @@ setMethod(f = "relistToClass",
        listData = x)
 }
 
+
+.ModifierSet_settings <- data.frame(
+  variable = c("internalBP"),
+  testFUN = c("assertive::is_a_bool"),
+  errorValue = c(FALSE),
+  errorMessage = c("'internalBP' must be TRUE or FALSE."),
+  stringsAsFactors = FALSE)
 .norm_ModifierSet_args <- function(input){
   internalBP <- FALSE
-  if(!is.null(input[["internalBP"]])){
-    internalBP <- input[["internalBP"]]
-    if(!assertive::is_a_bool(internalBP)){
-      stop("'internalBP' must be TRUE or FALSE.",
-           call. = FALSE)
-    }
-  }
-  args <- list(internalBP = internalBP)
+  args <- .norm_settings(input, .ModifierSet_settings, internalBP)
   args
 }
 

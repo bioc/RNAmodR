@@ -5,18 +5,18 @@ test_that("Modifier/ModifierSet:",{
   data(psd,package = "RNAmodR")
   data(e5sd,package = "RNAmodR")
   # arguments
-  expect_error(RNAmodR:::.norm_args(),
+  expect_error(RNAmodR:::.norm_Modifier_settings(),
                'argument "input" is missing, with no default')
-  actual <- RNAmodR:::.norm_args(list())
+  actual <- RNAmodR:::.norm_Modifier_settings(list())
   expect_type(actual,"list")
   expect_named(actual,c("minCoverage","minReplicate","find.mod"))
-  expect_error(RNAmodR:::.norm_args(list(minCoverage = 1)),
+  expect_error(RNAmodR:::.norm_Modifier_settings(list(minCoverage = 1)),
                "'minCoverage' must be a single positive integer value")
-  expect_error(RNAmodR:::.norm_args(list(minReplicate = 1)),
+  expect_error(RNAmodR:::.norm_Modifier_settings(list(minReplicate = 1)),
                "'minReplicate' must be a single positive integer value")
-  expect_error(RNAmodR:::.norm_args(list(minReplicate = -1L)),
+  expect_error(RNAmodR:::.norm_Modifier_settings(list(minReplicate = -1L)),
                "'minReplicate' must be a single positive integer value")
-  expect_error(RNAmodR:::.norm_args(list(find.mod = 1)),
+  expect_error(RNAmodR:::.norm_Modifier_settings(list(find.mod = 1)),
                "'find.mod' must be a single logical value")
   # .norm_SequenceData_elements
   expect_error(RNAmodR:::.check_SequenceData_elements(),

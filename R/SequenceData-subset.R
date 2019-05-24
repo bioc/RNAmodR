@@ -2,9 +2,41 @@
 #' @include SequenceData-class.R
 #' @include SequenceDataSet-class.R
 #' @include Modifier-subset.R
+#' @include settings.R
 NULL
 
 # common utility function for subsetting ---------------------------------------
+
+.subset_settings <- data.frame(
+  variable = c("name",
+               "type",
+               "merge",
+               "flanking",
+               "rawData",
+               "perTranscript",
+               "sequenceData"),
+  testFUN = c(".empty_character",
+              ".empty_character",
+              ".is_a_bool",
+              ".not_integer_bigger_equal_than_zero",
+              ".is_a_bool",
+              ".is_a_bool",
+              ".is_a_bool"),
+  errorValue = c(TRUE,
+                 TRUE,
+                 FALSE,
+                 TRUE,
+                 FALSE,
+                 FALSE,
+                 FALSE),
+  errorMessage = c("'name' must be a character with a width > 0L.",
+                   "'type' must be a character with a width > 0L.",
+                   "'merge' must be a single logical value.",
+                   "'flanking' must be a single integer value equal or higher than 0L.",
+                   "'rawData' must be a single logical value.",
+                   "'perTranscript' must be a single logical value.",
+                   "'sequenceData' must be a single logical value."),
+  stringsAsFactors = FALSE)
 
 .norm_subset_args <- function(input,x){
   name <- NA_character_
@@ -18,62 +50,14 @@ NULL
   perTranscript <- FALSE
   sequenceData <- FALSE
   rawData <- FALSE # only used for subsetting SequenceData
-  if(!is.null(input[["name"]])){
-    name <- input[["name"]]
-    if(!is.character(name) || width(name) == 0L){
-      stop("'name' must be a character with a width > 0L.",
+  args <- .norm_settings(input, .subset_settings, name, type, merge, flanking,
+                         perTranscript, sequenceData, rawData)
+  if(!is.na(args[["type"]])){
+    if(!(args[["type"]] %in% Modstrings::shortName(Modstrings::ModRNAString()))){
+      stop("'type' must be one or more elements of shortName(ModRNAString()).",
            call. = FALSE)
     }
   }
-  if(!is.null(input[["type"]])){
-    type <- input[["type"]]
-    if(!is.na(type)){
-      if(!is.character(type) || width(type) == 0L){
-        stop("'type' must be a character with a width > 0L.",
-             call. = FALSE)
-      }
-      if(!(type %in% Modstrings::shortName(Modstrings::ModRNAString()))){
-        stop("'type' must be one or more elements of shortName(ModRNAString()).",
-             call. = FALSE)
-      }
-    }
-  }
-  if(!is.null(input[["merge"]])){
-    merge <- input[["merge"]]
-    if(!assertive::is_a_bool(merge)){
-      stop("'merge' must be a single logical value.", call. = FALSE)
-    }
-  }
-  if(!is.null(input[["flanking"]])){
-    flanking <- input[["flanking"]]
-    if(!is.integer(flanking) || flanking < 0L){
-      stop("'flanking' must be a single integer value equal or higher than 0L.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["rawData"]])){ # only used for subsetting SequenceData
-    rawData <- input[["rawData"]]
-    if(!assertive::is_a_bool(rawData)){
-      stop("'rawData' must be a single logical value.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["perTranscript"]])){
-    perTranscript <- input[["perTranscript"]]
-    if(!assertive::is_a_bool(perTranscript)){
-      stop("'perTranscript' must be a single logical value.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["sequenceData"]])){
-    sequenceData <- input[["sequenceData"]]
-    if(!assertive::is_a_bool(sequenceData)){
-      stop("'sequenceData' must be a single logical value.")
-    }
-  }
-  args <- list(name = name, type = type, merge = merge, flanking = flanking,
-               rawData = rawData, perTranscript = perTranscript,
-               sequenceData = sequenceData)
   args
 }
 

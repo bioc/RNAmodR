@@ -67,7 +67,7 @@ NULL
 NULL
 
 .norm_show_argument <- function(show_arg, default = FALSE){
-  if(!assertive::is_a_bool(show_arg)){
+  if(missing(show_arg) || !assertive::is_a_bool(show_arg)){
     show_arg <- default
   }
   show_arg
@@ -94,27 +94,23 @@ NULL
   type
 }
 
+.viz_Modifier_settings <- data.frame(
+  variable = c("modified.seq",
+               "additional.mod"),
+  testFUN = c(".is_a_bool",
+              ".is_not_GRanges_or_GRangesList"),
+  errorValue = c(FALSE,
+                 TRUE),
+  errorMessage = c("'modified.seq' must be a single logical value.",
+                   "'additional.mod' must be a GRanges or GRangesList object, which is compatible with combineIntoModstrings()."),
+  stringsAsFactors = FALSE)
 .norm_viz_args_Modifier <- function(input, x){
   modified.seq <- FALSE
   additional.mod <- GRanges()
-  if(!is.null(input[["modified.seq"]])){
-    modified.seq <- input[["modified.seq"]]
-    if(!assertive::is_a_bool(modified.seq)){
-      stop("'modified.seq' must be a single logical value.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["additional.mod"]])){
-    additional.mod <- input[["additional.mod"]]
-    if(!is(additional.mod,"GRanges") && !is(additional.mod,"GRangesList")){
-      stop("'additional.mod' must be a GRanges or GRangesList object, which is",
-           " compatible with combineIntoModstrings().",
-           call. = FALSE)
-    }
-  }
+  args <- .norm_settings(input, .viz_Modifier_settings, modified.seq,
+                         additional.mod)
   args <- c(.norm_viz_args_SequenceData(input, x),
-            list(modified.seq = modified.seq,
-                 additional.mod = additional.mod))
+            args)
   args
 }
 

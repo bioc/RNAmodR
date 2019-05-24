@@ -123,7 +123,7 @@ condition types.}
 
 \item{\code{modifications}}{the found modifications as a \code{GRanges} object}
 
-\item{\code{arguments}}{arguments used for the analysis as a \code{list}}
+\item{\code{settings}}{arguments used for the analysis as a \code{list}}
 
 \item{\code{aggregateValidForCurrentArguments}}{\code{TRUE} or \code{FALSE} whether
 the aggregate data was constructed with the current arguments}

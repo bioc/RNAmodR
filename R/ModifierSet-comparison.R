@@ -99,6 +99,7 @@ NULL
   } else {
     compareType <- NA
   }
+  # browser()
   allTypes <- FALSE
   perTranscript <- FALSE
   sequenceData <- FALSE

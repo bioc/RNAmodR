@@ -1,6 +1,7 @@
 #' @include RNAmodR.R
 #' @include normalization.R
 #' @include SequenceDataFrame-class.R
+#' @include settings.R
 NULL
 
 #' @name SequenceData-class
@@ -105,9 +106,9 @@ setClass("SequenceData",
                    unlistType = "character",
                    dataDescription = "character"),
          prototype = list(ranges = GRangesList(),
-                 sequencesType = "RNAStringSet",
-                 sequences = RNAStringSet(),
-                 unlistType = "SequenceDataFrame"))
+                          sequencesType = "RNAStringSet",
+                          sequences = RNAStringSet(),
+                          unlistType = "SequenceDataFrame"))
 
 setMethod(
   f = "initialize",
@@ -397,17 +398,15 @@ setMethod("rownames", "SequenceData",
 
 # constructor ------------------------------------------------------------------
 
+.quality_settings <- data.frame(
+  variable = c("minQuality"),
+  testFUN = c(".not_integer_bigger_equal_than_one"),
+  errorValue = c(TRUE),
+  errorMessage = c("'minQuality' must be integer with a value higher than 1L."),
+  stringsAsFactors = FALSE)
+
 .norm_min_quality <- function(input, minQuality){
-  if(!is.null(input[["minQuality"]])){
-    minQuality <- input[["minQuality"]]
-    if(!is.integer(minQuality) | minQuality <= 1L){
-      if(!is.na(minQuality)){
-        stop("'minQuality' must be integer with a value higher than 1L.",
-             call. = FALSE)
-      }
-    }
-  }
-  minQuality
+  .norm_settings(input, .quality_settings, minQuality)[["minQuality"]]
 }
 
 .get_replicate_number <- function(bamfiles, conditions){

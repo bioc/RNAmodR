@@ -133,8 +133,7 @@ test_that("Visualization:",{
   expect_equal(width(actual),103L)
   expect_equal(names(actual),chr)
   # internal functions Modifier
-  expect_error(RNAmodR:::.norm_show_argument(),
-               'argument "show_arg" is missing, with no default')
+  expect_false(RNAmodR:::.norm_show_argument())
   expect_false(RNAmodR:::.norm_show_argument(1))
   expect_true(RNAmodR:::.norm_show_argument(1,default = TRUE))
   expect_error(RNAmodR:::.norm_score_type(),"'type' is missing")

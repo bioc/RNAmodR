@@ -65,17 +65,6 @@ NULL
        to = end)
 }
 
-
-#' @importFrom grDevices col2rgb
-.are_colours <- function(x) {
-  vapply(x,
-         function(z) {
-           tryCatch(is.matrix(grDevices::col2rgb(z)),
-                    error = function(e) FALSE)
-         },
-         logical(1))
-}
-
 .norm_viz_colour <- function(colour, type = NA){
   if(!is.character(colour) || any(!.are_colours(colour))){
     stop("'colour' must be a character vector and contain valid colours, which",
