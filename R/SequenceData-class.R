@@ -548,7 +548,7 @@ setMethod("rownames", "SequenceData",
   }
   message("OK")
   ##############################################################################
-  # Create Sequencedata object
+  # Create SequenceData object
   ##############################################################################
   new2(className, 
        ranges = ranges,
@@ -563,47 +563,32 @@ setMethod("rownames", "SequenceData",
        ...)
 }
 
-.get_sequence_data_args <- function(input){
+
+.SequenceData_settings <- data.frame(
+  variable = c("max_depth",
+               "minLength",
+               "maxLength"),
+  testFUN = c(".not_integer_bigger_than_10",
+              ".not_integer_bigger_equal_than_zero_nor_na",
+              ".not_integer_bigger_equal_than_one_nor_na"),
+  errorValue = c(TRUE,
+                 TRUE,
+                 FALSE),
+  errorMessage = c("'max_depth' must be integer with a value higher than 10L.",
+                   "'minLength' must be integer with a value higher than 0L or NA.",
+                   "'maxLength' must be integer with a value higher than 1L or NA."),
+  stringsAsFactors = FALSE)
+
+.get_SequenceData_args <- function(input){
   minQuality <- .norm_min_quality(input, NULL)
   max_depth <- 10000L # the default is 250, which is to small
   minLength <- NA
   maxLength <- NA
-  if(!is.null(input[["max_depth"]])){
-    max_depth <- input[["max_depth"]]
-    if(!is.integer(max_depth) | length(max_depth) > 1L | max_depth <= 10L){
-      stop("'max_depth' must be integer with a value higher than 10L.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["minLength"]])){
-    minLength <- input[["minLength"]]
-    if(!is.integer(minLength) | length(minLength) > 1L | minLength < 1L){
-      if(!is.na(minLength)){
-        stop("'minLength' must be integer with a value higher than 0L or NA.",
-             call. = FALSE)
-      }
-    }
-  }
-  if(!is.null(input[["maxLength"]])){
-    maxLength <- input[["maxLength"]]
-    if(!is.integer(maxLength) | length(maxLength) > 1L | maxLength <= 1L){
-      if(!is.na(maxLength)){
-        stop("'maxLength' must be integer with a value higher than 1L or NA.",
-             call. = FALSE)
-      }
-    }
-  }
-  if(!is.na(minLength) && !is.na(maxLength)){
-    if(minLength > maxLength){
-      stop("'minLength' must be smaller or equal to 'maxLength'.",
-           call. = FALSE)
-    }
-  }
+  args <- .norm_settings(input, .SequenceData_settings, max_depth, minLength,
+                         maxLength)
   #
-  args <- list(minQuality = minQuality,
-               max_depth = max_depth,
-               minLength = minLength,
-               maxLength = maxLength)
+  args <- c(list(minQuality = minQuality),
+            args)
   args
 }
 
@@ -613,7 +598,7 @@ setMethod("rownames", "SequenceData",
   if(is.null(dataType)){
     stop("Invalid data type.")
   }
-  args <- .get_sequence_data_args(list(...))
+  args <- .get_SequenceData_args(list(...))
   className <- sequenceDataClass(dataType)
   # check bam files
   bamfiles <- .norm_bamfiles(bamfiles, className)
@@ -636,8 +621,6 @@ setMethod("rownames", "SequenceData",
 .load_annotation <- function(annotation){
   if(is(annotation,"TxDb")){
     ranges <- GenomicFeatures::exonsBy(annotation, by = "tx")
-    rm(annotation)
-    gc(FALSE)
   } else if(is(annotation,"GRangesList")) {
     ranges <- annotation
   } else {
