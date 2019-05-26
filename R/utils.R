@@ -1,37 +1,7 @@
 #' @include RNAmodR.R
 NULL
 
-# BiocGeneric helper functions -------------------------------------------------
-# strand related functions
-.get_strand <- function(x){
-  as.character(BiocGenerics::strand(x))
-}
-.get_unique_strand <- function(x){
-  unique(.get_strand(x))
-}
-.is_minus_strand <- function(x) {
-  all(as.logical(.get_strand(x) == "-"))
-}
-.is_on_minus_strand <- function(x) {
-  all(.is_on_correct_strand(x,"-"))
-}
-# is on the minus strand?
-.is_on_correct_strand <- function(x, strand) {
-  as.logical(.get_strand(x) == strand) 
-}
-.is_on_correct_strand2 <- function(x, gr) {
-  as.logical(.get_strand(x) == .get_unique_strand(gr)) 
-}
-
 # seqnames related functions
-
-.get_seqnames <- function(x){
-  as.character(GenomicRanges::seqnames(x))
-}
-.get_unique_seqnames <- function(x){
-  unique(.get_seqnames(x))
-}
-
 .rebase_seqnames <- function(gr, seqnames){
   GenomicRanges::GRanges(seqnames = seqnames,
                          ranges = ranges(gr),
@@ -41,7 +11,7 @@ NULL
 
 # seqlengths related functions
 .rebase_GRanges <- function(gr){
-  usn <- .get_unique_seqnames(gr)
+  usn <- unique(GenomeInfoDb::seqnames(gr))
   gr_seqnames <- Rle(factor(GenomicRanges::seqnames(gr), levels = usn))
   seqlengths <- GenomeInfoDb::seqlengths(gr)[usn]
   seqinfo <- GenomeInfoDb::Seqinfo(usn, seqlengths)
@@ -53,14 +23,6 @@ NULL
 }
 
 # GRanges/GRangesList helper functions -----------------------------------------
-
-# per element entry
-.get_strands_GRangesList <- function(grl){
-  IRanges::CharacterList(strand(grl))
-}
-.get_column_GRangesList <- function(grl,column){
-  relist(mcols(grl@unlistData)[,column],grl@partitioning)
-}
 
 # per element of GRangesList unique 
 .get_strand_u_GRangesList <- function(grl){
@@ -162,8 +124,10 @@ NULL
   m <- match(unique(names(from)),names(width_x))
   width_x <- width_x[m]
   width_ans <- sum(width_x)
-  relist(unname(unlist(ans)),
-         IRanges::PartitioningByWidth(width_ans, names = names(width_ans)))
+  ans <- relist(unname(unlist(ans)),
+                IRanges::PartitioningByWidth(width_ans,
+                                             names = names(width_ans)))
+  unique(ans)
 }
 
 # DataFrame like helper functions ----------------------------------------------
@@ -205,10 +169,4 @@ NULL
     f <- rep(TRUE,length(conditions))
   }
   f
-}
-
-# Modstrings related helper functions ------------------------------------------
-
-.is_valid_modType <- function(modType){
-  modType %in% Modstrings::shortName(Modstrings::ModRNAString())
 }

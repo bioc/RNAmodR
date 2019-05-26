@@ -514,6 +514,7 @@ setMethod("rownames", "SequenceData",
   message("Loading ", proto@dataDescription, " from BAM files ... ",
           appendLF = FALSE)
   data <- getData(proto, bamfiles, ranges, sequences, param, args)
+  browser()
   names(data) <- paste0(names(data),".",condition,".",replicate)
   # check positions
   .check_positions_in_data(data, positions)
@@ -558,8 +559,8 @@ setMethod("rownames", "SequenceData",
        replicate = replicate,
        seqinfo = seqinfo,
        minQuality = minQuality,
-       unlistData = data@unlistData,
-       partitioning = data@partitioning,
+       unlistData = unlist(data, use.names = FALSE),
+       partitioning = IRanges::PartitioningByEnd(data),
        ...)
 }
 
@@ -625,6 +626,15 @@ setMethod("rownames", "SequenceData",
     ranges <- annotation
   } else {
     stop("Annotation is not a 'TxDb' or a 'GRangesList'.")
+  }
+  browser()
+  # check for multiple seqnames per ranges
+  seqnames_ranges_u <- unique(GenomeInfoDb::seqnames(ranges))
+  f <- lengths(seqnames_ranges_u) != 1L
+  if(any(f)){
+    warning("Found transcript annotation with non unique seqnames. Removing ",
+            "them ...")
+    ranges <- ranges[!f]
   }
   ranges
 }

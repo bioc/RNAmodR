@@ -67,10 +67,10 @@ setMethod(f = "constructModRanges",
             if(any(length(positions) != data_length)){
               stop("Number of positions and scores do not match.")
             }
-            seqnames_unique <- .get_unique_seqnames(range)
+            seqnames_unique <- unique(GenomeInfoDb::seqnames(range))
             ranges <- IRanges::IRanges(start = positions,
                                        width = 1L)
-            strand <- .get_unique_strand(range)
+            strand <- unique(BiocGenerics::strand(range))
             mranges <- 
               GenomicRanges::GRanges(seqnames = seqnames_unique,
                                      ranges = ranges,
