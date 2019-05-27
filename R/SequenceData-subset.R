@@ -53,7 +53,7 @@ NULL
   args <- .norm_settings(input, .subset_settings, name, type, merge, flanking,
                          perTranscript, sequenceData, rawData)
   if(!is.na(args[["type"]])){
-    if(!(args[["type"]] %in% Modstrings::shortName(Modstrings::ModRNAString()))){
+    if(!.is_valid_modType(args[["type"]])){
       stop("'type' must be one or more elements of shortName(ModRNAString()).",
            call. = FALSE)
     }

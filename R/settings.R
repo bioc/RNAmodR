@@ -1,6 +1,12 @@
 #' @include RNAmodR.R
 NULL
 
+# Modstrings related helper functions ------------------------------------------
+
+.is_valid_modType <- function(modType){
+  modType %in% Modstrings::shortName(Modstrings::ModRNAString())
+}
+
 # testthat
 
 .test_test_TRUE <- function(x){TRUE}
@@ -12,33 +18,58 @@ NULL
   .empty_character(x) | !(x %in% c("|","&"))
 }
 
-.not_single_numeric <- function(x){
+.not_single_numeric_or_na <- function(x){
   !is.numeric(x) | length(x) != 1 | is.na(x)
 }
 .not_numeric_between_0_100 <- function(x){
-  .not_single_numeric(x) | x < 0 | x > 100
+  .not_single_numeric_or_na(x) | x < 0 | x > 100
 }
 .not_numeric_between_0_1 <- function(x){
-  .not_single_numeric(x) | x < 0 | x > 1
+  .not_single_numeric_or_na(x) | x < 0 | x > 1
 }
 .not_numeric_bigger_zero <- function(x){
-  .not_single_numeric(x) | x < 0
+  .not_single_numeric_or_na(x) | x < 0
 }
 
-.not_single_integer <- function(x){
+.not_single_integer_or_na <- function(x){
   !is.integer(x) | length(x) != 1 | is.na(x)
 }
+.not_single_integer <- function(x){
+  !is.integer(x) | length(x) != 1
+}
 .not_integer_bigger_than_10 <- function(x){
-  .not_single_integer(x) | x <= 10L
+  .not_single_integer_or_na(x) | x <= 10L
 }
 .not_integer_bigger_than_zero <- function(x){
-  .not_single_integer(x) | x <= 0L
+  .not_single_integer_or_na(x) | x <= 0L
 }
 .not_integer_bigger_equal_than_zero <- function(x){
-  .not_single_integer(x) | x < 0L
+  .not_single_integer_or_na(x) | x < 0L
 }
 .not_integer_bigger_equal_than_one <- function(x){
-  .not_single_integer(x) | x <= 1L
+  .not_single_integer_or_na(x) | x <= 1L
+}
+.not_integer_bigger_equal_than_zero_nor_na <- function(x){
+  if(.not_single_integer(x)){
+    return(TRUE)
+  }
+  if(!is.na(x)){
+    if(x <= 0L){
+      return(TRUE)
+    }
+  }
+  return(FALSE)
+}
+.not_integer_bigger_equal_than_one_nor_na <- function(x){
+  if(.not_single_integer(x)){
+    return(TRUE)
+  }
+  if(!is.na(x)){
+    if(x <= 0L){
+      return(TRUE)
+    }
+  }
+  return(FALSE)
 }
 
 .is_not_GRanges_or_GRangesList <- function(x){

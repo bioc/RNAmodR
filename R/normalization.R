@@ -259,7 +259,7 @@ SAMPLE_TYPES <- c("treated","control")
 }
 
 .norm_mod <- function(mod, className){
-  f <- mod %in% Modstrings::shortName(Modstrings::ModRNAString())
+  f <- .is_valid_modType(mod)
   if(length(which(f)) != length(mod)){
     stop("Modification '",mod[!f],"' as defined for ",className," does not ",
          "exist in the Modstrings dictionary for modified RNA sequences.",
