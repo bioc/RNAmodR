@@ -514,7 +514,6 @@ setMethod("rownames", "SequenceData",
   message("Loading ", proto@dataDescription, " from BAM files ... ",
           appendLF = FALSE)
   data <- getData(proto, bamfiles, ranges, sequences, param, args)
-  browser()
   names(data) <- paste0(names(data),".",condition,".",replicate)
   # check positions
   .check_positions_in_data(data, positions)
@@ -574,7 +573,7 @@ setMethod("rownames", "SequenceData",
               ".not_integer_bigger_equal_than_one_nor_na"),
   errorValue = c(TRUE,
                  TRUE,
-                 FALSE),
+                 TRUE),
   errorMessage = c("'max_depth' must be integer with a value higher than 10L.",
                    "'minLength' must be integer with a value higher than 0L or NA.",
                    "'maxLength' must be integer with a value higher than 1L or NA."),
@@ -583,10 +582,16 @@ setMethod("rownames", "SequenceData",
 .get_SequenceData_args <- function(input){
   minQuality <- .norm_min_quality(input, NULL)
   max_depth <- 10000L # the default is 250, which is to small
-  minLength <- NA
-  maxLength <- NA
+  minLength <- NA_integer_
+  maxLength <- NA_integer_
   args <- .norm_settings(input, .SequenceData_settings, max_depth, minLength,
                          maxLength)
+  if(!is.na(args[["minLength"]]) && !is.na(args[["maxLength"]])){
+    if(args[["minLength"]] > args[["maxLength"]]){
+      stop("'minLength' must be smaller or equal to 'maxLength'.",
+           call. = FALSE)
+    }
+  }
   #
   args <- c(list(minQuality = minQuality),
             args)
@@ -618,23 +623,38 @@ setMethod("rownames", "SequenceData",
 # constructor utility functions ------------------------------------------------
 # also used at other places
 
+# check for multiple seqnames per ranges
+.norm_unique_seqnames <- function(ranges){
+  seqnames_ranges_u <- unique(GenomeInfoDb::seqnames(ranges))
+  f <- lengths(seqnames_ranges_u) != 1L
+  if(any(f)){
+    message("Found transcript annotation with non unique seqnames. Removing ",
+            "them ...")
+    ranges <- ranges[!f]
+    GenomeInfoDb::seqlevels(ranges) <- GenomeInfoDb::seqlevelsInUse(ranges)
+  }
+  ranges
+}
+
 # load annotation as GRangesList. one element per transcript
 .load_annotation <- function(annotation){
   if(is(annotation,"TxDb")){
     ranges <- GenomicFeatures::exonsBy(annotation, by = "tx")
+    ranges <- .norm_unique_seqnames(ranges)
   } else if(is(annotation,"GRangesList")) {
     ranges <- annotation
+    ranges <- .norm_unique_seqnames(ranges)
+    # make sure, that the elements are reverse order if on minus strand
+    unlisted_ranges <- unlist(ranges)
+    strand <- strand(unlisted_ranges) == "+"
+    unlisted_ranges <- 
+      c(unlisted_ranges[strand][order(unlisted_ranges[strand])],
+        unlisted_ranges[!strand][rev(order(unlisted_ranges[!strand]))])
+    ranges <- split(unname(unlisted_ranges),
+                    factor(names(unlisted_ranges),
+                           levels = unique(names(ranges))))
   } else {
     stop("Annotation is not a 'TxDb' or a 'GRangesList'.")
-  }
-  browser()
-  # check for multiple seqnames per ranges
-  seqnames_ranges_u <- unique(GenomeInfoDb::seqnames(ranges))
-  f <- lengths(seqnames_ranges_u) != 1L
-  if(any(f)){
-    warning("Found transcript annotation with non unique seqnames. Removing ",
-            "them ...")
-    ranges <- ranges[!f]
   }
   ranges
 }
@@ -644,7 +664,7 @@ setMethod("rownames", "SequenceData",
 # element
 .load_transcript_sequences <- function(sequences, grl){
   seq <- Biostrings::getSeq(sequences, unlist(grl))
-  seq <- relist(unlist(seq),PartitioningByWidth(sum(width(grl))))
+  seq <- relist(unlist(seq),IRanges::PartitioningByWidth(sum(width(grl))))
   names(seq) <- names(grl)
   as(seq,"RNAStringSet")
 }
@@ -652,9 +672,8 @@ setMethod("rownames", "SequenceData",
 # remove any elements, which are not in the seqinfo
 .subset_by_seqinfo <- function(grl, seqinfo){
   grl <- grl[GenomicRanges::seqnames(grl) %in% GenomeInfoDb::seqnames(seqinfo)]
-  grl <- grl[width(grl@partitioning) != 0L]
-  GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevels(seqinfo)
-  grl@unlistData <- .rebase_GRanges(grl@unlistData)
+  grl <- grl[width(IRanges::PartitioningByWidth(grl)) != 0L]
+  GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevelsInUse(grl)
   grl
 }
 

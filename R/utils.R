@@ -9,17 +9,24 @@ NULL
                          mcols(gr))
 }
 
-# seqlengths related functions
-.rebase_GRanges <- function(gr){
-  usn <- unique(GenomeInfoDb::seqnames(gr))
-  gr_seqnames <- Rle(factor(GenomicRanges::seqnames(gr), levels = usn))
-  seqlengths <- GenomeInfoDb::seqlengths(gr)[usn]
-  seqinfo <- GenomeInfoDb::Seqinfo(usn, seqlengths)
-  GenomicRanges::GRanges(seqnames = gr_seqnames,
-                         ranges = IRanges::ranges(gr),
-                         strand = BiocGenerics::strand(gr),
-                         seqinfo = seqinfo,
-                         mcols(gr))
+.get_which_label <- function(grl, seqs = NULL){
+  if(is.null(seqs)){
+    seqs <- .seqs_rl(grl)
+  }
+  which_label <- Map(function(sn,s,e){paste0(sn,":",s,"-",e)},
+                     seqnames(grl),
+                     start(grl),
+                     end(grl))
+  f <- lengths(grl) != 1L
+  if(any(f)){
+    which_label <- Map(function(w,l){paste0(w,".",seq_len(l))},
+                       which_label,
+                       lengths(grl))
+  }
+  which_label <- Map(function(w,l){unname(unlist(Map(rep,w,l)))},
+                     which_label,
+                     lengths(seqs))
+  IRanges::CharacterList(which_label)
 }
 
 # GRanges/GRangesList helper functions -----------------------------------------
@@ -132,7 +139,7 @@ NULL
 
 # DataFrame like helper functions ----------------------------------------------
 
-# splits x along x$which_labe. However, x$which_labe is restructured to reflect 
+# splits x along x$which_label. However, x$which_label is restructured to reflect 
 # length GRanges elements in a GRangesList. This is helpful to split data along
 # transcripts instead of exons
 #' @importFrom IRanges splitAsList
@@ -149,11 +156,11 @@ NULL
   f_target <- unlist(mapply(rep, names(grl), lengths(grl)))
   f_target <- f_target[!is.na(f_order_match)]
   f_target <- factor(unname(f_target), levels = unique(f_target))
-  f_target <- vapply(split(width(PartitioningByWidth(ans)), f_target),
+  f_target <- vapply(split(width(IRanges::PartitioningByWidth(ans)), f_target),
                      sum, integer(1))
   f_target <- cumsum(f_target)
-  f_target <- PartitioningByEnd(f_target)
-  relist(unlist(ans),f_target)
+  f_target <- IRanges::PartitioningByEnd(f_target)
+  relist(unlist(ans,use.names = FALSE),f_target)
 }
 
 # SequenceData helper functions ------------------------------------------------

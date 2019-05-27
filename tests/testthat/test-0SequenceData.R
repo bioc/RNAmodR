@@ -1,6 +1,18 @@
 
 context("SequenceData")
 test_that("SequenceData:",{
+  expect_error(RNAmodR:::.get_SequenceData_args(),
+               'argument "input" is missing, with no default')
+  actual <- RNAmodR:::.get_SequenceData_args(list())
+  expect_named(actual,c("minQuality","max_depth","minLength","maxLength"))
+  expect_error(RNAmodR:::.get_SequenceData_args(list(minQuality = 10)),
+               "'minQuality' must be integer with a value higher than 1L.")
+  expect_error(RNAmodR:::.get_SequenceData_args(list(max_depth = 11)),
+               "'max_depth' must be integer with a value higher than 10L.")
+  expect_error(RNAmodR:::.get_SequenceData_args(list(minLength = 11)),
+               "'minLength' must be integer with a value higher than 0L or NA.")
+  expect_error(RNAmodR:::.get_SequenceData_args(list(maxLength = 11)),
+               "'maxLength' must be integer with a value higher than 1L or NA.")
   # SequenceData using CoverageSequenceData as test case
   library(RNAmodR.Data)
   library(rtracklayer)

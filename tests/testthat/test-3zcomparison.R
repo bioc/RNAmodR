@@ -50,7 +50,8 @@ test_that("Comparing data:",{
   data <- subsetByCoord(msi, coord)
   actual <- RNAmodR:::.norm_compare_args(list(),data,msi)
   expect_type(actual,"list")
-  expect_named(actual,c("alias","compareType","perTranscript","sequenceData"))
+  expect_named(actual,c("alias","compareType","allTypes","perTranscript",
+                        "sequenceData"))
   expect_error(RNAmodR:::.norm_compare_args(list(perTranscript = 1),data,msi),
                "'perTranscript' must be a single logical value")
   expect_error(RNAmodR:::.norm_compare_args(list(sequenceData = 1),data,msi),

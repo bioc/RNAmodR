@@ -93,56 +93,50 @@ NULL
   list(alias = alias)
 }
 
+.compare_settings <- data.frame(
+  variable = c("compareType",
+               "allTypes",
+               "perTranscript",
+               "sequenceData"),
+  testFUN = c(".is_a_non_empty_string",
+              ".is_a_bool",
+              ".is_a_bool",
+              ".is_a_bool"),
+  errorValue = c(FALSE,
+                 FALSE,
+                 FALSE,
+                 FALSE),
+  errorMessage = c("'compareType' must be a character and a valid colname in the aggregated data of 'x'.",
+                   "'allTypes' must be a single logical value.",
+                   "'perTranscript' must be a single logical value.",
+                   "'sequenceData' must be a single logical value."),
+  stringsAsFactors = FALSE)
 .norm_compare_args <- function(input, data, x){
   if(is(x,"ModifierSet")){
     compareType <- mainScore(x)
   } else {
-    compareType <- NA
+    compareType <- NA_character_
   }
-  # browser()
   allTypes <- FALSE
   perTranscript <- FALSE
   sequenceData <- FALSE
-  if(!is.null(input[["perTranscript"]])){
-    perTranscript <- input[["perTranscript"]]
-    if(!assertive::is_a_bool(perTranscript)){
-      stop("'perTranscript' must be a single logical value.",
-           call. = FALSE)
-    }
-  }
-  if(!is.null(input[["sequenceData"]])){
-    sequenceData <- input[["sequenceData"]]
-    if(!assertive::is_a_bool(sequenceData)){
-      stop("'sequenceData' must be a single logical value.")
-    }
-  }
-  if(!is.null(input[["compareType"]])){
-    compareType <- input[["compareType"]]
-    colnames <- unique(unlist(colnames(data[[1]])))
-    if(!is.character(compareType) || width(compareType) == 0L ||
-       !(compareType %in% colnames)){
-      stop("'compareType' must be a character and a valid colname in the ",
-           "aggregated data of 'x'.", call. = FALSE)
-    }
-  }
-  if(!is.null(input[["allTypes"]])){
-    allTypes <- input[["allTypes"]]
-    if(length(allTypes) != 1L ||
-       !is.logical(allTypes)){
-      stop("'allTypes' must be a single logical value.", call. = FALSE)
-    }
+  args <- .norm_settings(input, .compare_settings, compareType, allTypes,
+                         perTranscript, sequenceData)
+  colnames <- unique(unlist(colnames(data[[1]])))
+  if(!is.na(args[["compareType"]]) && !(args[["compareType"]] %in% colnames)){
+    stop("'compareType' must be a character and a valid colname in the ",
+         "aggregated data of 'x'.", call. = FALSE)
   }
   if(allTypes){
-    compareType <- names(data[[1]][[1]])
+    args[["compareType"]] <- names(data[[1]][[1]])
   }
-  if(is.na(compareType[1L])){
+  if(is.na(args[["compareType"]][1L]) & args[["sequenceData"]] & 
+     !args[["allTypes"]]){
     stop("'compareType' must be set if 'sequenceData = TRUE' and ",
          "'allTypes = FALSE'", call. = FALSE)
   }
   args <- c(.norm_alias(input, x),
-            list(compareType = compareType,
-                 perTranscript = perTranscript,
-                 sequenceData = sequenceData))
+            args)
   args
 }
 

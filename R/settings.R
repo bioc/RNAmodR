@@ -65,7 +65,7 @@ NULL
     return(TRUE)
   }
   if(!is.na(x)){
-    if(x <= 0L){
+    if(x <= 1L){
       return(TRUE)
     }
   }
@@ -96,11 +96,13 @@ NULL
   width(x) == 0L
 }
 
+
 # test import from assertive ---------------------------------------------------
 
 .is_a_bool <- assertive::is_a_bool
 .is_numeric_string <- assertive::is_numeric_string
 .is_a_string <- assertive::is_a_string
+.is_a_non_empty_string <- assertive::is_a_non_empty_string
 
 # testing settings -------------------------------------------------------------
 
