@@ -119,64 +119,54 @@ setMethod("summary",
   type <- match.arg(type)
   strands_u <- .get_strand_u_GRangesList(grl)
   data <- .load_bam_alignment_data(bamFile, param, grl, args)
-  # factor for found and non found transcripts
-  f <- names(data)
-  f_not_found <- names(grl)[!(names(grl) %in% names(data))]
+  # get hits
+  hits <- GenomicAlignments::findOverlaps(data, grl)
   # summarize pos of reads based on type
-  enddata <- .summarize_to_position_data(data, strands_u[f], type)
+  enddata <- .summarize_to_position_data(data, hits, names(grl), strands_u,
+                                         type)
+  rm(hits)
+  # get subsetting vectors
+  f <- names(enddata)
+  f_not_found <- names(grl)[!(names(grl) %in% f)]
   # tabulate the counts per position
   seqs <- .seqs_rl_strand(grl, force_continous = TRUE)
-  enddata <- IRanges::IntegerList(Map(
-    function(d,s){
-      bg <- table(s) - 1L
-      d <- d[d %in% s]
-      d <- table(d)
-      d <- d[as.integer(names(d)) > 0L]
-      d <- reshape2::acast(data.frame(pos = as.integer(c(names(bg),names(d))),
-                                      count = as.integer(c(bg,d))),
-                           pos ~ .,
-                           value.var = "count",
-                           fun.aggregate = sum)
-      as.integer(d)
-    },
-    enddata,
-    seqs[f]))
+  background <- relist(rep(0L,sum(lengths(seqs))),seqs)
+  enddata <- enddata[enddata %in% seqs[f]]
+  enddata <- enddata[lengths(enddata) > 0L]
+  # update subsetting vectors
+  f <- names(enddata)
+  f_not_found <- names(grl)[!(names(grl) %in% f)]
+  # calculated table
+  enddata <- pc(enddata,seqs[f])
+  # vectorized attempt does work for human transcriptome, since 
+  # prod(dimensions) is bigger than .Machine$integer.max
+  enddata <- IRanges::IntegerList(lapply(enddata,function(d){unname(table(d))}))
+  enddata <- enddata - 1L
   # noralize against total number transcript or against the overlap per position
-  normTranscript <- (enddata / lengths(data)) * 1000
-  normTranscript <- IRanges::NumericList(lapply(normTranscript,unname))
-  normOverlap <- IRanges::NumericList(Map(
-    function(d,end,pos){
-      gr <- GenomicRanges::GRanges(
-        seqnames = as.character(unique(seqnames(d))),
-        ranges = IRanges::IRanges(pos,width = 1),
-        strand = as.character(unique(strand(d))))
-      end / GenomicRanges::countOverlaps(gr,d)
-    },
-    data,
-    enddata,
-    seqs[f]))
-  # calculate tables and add empty positions
-  data_not_found <- IRanges::IntegerList(Map(
-    function(s){
-      d <- table(s) - 1
-      as.integer(d)
-    },
-    seqs[f_not_found]))
+  normTranscript <- (enddata / unname(sum(enddata))) * 1000
+  coverage <- .get_position_data_of_transcript_coverage(bamFile, grl[f], param,
+                                                        args)
+  if(any(names(coverage) != names(enddata))){
+    stop("")
+  }
+  normOverlap <- enddata / coverage
   # merge data with empty data and order based on factor numbers
-  enddata <- c(enddata,data_not_found)
+  enddata <- c(enddata,background[f_not_found])
   enddata@unlistData[is.na(enddata@unlistData)] <- 0L
   enddata <- enddata[match(names(grl),names(enddata))]
-  normTranscript <- c(normTranscript,data_not_found)
+  normTranscript <- c(normTranscript,background[f_not_found])
   normTranscript@unlistData[is.na(normTranscript@unlistData)] <- 0
   normTranscript <- normTranscript[match(names(grl),names(normTranscript))]
-  normOverlap <- c(normOverlap,data_not_found)
+  normOverlap <- c(normOverlap,background[f_not_found])
   normOverlap@unlistData[is.na(normOverlap@unlistData)] <- 0
+  normOverlap@unlistData[is.infinite(normOverlap@unlistData)] <- 0
   normOverlap <- normOverlap[match(names(grl),names(normOverlap))]
+  rm(background)
   # name results based on transcript ID
   df <- S4Vectors::DataFrame(ends = unlist(enddata),
                              norm.tx = unlist(normTranscript),
                              norm.ol = unlist(normOverlap))
-  ans <- relist(df, enddata@partitioning)
+  ans <- relist(df, IRanges::PartitioningByWidth(enddata))
   rownames(ans) <- IRanges::CharacterList(seqs)
   ans
 }

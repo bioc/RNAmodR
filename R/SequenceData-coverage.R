@@ -59,15 +59,23 @@ CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
                                                       args = list()){
   # get data per chromosome
   coverage <- GenomicAlignments::coverage(bamFile, param = param)
+  coverage <- coverage[seqlevels(grl)]
   coverage <- as(coverage,"IntegerList")
   # subset per transcript
   seqs <- .seqs_rl_strand(grl, force_continous = TRUE)
-  coverage <- IRanges::IntegerList(Map(
-    function(gr,s){
-      coverage[[unique(GenomicRanges::seqnames(gr))]][s]
+  seqs_list <- split(seqs,unlist(unique(GenomicRanges::seqnames(grl))))
+  coverage <- Map(
+    function(sn,s){
+      relist(coverage[[sn]][unlist(s)],s)
     },
-    grl,
-    seqs))
+    names(seqs_list),
+    seqs_list)
+  partitioning <- IRanges::PartitioningByWidth(
+    unlist(unname(lapply(coverage,lengths))))
+  coverage <- relist(unlist(lapply(coverage,unlist),
+                            use.names=FALSE),
+                     partitioning)
+  coverage <- coverage[names(grl)]
   coverage
 }
 

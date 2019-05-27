@@ -58,55 +58,17 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 
 # PileupSequenceData ----------------------------------------------------------------
 
-.pileup_colnames <- c("pos","-","G","A","T","C")
-.pileup_measure_colnames <- c("-","G","A","T","C")
-
 #' @importFrom reshape2 dcast melt
-.fill_up_pileup_data <- function(d,seq){
-  pos <- seq
-  if(is.null(d)){
-    colnames <- .pileup_colnames
-    d <- data.frame(pos = pos,
-                    "-" = 0,
-                    "G" = 0,
-                    "A" = 0,
-                    "T" = 0,
-                    "C" = 0)
-  } else {
-    missingPos <- pos[!(pos %in% d$pos)]
-    missingCols <- .pileup_colnames[!(.pileup_colnames %in% colnames(d))]
-    d <- reshape2::melt(d,
-                        id.vars = "pos",
-                        measure.vars = .pileup_measure_colnames[
-                          .pileup_measure_colnames %in% colnames(d)])
-    if(length(missingPos) > 0){
-      d <- rbind(d,
-                 data.frame(pos = missingPos,
-                            variable = "-",
-                            value = 0))
-    }
-    mpos <- max(d$pos)
-    if(length(missingCols) > 0){
-      d <- do.call(
-        rbind,
-        c(list(d),
-          lapply(
-            missingCols,
-            function(c){
-              data.frame(pos = mpos,
-                         variable = c,
-                         value = ifelse(is.null(d[d$pos == mpos,"value"]),
-                                        0,
-                                        d[d$pos == mpos,"value"]))
-            })))
-    }
-    d <- reshape2::dcast(d, pos ~ variable, fun.aggregate = sum, fill = 0)
-    colnames <- colnames(d)
-  }
-  df <- S4Vectors::DataFrame(d)
-  colnames(df) <- colnames
-  df <- df[,.pileup_colnames]
-  df
+.fill_up_pileup_data <- function(pileup,grl,seqs){
+  which_label <- .get_which_label(grl, seqs)
+  strand <- Map(rep, .get_strand_u_GRangesList(grl), lengths(seqs))
+  pileup_add <- data.frame(pos = unlist(seqs),
+                           strand = unlist(strand),
+                           nucleotide = "-",
+                           count = 0L,
+                           which_label = unlist(which_label),
+                           row.names = NULL)
+  rbind(pileup_add,pileup)
 }
 
 #' @importFrom Rsamtools pileup PileupParam
@@ -131,7 +93,15 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   pileup <- Rsamtools::pileup(bamFile,
                               scanBamParam = param,
                               pileupParam = pileupParam)
+  pileup <- pileup[,c("pos","strand","nucleotide","count","which_label")]
+  seqs <- .seqs_rl(grl)
+  pileup <- .fill_up_pileup_data(pileup,grl,seqs)
+  pileup <- reshape2::dcast(pileup, which_label + pos + strand ~ nucleotide,
+                            sum, value.var = "count")
+  cols <- c("which_label","pos","strand","-","A","C","G","T")
+  pileup <- pileup[,cols]
   pileup <- S4Vectors::DataFrame(pileup)
+  colnames(pileup) <- cols
   # split into data per transcript which is defined by the which_label column
   # format: chromosome:start-end
   # merge results from different exons by creating a custom PartitioningByEnd
@@ -140,33 +110,13 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   if(length(pileup) != length(grl)){
     stop("")
   }
-  # sanitize pilup data
-  # - keep only data for correct strand
-  # - fillup empty positions with zero
+  # keep only data for correct strand
   strands_u <- .get_strand_u_GRangesList(grl)
-  seqs <- .seqs_rl(grl)
-  pileup <- IRanges::SplitDataFrameList(
-    Map(
-      function(d,seq,strand){
-        ans <- NULL
-        d <- d[d$strand == strand,]
-        if(nrow(d) > 0) {
-          ans <- reshape2::dcast(as.data.frame(d), pos ~ nucleotide, sum,
-                                 value.var = "count")
-        }
-        ans <- .fill_up_pileup_data(ans,seq)
-        # data has to be in ascending order
-        if(strand == "-"){
-          ans <- ans[order(ans$pos,decreasing = FALSE),]
-        }
-        rownames(ans) <- ans$pos
-        ans$pos <- NULL
-        ans
-      },
-      pileup,
-      seqs,
-      strands_u))
-  names(pileup) <- names(grl)
+  pileup <- pileup[pileup[,"strand"] == strands_u]
+  # sort rev on minus strand
+  pileup[strands_u == "-"] <- 
+    pileup[strands_u == "-"][order(pileup[strands_u == "-","pos"],decreasing = FALSE)]
+  pileup <- pileup[,c("-","G","A","T","C")]
   pileup
 }
 

@@ -104,56 +104,38 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
          " (",args[["minLength"]]," nt) and 'maxLength' (",args[["maxLength"]],
          " nt).", call. = FALSE)
   }
-  hits <- GenomicAlignments::findOverlaps(data, grl)
-  # split results per transcript
-  data <- split(data[S4Vectors::queryHits(hits)],
-                S4Vectors::subjectHits(hits))
   data
 }
 
-.summarize_to_position_data <- function(data, strands, type){
+.summarize_to_position_data <- function(data, hits, names, strands, type){
   # get data for lapply
   starts <- BiocGenerics::start(data)
   ends <- BiocGenerics::end(data)
+  rm(data)
+  starts <- IRanges::IntegerList(split(starts[S4Vectors::queryHits(hits)],
+                                       S4Vectors::subjectHits(hits)))
+  ends <- IRanges::IntegerList(split(ends[S4Vectors::queryHits(hits)],
+                                     S4Vectors::subjectHits(hits)))
+  f <- as.integer(names(starts))
+  strands <- strands[f]
+  names(starts) <- names[f]
+  names(ends) <- names[f]
   # aggregate pos of reads based on strand information
   if(type == "5prime"){
-    data <- IRanges::IntegerList(lapply(seq_along(data),
-                                        function(i){
-                                          if(strands[i] == "+"){
-                                            starts[[i]]
-                                          } else {
-                                            ends[[i]]
-                                          }
-                                        }))
+    data <- c(starts[strands == "+"],ends[strands == "-"])
+    data <- data[names[f]]
   } else if(type == "3prime"){
-    data <- IRanges::IntegerList(lapply(seq_along(data),
-                                        function(i){
-                                          if(strands[i] == "-"){
-                                            starts[[i]]
-                                          } else {
-                                            ends[[i]]
-                                          }
-                                        }))
+    data <- c(starts[strands == "-"],ends[strands == "+"])
+    data <- data[names[f]]
   } else if(type == "all"){
-    data <- IRanges::IntegerList(lapply(seq_along(data),
-                                        function(i){
-                                          c(starts[[i]], ends[[i]])
-                                        }))
+    data <- pc(starts, ends)
   } else if(type == "protected_ends"){
-    data <- IRanges::IntegerList(lapply(seq_along(data),
-                                        function(i){
-                                          # offset applied to start to
-                                          # sync the data on the position
-                                          if(strands[i] == "-"){
-                                            c(ends[[i]] - 1L, starts[[i]])
-                                          } else {
-                                            c(starts[[i]] - 1L, ends[[i]])
-                                          }
-                                        }))
+    data <- c(pc(ends[strands == "-"] - 1L,starts[strands == "-"]),
+              pc(starts[strands == "+"] - 1L,ends[strands == "+"]))
+    data <- data[names[f]]
   } else {
     stop("Something went wrong. Invalid type '", type, "'.")
   }
-  names(data) <- names(starts)
   data
 }
 
@@ -167,38 +149,31 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   type <- match.arg(type)
   strands_u <- .get_strand_u_GRangesList(grl)
   data <- .load_bam_alignment_data(bamFile, param, grl, args)
-  # factor for found and non found transcripts
-  f <- names(data)
-  f_not_found <- names(grl)[!(names(grl) %in% names(data))]
+  # get hits
+  hits <- GenomicAlignments::findOverlaps(data, grl)
   # summarize pos of reads based on type
-  data <- .summarize_to_position_data(data, strands_u[f], type)
+  data <- .summarize_to_position_data(data, hits, names(grl), strands_u, type)
+  rm(hits)
+  # get subsetting vectors
+  f <- names(data)
+  f_not_found <- names(grl)[!(names(grl) %in% f)]
   # calculate tables and add empty positions
   # also remove overhanging read data
   seqs <- .seqs_rl(grl)
-  data <- IRanges::IntegerList(Map(
-    function(d,s){
-      bg <- table(s) - 1L
-      d <- d[d %in% s]
-      d <- table(d)
-      d <- d[as.integer(names(d)) > 0L]
-      d <- reshape2::acast(data.frame(pos = as.integer(c(names(bg),names(d))),
-                                      count = as.integer(c(bg,d))),
-                           pos ~ .,
-                           value.var = "count",
-                           fun.aggregate = sum)
-      as.integer(d)
-    },
-    data,
-    seqs[f]))
-  # get data for empty transcripts
-  data_not_found <- IRanges::IntegerList(Map(
-    function(s){
-      d <- table(s) - 1
-      as.integer(d)
-    },
-    seqs[f_not_found]))
-  # merge and order
-  data <- c(data,data_not_found)
+  background <- relist(rep(0L,sum(lengths(seqs))),seqs)
+  data <- data[data %in% seqs[f]]
+  data <- data[lengths(data) > 0L]
+  # update subsetting vectors
+  f <- names(data)
+  f_not_found <- names(grl)[!(names(grl) %in% f)]
+  # calculated table
+  data <- pc(data,seqs[f])
+  # vectorized attempt does work for human transcriptome, since 
+  # prod(dimensions) is bigger than .Machine$integer.max
+  data <- IRanges::IntegerList(lapply(data,function(d){unname(table(d))}))
+  data <- data - 1L
+  # combine with empty positions
+  data <- c(data,background[f_not_found])
   data <- data[match(names(grl),names(data))]
   data
 }

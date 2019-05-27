@@ -345,7 +345,7 @@ setMethod("compareByCoord",
   } else {
     limits <- c(0,ceiling(max(data$value)))
   }
-  if(!is.na(args[["limits"]])){
+  if(all(!is.na(args[["limits"]]))){
     limits <- args[["limits"]]
   }
   # plot

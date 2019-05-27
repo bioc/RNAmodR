@@ -52,8 +52,8 @@ NULL
   rawData <- FALSE # only used for subsetting SequenceData
   args <- .norm_settings(input, .subset_settings, name, type, merge, flanking,
                          perTranscript, sequenceData, rawData)
-  if(!is.na(args[["type"]])){
-    if(!.is_valid_modType(args[["type"]])){
+  if(all(!is.na(args[["type"]]))){
+    if(any(!.is_valid_modType(args[["type"]]))){
       stop("'type' must be one or more elements of shortName(ModRNAString()).",
            call. = FALSE)
     }
