@@ -58,11 +58,20 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 
 # PileupSequenceData ----------------------------------------------------------------
 
-#' @importFrom reshape2 dcast melt
-.fill_up_pileup_data <- function(pileup,grl,seqs){
-  which_label <- .get_which_label(grl, seqs)
-  strand <- Map(rep, .get_strand_u_GRangesList(grl), lengths(seqs))
-  pileup_add <- data.frame(pos = unlist(seqs),
+.fill_up_pileup_data <- function(pileup,grl,irl){
+  which_label <- .get_which_label(irl)
+  unlisted_which_label <- unlist(which_label, use.names = FALSE)
+  which_label <- IRanges::CharacterList(split(unlisted_which_label,
+                                              names(unlisted_which_label)))
+  if(any(names(which_label) != names(grl))){
+    stop("")
+  }
+  which_label <- IRanges::CharacterList(
+    Map(function(w,l){unname(unlist(Map(rep,w,l)))},
+        which_label,
+        width(grl)))
+  strand <- Map(rep, .get_strand_u_GRangesList(grl), sum(width(grl)))
+  pileup_add <- data.frame(pos = unlist(.seqs_rl(grl)),
                            strand = unlist(strand),
                            nucleotide = "-",
                            count = 0L,
@@ -94,8 +103,7 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
                               scanBamParam = param,
                               pileupParam = pileupParam)
   pileup <- pileup[,c("pos","strand","nucleotide","count","which_label")]
-  seqs <- .seqs_rl(grl)
-  pileup <- .fill_up_pileup_data(pileup,grl,seqs)
+  pileup <- .fill_up_pileup_data(pileup,grl,bamWhich(param))
   pileup <- reshape2::dcast(pileup, which_label + pos + strand ~ nucleotide,
                             sum, value.var = "count")
   cols <- c("which_label","pos","strand","-","A","C","G","T")
@@ -219,7 +227,7 @@ setMethod("summary",
   # merge data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
-  ans <- relist(ans, x@partitioning)
+  ans <- relist(ans, IRanges::PartitioningByEnd(x))
   positions <- .seqs_rl_strand(ranges(x))
   rownames(ans) <- IRanges::CharacterList(positions)
   ans

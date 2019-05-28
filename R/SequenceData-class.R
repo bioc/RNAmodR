@@ -300,7 +300,7 @@ setMethod("lapply", "SequenceData",
 setMethod("extractROWS", "SequenceData",
   function(x, i){
     i <- normalizeSingleBracketSubscript(i, x, as.NSBS = TRUE)
-    ans_eltNROWS <- extractROWS(width(x@partitioning), i)
+    ans_eltNROWS <- extractROWS(width(IRanges::PartitioningByEnd(x)), i)
     ans_breakpoints <- suppressWarnings(cumsum(ans_eltNROWS))
     nbreakpoints <- length(ans_breakpoints)
     if (nbreakpoints != 0L && is.na(ans_breakpoints[[nbreakpoints]])){
@@ -310,7 +310,7 @@ setMethod("extractROWS", "SequenceData",
            "This is not implemented, yet.")
     }
     idx_on_unlisted_x <- 
-      IRanges::IRanges(end = extractROWS(end(x@partitioning), i),
+      IRanges::IRanges(end = extractROWS(end(IRanges::PartitioningByEnd(x)), i),
                        width = ans_eltNROWS)
     ans_unlistData <- extractROWS(x@unlistData, idx_on_unlisted_x)
     ans_partitioning <- new2("PartitioningByEnd", end = ans_breakpoints,
@@ -392,7 +392,7 @@ setMethod("unlist", "SequenceData",
 
 setMethod("rownames", "SequenceData",
           function(x, do.NULL = TRUE, prefix = "row"){
-            relist(rownames(x@unlistData),x@partitioning)
+            relist(rownames(unlist(x)),IRanges::PartitioningByEnd(x))
           }
 )
 

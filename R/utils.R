@@ -9,24 +9,24 @@ NULL
                          mcols(gr))
 }
 
-.get_which_label <- function(grl, seqs = NULL){
-  if(is.null(seqs)){
-    seqs <- .seqs_rl(grl)
+.get_which_label <- function(irl){
+  which <- Map(
+    function(ir,n){
+      ans <- paste0(n,":",start(ir),"-",end(ir))
+      names(ans) <- names(ir)
+      ans
+    },
+    irl, names(irl))
+  which <- IRanges::CharacterList(which)
+  if(sum(vapply(which,anyDuplicated,integer(1))) != 0L){
+    unlisted_which <- unlist(which, use.names = FALSE)
+    names <- names(unlisted_which) 
+    unlisted_which <- paste0(unlisted_which,".",
+                             as.character(seq_along(unlisted_which)))
+    names(unlisted_which) <- names
+    which <- relist(unlisted_which,which)
   }
-  which_label <- Map(function(sn,s,e){paste0(sn,":",s,"-",e)},
-                     seqnames(grl),
-                     start(grl),
-                     end(grl))
-  f <- lengths(grl) != 1L
-  if(any(f)){
-    which_label <- Map(function(w,l){paste0(w,".",seq_len(l))},
-                       which_label,
-                       lengths(grl))
-  }
-  which_label <- Map(function(w,l){unname(unlist(Map(rep,w,l)))},
-                     which_label,
-                     lengths(seqs))
-  IRanges::CharacterList(which_label)
+  which
 }
 
 # GRanges/GRangesList helper functions -----------------------------------------
@@ -44,12 +44,14 @@ NULL
 # per positions of each element
 
 .seqnames_rl <- function(rl){
-  ul_seqnames <- as.character(seqnames(rl@unlistData))
-  width <- as.integer(width(rl@unlistData))
+  partitioning <- IRanges::PartitioningByEnd(rl)
+  unlisted_rl <- unlist(rl)
+  ul_seqnames <- as.character(seqnames(unlisted_rl))
+  width <- as.integer(width(unlisted_rl))
   ul_seqnames <- Map(rep,ul_seqnames,width)
   ul_seqnames <- IRanges::CharacterList(lapply(Map(seq.int,
-                                                   start(rl@partitioning),
-                                                   end(rl@partitioning)),
+                                                   start(partitioning),
+                                                   end(partitioning)),
                                                function(i){
                                                  unname(unlist(ul_seqnames[i]))
                                                }))
@@ -57,12 +59,14 @@ NULL
 }
 
 .strands_rl <- function(rl){
-  strands <- as.character(strand(rl@unlistData))
-  width <- as.integer(width(rl@unlistData))
+  partitioning <- IRanges::PartitioningByEnd(rl)
+  unlisted_rl <- unlist(rl)
+  strands <- as.character(strand(unlisted_rl))
+  width <- as.integer(width(unlisted_rl))
   strands <- Map(rep,strands,width)
   strands <- IRanges::CharacterList(lapply(Map(seq.int,
-                                               start(rl@partitioning),
-                                               end(rl@partitioning)),
+                                               start(partitioning),
+                                               end(partitioning)),
                                            function(i){
                                              unname(unlist(strands[i]))
                                            }))
@@ -126,8 +130,9 @@ NULL
     from,
     to)
   ans <- IRanges::IntegerList(ans)
-  width_x <- IRanges::IntegerList(split(width(ans@partitioning),
-                                        names(ans@partitioning)))
+  partitioning <- IRanges::PartitioningByEnd(ans)
+  width_x <- IRanges::IntegerList(split(width(partitioning),
+                                        names(partitioning)))
   m <- match(unique(names(from)),names(width_x))
   width_x <- width_x[m]
   width_ans <- sum(width_x)

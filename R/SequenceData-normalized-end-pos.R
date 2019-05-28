@@ -275,7 +275,7 @@ setMethod("getData",
   # merge data
   ans <- cbind(do.call(S4Vectors::DataFrame, means),
                do.call(S4Vectors::DataFrame, sds))
-  ans <- relist(ans, x@partitioning)
+  ans <- relist(ans, IRanges::PartitioningByEnd(x))
   positions <- .seqs_rl_strand(ranges(x))
   rownames(ans) <- IRanges::CharacterList(positions)
   ans

@@ -282,7 +282,7 @@ NULL
                                                           width = 1),
                                 strand = unlist(strands),
                                 unlist(data, use.names = FALSE))
-  ans <- relist(ans, data@partitioning)
+  ans <- relist(ans, IRanges::PartitioningByEnd(data))
   metadata(ans) <- metadata(ranges)
   ans
 }

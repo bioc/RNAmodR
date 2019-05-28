@@ -266,7 +266,7 @@ setMethod("getData",
   # assemble data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
-  ans <- relist(ans, x@partitioning)
+  ans <- relist(ans, IRanges::PartitioningByEnd(x))
   positions <- .seqs_rl_strand(ranges(x))
   rownames(ans) <- IRanges::CharacterList(positions)
   ans

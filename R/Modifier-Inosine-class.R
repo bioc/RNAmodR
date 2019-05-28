@@ -237,7 +237,7 @@ setMethod(f = "aggregateData",
   minScore <- settings(x,"minScore")
   # construct logical vector for passing the coverage threshold
   coverage <- rowSums(as.data.frame(unlist(coverage))) >= minCoverage
-  coverage <- relist(unname(coverage),mod@partitioning)
+  coverage <- relist(unname(coverage),IRanges::PartitioningByEnd(mod))
   # find inosine positions by looking for A to G conversion at position with 
   # enough coverage
   grl <- ranges(x)
