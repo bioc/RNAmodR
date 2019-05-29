@@ -86,27 +86,6 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 
 # End5SequenceData ------------------------------------------------------------------
 
-#' @importFrom GenomicAlignments readGAlignments findOverlaps
-.load_bam_alignment_data <- function(bamFile, param, grl, args){
-  data <- GenomicAlignments::readGAlignments(bamFile, param = param)
-  if(length(data) == 0L){
-    stop("No reads found in data.", call. = FALSE)
-  }
-  # apply length cut off if set
-  if(!is.na(args[["maxLength"]])){
-    data <- data[GenomicAlignments::qwidth(data) <= args[["maxLength"]],]
-  }
-  if(!is.na(args[["minLength"]])){
-    data <- data[GenomicAlignments::qwidth(data) >= args[["minLength"]],]
-  }
-  if(length(data) == 0L){
-    stop("No reads found in data with read length equal or between 'minLength'",
-         " (",args[["minLength"]]," nt) and 'maxLength' (",args[["maxLength"]],
-         " nt).", call. = FALSE)
-  }
-  data
-}
-
 .summarize_to_position_data <- function(data, hits, names, strands, type){
   # get data for lapply
   starts <- BiocGenerics::start(data)
@@ -139,7 +118,7 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   data
 }
 
-#'@importFrom reshape2 acast
+#' @importFrom GenomicAlignments findOverlaps
 .get_position_data_of_transcript_ends <- function(bamFile, grl, param,
                                                   type = c("5prime",
                                                            "3prime",

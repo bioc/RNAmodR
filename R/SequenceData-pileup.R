@@ -61,8 +61,10 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 .fill_up_pileup_data <- function(pileup,grl,irl){
   which_label <- .get_which_label(irl)
   unlisted_which_label <- unlist(which_label, use.names = FALSE)
-  which_label <- IRanges::CharacterList(split(unlisted_which_label,
-                                              names(unlisted_which_label)))
+  which_label <- IRanges::CharacterList(
+    split(unlisted_which_label,
+          factor(names(unlisted_which_label),
+                 levels = unique(names(unlisted_which_label)))))
   if(any(names(which_label) != names(grl))){
     stop("")
   }
@@ -103,7 +105,7 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
                               scanBamParam = param,
                               pileupParam = pileupParam)
   pileup <- pileup[,c("pos","strand","nucleotide","count","which_label")]
-  pileup <- .fill_up_pileup_data(pileup,grl,bamWhich(param))
+  pileup <- .fill_up_pileup_data(pileup,grl,Rsamtools::bamWhich(param))
   pileup <- reshape2::dcast(pileup, which_label + pos + strand ~ nucleotide,
                             sum, value.var = "count")
   cols <- c("which_label","pos","strand","-","A","C","G","T")

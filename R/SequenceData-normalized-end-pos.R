@@ -111,7 +111,7 @@ setMethod("summary",
 
 # End5SequenceData ------------------------------------------------------------------
 
-#'@importFrom reshape2 acast
+#' @importFrom GenomicAlignments findOverlaps
 .get_position_data_of_transcript_ends_norm <- function(bamFile, grl, param,
                                                        type = c("5prime",
                                                                 "3prime"),
@@ -144,8 +144,7 @@ setMethod("summary",
   enddata <- enddata - 1L
   # noralize against total number transcript or against the overlap per position
   normTranscript <- (enddata / unname(sum(enddata))) * 1000
-  coverage <- .get_position_data_of_transcript_coverage(bamFile, grl[f], param,
-                                                        args)
+  coverage <- .get_coverage_from_GA(data, grl[f])
   if(any(names(coverage) != names(enddata))){
     stop("")
   }

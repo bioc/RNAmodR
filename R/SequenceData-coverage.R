@@ -54,11 +54,8 @@ CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
 }
 
 # CoverageSequenceData ---------------------------------------------------------
-#' @importFrom GenomicAlignments coverage
-.get_position_data_of_transcript_coverage <- function(bamFile, grl, param,
-                                                      args = list()){
-  # get data per chromosome
-  coverage <- GenomicAlignments::coverage(bamFile, param = param)
+
+.process_coverage_data <- function(coverage, grl){
   coverage <- coverage[seqlevels(grl)]
   coverage <- as(coverage,"IntegerList")
   # subset per transcript
@@ -77,6 +74,20 @@ CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
                      partitioning)
   coverage <- coverage[names(grl)]
   coverage
+}
+
+#' @importFrom GenomicAlignments coverage
+.get_coverage_from_GA <- function(data, grl){
+  # get data per chromosome
+  coverage <- GenomicAlignments::coverage(data)
+  .process_coverage_data(coverage, grl)
+}
+
+#' @importFrom GenomicAlignments coverage
+.get_position_data_of_transcript_coverage <- function(bamFile, grl, param,
+                                                      args = list()){
+  data <- .load_bam_alignment_data(bamFile, param, grl, args)
+  .get_coverage_from_GA(data, grl)
 }
 
 #' @rdname CoverageSequenceData-class

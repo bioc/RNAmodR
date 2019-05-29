@@ -28,12 +28,23 @@ NULL
   return(param)
 }
 
-#' @importFrom Rsamtools idxstatsBam
-# Extracts sequence names aka. chromosome identifier from list of bam files
-.get_acceptable_chrom_ident <- function(bamFiles){
-  bf_seqnames <- lapply(bamFiles, function(file){
-    res <- Rsamtools::idxstatsBam(file)
-    return(as.character(res$seqnames))
-  })
-  return(unique(unlist(bf_seqnames)))
+#' @importFrom GenomicAlignments readGAlignments
+.load_bam_alignment_data <- function(bamFile, param, grl, args){
+  data <- GenomicAlignments::readGAlignments(bamFile, param = param)
+  if(length(data) == 0L){
+    stop("No reads found in data.", call. = FALSE)
+  }
+  # apply length cut off if set
+  if(!is.na(args[["maxLength"]])){
+    data <- data[GenomicAlignments::qwidth(data) <= args[["maxLength"]],]
+  }
+  if(!is.na(args[["minLength"]])){
+    data <- data[GenomicAlignments::qwidth(data) >= args[["minLength"]],]
+  }
+  if(length(data) == 0L){
+    stop("No reads found in data with read length equal or between 'minLength'",
+         " (",args[["minLength"]]," nt) and 'maxLength' (",args[["maxLength"]],
+         " nt).", call. = FALSE)
+  }
+  data
 }

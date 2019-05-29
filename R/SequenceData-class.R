@@ -388,14 +388,6 @@ setMethod("unlist", "SequenceData",
           }
 )
 
-# accessors --------------------------------------------------------------------
-
-setMethod("rownames", "SequenceData",
-          function(x, do.NULL = TRUE, prefix = "row"){
-            relist(rownames(unlist(x)),IRanges::PartitioningByEnd(x))
-          }
-)
-
 # constructor ------------------------------------------------------------------
 
 .quality_settings <- data.frame(
