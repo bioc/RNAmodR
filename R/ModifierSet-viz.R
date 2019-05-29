@@ -145,8 +145,8 @@ setMethod(
       atm <- .get_viz_annotation_track(x, args)
     }
     if(showSequence){
-      seq <- .get_viz_sequence(x, args)
-      st <- .get_viz_sequence_track(seq, ranges(x), chromosome, args)
+      seq <- .get_viz_sequence(x, args)[name]
+      st <- .get_viz_sequence_track(seq, ranges(x)[name], chromosome, args)
     }
     dts <- lapply(x, getDataTrack, name = name, type = type, ...)
     dts <- .add_viz_names(dts, names(x))

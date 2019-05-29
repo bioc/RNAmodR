@@ -64,7 +64,7 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   which_label <- IRanges::CharacterList(
     split(unlisted_which_label,
           factor(names(unlisted_which_label),
-                 levels = unique(names(unlisted_which_label)))))
+                 levels = names(grl))))
   if(any(names(which_label) != names(grl))){
     stop("")
   }

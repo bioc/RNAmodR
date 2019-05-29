@@ -123,12 +123,12 @@ test_that("Visualization:",{
   gr <- GRanges(chr,1:4,"+",Parent = "2")
   gr2 <- GRanges(chr,100:103,"+",Parent = "2")
   ranges <- GRangesList("2" = gr, "3" = gr2)
-  actual <- RNAmodR:::.stitch_chromosome(seq, ranges, chr)
+  actual <- RNAmodR:::.stitch_chromosome(seq["3"], ranges["3"], chr)
   expect_s4_class(actual,"RNAStringSet")
   expect_equal(width(actual),103L)
   expect_equal(names(actual),chr)
   seq <- ModRNAStringSet(c("2" = "AGCU","3" = "AGCU"))
-  actual <- RNAmodR:::.stitch_chromosome(seq, ranges, chr)
+  actual <- RNAmodR:::.stitch_chromosome(seq["3"], ranges["3"], chr)
   expect_s4_class(actual,"ModRNAStringSet")
   expect_equal(width(actual),103L)
   expect_equal(names(actual),chr)
@@ -160,13 +160,16 @@ test_that("Visualization:",{
   actual <- RNAmodR:::.get_viz_annotation_track(psd, args)
   expect_s4_class(actual,"AnnotationTrack")
   # .get_viz_sequence_track
-  expect_error(RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd),
+  expect_error(RNAmodR:::.get_viz_sequence_track(sequences(psd)["1"],
+                                                 ranges(psd)["1"],
                                                  "chr2", args),
                "No ranges with seqnames = 'chr2' found")
-  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd),
+  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd)["1"],
+                                              ranges(psd)["1"],
                                               "chr1", args)
   expect_s4_class(actual,"RNASequenceTrack")
-  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd), ranges(psd),
+  actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd)["1"],
+                                              ranges(psd)["1"],
                                               "chr1", args)
   expect_s4_class(actual,"RNASequenceTrack")
   # .get_data_for_visualization

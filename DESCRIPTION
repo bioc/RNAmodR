@@ -51,6 +51,7 @@ Imports:
     ggplot2,
     Gviz,
     reshape2,
+    stringi,
     stringr,
     dplyr,
     ROCR

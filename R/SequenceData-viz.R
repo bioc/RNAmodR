@@ -91,7 +91,7 @@ NULL
   if(!(name %in% names(ranges))){
     stop("Transcript name '",name,"' not found in 'x'", call. = FALSE)
   }
-  as.character(seqnames(ranges[name]))
+  as.character(unique(unlist(seqnames(ranges[name]),use.names=FALSE)))
 }
 
 .norm_viz_args_SequenceData <- function(input, x){
@@ -160,7 +160,7 @@ NULL
   at
 }
 
-#' @importFrom Biostrings xscat
+#' @importFrom stringi stri_rand_strings
 .stitch_chromosome <- function(seq, ranges, chromosome){
   ranges <- ranges[seqnames(ranges) == chromosome]
   ranges <- ranges[!vapply(ranges,function(r){length(r) == 0L},logical(1))]
@@ -172,54 +172,37 @@ NULL
   if(length(seq) == 0L){
     stop("No sequences for seqnames = '",chromosome,"' found.")
   }
-  ranges <- unlist(ranges)
-  if(any(width(ranges) != width(seq))){
+  if(any(sum(width(ranges))!= width(seq))){
     stop("width() or sequences and ranges does not match.")
   }
-  hits <- findOverlaps(ranges)
+  unlisted_ranges <- unlist(ranges)
+  hits <- findOverlaps(unlisted_ranges)
   # if overlapping ranges exist, merge em
-  if(length(hits) > length(ranges)){
-    h <- split(subjectHits(hits),
-               queryHits(hits))
-    f <- lengths(h) > 1L
-    ranges <- c(list(ranges[!f]),
-                lapply(h[f],
-                       function(i){
-                         r <- ranges[i]
-                         GRanges(seqnames = unique(seqnames(r)),
-                                 ranges = IRanges::IRanges(min(start(r)),
-                                                           max(end(r))),
-                                 strand = "+")
-                       }))
-    ranges <- ranges[!duplicated(ranges)]
-    ranges <- unlist(GRangesList(ranges))
+  if(length(hits) > length(unlisted_ranges)){
+    stop("")
   }
   # get gaps in ranges
-  gaps <- gaps(ranges)
+  GenomeInfoDb::seqlevels(unlisted_ranges) <- 
+    GenomeInfoDb::seqlevelsInUse(unlisted_ranges)
+  gaps <- gaps(unlisted_ranges)
+  if(length(gaps) == 0L){
+    names(seq) <- chromosome
+    return(seq)
+  } 
+  gaps <- gaps[end(gaps) <= max(end(unlisted_ranges))]
   if(length(gaps) == 0L){
     names(seq) <- chromosome
     return(seq)
   }
-  starts <- start(gaps)
-  ends <- end(gaps)
   # get N sequence for gaps
-  N <- paste0(rep("N",max(ends)),collapse = "")
   FUN <- match.fun(class(seq))
-  N <- unlist(FUN(unlist(N)))
-  Ns <- as(IRanges::Views(N,starts,ends),class(seq))
-  common_length <- min(length(seq),length(Ns))
-  common_seq <- seq_len(common_length)
+  N <- FUN(stringi::stri_rand_strings(length(gaps), width(gaps),
+                                      pattern = "[N]"))
+  seq <- relist(unlist(seq),
+                IRanges::PartitioningByWidth(width(unlisted_ranges)))
   # assemble result
-  equal_no_of_gaps_and_ranges <- length(gaps) == length(ranges)
-  if(equal_no_of_gaps_and_ranges){
-    ans <- pc(Ns[common_seq],seq[common_seq])
-  } else {
-    missing_length_seq <- seq_along(seq)
-    missing_length_seq <- missing_length_seq[missing_length_seq > common_length]
-    ans <- pc(seq[common_seq],Ns[common_seq])
-    ans <- Biostrings::xscat(ans,seq[missing_length_seq])
-  }
-  ans <- as(unlist(ans),class(seq))
+  ans <- pc(N,seq)
+  ans <- FUN(unlist(ans))
   names(ans) <- chromosome
   ans
 }
@@ -324,7 +307,8 @@ setMethod(
       atm <- .get_viz_annotation_track(x,args)
     }
     if(showSequence){
-      st <- .get_viz_sequence_track(sequences(x), ranges(x), chromosome, args)
+      st <- .get_viz_sequence_track(sequences(x)[name], ranges(x)[name], 
+                                    chromosome, args)
     }
     dt <- getDataTrack(x, name = name, ...)
     if(!is.list(dt)){
