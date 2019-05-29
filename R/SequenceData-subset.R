@@ -133,13 +133,13 @@ NULL
 }
 
 .check_for_invalid_positions <- function(data, coord){
-  lengths <- lengths(data)
+  available_pos <- rownames(data)
   positions <- start(ranges(coord))
-  f_names <- match(names(positions),names(lengths))
-  f <- IRanges::LogicalList(Map(function(i,j){i >= j},
+  f_names <- match(names(positions),names(available_pos))
+  f <- IRanges::LogicalList(Map(function(i,j){!(i %in% j)},
                                 positions,
-                                lengths[f_names]))
-  if(!any(lengths(BiocGenerics::which(f)) > 0L )){
+                                available_pos[f_names]))
+  if(!any(all(f))){
     return(NULL)
   }
   invalidPositions <- unlist(lapply(coord[f],as.character),
@@ -177,12 +177,13 @@ NULL
                                   })
              ))
            }))
-  if(length(flanking) > 0L){
-    l <- IRanges::IntegerList(as.list(lengths(data)))
-    flank <- flank[flank > 0L & flank <= l[m]]
+  if(length(flanking) > 1L){
+    l <- IRanges::IntegerList(as.list(rownames(data)))
+    flank <- flank[flank %in% l[m]]
   }
   flank <- as(flank,"CharacterList")
-  ff <- IRanges::LogicalList(mapply(function(r,z){r %in% z},rownames(data)[m],
+  ff <- IRanges::LogicalList(mapply(function(r,z){r %in% z},
+                                    rownames(data)[m],
                                     flank))
   ans <- data[m][ff]
   if(perTranscript){
