@@ -283,7 +283,7 @@ setClass("Modifier",
   }
   if(hasAggregateData(x)){
     data <- getAggregateData(x)
-    if(is.null(rownames(data@unlistData))){
+    if(is.null(rownames(unlist(data, use.names = FALSE)))){
       return("rownames of aggregate data is not set.")
     } else {
       seqs <- .seqs_rl_strand(ranges(x))
@@ -871,7 +871,7 @@ NULL
 .check_aggregate_modifier <- function(data, x){
   score <- x@score
   if(is(data,"CompressedSplitDataFrameList")){
-    columns <- colnames(data@unlistData)
+    columns <- colnames(unlist(data, use.names = FALSE))
   } else {
     stop("aggregate data has to be a 'CompressedSplitDataFrameList' object. ",
          "Contact the maintainer of the class used.",

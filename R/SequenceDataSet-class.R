@@ -47,8 +47,8 @@ setMethod("show", "SequenceDataSet",
                 "\n", sep = "")
             if (!is.null(names(object)))
               cat(S4Vectors:::labeledLine("names", names(object)))
-            ranges_mcols <- mcols(object@listData[[1]]@ranges@unlistData,
-                                  use.names = FALSE)
+            unlisted_ranges <- unlist(ranges(object[[1]]),use.names = FALSE)
+            ranges_mcols <- mcols(unlisted_ranges, use.names = FALSE)
             nhead <- S4Vectors::get_showHeadLines()
             ntail <- S4Vectors::get_showTailLines()
             nc <- if (is.null(ranges_mcols)) 0L else ncol(ranges_mcols)

@@ -56,9 +56,22 @@ NULL
 
 #' @rdname ProtectedEndSequenceData-class
 #' @export
+setClass(Class = "ProtectedEndSequenceDataFrame",
+         contains = "SequenceDataFrame")
+#' @rdname ProtectedEndSequenceData-class
+#' @export
+ProtectedEndSequenceDataFrame <- function(df, ranges, sequence, replicate,
+                                          condition){
+  .SequenceDataFrame("ProtectedEnd",df, ranges, sequence, replicate, condition)
+}
+#' @rdname ProtectedEndSequenceData-class
+#' @export
 setClass(Class = "ProtectedEndSequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L,
+         slots = c(unlistData = "ProtectedEndSequenceDataFrame"),
+         prototype = list(unlistData = ProtectedEndSequenceDataFrame(),
+                          unlistType = "ProtectedEndSequenceDataFrame",
+                          minQuality = 5L,
                           dataDescription = "protected end data"))
 
 #' @rdname ProtectedEndSequenceData-class
@@ -120,7 +133,7 @@ setMethod(
     # clean meta data columns
     seqdata <- .clean_mcols_end(seqdata)
     seqdata <- unlist(seqdata)
-    conditions <- unique(x@condition)
+    conditions <- unique(conditions(x))
     if("control" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))

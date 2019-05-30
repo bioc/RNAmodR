@@ -4,11 +4,15 @@
 \name{ProtectedEndSequenceData-class}
 \alias{ProtectedEndSequenceData-class}
 \alias{ProtectedEndSequenceData}
+\alias{ProtectedEndSequenceDataFrame-class}
+\alias{ProtectedEndSequenceDataFrame}
 \alias{getData,ProtectedEndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{aggregateData,ProtectedEndSequenceData-method}
 \alias{getDataTrack,ProtectedEndSequenceData-method}
 \title{ProtectedEndSequenceData}
 \usage{
+ProtectedEndSequenceDataFrame(df, ranges, sequence, replicate, condition)
+
 ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 
@@ -21,14 +25,14 @@ ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{getDataTrack}{ProtectedEndSequenceData}(x, name, ...)
 }
 \arguments{
+\item{condition}{For \code{\link{aggregate}}: condition for which the data 
+should be aggregated.}
+
 \item{bamfiles, annotation, seqinfo, grl, sequences, param, args, ...}{See 
 \code{\link[=SequenceData-class]{SequenceData}} and
 \code{\link[=SequenceData-functions]{SequenceData-functions}}}
 
 \item{x}{a \code{ProtectedEndSequenceData}}
-
-\item{condition}{For \code{\link{aggregate}}: condition for which the data 
-should be aggregated.}
 
 \item{name}{For \code{\link[=plotDataByCoord]{getDataTrack}}: a valid 
 transcript name. Must be a name of \code{ranges(x)}}

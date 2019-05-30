@@ -185,7 +185,7 @@ NULL
   ff <- IRanges::LogicalList(mapply(function(r,z){r %in% z},
                                     rownames(data)[m],
                                     flank))
-  ans <- data[m][ff]
+  ans <- data[m][ff,,drop=FALSE]
   if(perTranscript){
     pos <- IRanges::CharacterList(Map(
       function(d,i){

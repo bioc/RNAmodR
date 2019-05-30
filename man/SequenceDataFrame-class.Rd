@@ -7,11 +7,12 @@
 \alias{[,SequenceDataFrame,ANY,ANY,ANY-method}
 \title{The SequenceDataFrame class}
 \usage{
-SequenceDataFrame(df, ranges, sequence, replicate, condition)
-
 \S4method{[}{SequenceDataFrame,ANY,ANY,ANY}(x, i, j, ..., drop = TRUE)
 }
 \arguments{
+\item{x, i, j, ..., drop}{arguments used for 
+\code{\link[S4Vectors:DataFrame-class]{subsetting}}.}
+
 \item{df}{the data as a \code{DataFrame}.}
 
 \item{ranges}{a \code{GRanges} object containing all annotation elements
@@ -20,14 +21,11 @@ for a transcript.}
 \item{sequence}{\code{XString} object describing the nucleotide sequence of 
 the transcript.}
 
-\item{replicate}{The replicate of each column or set of columns for the 
-individual conditions}
-
 \item{condition}{The condition of each column or set of columns. Either 
 \code{control} or \code{treated}.}
 
-\item{x, i, j, ..., drop}{arguments used for 
-\code{\link[S4Vectors:DataFrame-class]{subsetting}}.}
+\item{replicate}{The replicate of each column or set of columns for the 
+individual conditions}
 }
 \value{
 a \code{SequenceDataFrame} object

@@ -182,3 +182,13 @@ NULL
   }
   f
 }
+
+# partitioning object ----------------------------------------------------------
+
+.seqs_partitioning <- function(partitioning){
+  from <- rep.int(1,length(partitioning))
+  to <- width(partitioning)
+  names(from) <- names(partitioning)
+  names(to) <- names(partitioning)
+  .seqs_l_by(from,to)
+}

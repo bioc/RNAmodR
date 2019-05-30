@@ -4,6 +4,8 @@
 \name{PileupSequenceData-class}
 \alias{PileupSequenceData-class}
 \alias{PileupSequenceData}
+\alias{PileupSequenceDataFrame-class}
+\alias{PileupSequenceDataFrame}
 \alias{getData,PileupSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{aggregateData,PileupSequenceData-method}
 \alias{getDataTrack,PileupSequenceData-method}
@@ -11,6 +13,8 @@
 \alias{pileupToCoverage,PileupSequenceData-method}
 \title{PileupSequenceData}
 \usage{
+PileupSequenceDataFrame(df, ranges, sequence, replicate, condition)
+
 PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 
@@ -27,14 +31,14 @@ pileupToCoverage(x)
 \S4method{pileupToCoverage}{PileupSequenceData}(x)
 }
 \arguments{
+\item{condition}{For \code{\link{aggregate}}: condition for which the data 
+should be aggregated.}
+
 \item{bamfiles, annotation, seqinfo, grl, sequences, param, args, ...}{See 
 \code{\link[=SequenceData-class]{SequenceData}} and
 \code{\link[=SequenceData-functions]{SequenceData-functions}}}
 
 \item{x}{a \code{PileupSequenceData}}
-
-\item{condition}{For \code{\link{aggregate}}: condition for which the data 
-should be aggregated.}
 
 \item{name}{For \code{\link[=plotDataByCoord]{getDataTrack}}: a valid 
 transcript name. Must be a name of \code{ranges(x)}}

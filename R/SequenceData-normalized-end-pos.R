@@ -49,29 +49,55 @@ NULL
 
 #' @rdname NormEndSequenceData-class
 #' @export
+setClass(Class = "NormEnd5SequenceDataFrame",
+         contains = "SequenceDataFrame")
+#' @rdname NormEndSequenceData-class
+#' @export
+NormEnd5SequenceDataFrame <- function(df, ranges, sequence, replicate,
+                                      condition){
+  .SequenceDataFrame("NormEnd5",df, ranges, sequence, replicate, condition)
+}
+#' @rdname NormEndSequenceData-class
+#' @export
 setClass(Class = "NormEnd5SequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L,
+         slots = c(unlistData = "NormEnd5SequenceDataFrame"),
+         prototype = list(unlistData = NormEnd5SequenceDataFrame(),
+                          unlistType = "NormEnd5SequenceDataFrame",
+                          minQuality = 5L,
                           dataDescription = "normalized 5'-end position data"))
 
 #' @rdname NormEndSequenceData-class
 #' @export
+setClass(Class = "NormEnd3SequenceDataFrame",
+         contains = "SequenceDataFrame")
+#' @rdname NormEndSequenceData-class
+#' @export
+NormEnd3SequenceDataFrame <- function(df, ranges, sequence, replicate,
+                                      condition){
+  .SequenceDataFrame("NormEnd3",df, ranges, sequence, replicate, condition)
+}
+#' @rdname NormEndSequenceData-class
+#' @export
 setClass(Class = "NormEnd3SequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L,
+         slots = c(unlistData = "NormEnd3SequenceDataFrame"),
+         prototype = list(unlistData = NormEnd3SequenceDataFrame(),
+                          unlistType = "NormEnd3SequenceDataFrame",
+                          minQuality = 5L,
                           dataDescription = "normalized 3'-end position data"))
 
 #' @rdname NormEndSequenceData-class
 #' @export
 NormEnd5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("NormEnd5", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
+  .new_SequenceData("NormEnd5", bamfiles = bamfiles, annotation = annotation,
+                    sequences = sequences, seqinfo = seqinfo, ...)
 }
 #' @rdname NormEndSequenceData-class
 #' @export
 NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("NormEnd3", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
+  .new_SequenceData("NormEnd3", bamfiles = bamfiles, annotation = annotation,
+                    sequences = sequences, seqinfo = seqinfo, ...)
 }
 
 # summary ----------------------------------------------------------------------
@@ -218,12 +244,13 @@ setMethod("getData",
 # - calculate sd per observation
 #' @importFrom matrixStats rowSds
 .aggregate_data_frame_mean_sd <- function(x, condition){
-  f <- .subset_to_condition(x@condition, condition)
-  df <- x@unlistData[f]
-  conditions <- unique(x@condition[f])
-  replicates <- x@replicate[f]
+  conditions <- conditions(x)
+  f <- .subset_to_condition(conditions, condition)
+  df <- as(unlist(x,use.names=FALSE)[,f],"DataFrame")
+  conditions_u <- unique(conditions[f])
+  replicates <- replicates(x)[f]
   # set up some base values
-  sample_width <- length(replicates[x@condition[f] == conditions[1] & 
+  sample_width <- length(replicates[conditions[f] == conditions_u[1] & 
                                       replicates == unique(replicates)[1]])
   colNames <- strsplit(colnames(df)[seq_len(sample_width)],"\\.")
   colNames <- IRanges::CharacterList(colNames)[as.list(lengths(colNames))]
@@ -232,12 +259,12 @@ setMethod("getData",
   # get means
   means <- do.call(
     c,
-    lapply(conditions,
+    lapply(conditions_u,
            function(con){
-             ff <- x@condition[f] == con
+             ff <- conditions[f] == con
              ncol <- ncol(df[,ff,drop = FALSE]
                           [,replicates[ff] == unique(replicates[ff])[1],
-                             drop = FALSE])
+                            drop = FALSE])
              seqAdd <- seq.int(from = 0, 
                                to = ncol(df[,ff,drop=FALSE]) - 1, 
                                by = sample_width)
@@ -253,9 +280,9 @@ setMethod("getData",
   # get sds
   sds <- do.call(
     c,
-    lapply(conditions,
+    lapply(conditions_u,
            function(con){
-             ff <- x@condition[f] == con
+             ff <- conditions[f] == con
              ncol <- ncol(df[,ff,drop = FALSE]
                           [,replicates[ff] == unique(replicates[ff])[1],
                             drop = FALSE])
@@ -266,7 +293,7 @@ setMethod("getData",
                lapply(seq_len(ncol),
                       function(i){
                         unname(matrixStats::rowSds(as.matrix(df[,ff,drop=FALSE][,i + seqAdd,drop=FALSE]),
-                                        na.rm = TRUE))
+                                                   na.rm = TRUE))
                       }))
              names(means) <- paste0("sds.", con, ".", colNames)
              means
@@ -328,8 +355,8 @@ setMethod(
     # clean meta data columns
     seqdata <- .clean_mcols_normend(seqdata)
     seqdata <- unlist(seqdata)
-    conditions <- unique(x@condition)
-    if("control" %in% conditions){
+    conditions_u <- unique(conditions(x))
+    if("control" %in% conditions_u){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.tx <- Gviz::DataTrack(
@@ -357,7 +384,7 @@ setMethod(
       tracks <- list("NormEnd5tx" = dt.control.tx,
                      "NormEnd5ol" = dt.control.ol)
     }
-    if("treated" %in% conditions){
+    if("treated" %in% conditions_u){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated.tx <- Gviz::DataTrack(
@@ -383,7 +410,7 @@ setMethod(
       tracks <- list("NormEnd5tx" = dt.treated.tx,
                      "NormEnd5ol" = dt.treated.ol)
     }
-    if(length(conditions) == 2L){
+    if(length(conditions_u) == 2L){
       tracks <- list("NormEnd5tx" = dt.control.tx,
                      "NormEnd5ol" = dt.control.ol,
                      "NormEnd5tx" = dt.treated.tx,
@@ -405,8 +432,8 @@ setMethod(
     # clean meta data columns
     seqdata <- .clean_mcols_normend(seqdata)
     seqdata <- unlist(seqdata)
-    conditions <- unique(x@condition)
-    if("control" %in% conditions){
+    conditions_u <- unique(conditions(x))
+    if("control" %in% conditions_u){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.tx <- Gviz::DataTrack(
@@ -434,7 +461,7 @@ setMethod(
       tracks <- list("NormEnd3tx" = dt.control.tx,
                      "NormEnd3ol" = dt.control.ol)
     }
-    if("treated" %in% conditions){
+    if("treated" %in% conditions_u){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated.tx <- Gviz::DataTrack(
@@ -460,7 +487,7 @@ setMethod(
       tracks <- list("NormEnd3tx" = dt.treated.tx,
                      "NormEnd3ol" = dt.treated.ol)
     }
-    if(length(conditions) == 2L){
+    if(length(conditions_u) == 2L){
       tracks <- list("NormEnd3tx" = dt.control.tx,
                      "NormEnd3ol" = dt.control.ol,
                      "NormEnd3tx" = dt.treated.tx,

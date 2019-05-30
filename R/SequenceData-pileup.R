@@ -44,9 +44,21 @@ NULL
 
 #' @rdname PileupSequenceData-class
 #' @export
+setClass(Class = "PileupSequenceDataFrame",
+         contains = "SequenceDataFrame")
+#' @rdname PileupSequenceData-class
+#' @export
+PileupSequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
+  .SequenceDataFrame("Pileup", df, ranges, sequence, replicate, condition)
+}
+#' @rdname PileupSequenceData-class
+#' @export
 setClass(Class = "PileupSequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L,
+         slots = c(unlistData = "PileupSequenceDataFrame"),
+         prototype = list(unlistData = PileupSequenceDataFrame(),
+                          unlistType = "PileupSequenceDataFrame",
+                          minQuality = 5L,
                           dataDescription = "Pileup data"))
 
 #' @rdname PileupSequenceData-class
@@ -166,18 +178,19 @@ setMethod("summary",
 # - calculate sd per observation
 #' @importFrom matrixStats rowSds
 .aggregate_data_frame_percentage_mean_sd <- function(x,condition){
-  f <- .subset_to_condition(x@condition, condition)
-  df <- x@unlistData[f]
-  conditions <- unique(x@condition[f])
-  replicates <- x@replicate[f]
+  conditions <- conditions(x)
+  f <- .subset_to_condition(conditions, condition)
+  df <- as(unlist(x,use.names=FALSE)[,f],"DataFrame")
+  conditions_u <- unique(conditions[f])
+  replicates <- replicates(x)[f]
   # set up some base values
-  sample_width <- length(replicates[x@condition[f] == conditions[1] & 
+  sample_width <- length(replicates[conditions[f] == conditions_u[1] & 
                                       replicates == unique(replicates)[1]])
   colNames <- strsplit(colnames(df)[seq_len(sample_width)],"\\.")
   colNames <- IRanges::CharacterList(colNames)[as.list(lengths(colNames))]
   # get percentage per replicate
-  for(con in conditions){
-    ff <- x@condition[f] == con
+  for(con in conditions_u){
+    ff <- conditions[f] == con
     for(i in unique(replicates[ff])){
       df[,ff][,replicates[ff] == i] <- 
         as.data.frame(df[,ff,drop = FALSE][,replicates[ff] == i,drop = FALSE]) / 
@@ -187,9 +200,9 @@ setMethod("summary",
   # get means
   means <- do.call(
     c,
-    lapply(conditions,
+    lapply(conditions_u,
            function(con){
-             ff <- x@condition[f] == con
+             ff <- conditions[f] == con
              ncol <- ncol(df[,ff,drop = FALSE]
                           [,replicates[ff] == unique(replicates[ff])[1],
                             drop = FALSE])
@@ -208,9 +221,9 @@ setMethod("summary",
   # get sds
   sds <- do.call(
     c,
-    lapply(conditions,
+    lapply(conditions_u,
            function(con){
-             ff <- x@condition[f] == con
+             ff <- conditions[f] == con
              ncol <- ncol(df[,ff,drop = FALSE]
                           [,replicates[ff] == unique(replicates[ff])[1],
                             drop = FALSE])
@@ -307,8 +320,8 @@ setMethod(
     # clean meta data columns
     seqdata <- .clean_mcols_pileup(seqdata, colour.bases)
     seqdata <- unlist(seqdata)
-    conditions <- unique(x@condition)
-    if("control" %in% conditions){
+    conditions_u <- unique(conditions(x))
+    if("control" %in% conditions_u){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
       colnames(mcols(d)) <- gsub("control.","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(range = d,
@@ -324,7 +337,7 @@ setMethod(
       Gviz::displayPars(dt.control) <- args
       track <- list("Pileup" = dt.control)
     }
-    if("treated" %in% conditions){
+    if("treated" %in% conditions_u){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
       colnames(mcols(d)) <- gsub("treated.","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(range = d,
@@ -340,7 +353,7 @@ setMethod(
       Gviz::displayPars(dt.treated) <- args
       track <- list("Pileup" = dt.treated)
     }
-    if(length(conditions) == 2L){
+    if(length(conditions_u) == 2L){
       track <- list("Pileup" = dt.control,
                     "Pileup" = dt.treated)
     }

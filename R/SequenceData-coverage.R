@@ -39,18 +39,31 @@ NULL
 #'                             sequences = sequences)
 NULL
 
+
+#' @rdname CoverageSequenceData-class
+#' @export
+setClass(Class = "CoverageSequenceDataFrame",
+         contains = "SequenceDataFrame")
+#' @rdname CoverageSequenceData-class
+#' @export
+CoverageSequenceDataFrame <- function(df, ranges, sequence, replicate,
+                                      condition){
+  .SequenceDataFrame("Coverage",df, ranges, sequence, replicate, condition)
+}
 #' @rdname CoverageSequenceData-class
 #' @export
 setClass(Class = "CoverageSequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L,
+         slots = c(unlistData = "CoverageSequenceDataFrame"),
+         prototype = list(unlistData = CoverageSequenceDataFrame(),
+                          unlistType = "CoverageSequenceDataFrame",
+                          minQuality = 5L,
                           dataDescription = "Coverage data"))
-
 #' @rdname CoverageSequenceData-class
 #' @export
 CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("Coverage", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
+  .new_SequenceData("Coverage", bamfiles = bamfiles, annotation = annotation,
+                    sequences = sequences, seqinfo = seqinfo, ...)
 }
 
 # CoverageSequenceData ---------------------------------------------------------
@@ -142,7 +155,7 @@ setMethod(
     # clean meta data columns
     seqdata <- .clean_mcols_coverage(seqdata)
     seqdata <- unlist(seqdata)
-    conditions <- unique(x@condition)
+    conditions <- unique(conditions(x))
     if("control" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))

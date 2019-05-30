@@ -5,7 +5,11 @@
 \alias{NormEndSequenceData-class}
 \alias{NormEnd5SequenceData}
 \alias{NormEnd3SequenceData}
+\alias{NormEnd5SequenceDataFrame-class}
+\alias{NormEnd5SequenceDataFrame}
 \alias{NormEnd5SequenceData-class}
+\alias{NormEnd3SequenceDataFrame-class}
+\alias{NormEnd3SequenceDataFrame}
 \alias{NormEnd3SequenceData-class}
 \alias{getData,NormEnd5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{getData,NormEnd3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
@@ -15,6 +19,10 @@
 \alias{getDataTrack,NormEnd3SequenceData-method}
 \title{NormEnd5SequenceData/NormEnd3SequenceData}
 \usage{
+NormEnd5SequenceDataFrame(df, ranges, sequence, replicate, condition)
+
+NormEnd3SequenceDataFrame(df, ranges, sequence, replicate, condition)
+
 NormEnd5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
@@ -38,14 +46,14 @@ NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{getDataTrack}{NormEnd3SequenceData}(x, name, ...)
 }
 \arguments{
+\item{condition}{For \code{\link{aggregate}}: condition for which the data 
+should be aggregated.}
+
 \item{bamfiles, annotation, seqinfo, grl, sequences, param, args, ...}{See 
 \code{\link[=SequenceData-class]{SequenceData}} and
 \code{\link[=SequenceData-functions]{SequenceData-functions}}}
 
 \item{x}{a \code{CoverageSequenceData}}
-
-\item{condition}{For \code{\link{aggregate}}: condition for which the data 
-should be aggregated.}
 
 \item{name}{For \code{\link[=plotDataByCoord]{getDataTrack}}: a valid 
 transcript name. Must be a name of \code{ranges(x)}}

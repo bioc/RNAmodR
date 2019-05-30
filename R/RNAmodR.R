@@ -73,7 +73,9 @@ NULL
 #' @importFrom Modstrings ModRNAString ModRNAStringSet combineIntoModstrings
 #' shortName fullName
 #' @importClassesFrom IRanges IntegerList CharacterList LogicalList IRanges
-#' SplitDataFrameList
+#' SplitDataFrameList PartitioningByEnd PartitioningByWidth
+#' @importFrom IRanges IntegerList CharacterList LogicalList IRanges
+#' SplitDataFrameList PartitioningByEnd PartitioningByWidth
 NULL
 
 # constants for annotation -----------------------------------------------------

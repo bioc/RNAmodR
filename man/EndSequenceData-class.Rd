@@ -6,8 +6,14 @@
 \alias{End5SequenceData}
 \alias{End3SequenceData}
 \alias{EndSequenceData}
+\alias{End5SequenceDataFrame-class}
+\alias{End5SequenceDataFrame}
 \alias{End5SequenceData-class}
+\alias{End3SequenceDataFrame-class}
+\alias{End3SequenceDataFrame}
 \alias{End3SequenceData-class}
+\alias{EndSequenceDataFrame}
+\alias{EndSequenceDataFrame-class}
 \alias{getData,End5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{getData,End3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{getData,EndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
@@ -19,6 +25,12 @@
 \alias{getDataTrack,End3SequenceData-method}
 \title{End5SequenceData/End3SequenceData/EndSequenceData}
 \usage{
+End5SequenceDataFrame(df, ranges, sequence, replicate, condition)
+
+End3SequenceDataFrame(df, ranges, sequence, replicate, condition)
+
+EndSequenceDataFrame(df, ranges, sequence, replicate, condition)
+
 End5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 End3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
@@ -53,15 +65,15 @@ EndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{getDataTrack}{End3SequenceData}(x, name, ...)
 }
 \arguments{
+\item{condition}{For \code{\link{aggregate}}: condition for which the data
+should be aggregated.}
+
 \item{bamfiles, annotation, seqinfo, grl, sequences, param, args, ...}{See
 \code{\link[=SequenceData-class]{SequenceData}} and
 \code{\link[=SequenceData-functions]{SequenceData-functions}}}
 
 \item{x}{a \code{End5SequenceData}, \code{End3SequenceData} or
 \code{EndSequenceData} object}
-
-\item{condition}{For \code{\link{aggregate}}: condition for which the data
-should be aggregated.}
 
 \item{name}{For \code{\link[=plotDataByCoord]{getDataTrack}}: a valid
 transcript name. Must be a name of \code{ranges(x).}}

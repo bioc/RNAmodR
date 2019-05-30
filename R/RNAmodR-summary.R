@@ -22,14 +22,15 @@ NULL
 }
 
 .get_data_stats <- function(object){
-  stats <- lapply(seq_len(ncol(object@unlistData)),
+  unlisted_object <- unlist(object, use.names = FALSE)
+  stats <- lapply(seq_len(ncol(unlisted_object)),
                   function(i){
-                    as.data.frame(as.list(summary(object@unlistData[,i])))
+                    as.data.frame(as.list(summary(unlisted_object[,i])))
                   })
   stats <- Reduce(rbind,stats)
   stats <- as.data.frame(t(stats),
                          stringsAsFactors = FALSE)
-  colnames(stats) <- colnames(object@unlistData)
+  colnames(stats) <- colnames(unlisted_object)
   rownames(stats) <- paste0("Data.",rownames(stats))
   stats
 }

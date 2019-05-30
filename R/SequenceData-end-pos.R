@@ -45,44 +45,80 @@ NULL
 
 #' @rdname EndSequenceData-class
 #' @export
+setClass(Class = "End5SequenceDataFrame",
+         contains = "SequenceDataFrame")
+#' @rdname EndSequenceData-class
+#' @export
+End5SequenceDataFrame <- function(df, ranges, sequence, replicate,
+                                  condition){
+  .SequenceDataFrame("End5",df, ranges, sequence, replicate, condition)
+}
+#' @rdname EndSequenceData-class
+#' @export
 setClass(Class = "End5SequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L,
+         slots = c(unlistData = "End5SequenceDataFrame"),
+         prototype = list(unlistData = End5SequenceDataFrame(),
+                          unlistType = "End5SequenceDataFrame",
+                          minQuality = 5L,
                           dataDescription = "5'-end position data"))
 
 #' @rdname EndSequenceData-class
 #' @export
+setClass(Class = "End3SequenceDataFrame",
+         contains = "SequenceDataFrame")
+#' @rdname EndSequenceData-class
+#' @export
+End3SequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
+  .SequenceDataFrame("End3",df, ranges, sequence, replicate, condition)
+}
+#' @rdname EndSequenceData-class
+#' @export
 setClass(Class = "End3SequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L,
+         slots = c(unlistData = "End3SequenceDataFrame"),
+         prototype = list(unlistData = End3SequenceDataFrame(),
+                          unlistType = "End3SequenceDataFrame",
+                          minQuality = 5L,
                           dataDescription = "3'-end position data"))
 
 #' @rdname EndSequenceData-class
 #' @export
+EndSequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
+  .SequenceDataFrame("End",df, ranges, sequence, replicate, condition)
+}
+#' @rdname EndSequenceData-class
+#' @export
+setClass(Class = "EndSequenceDataFrame",
+         contains = "SequenceDataFrame")
+#' @rdname EndSequenceData-class
+#' @export
 setClass(Class = "EndSequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L,
+         slots = c(unlistData = "EndSequenceDataFrame"),
+         prototype = list(unlistData = EndSequenceDataFrame(),
+                          unlistType = "EndSequenceDataFrame",
+                          minQuality = 5L,
                           dataDescription = "read end position data (5' and 3')"))
 
 #' @rdname EndSequenceData-class
 #' @export
 End5SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("End5", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
+  .new_SequenceData("End5", bamfiles = bamfiles, annotation = annotation,
+                    sequences = sequences, seqinfo = seqinfo, ...)
 }
 #' @rdname EndSequenceData-class
 #' @export
 End3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("End3", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
+  .new_SequenceData("End3", bamfiles = bamfiles, annotation = annotation,
+                    sequences = sequences, seqinfo = seqinfo, ...)
 }
 #' @rdname EndSequenceData-class
 #' @export
 EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
-  SequenceData("End", bamfiles = bamfiles, annotation = annotation,
-               sequences = sequences, seqinfo = seqinfo, ...)
+  .new_SequenceData("End", bamfiles = bamfiles, annotation = annotation,
+                    sequences = sequences, seqinfo = seqinfo, ...)
 }
-
 
 # End5SequenceData ------------------------------------------------------------------
 
@@ -221,27 +257,28 @@ setMethod("getData",
 
 #' @importFrom matrixStats rowSds
 .aggregate_list_data_mean_sd <- function(x, condition){
-  f <- .subset_to_condition(x@condition, condition)
-  df <- x@unlistData[f]
-  conditions <- unique(x@condition[f])
+  conditions <- conditions(x)
+  f <- .subset_to_condition(conditions, condition)
+  df <- as(unlist(x,use.names=FALSE),"DataFrame")
+  conditions_u <- unique(conditions[f])
   # set up some base values. replicates is here the same as the number of
   # columns, since a list per replicate is assumed
   # get means
   means <- IRanges::NumericList(
-    lapply(conditions,
+    lapply(conditions_u,
            function(con){
-             rowMeans(as.data.frame(df[,x@condition[f] == con]),
+             rowMeans(as.data.frame(df[,conditions[f] == con]),
                       na.rm = TRUE)
            }))
-  names(means) <- paste0("means.", conditions)
+  names(means) <- paste0("means.", conditions_u)
   # get sds
   sds <- IRanges::NumericList(
-    lapply(conditions,
+    lapply(conditions_u,
            function(con){
-             matrixStats::rowSds(as.matrix(df[,x@condition[f] == con]),
+             matrixStats::rowSds(as.matrix(df[,conditions[f] == con]),
                                  na.rm = TRUE)
            }))
-  names(sds) <- paste0("sds.", conditions)
+  names(sds) <- paste0("sds.", conditions_u)
   # assemble data
   ans <- cbind(do.call(DataFrame, means),
                do.call(DataFrame, sds))
@@ -306,7 +343,7 @@ setMethod(
     # clean meta data columns
     seqdata <- .clean_mcols_end(seqdata)
     seqdata <- unlist(seqdata)
-    conditions <- unique(x@condition)
+    conditions <- unique(conditions(x))
     if("control" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
@@ -355,7 +392,7 @@ setMethod(
     # clean meta data columns
     seqdata <- .clean_mcols_end(seqdata)
     seqdata <- unlist(seqdata)
-    conditions <- unique(x@condition)
+    conditions <- unique(conditions(x))
     if("control" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
@@ -404,7 +441,7 @@ setMethod(
     # clean meta data columns
     seqdata <- .clean_mcols_end(seqdata)
     seqdata <- unlist(seqdata)
-    conditions <- unique(x@condition)
+    conditions <- unique(conditions(x))
     if("control" %in% conditions){
       d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))

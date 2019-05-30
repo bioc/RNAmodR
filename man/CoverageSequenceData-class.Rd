@@ -4,11 +4,15 @@
 \name{CoverageSequenceData-class}
 \alias{CoverageSequenceData-class}
 \alias{CoverageSequenceData}
+\alias{CoverageSequenceDataFrame-class}
+\alias{CoverageSequenceDataFrame}
 \alias{getData,CoverageSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{aggregateData,CoverageSequenceData-method}
 \alias{getDataTrack,CoverageSequenceData-method}
 \title{CoverageSequenceData}
 \usage{
+CoverageSequenceDataFrame(df, ranges, sequence, replicate, condition)
+
 CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 
@@ -21,13 +25,13 @@ CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{getDataTrack}{CoverageSequenceData}(x, name, ...)
 }
 \arguments{
+\item{condition}{For \code{\link{aggregate}}: condition for which the data 
+should be aggregated.}
+
 \item{bamfiles, annotation, seqinfo, grl, sequences, param, args, ...}{See 
 \code{\link[=SequenceData-class]{SequenceData}}}
 
 \item{x}{a \code{CoverageSequenceData}}
-
-\item{condition}{For \code{\link{aggregate}}: condition for which the data 
-should be aggregated.}
 
 \item{name}{For \code{getDataTrack}: a valid transcript name. Must be a name
 of \code{ranges(x)}}
