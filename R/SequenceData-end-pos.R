@@ -28,6 +28,9 @@ NULL
 #' transcript name. Must be a name of \code{ranges(x).}
 #' @param condition For \code{\link{aggregate}}: condition for which the data
 #' should be aggregated.
+#' @param df,ranges,sequence,replicate inputs for creating a 
+#' \code{SequenceDataFrame}. See 
+#' \code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.
 #'
 #' @return a \code{End5SequenceData}, a \code{End3SequenceData} or a
 #' \code{EndSequenceData} object
@@ -50,8 +53,9 @@ setClass(Class = "End5SequenceDataFrame",
 #' @rdname EndSequenceData-class
 #' @export
 End5SequenceDataFrame <- function(df, ranges, sequence, replicate,
-                                  condition){
-  .SequenceDataFrame("End5",df, ranges, sequence, replicate, condition)
+                                  condition, bamfiles, seqinfo){
+  .SequenceDataFrame("End5",df, ranges, sequence, replicate, condition,
+                     bamfiles, seqinfo)
 }
 #' @rdname EndSequenceData-class
 #' @export
@@ -69,8 +73,10 @@ setClass(Class = "End3SequenceDataFrame",
          contains = "SequenceDataFrame")
 #' @rdname EndSequenceData-class
 #' @export
-End3SequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
-  .SequenceDataFrame("End3",df, ranges, sequence, replicate, condition)
+End3SequenceDataFrame <- function(df, ranges, sequence, replicate, condition,
+                                  bamfiles, seqinfo){
+  .SequenceDataFrame("End3",df, ranges, sequence, replicate, condition,
+                     bamfiles, seqinfo)
 }
 #' @rdname EndSequenceData-class
 #' @export
@@ -84,8 +90,10 @@ setClass(Class = "End3SequenceData",
 
 #' @rdname EndSequenceData-class
 #' @export
-EndSequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
-  .SequenceDataFrame("End",df, ranges, sequence, replicate, condition)
+EndSequenceDataFrame <- function(df, ranges, sequence, replicate, condition,
+                                 bamfiles, seqinfo){
+  .SequenceDataFrame("End",df, ranges, sequence, replicate, condition,
+                     bamfiles, seqinfo)
 }
 #' @rdname EndSequenceData-class
 #' @export
@@ -119,6 +127,10 @@ EndSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   .new_SequenceData("End", bamfiles = bamfiles, annotation = annotation,
                     sequences = sequences, seqinfo = seqinfo, ...)
 }
+
+setSequenceDataCoercions("End5")
+setSequenceDataCoercions("End3")
+setSequenceDataCoercions("End")
 
 # End5SequenceData ------------------------------------------------------------------
 
@@ -259,7 +271,7 @@ setMethod("getData",
 .aggregate_list_data_mean_sd <- function(x, condition){
   conditions <- conditions(x)
   f <- .subset_to_condition(conditions, condition)
-  df <- as(unlist(x,use.names=FALSE),"DataFrame")
+  df <- as(unlist(x,use.names=FALSE),"DataFrame")[,f,drop=FALSE]
   conditions_u <- unique(conditions[f])
   # set up some base values. replicates is here the same as the number of
   # columns, since a list per replicate is assumed

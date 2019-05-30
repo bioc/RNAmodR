@@ -28,6 +28,9 @@ NULL
 #' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
+#' @param df,ranges,sequence,replicate inputs for creating a 
+#' \code{SequenceDataFrame}. See 
+#' \code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.
 #' 
 #' @return a \code{PileupSequenceData} object
 #' 
@@ -48,8 +51,10 @@ setClass(Class = "PileupSequenceDataFrame",
          contains = "SequenceDataFrame")
 #' @rdname PileupSequenceData-class
 #' @export
-PileupSequenceDataFrame <- function(df, ranges, sequence, replicate, condition){
-  .SequenceDataFrame("Pileup", df, ranges, sequence, replicate, condition)
+PileupSequenceDataFrame <- function(df, ranges, sequence, replicate, condition,
+                                    bamfiles, seqinfo){
+  .SequenceDataFrame("Pileup", df, ranges, sequence, replicate, condition,
+                     bamfiles, seqinfo)
 }
 #' @rdname PileupSequenceData-class
 #' @export
@@ -67,6 +72,8 @@ PileupSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   SequenceData("Pileup", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
+
+setSequenceDataCoercions("Pileup")
 
 # PileupSequenceData ----------------------------------------------------------------
 
@@ -180,7 +187,7 @@ setMethod("summary",
 .aggregate_data_frame_percentage_mean_sd <- function(x,condition){
   conditions <- conditions(x)
   f <- .subset_to_condition(conditions, condition)
-  df <- as(unlist(x,use.names=FALSE)[,f],"DataFrame")
+  df <- as(unlist(x,use.names=FALSE),"DataFrame")[,f,drop=FALSE]
   conditions_u <- unique(conditions[f])
   replicates <- replicates(x)[f]
   # set up some base values
@@ -370,12 +377,13 @@ setGeneric(name = "pileupToCoverage",
            def = function(x) standardGeneric("pileupToCoverage"))
 
 .aggregate_pile_up_to_coverage <- function(data){
-  unlisted_data <- unlist(data)
-  replicates <- unique(replicates(data))
+  unlisted_data <- unlist(data,use.names=FALSE)
+  replicates <- unique(as.integer(interaction(conditions(data),
+                                              replicates(data))))
   ans  <- IRanges::IntegerList(
     lapply(seq_along(replicates),
            function(i){
-             rowSums(as.data.frame(unlisted_data[,replicates(data) == i]))
+             rowSums(as.data.frame(unlisted_data[,replicates == i]))
            }))
   names(ans) <- paste0("replicate.",replicates)
   ans <- do.call(S4Vectors::DataFrame,ans)

@@ -19,9 +19,11 @@
 \alias{getDataTrack,NormEnd3SequenceData-method}
 \title{NormEnd5SequenceData/NormEnd3SequenceData}
 \usage{
-NormEnd5SequenceDataFrame(df, ranges, sequence, replicate, condition)
+NormEnd5SequenceDataFrame(df, ranges, sequence, replicate, condition,
+  bamfiles, seqinfo)
 
-NormEnd3SequenceDataFrame(df, ranges, sequence, replicate, condition)
+NormEnd3SequenceDataFrame(df, ranges, sequence, replicate, condition,
+  bamfiles, seqinfo)
 
 NormEnd5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
@@ -46,6 +48,10 @@ NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{getDataTrack}{NormEnd3SequenceData}(x, name, ...)
 }
 \arguments{
+\item{df, ranges, sequence, replicate}{inputs for creating a 
+\code{SequenceDataFrame}. See 
+\code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.}
+
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
 

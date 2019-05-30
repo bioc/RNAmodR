@@ -383,7 +383,7 @@ setMethod(f = "bamfiles",
 setMethod(f = "conditions",
           signature = signature(object = "Modifier"),
           definition = function(object){
-            conditions(sequenceData(object))
+            object@condition
           })
 #' @rdname Modifier-functions
 #' @export
@@ -461,7 +461,7 @@ setMethod(f = "ranges",
 setMethod(f = "replicates",
           signature = signature(x = "Modifier"),
           definition = function(x){
-            replicates(sequenceData(x))
+            x@replicate
           })
 #' @rdname Modifier-functions
 #' @export
@@ -628,12 +628,12 @@ setReplaceMethod(f = "settings",
   data <- .norm_Modifier_input_SequenceData_elements(data, proto)
   bamfiles <- bamfiles(data)
   condition <- factor(names(bamfiles))
-  new2(className,
-       mod = .norm_mod(proto@mod, className),
-       bamfiles = bamfiles,
-       condition = condition,
-       replicate = .get_replicate_number(bamfiles, condition),
-       data = data)
+  new(className,
+      mod = .norm_mod(proto@mod, className),
+      bamfiles = bamfiles,
+      condition = condition,
+      replicate = .get_replicate_number(condition),
+      data = data)
 }
 
 .load_SequenceData <- function(classes, bamfiles, annotation, sequences,

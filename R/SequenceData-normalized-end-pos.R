@@ -31,6 +31,9 @@ NULL
 #' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
+#' @param df,ranges,sequence,replicate inputs for creating a 
+#' \code{SequenceDataFrame}. See 
+#' \code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.
 #' 
 #' @return a \code{NormEnd5SequenceData} or \code{NormEnd3SequenceData} object
 #' 
@@ -54,8 +57,9 @@ setClass(Class = "NormEnd5SequenceDataFrame",
 #' @rdname NormEndSequenceData-class
 #' @export
 NormEnd5SequenceDataFrame <- function(df, ranges, sequence, replicate,
-                                      condition){
-  .SequenceDataFrame("NormEnd5",df, ranges, sequence, replicate, condition)
+                                      condition, bamfiles, seqinfo){
+  .SequenceDataFrame("NormEnd5",df, ranges, sequence, replicate, condition,
+                     bamfiles, seqinfo)
 }
 #' @rdname NormEndSequenceData-class
 #' @export
@@ -74,8 +78,9 @@ setClass(Class = "NormEnd3SequenceDataFrame",
 #' @rdname NormEndSequenceData-class
 #' @export
 NormEnd3SequenceDataFrame <- function(df, ranges, sequence, replicate,
-                                      condition){
-  .SequenceDataFrame("NormEnd3",df, ranges, sequence, replicate, condition)
+                                      condition, bamfiles, seqinfo){
+  .SequenceDataFrame("NormEnd3",df, ranges, sequence, replicate, condition,
+                     bamfiles, seqinfo)
 }
 #' @rdname NormEndSequenceData-class
 #' @export
@@ -99,6 +104,9 @@ NormEnd3SequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   .new_SequenceData("NormEnd3", bamfiles = bamfiles, annotation = annotation,
                     sequences = sequences, seqinfo = seqinfo, ...)
 }
+
+setSequenceDataCoercions("NormEnd5")
+setSequenceDataCoercions("NormEnd3")
 
 # summary ----------------------------------------------------------------------
 
@@ -246,7 +254,7 @@ setMethod("getData",
 .aggregate_data_frame_mean_sd <- function(x, condition){
   conditions <- conditions(x)
   f <- .subset_to_condition(conditions, condition)
-  df <- as(unlist(x,use.names=FALSE)[,f],"DataFrame")
+  df <- as(unlist(x,use.names=FALSE),"DataFrame")[,f,drop=FALSE]
   conditions_u <- unique(conditions[f])
   replicates <- replicates(x)[f]
   # set up some base values

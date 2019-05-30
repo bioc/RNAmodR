@@ -25,6 +25,9 @@ NULL
 #' of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
+#' @param df,ranges,sequence,replicate inputs for creating a 
+#' \code{SequenceDataFrame}. See 
+#' \code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.
 #' 
 #' @return a \code{CoverageSequenceData} object
 #' 
@@ -47,8 +50,9 @@ setClass(Class = "CoverageSequenceDataFrame",
 #' @rdname CoverageSequenceData-class
 #' @export
 CoverageSequenceDataFrame <- function(df, ranges, sequence, replicate,
-                                      condition){
-  .SequenceDataFrame("Coverage",df, ranges, sequence, replicate, condition)
+                                      condition, bamfiles, seqinfo){
+  .SequenceDataFrame("Coverage",df, ranges, sequence, replicate, condition,
+                     bamfiles, seqinfo)
 }
 #' @rdname CoverageSequenceData-class
 #' @export
@@ -65,6 +69,8 @@ CoverageSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   .new_SequenceData("Coverage", bamfiles = bamfiles, annotation = annotation,
                     sequences = sequences, seqinfo = seqinfo, ...)
 }
+
+setSequenceDataCoercions("Coverage")
 
 # CoverageSequenceData ---------------------------------------------------------
 

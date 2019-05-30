@@ -58,21 +58,11 @@ NULL
 #' Subsetting of a \code{SequenceDataFrame} returns a \code{SequenceDataFrame} or 
 #' \code{DataFrame}, if it is subset by a column or row, respectively. The 
 #' \code{drop} argument is ignored for column subsetting.
-#' 
-#' @param df the data as a \code{DataFrame}.
-#' @param ranges a \code{GRanges} object containing all annotation elements
-#' for a transcript.
-#' @param sequence \code{XString} object describing the nucleotide sequence of 
-#' the transcript.
-#' @param condition The condition of each column or set of columns. Either 
-#' \code{control} or \code{treated}.
-#' @param replicate The replicate of each column or set of columns for the 
-#' individual conditions
-#' @param x,i,j,...,drop arguments used for 
-#' \code{\link[S4Vectors:DataFrame-class]{subsetting}}.
-#' 
-#' @return a \code{SequenceDataFrame} object
-#' 
+#'
+#' @param x,i,j,...,drop,deparse.level arguments used for 
+#' \code{\link[S4Vectors:DataFrame-class]{subsetting}} or 
+#' \code{\link[base:cbind]{base::cbind}}.
+#'
 #' @examples 
 #' data(e5sd,package="RNAmodR")
 #' # A SequenceDataFrame can is usually constructed by subsetting from 
@@ -89,11 +79,15 @@ setClass(Class = "SequenceDataFrame",
          slots = c(ranges = "GRanges",
                    sequence = "XString",
                    condition = "factor",
-                   replicate = "factor"),
+                   replicate = "factor",
+                   bamfiles = "BamFileList",
+                   seqinfo = "Seqinfo"),
          prototype = list(ranges = GRanges(),
                           sequence = RNAString(),
                           condition = factor(),
-                          replicate = factor()))
+                          replicate = factor(),
+                          bamfiles = Rsamtools::BamFileList(),
+                          seqinfo = GenomeInfoDb::Seqinfo()))
 
 setMethod("relistToClass", "SequenceDataFrame",
           function(x) gsub("DataFrame","Data",class(x))
@@ -112,7 +106,7 @@ sequenceDataFrameClass <- function(dataType){
 }
 
 .SequenceDataFrame <- function(class, df, ranges, sequence, replicate,
-                               condition){
+                               condition, bamfiles, seqinfo){
   # defaults from function are strangly not set
   if(missing(df)){
     df <- DataFrame()
@@ -128,6 +122,12 @@ sequenceDataFrameClass <- function(dataType){
   }
   if(missing(condition)){
     condition <- factor()
+  }
+  if(missing(bamfiles)){
+    bamfiles <- Rsamtools::BamFileList()
+  }
+  if(missing(seqinfo)){
+    seqinfo <- GenomeInfoDb::Seqinfo()
   }
   # check inputs
   if(!is(df,"DataFrame")){
@@ -149,6 +149,8 @@ sequenceDataFrameClass <- function(dataType){
       sequence = sequence,
       condition = condition,
       replicate = replicate,
+      bamfiles = bamfiles,
+      seqinfo = seqinfo,
       rownames = df@rownames,
       nrows = df@nrows,
       listData = df@listData,
@@ -208,6 +210,18 @@ setMethod(
   f = "conditions", 
   signature = signature(object = "SequenceDataFrame"),
   definition = function(object){object@condition})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "bamfiles", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@bamfiles})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "seqinfo", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@seqinfo})
 
 # internals --------------------------------------------------------------------
 
@@ -249,6 +263,61 @@ setMethod(
   }
 )
 
+#' @rdname SequenceDataFrame-class
+#' @export
+setMethod(
+  "cbind", "SequenceDataFrame",
+  function(...){
+    args <- list(...)
+    if(length(args) == 1L){
+      return(args[[1L]])
+    }
+    # input checks
+    classes <- lapply(args,class)
+    if(length(unique(classes)) != 1L){
+      stop("Inputs must be of the same SequenceDataFrame type.")
+    }
+    className <- unique(classes)
+    lengths <- vapply(args,function(a){sum(lengths(a))},integer(1))
+    if(length(unique(lengths)) != 1L){
+      stop("Inputs must have the same length.")
+    }
+    .check_ranges(args)
+    .check_sequences(args)
+    #
+    data <- do.call(cbind,
+                    lapply(args,function(a){
+                      as(a, "DataFrame")
+                    }))
+    ranges <- ranges(args[[1L]])
+    sequences <- sequences(args[[1L]])
+    colnames <- IRanges::CharacterList(strsplit(colnames(data),"\\."))
+    colnames_conditions <- colnames %in% c("treated","control")
+    colnames_replicates <- !is.na(suppressWarnings(IntegerList(colnames)))
+    colnames_f <- !(colnames_conditions | colnames_replicates)
+    conditionsFmultiplier <- length(unique(vapply(colnames[colnames_f],
+                                                  paste,character(1),
+                                                  collapse=".")))
+    condition <- unlist(lapply(args,conditions))
+    condition_steps <- seq.int(1,length(condition),by=conditionsFmultiplier)
+    replicate <- .get_replicate_number(condition[condition_steps])
+    replicate <- rep(replicate, each = conditionsFmultiplier)
+    colnames[colnames_conditions] <- IRanges::CharacterList(condition)
+    colnames[colnames_replicates] <- IRanges::CharacterList(replicate)
+    colnames(data) <- vapply(colnames,paste,character(1),collapse = ".")
+    bamfiles <- do.call(c,lapply(args,bamfiles))
+    seqinfo <- seqinfo(args[[1L]])
+    .SequenceDataFrame(class = gsub("SequenceDataFrame","",className),
+                       df = data,
+                       ranges = ranges,
+                       sequence = sequences,
+                       replicate = replicate,
+                       condition = condition,
+                       bamfiles = bamfiles,
+                       seqinfo = seqinfo)
+  }
+)
+
 #' @importFrom stats setNames
 #' @rdname SequenceDataFrame-class
 #' @export
@@ -272,15 +341,29 @@ setMethod(
           return(x)
         j <- i
       }
-      if (!is(j, "IntegerRanges")) {
-        xstub <- stats::setNames(seq_along(x), names(x))
+      xstub <- stats::setNames(seq_along(x), names(x))
+      ia <- interaction(conditions(x), replicates(x))
+      if(is.character(j)){
         j <- normalizeSingleBracketSubscript(j, xstub)
+        j <- as.integer(ia)[j]
       }
-      x <- initialize(x, as(x,"DataFrame")[, j, drop = FALSE],
+      colnames <- IRanges::CharacterList(strsplit(colnames(x),"\\."))
+      colnames_conditions <- colnames %in% c("treated","control")
+      colnames_replicates <- !is.na(suppressWarnings(IntegerList(colnames)))
+      colnames_f <- !(colnames_conditions | colnames_replicates)
+      conditionsFmultiplier <- length(unique(vapply(colnames[colnames_f],
+                                                    paste,character(1),
+                                                    collapse=".")))
+      j <- normalizeSingleBracketSubscript(j, xstub[seq_len(length(xstub)/conditionsFmultiplier)])
+      j2 <- which(!is.na(match(as.integer(ia), j)))
+      x <- initialize(x,
+                      as(x,"DataFrame")[, j2, drop = FALSE],
                       ranges = x@ranges,
                       sequence = x@sequence,
-                      replicate = x@replicate[j],
-                      condition = x@condition[j])
+                      replicate = factor(x@replicate[j2]),
+                      condition = factor(x@condition[j2]),
+                      bamfiles = x@bamfiles[j],
+                      seqinfo = x@seqinfo)
       if (anyDuplicated(names(x))){
         names(x) <- make.unique(names(x))
       }

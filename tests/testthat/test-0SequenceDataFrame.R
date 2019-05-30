@@ -14,7 +14,9 @@ test_that("SequenceDataFrame:",{
                                   ranges(sdf),
                                   sequences(sdf),
                                   replicates(sdf),
-                                  conditions(sdf))
+                                  conditions(sdf),
+                                  bamfiles(sdf),
+                                  seqinfo(sdf))
   expect_equal(sdf,sdf2)
   ##############################################################################
   # errors
@@ -49,11 +51,11 @@ test_that("SequenceDataFrame:",{
   expect_s4_class(sdf[1,,drop = FALSE],"DataFrame")
   expect_equal(ncol(sdf[1,,drop = FALSE]),ncol(sdf))
   expect_s4_class(sdf[,1],"PileupSequenceDataFrame")
-  expect_equal(ncol(sdf[,1]),1L)
+  expect_equal(ncol(sdf[,1]),5L)
   expect_type(sdf["1",],"list")
   expect_equal(length(sdf["1",]),ncol(sdf))
   expect_s4_class(sdf["1",,drop = FALSE],"DataFrame")
   expect_equal(ncol(sdf["1",,drop = FALSE]),ncol(sdf))
   expect_s4_class(sdf[,"pileup.treated.1.G"],"PileupSequenceDataFrame")
-  expect_equal(ncol(sdf[,"pileup.treated.1.G"]),1L)
+  expect_equal(ncol(sdf[,"pileup.treated.1.G"]),5L)
 })

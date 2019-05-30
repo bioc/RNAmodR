@@ -4,31 +4,18 @@
 \name{SequenceDataFrame-class}
 \alias{SequenceDataFrame-class}
 \alias{SequenceDataFrame}
+\alias{cbind,SequenceDataFrame-method}
 \alias{[,SequenceDataFrame,ANY,ANY,ANY-method}
 \title{The SequenceDataFrame class}
 \usage{
+\S4method{cbind}{SequenceDataFrame}(..., deparse.level = 1)
+
 \S4method{[}{SequenceDataFrame,ANY,ANY,ANY}(x, i, j, ..., drop = TRUE)
 }
 \arguments{
-\item{x, i, j, ..., drop}{arguments used for 
-\code{\link[S4Vectors:DataFrame-class]{subsetting}}.}
-
-\item{df}{the data as a \code{DataFrame}.}
-
-\item{ranges}{a \code{GRanges} object containing all annotation elements
-for a transcript.}
-
-\item{sequence}{\code{XString} object describing the nucleotide sequence of 
-the transcript.}
-
-\item{condition}{The condition of each column or set of columns. Either 
-\code{control} or \code{treated}.}
-
-\item{replicate}{The replicate of each column or set of columns for the 
-individual conditions}
-}
-\value{
-a \code{SequenceDataFrame} object
+\item{x, i, j, ..., drop, deparse.level}{arguments used for 
+\code{\link[S4Vectors:DataFrame-class]{subsetting}} or 
+\code{\link[base:cbind]{base::cbind}}.}
 }
 \description{
 The \code{SequenceDataFrame} class contains data for positions along a single

@@ -11,7 +11,8 @@
 \alias{getDataTrack,CoverageSequenceData-method}
 \title{CoverageSequenceData}
 \usage{
-CoverageSequenceDataFrame(df, ranges, sequence, replicate, condition)
+CoverageSequenceDataFrame(df, ranges, sequence, replicate, condition,
+  bamfiles, seqinfo)
 
 CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
@@ -25,6 +26,10 @@ CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{getDataTrack}{CoverageSequenceData}(x, name, ...)
 }
 \arguments{
+\item{df, ranges, sequence, replicate}{inputs for creating a 
+\code{SequenceDataFrame}. See 
+\code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.}
+
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
 

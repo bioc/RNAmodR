@@ -96,10 +96,12 @@ NULL
       }
     }
   }
+  levels <- unique(coord$Parent)
+  # coord <- coord[order(start(coord))]
   if(merge){
-    coord <- split(coord, factor(coord$Parent, levels = unique(coord$Parent)))
+    coord <- split(coord, factor(coord$Parent, levels = levels))
   } else {
-    coord <- coord[order(factor(coord$Parent,unique(coord$Parent)))]
+    coord <- coord[order(factor(coord$Parent, levels = levels))]
     coord <- split(coord, seq_along(coord))
     names(coord) <- mcols(coord, level="within")[,"Parent"]
   }
@@ -216,7 +218,9 @@ NULL
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]], args[["merge"]])
   if(args[["rawData"]]){
-    data <- .norm_sequence_data(as(x,"SplitDataFrameList"))
+    data <- relist(as(unlist(x, use.names = FALSE),"DataFrame"),
+                   IRanges::PartitioningByWidth(x))
+    data <- .norm_sequence_data(data)
   } else {
     data <- .norm_aggregate_data(aggregate(x))
   }
@@ -350,7 +354,8 @@ setMethod("subsetByCoord",
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
   if(args[["rawData"]]){
-    data <- as(x,"SplitDataFrameList")
+    data <- relist(as(unlist(x, use.names = FALSE),"DataFrame"),
+                   IRanges::PartitioningByWidth(x))
   } else {
     data <- aggregate(x)
   }

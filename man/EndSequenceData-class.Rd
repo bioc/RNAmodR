@@ -25,11 +25,14 @@
 \alias{getDataTrack,End3SequenceData-method}
 \title{End5SequenceData/End3SequenceData/EndSequenceData}
 \usage{
-End5SequenceDataFrame(df, ranges, sequence, replicate, condition)
+End5SequenceDataFrame(df, ranges, sequence, replicate, condition, bamfiles,
+  seqinfo)
 
-End3SequenceDataFrame(df, ranges, sequence, replicate, condition)
+End3SequenceDataFrame(df, ranges, sequence, replicate, condition, bamfiles,
+  seqinfo)
 
-EndSequenceDataFrame(df, ranges, sequence, replicate, condition)
+EndSequenceDataFrame(df, ranges, sequence, replicate, condition, bamfiles,
+  seqinfo)
 
 End5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
@@ -65,6 +68,10 @@ EndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{getDataTrack}{End3SequenceData}(x, name, ...)
 }
 \arguments{
+\item{df, ranges, sequence, replicate}{inputs for creating a 
+\code{SequenceDataFrame}. See 
+\code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.}
+
 \item{condition}{For \code{\link{aggregate}}: condition for which the data
 should be aggregated.}
 

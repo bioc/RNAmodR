@@ -38,6 +38,9 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' transcript name. Must be a name of \code{ranges(x)}
 #' @param condition For \code{\link{aggregate}}: condition for which the data 
 #' should be aggregated.
+#' @param df,ranges,sequence,replicate inputs for creating a 
+#' \code{SequenceDataFrame}. See 
+#' \code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.
 #' 
 #' @return a \code{ProtectedEndSequenceData} object
 #' 
@@ -61,8 +64,9 @@ setClass(Class = "ProtectedEndSequenceDataFrame",
 #' @rdname ProtectedEndSequenceData-class
 #' @export
 ProtectedEndSequenceDataFrame <- function(df, ranges, sequence, replicate,
-                                          condition){
-  .SequenceDataFrame("ProtectedEnd",df, ranges, sequence, replicate, condition)
+                                          condition, bamfiles, seqinfo){
+  .SequenceDataFrame("ProtectedEnd",df, ranges, sequence, replicate, condition,
+                     bamfiles, seqinfo)
 }
 #' @rdname ProtectedEndSequenceData-class
 #' @export
@@ -81,6 +85,8 @@ ProtectedEndSequenceData <- function(bamfiles, annotation, sequences, seqinfo,
   SequenceData("ProtectedEnd", bamfiles = bamfiles, annotation = annotation,
                sequences = sequences, seqinfo = seqinfo, ...)
 }
+
+setSequenceDataCoercions("ProtectedEnd")
 
 # ProtectedEndSequenceData -----------------------------------------------------
 

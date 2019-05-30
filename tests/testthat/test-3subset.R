@@ -217,3 +217,24 @@ test_that("Subsetting Modifier/ModifierSet:",{
   expect_type(actual@unlistData$labels,"logical")
   
 })
+
+context("Combining SequenceData")
+test_that("Combining SequenceData:",{
+  data(psd,package = "RNAmodR")
+  expect_error(c(psd[1],psd[1]),
+               "Input must have unique names.")
+  expect_error(cbind(psd[1],psd[2]),
+               "Inputs must have the same lengths.")
+  expect_error(cbind(psd[1],psd),
+               "Inputs must have the same lengths.")
+  expect_error(rbind(psd[1],psd[,1:2]),
+               "Inputs must have the same width.")
+  expect_s4_class(c(psd[1],psd[2]),
+                  "PileupSequenceData")
+  expect_s4_class(cbind(psd[1],psd[1]),
+                  "PileupSequenceData")
+  expect_s4_class(rbind(psd[1],psd),
+                  "PileupSequenceData")
+  expect_equal(relist(unlist(psd),psd),psd)
+  expect_equal(relist(unlist(psd,use.names = FALSE),psd),psd)
+})

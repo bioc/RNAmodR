@@ -11,6 +11,8 @@
 \alias{ranges,SequenceDataFrame-method}
 \alias{replicates,SequenceDataFrame-method}
 \alias{conditions,SequenceDataFrame-method}
+\alias{bamfiles,SequenceDataFrame-method}
+\alias{seqinfo,SequenceDataFrame-method}
 \alias{show,SequenceData-method}
 \alias{getData,SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{bamfiles,SequenceData-method}
@@ -49,6 +51,10 @@ replicates(x)
 \S4method{replicates}{SequenceDataFrame}(x)
 
 \S4method{conditions}{SequenceDataFrame}(object)
+
+\S4method{bamfiles}{SequenceDataFrame}(x)
+
+\S4method{seqinfo}{SequenceDataFrame}(x)
 
 \S4method{show}{SequenceData}(object)
 

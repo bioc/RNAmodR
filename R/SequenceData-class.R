@@ -9,6 +9,8 @@ NULL
 #' 
 #' @title The SequenceData class
 #' 
+#' @md
+#' 
 #' @description 
 #' The \code{SequenceData} class is implemented to contain data on each position
 #' along transcripts and holds the corresponding annotation data and
@@ -37,8 +39,20 @@ NULL
 #' The \code{SequenceData} class is derived from the
 #' \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}} class
 #' with additional slots for annotation and sequence data. Some functionality is
-#' not inherited and not available, e.g. \code{cbind}, \code{rbind} amd
-#' \code{relist}.
+#' not inherited and might not available to full extend, e.g.\code{relist}.
+#' 
+#' **SequenceDataFrame**
+#' 
+#' #' The \code{SequenceDataFrame} class contains data for positions along a single
+#' transcript. It is used to describe elements from a \code{SequenceData}
+#' object.
+#' 
+#' The \code{SequenceDataFrame} class is derived from the
+#' \code{\link[S4Vectors:DataFrame-class]{DataFrame}} class.
+#' 
+#' Subsetting of a \code{SequenceDataFrame} returns a \code{SequenceDataFrame} or 
+#' \code{DataFrame}, if it is subset by a column or row, respectively. The 
+#' \code{drop} argument is ignored for column subsetting.
 #' 
 #' @param dataType The prefix for construction the class name of the 
 #' \code{SequenceData} subclass to be constructed.
@@ -68,6 +82,8 @@ NULL
 #' \item{\code{max_depth}} {maximum depth for pileup loading (default: 
 #' \code{max_depth = 10000L}).}
 #' }
+#' @param deparse.level See \code{\link[base:cbind]{base::cbind}} for a 
+#' description of this argument.
 #' 
 #' @slot ranges a \code{\link[GenomicRanges:GRangesList-class]{GRangesList}} 
 #' object each element describing a transcript including its element. The 
@@ -96,8 +112,6 @@ NULL
 setClass("SequenceData",
          contains = c("VIRTUAL", "CompressedSplitDataFrameList"),
          slots = c(sequencesType = "character",
-                   bamfiles = "BamFileList",
-                   seqinfo = "Seqinfo",
                    minQuality = "integer",
                    unlistData = "SequenceDataFrame",
                    unlistType = "character",
@@ -192,12 +206,33 @@ S4Vectors::setValidity2(Class = "SequenceData", .valid.SequenceData)
 
 # coercion ---------------------------------------------------------------------
 
-.as_SplitDataFrameList <- function(from){
-  relist(as(unlist(from, use.names = FALSE),"DataFrame"),
-         IRanges::PartitioningByWidth(from))
+coerceToSequenceData <- function(className) {
+  function(from) {
+    if(is.list(from)) {
+      classes <- unlist(lapply(from,class))
+      from <- from[classes == paste0(className,"Frame")]
+      if(length(from) == 0) {
+        FUN <- match.fun(className)
+        from <- list(FUN())
+      }
+    } else {
+      if(is(from,className)){
+        return(from)
+      } else if(is(from,paste0(className,"Frame"))) {
+        from <- list(from)
+      } else {
+        stop("Cannot coerce ",class(from)," to ",className,".")
+      }
+    }
+    IRanges:::coerceToCompressedList(from)
+  }
 }
-setAs("SequenceData", "SplitDataFrameList", .as_SplitDataFrameList)
 
+setSequenceDataCoercions <- function(type) {
+  className <- sequenceDataClass(type)
+  setAs("ANY", className, coerceToSequenceData(className))
+  setAs("list", className, coerceToSequenceData(className))
+}
 
 # internals --------------------------------------------------------------------
 
@@ -223,8 +258,7 @@ setMethod("extractROWS", "SequenceData",
     ans_partitioning <- new("PartitioningByEnd", end = ans_breakpoints,
                             NAMES = extractROWS(names(x), i))
     ans_elementMetadata <- extractROWS(x@elementMetadata, i)
-    initialize(x, bamfiles = x@bamfiles, seqinfo = x@seqinfo, 
-               minQuality = x@minQuality, unlistData = ans_unlistData,
+    initialize(x, minQuality = x@minQuality, unlistData = ans_unlistData,
                partitioning = ans_partitioning, 
                elementMetadata = ans_elementMetadata)
   }
@@ -237,34 +271,114 @@ setMethod("rownames", "SequenceData",
           }
 )
 
-# methods inherited from List and CompressedList, contain a coercion step
-# x <- as(x, "List", strict = FALSE)
-# 
-# This does not keep the SequenceData object intact resulting in coercion
-# to a CompressedSplitDataFrameList.
-setMethod("[[", "SequenceData",
-          function(x, i, j, ...) 
-          {
-            METHOD <- selectMethod("[[", "List")
-            METHOD(x, i, j, ...)
-          }
-)
-
-
 # Concatenation ----------------------------------------------------------------
 
-setMethod("cbind", "SequenceData",
-          function(...){
-            arg1 <- list(...)[[1L]]
-            stop("'rbind' is not supported for ",class(arg1),".")
+.check_ranges <- function(args){
+  ranges <- lapply(args,ranges)
+  ranges <- vapply(ranges[seq.int(2L,length(ranges))],
+                   function(r){
+                     all(all(r == ranges[[1L]]))
+                   },
+                   logical(1))
+  if(!all(ranges)){
+    stop("Inputs must have the same ranges.")
   }
-)
-setMethod("rbind", "SequenceData",
-          function(...){
-            arg1 <- list(...)[[1L]]
-            stop("'rbind' is not supported for ",class(arg1),".")
+}
+
+.check_sequences <- function(args){
+  sequences <- lapply(args,sequences)
+  sequences <- vapply(sequences[seq.int(2L,length(sequences))],
+                      function(s){
+                        all(s == sequences[[1L]])
+                      },
+                      logical(1))
+  if(!all(sequences)){
+    stop("Inputs must have the same sequences.")
+  }
+}
+
+.check_bamfiles <- function(args){
+  bamfiles <- lapply(args,bamfiles)
+  bamfiles <- vapply(bamfiles[seq.int(2L,length(bamfiles))],
+                     function(b){
+                       all(path(b) == path(bamfiles[[1L]]))
+                     },
+                     logical(1))
+  if(!all(bamfiles)){
+    stop("Inputs must be derived from the same bamfiles.")
+  }
+}
+
+#' @rdname SequenceData-class
+#' @export
+setMethod("cbind", "SequenceData",
+          function(..., deparse.level = 1) 
+          {
+            args <- list(...)
+            if(length(args) == 1L){
+              return(args[[1L]])
+            }
+            # input checks
+            classes <- lapply(args,class)
+            if(length(unique(classes)) != 1L){
+              stop("Inputs must be of the same SequenceDataFrame type.")
+            }
+            lengths <- vapply(args,function(a){sum(lengths(a))},integer(1))
+            if(length(unique(lengths)) != 1L){
+              stop("Inputs must have the same lengths.")
+            }
+            .check_ranges(args)
+            .check_sequences(args)
+            callNextMethod()
           }
 )
+
+#' @rdname SequenceData-class
+#' @export
+setMethod("rbind", "SequenceData",
+          function(..., deparse.level = 1) 
+          {
+            args <- list(...)
+            if(length(args) == 1L){
+              return(args[[1L]])
+            }
+            # input checks
+            classes <- lapply(args,class)
+            if(length(unique(classes)) != 1L){
+              stop("Inputs must be of the same SequenceDataFrame type.")
+            }
+            lengths <- vapply(args,function(a){ncol(unlist(a))},integer(1))
+            if(length(unique(lengths)) != 1L){
+              stop("Inputs must have the same width.")
+            }
+            .check_bamfiles(args)
+            callNextMethod()
+          }
+)
+
+setMethod("bindROWS", "SequenceData",
+          function (x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, 
+                    check = TRUE) 
+          {
+            objects <- S4Vectors:::prepare_objects_to_bind(x, objects)
+            all_objects <- c(list(x), objects)
+            names <- unlist(lapply(all_objects,names))
+            if(any(duplicated(names))){
+              stop("Input must have unique names.")
+            }
+            .check_bamfiles(all_objects)
+            callNextMethod(x, objects, use.names = use.names, 
+                           ignore.mcols = ignore.mcols, check = FALSE)
+          }
+)
+
+setMethod("unlist", "SequenceData",
+          function(x, recursive = TRUE, use.names = FALSE) 
+          {
+            callNextMethod(x, recursive = recursive, use.names = FALSE) 
+          }
+)
+
 
 # constructor ------------------------------------------------------------------
 
@@ -279,9 +393,9 @@ setMethod("rbind", "SequenceData",
   .norm_settings(input, .quality_settings, minQuality)[["minQuality"]]
 }
 
-.get_replicate_number <- function(bamfiles, conditions){
-  control_rep <- seq_along(bamfiles[conditions == "control"])
-  treated_rep <- seq_along(bamfiles[conditions == "treated"])
+.get_replicate_number <- function(conditions){
+  control_rep <- seq_along(conditions[conditions == "control"])
+  treated_rep <- seq_along(conditions[conditions == "treated"])
   rep <- c(control_rep,treated_rep)
   rep <- rep[c(which(conditions == "control"),
                which(conditions == "treated"))]
@@ -365,7 +479,7 @@ setMethod("rbind", "SequenceData",
   proto <- new(className)
   minQuality <- .norm_min_quality(args, proto@minQuality)
   condition <- factor(names(bamfiles))
-  replicate <- .get_replicate_number(bamfiles, condition)
+  replicate <- .get_replicate_number(condition)
   if(!assertive::is_a_non_empty_string(proto@dataDescription)){
     stop("'dataDescription' must be a single non empty character value.")
   }
@@ -419,16 +533,18 @@ setMethod("rbind", "SequenceData",
   ##############################################################################
   # Create SequenceData object
   ##############################################################################
+  unlist_data <- 
+    .SequenceDataFrame(class = gsub("SequenceData","",className),
+                       df = unlist(data, use.names = FALSE),
+                       ranges = unlist(ranges, use.names = FALSE),
+                       sequence = unlist(sequences, use.names = FALSE),
+                       replicate = replicate,
+                       condition = condition,
+                       bamfiles = bamfiles,
+                       seqinfo = seqinfo)
   ans <- new(className, 
-             bamfiles = bamfiles,
-             seqinfo = seqinfo,
              minQuality = minQuality,
-             unlistData = .SequenceDataFrame(gsub("SequenceData","",className),
-                                             unlist(data, use.names = FALSE),
-                                             unlist(ranges, use.names = FALSE),
-                                             unlist(sequences, use.names = FALSE),
-                                             replicate,
-                                             condition),
+             unlistData = unlist_data,
              partitioning = IRanges::PartitioningByEnd(data),
              ...)
   message("OK")
@@ -558,6 +674,8 @@ setMethod("rbind", "SequenceData",
 
 ################################################################################
 
+#' @rdname SequenceData-class
+#' @export
 setGeneric( 
   name = "SequenceData",
   signature = c("annotation","sequences"),
@@ -565,72 +683,96 @@ setGeneric(
     standardGeneric("SequenceData")
 ) 
 
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "character", sequences = "character"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "character", sequences = "BSgenome"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "TxDb", sequences = "character"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "TxDb", sequences = "BSgenome"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "GRangesList", sequences = "character"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "GRangesList", sequences = "BSgenome"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "GFF3File", sequences = "BSgenome"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "GFF3File", sequences = "character"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "character", sequences = "FaFile"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "GFF3File", sequences = "FaFile"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "TxDb", sequences = "FaFile"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
             .new_SequenceData(dataType, bamfiles, annotation, sequences,
                               seqinfo, ...)
           })
+#' @rdname SequenceData-class
+#' @export
 setMethod("SequenceData",
           signature = c(annotation = "GRangesList", sequences = "FaFile"),
           function(dataType, bamfiles, annotation, sequences, seqinfo, ...){
@@ -659,7 +801,7 @@ setMethod("getData",
 #' @export
 setMethod(f = "bamfiles", 
           signature = signature(x = "SequenceData"),
-          definition = function(x){x@bamfiles})
+          definition = function(x){bamfiles(unlist(x))})
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "conditions", 
@@ -674,12 +816,12 @@ setMethod(
     function(x){
       partitioning <- IRanges::PartitioningByEnd(x)
       unlisted_ranges <- ranges(unlist(x))
-      ends <- cumsum(width(unlisted_ranges)) == cumsum(width(partitioning))
-      partitioning_relist <- IRanges::PartitioningByEnd(which(ends))
-      names(partitioning_relist) <- names(x)
+      ends <- match(cumsum(width(partitioning)),cumsum(width(unlisted_ranges)))
+      partitioning_relist <- IRanges::PartitioningByEnd(ends)
       if(length(x) != length(partitioning_relist)){
         stop("ranges could not be relisted.")
       }
+      names(partitioning_relist) <- names(x)
       relist(unlisted_ranges, partitioning_relist)
     })
 #' @rdname SequenceData-functions
@@ -691,7 +833,7 @@ setMethod(f = "replicates",
 #' @export
 setMethod(f = "seqinfo", 
           signature = signature(x = "SequenceData"),
-          definition = function(x){x@seqinfo})
+          definition = function(x){seqinfo(unlist(x))})
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "sequences", 

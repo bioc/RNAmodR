@@ -11,7 +11,8 @@
 \alias{getDataTrack,ProtectedEndSequenceData-method}
 \title{ProtectedEndSequenceData}
 \usage{
-ProtectedEndSequenceDataFrame(df, ranges, sequence, replicate, condition)
+ProtectedEndSequenceDataFrame(df, ranges, sequence, replicate, condition,
+  bamfiles, seqinfo)
 
 ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
@@ -25,6 +26,10 @@ ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 \S4method{getDataTrack}{ProtectedEndSequenceData}(x, name, ...)
 }
 \arguments{
+\item{df, ranges, sequence, replicate}{inputs for creating a 
+\code{SequenceDataFrame}. See 
+\code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.}
+
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
 

@@ -13,7 +13,8 @@
 \alias{pileupToCoverage,PileupSequenceData-method}
 \title{PileupSequenceData}
 \usage{
-PileupSequenceDataFrame(df, ranges, sequence, replicate, condition)
+PileupSequenceDataFrame(df, ranges, sequence, replicate, condition,
+  bamfiles, seqinfo)
 
 PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
@@ -31,6 +32,10 @@ pileupToCoverage(x)
 \S4method{pileupToCoverage}{PileupSequenceData}(x)
 }
 \arguments{
+\item{df, ranges, sequence, replicate}{inputs for creating a 
+\code{SequenceDataFrame}. See 
+\code{\link[=SequenceDataFrame-class]{SequenceDataFrame}}.}
+
 \item{condition}{For \code{\link{aggregate}}: condition for which the data 
 should be aggregated.}
 

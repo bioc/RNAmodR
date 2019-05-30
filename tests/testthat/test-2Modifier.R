@@ -61,7 +61,7 @@ test_that("Modifier/ModifierSet:",{
                factor("*", levels = c("+","-","*")))
   expect_true(is.factor(conditions(msi[[1]])))
   expect_equal(conditions(msi[[1]]),
-               factor(rep("treated",ncol(sequenceData(msi[[1]]))[1])))
+               factor(rep("treated",ncol(sequenceData(msi[[1]]))[1]/5)))
   ##############################################################################
   skip_on_bioc()
   # Modifier creation
