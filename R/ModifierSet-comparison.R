@@ -157,29 +157,30 @@ NULL
   # keep rownames/names and unlist data
   positions <- rownames(data)
   data_names <- as.character(S4Vectors::Rle(names(data), lengths(data)))
-  data <- unlist(data)
+  partitioning_data <- IRanges::PartitioningByEnd(data)
+  data <- unlist(data,use.names=FALSE)
   # add names and positions column as factors
   data$names <- factor(data_names)
   data$positions <- factor(as.integer(unlist(positions)))
   rownames(data) <- NULL
-  # add activity information if present
-  coord <- unlist(coord)
-  if(any(!is.na(modType))){
-    coord <- coord[coord$mod %in% modType,]
+  # subset to specific modType, if set
+  if(any(!is.na(modType)) && !is.null(unlist(coord)$mod)){
+    coord <- coord[mcols(coord,level="within")[,"mod"] %in% modType,]
   }
-  if(!is.null(coord$Activity) || !is.null(coord$mod)){
-    f <- unlist(lapply(unique(as.character(data$names)),
-                       function(n){
-                         d <- data[data$names == n,]
-                         d$positions %in% start(coord)[coord$Parent == n]
-                       }))
-    if(!is.null(coord$Activity)){
+  # add activity information if present
+  unlisted_coord <- unlist(coord,use.names = FALSE)
+  if(!is.null(unlisted_coord$Activity) || !is.null(unlisted_coord$mod)){
+    f <- match(start(coord),relist(data$positions,partitioning_data))
+    f <- f + start(IRanges::PartitioningByEnd(f)) - 1L
+    f <- unlist(f)
+    if(!is.null(unlisted_coord$Activity)){
       data$Activity <- ""
-      data$Activity[f] <- unlist(lapply(coord$Activity, paste, collapse = "/"))
+      data$Activity[f] <- vapply(unlisted_coord$Activity, paste, character(1),
+                                 collapse = "/")
     }
-    if(!is.null(coord$mod)){
+    if(!is.null(unlisted_coord$mod)){
       data$mod <- ""
-      data$mod[f] <- unlist(coord$mod)
+      data$mod[f] <- unlisted_coord$mod
     }
   }
   # convert ids to names for labeling if present
