@@ -627,12 +627,19 @@ setReplaceMethod(f = "settings",
   proto <- new(className)  # create prototype object for mod normalization only
   data <- .norm_Modifier_input_SequenceData_elements(data, proto)
   bamfiles <- bamfiles(data)
-  condition <- factor(names(bamfiles))
+  # setup conditions and replicates
+  conditions <- .norm_conditions(data)
+  replicates <- .norm_replicates(data)
+  ia <- as.integer(interaction(conditions,replicates))
+  m <- match(unique(ia),ia)
+  condition <- conditions[m]
+  replicate <- replicates[m]
+  # create Modifier object
   new(className,
       mod = .norm_mod(proto@mod, className),
       bamfiles = bamfiles,
       condition = condition,
-      replicate = .get_replicate_number(condition),
+      replicate = replicate,
       data = data)
 }
 

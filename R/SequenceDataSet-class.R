@@ -286,16 +286,30 @@ setMethod(f = "bamfiles",
 setMethod(f = "conditions", 
           signature = signature(object = "SequenceDataSet"),
           definition = function(object){
-            ans <- IRanges::FactorList(lapply(object,conditions))
-            ans
+            ans <- IRanges::FactorList(
+              lapply(object[1L],
+                     function(o){
+                       ia <- as.integer(interaction(conditions(o),
+                                                    replicates(o)))
+                       m <- match(unique(ia),ia)
+                       conditions(o)[m]
+                     }))
+            ans[[1L]]
           })
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "replicates", 
           signature = signature(x = "SequenceDataSet"),
           definition = function(x){
-            ans <- IRanges::FactorList(lapply(x,replicates))
-            ans
+            ans <- IRanges::FactorList(
+              lapply(x[1L],
+                     function(o){
+                       ia <- as.integer(interaction(conditions(o),
+                                                    replicates(o)))
+                       m <- match(unique(ia),ia)
+                       replicates(o)[m]
+                     }))
+            ans[[1L]]
           })
 
 # aggregate --------------------------------------------------------------------

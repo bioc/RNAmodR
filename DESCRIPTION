@@ -1,7 +1,7 @@
 Package: RNAmodR
 Type: Package
 Title: Detection of post-transcriptional modifications
-Version: 0.99.17
+Version: 0.99.18
 Date: 2019-05-31
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 

@@ -283,3 +283,21 @@ SAMPLE_TYPES <- c("treated","control")
   }
   data
 }
+
+# conditions and replicates ----------------------------------------------------
+
+.norm_conditions <- function(x){
+  conditions <- conditions(x)
+  if(is(x,"SequenceDataList")){
+    conditions <- conditions[[1L]]
+  }
+  conditions
+}
+
+.norm_replicates <- function(x){
+  replicates <- replicates(x)
+  if(is(x,"SequenceDataList")){
+    replicates <- replicates[[1L]]
+  }
+  replicates
+}

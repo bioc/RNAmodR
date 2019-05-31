@@ -171,16 +171,18 @@ NULL
   unlisted_coord <- unlist(coord,use.names = FALSE)
   if(!is.null(unlisted_coord$Activity) || !is.null(unlisted_coord$mod)){
     f <- match(start(coord),relist(data$positions,partitioning_data))
+    ff <- !is.na(f)
+    f <- f[ff]
     f <- f + start(IRanges::PartitioningByEnd(f)) - 1L
     f <- unlist(f)
     if(!is.null(unlisted_coord$Activity)){
       data$Activity <- ""
       data$Activity[f] <- vapply(unlisted_coord$Activity, paste, character(1),
-                                 collapse = "/")
+                                 collapse = "/")[unlist(ff)]
     }
     if(!is.null(unlisted_coord$mod)){
       data$mod <- ""
-      data$mod[f] <- unlisted_coord$mod
+      data$mod[f] <- unlisted_coord$mod[unlist(ff)]
     }
   }
   # convert ids to names for labeling if present

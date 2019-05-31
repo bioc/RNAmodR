@@ -345,16 +345,11 @@ setMethod(
       ia <- interaction(conditions(x), replicates(x))
       if(is.character(j)){
         j <- normalizeSingleBracketSubscript(j, xstub)
-        j <- as.integer(ia)[j]
+        j <- unique(as.integer(ia)[j])
+      } else {
+        conditionsFmultiplier <- length(ia) / length(unique(ia))
+        j <- normalizeSingleBracketSubscript(j, xstub[seq_len(length(ia)/conditionsFmultiplier)])
       }
-      colnames <- IRanges::CharacterList(strsplit(colnames(x),"\\."))
-      colnames_conditions <- colnames %in% c("treated","control")
-      colnames_replicates <- !is.na(suppressWarnings(IntegerList(colnames)))
-      colnames_f <- !(colnames_conditions | colnames_replicates)
-      conditionsFmultiplier <- length(unique(vapply(colnames[colnames_f],
-                                                    paste,character(1),
-                                                    collapse=".")))
-      j <- normalizeSingleBracketSubscript(j, xstub[seq_len(length(xstub)/conditionsFmultiplier)])
       j2 <- which(!is.na(match(as.integer(ia), j)))
       x <- initialize(x,
                       as(x,"DataFrame")[, j2, drop = FALSE],
