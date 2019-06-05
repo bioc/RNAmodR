@@ -47,7 +47,7 @@ If during construction a \code{GRangesList} is provided instead of a
 character value pointing to a gff3 file or a \code{TxDb} object, it must have
 a comparable structure.}
 
-\item{\code{sequences}}{a \code{\link[Biostrings:XString-class]{XString}} of 
+\item{\code{sequence}}{a \code{\link[Biostrings:XString-class]{XString}} of 
 type \code{sequencesType} from the parent 
 \code{\link[=SequenceData-class]{SequenceData}} object.}
 
@@ -58,11 +58,11 @@ or \code{treated}}
 \item{\code{replicate}}{replicate number along the \code{BamFileList} for each of the
 condition types.}
 
-\item{\code{seqinfo}}{a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
-the avialable/used chromosomes.}
-
 \item{\code{bamfiles}}{the input bam files as 
 \code{\link[Rsamtools:BamFile-class]{BamFileList}}}
+
+\item{\code{seqinfo}}{a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
+the avialable/used chromosomes.}
 }}
 
 \examples{
@@ -70,6 +70,9 @@ data(e5sd,package="RNAmodR")
 # A SequenceDataFrame can is usually constructed by subsetting from 
 # a SequenceData object
 sdf <- e5sd[[1]]
+# Its also used to store the unlisted data in a SequenceData object
+sdf <- unlist(e5sd) # should probably only used internally
+e5sd <- relist(sdf,e5sd)
 }
 \seealso{
 for an example see

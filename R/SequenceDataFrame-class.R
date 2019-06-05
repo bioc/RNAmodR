@@ -77,7 +77,7 @@ NULL
 #' If during construction a \code{GRangesList} is provided instead of a 
 #' character value pointing to a gff3 file or a \code{TxDb} object, it must have
 #' a comparable structure. 
-#' @slot sequences a \code{\link[Biostrings:XString-class]{XString}} of 
+#' @slot sequence a \code{\link[Biostrings:XString-class]{XString}} of 
 #' type \code{sequencesType} from the parent 
 #' \code{\link[=SequenceData-class]{SequenceData}} object.
 #' @slot condition conditions along the 
@@ -85,10 +85,10 @@ NULL
 #' or \code{treated}
 #' @slot replicate replicate number along the \code{BamFileList} for each of the
 #' condition types.
-#' @slot seqinfo a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
-#' the avialable/used chromosomes.
 #' @slot bamfiles the input bam files as 
 #' \code{\link[Rsamtools:BamFile-class]{BamFileList}}
+#' @slot seqinfo a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
+#' the avialable/used chromosomes.
 #' 
 #' 
 #' @return A \code{SequenceDataFrame} object or if subset to row a 
