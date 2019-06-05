@@ -100,6 +100,9 @@ mapped onto. This must match the information contained in the BAM files.}
 \item{seqinfo}{optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to
 subset the transcripts analyzed on a chromosome basis.}
 }
+\value{
+A SequenceData object
+}
 \description{
 The \code{SequenceData} class is implemented to contain data on each position
 along transcripts and holds the corresponding annotation data and
@@ -132,9 +135,12 @@ not inherited and might not available to full extend, e.g.\code{relist}.
 
 \strong{SequenceDataFrame}
 
-#' The \code{SequenceDataFrame} class contains data for positions along a single
-transcript. It is used to describe elements from a \code{SequenceData}
-object.
+The \code{SequenceDataFrame} class is a virtual class and  contains data for
+positions along a single transcript. In addition to being used for returning
+elements from a \code{SequenceData} object, the SequenceDataFrame class is
+used to store the unlisted data within a
+\code{\link[=SequenceData-class]{SequenceData}} object. Therefore, a matching
+\code{SequenceData} and \code{SequenceDataFrame} class must be implemented.
 
 The \code{SequenceDataFrame} class is derived from the
 \code{\link[S4Vectors:DataFrame-class]{DataFrame}} class.
@@ -146,32 +152,8 @@ Subsetting of a \code{SequenceDataFrame} returns a \code{SequenceDataFrame} or
 \section{Slots}{
 
 \describe{
-\item{\code{ranges}}{a \code{\link[GenomicRanges:GRangesList-class]{GRangesList}}
-object each element describing a transcript including its element. The
-\code{GRangesList} is constructed from the
-\code{\link[GenomicFeatures:transcriptsBy]{exonsBy(x, by="tx")}} function.
-If during construction a \code{GRangesList} is provided instead of a
-character value pointing to a gff3 file or a \code{TxDb} object, it must have
-a comparable structure.}
-
-\item{\code{sequences}}{a \code{\link[Biostrings:XStringSet-class]{XStringSet}} of
-type \code{sequencesType}.}
-
 \item{\code{sequencesType}}{a \code{character} value for the class name of
 \code{sequences}. Either \code{RNAStringSet} or \code{ModRNAStringSet}.}
-
-\item{\code{bamfiles}}{the input bam files as
-\code{\link[Rsamtools:BamFile-class]{BamFileList}}}
-
-\item{\code{condition}}{conditions along the
-\code{\link[Rsamtools:BamFile-class]{BamFileList}}: Either \code{control}
-or \code{treated}}
-
-\item{\code{replicate}}{replicate number along the \code{BamFileList} for each of the
-condition types.}
-
-\item{\code{seqinfo}}{a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
-the avialable chromosomes. This is an intersection of}
 
 \item{\code{minQuality}}{a \code{integer} value describing a threshold of the minimum
 quality of reads to be used.}

@@ -48,9 +48,12 @@ NULL
 #' @title The SequenceDataFrame class
 #' 
 #' @description 
-#' The \code{SequenceDataFrame} class contains data for positions along a single
-#' transcript. It is used to describe elements from a \code{SequenceData}
-#' object.
+#' The \code{SequenceDataFrame} class is a virtual class and  contains data for
+#' positions along a single transcript. In addition to being used for returning
+#' elements from a \code{SequenceData} object, the SequenceDataFrame class is
+#' used to store the unlisted data within a
+#' \code{\link[=SequenceData-class]{SequenceData}} object. Therefore, a matching
+#' \code{SequenceData} and \code{SequenceDataFrame} class must be implemented.
 #' 
 #' The \code{SequenceDataFrame} class is derived from the
 #' \code{\link[S4Vectors:DataFrame-class]{DataFrame}} class.
@@ -62,12 +65,43 @@ NULL
 #' @param x,i,j,...,drop,deparse.level arguments used for 
 #' \code{\link[S4Vectors:DataFrame-class]{subsetting}} or 
 #' \code{\link[base:cbind]{base::cbind}}.
+#' 
+#' @seealso for an example see
+#' \code{\link[=ProtectedEndSequenceData-class]{ProtectedEndSequenceData}}
+#' and for more information see \code{\link[=SequenceData-class]{SequenceData}}
+#' 
+#' @slot ranges a \code{\link[GenomicRanges:GRanges-class]{GRanges}} 
+#' object each element describing a transcript including its element. The 
+#' \code{GRanges} is constructed from the unlisted results of the
+#' \code{\link[GenomicFeatures:transcriptsBy]{exonsBy(x, by="tx")}} function.
+#' If during construction a \code{GRangesList} is provided instead of a 
+#' character value pointing to a gff3 file or a \code{TxDb} object, it must have
+#' a comparable structure. 
+#' @slot sequences a \code{\link[Biostrings:XString-class]{XString}} of 
+#' type \code{sequencesType} from the parent 
+#' \code{\link[=SequenceData-class]{SequenceData}} object.
+#' @slot condition conditions along the 
+#' \code{\link[Rsamtools:BamFile-class]{BamFileList}}: Either \code{control}
+#' or \code{treated}
+#' @slot replicate replicate number along the \code{BamFileList} for each of the
+#' condition types.
+#' @slot seqinfo a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
+#' the avialable/used chromosomes.
+#' @slot bamfiles the input bam files as 
+#' \code{\link[Rsamtools:BamFile-class]{BamFileList}}
+#' 
+#' 
+#' @return A \code{SequenceDataFrame} object or if subset to row a 
+#' \code{DataFrame}
 #'
 #' @examples 
 #' data(e5sd,package="RNAmodR")
 #' # A SequenceDataFrame can is usually constructed by subsetting from 
 #' # a SequenceData object
 #' sdf <- e5sd[[1]]
+#' # Its also used to store the unlisted data in a SequenceData object
+#' sdf <- unlist(e5sd) # should probably only used internally
+#' e5sd <- relist(sdf,e5sd)
 NULL
 
 # SequenceDataFrame ------------------------------------------------------------
