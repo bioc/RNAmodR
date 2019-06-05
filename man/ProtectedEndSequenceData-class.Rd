@@ -63,7 +63,6 @@ and \code{treated} condition separatly.
 }
 \examples{
 # Construction of a ProtectedEndSequenceData object
-\dontrun{
 library(RNAmodR.Data)
 library(rtracklayer)
 annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
@@ -71,5 +70,4 @@ sequences <- RNAmodR.Data.example.man.fasta()
 files <- c(treated = RNAmodR.Data.example.wt.1())
 pesd <- ProtectedEndSequenceData(files, annotation = annotation,
                                  sequences = sequences)
-}
 }

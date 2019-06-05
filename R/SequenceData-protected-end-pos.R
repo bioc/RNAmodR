@@ -46,7 +46,6 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' 
 #' @examples 
 #' # Construction of a ProtectedEndSequenceData object
-#' \dontrun{
 #' library(RNAmodR.Data)
 #' library(rtracklayer)
 #' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
@@ -54,7 +53,6 @@ RNAMODR_PROT_SEQDATA_PLOT_DATA_COLOURS <- c(means = "#FBB4AE",
 #' files <- c(treated = RNAmodR.Data.example.wt.1())
 #' pesd <- ProtectedEndSequenceData(files, annotation = annotation,
 #'                                  sequences = sequences)
-#' }
 NULL
 
 #' @rdname ProtectedEndSequenceData-class
