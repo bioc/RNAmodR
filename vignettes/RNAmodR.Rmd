@@ -87,9 +87,9 @@ files <- c(Treated = RNAmodR.Data.example.bam.1(),
 ```
 
 For `annotation` and `sequences` several input are accepted. `annotation` can
-be a `GRangeSList`, a `GFF3File` or a `TxDb` object. Internally, a `GFF3File`
-is converted to a `TxDb` object and a `GRangesList` is retrieved using 
-`exonsBy`.
+be a `GRangesList`, a `GFF3File` or a `TxDb` object. Internally, a `GFF3File`
+is converted to a `TxDb` object and a `GRangesList` is retrieved using the
+`exonsBy` function.
 
 ```{r seqdata}
 seqdata <- End5SequenceData(files, annotation = annotation, 
@@ -124,12 +124,13 @@ Currently the following `SequenceData` classes are implemented:
 
 The data types and names of the columns are different for most of the
 `SequenceData` classes. As a naming convenction a descriptor is combined with
-the condition as defined in files input and the replicate. For more details
-please have a look at the man pages, e.g. `?End5SequenceData`.
+the condition as defined in the files input and the replicate number. For more 
+details please have a look at the man pages, e.g. `?End5SequenceData`.
 
 `SequenceData` objects can be subset like a `CompressedSplitDataFrameList`. 
-Elements are returned as a `SequenceDataFrame` independent of the type of
-`SequenceData` used.
+Elements are returned as a `SequenceDataFrame` dependent of the type of
+`SequenceData` used. For each `SequenceData` class a matching 
+`SequenceDataFrame` is implemented. 
 
 ```{r seqdata2}
 seqdata[1]
@@ -137,7 +138,8 @@ sdf <- seqdata[[1]]
 sdf
 ```
 
-It retains some accessor functions from the `SequenceData`.
+The `SequenceDataFrame` objects retains some accessor functions from the 
+`SequenceData` class.
 
 ```{r seqdata2_functions,include=FALSE}
 names(sdf) # this returns the columns names of the data
@@ -146,8 +148,8 @@ sequences(sdf)
 ```
 
 Subsetting of a `SequenceDataFrame` returns a `SequenceDataFrame` or 
-`DataFrame`, if it is subset by a column or row, respectively. The `drop`
-argument is ignored for column subsetting.
+`DataFrame`, depending on whether it is subset by a column or row, respectively.
+The `drop` argument is ignored for column subsetting.
 
 ```{r seqdata2_subset}
 sdf[,1:2]
@@ -178,32 +180,32 @@ For now three `Modifier` classes are available:
 
 `Modifier` objects can use and wrap multiple `SequenceData` objects as elements
 of a `SequenceDataSet` class. The elements of this class are different types of
-`SequenceData`, which are needed for the specific `Modifier` class. However,
+`SequenceData`, which are required by the specific `Modifier` class. However,
 they are required to contain data for the same annotation and sequence data.
 
 `Modifier` objects are created with the same arguments as `SequenceData` objects
 and will start loading the necessary `SequenceData` objects from these. In
 addition they will start automatically start to calculate any additional scores 
 (aggregation) and then start to search for modifications, if the optional 
-argument `findMod` is not set to `FALSE`. For more informations on how to create
-a `Modifier` object, have a look at the man page.
+argument `find.mod` is not set to `FALSE`.
 
 ```{r modifier1}
 mi <- ModInosine(files, annotation = annotation, sequences = sequences)
 ```
 
 (Hint: If you use an artificial genome, name the chromosomes chr1-chrN. It
-will make some things easier later on during visualization, which relies on the 
+will make some things easier for subsequent visualization, which relies on the 
 `Gviz` package)
 
-Since the `Modifier` class wraps a `SequenceData` object the accessor to data
-contained withing work as well. What type of conditions the `Modifier` class 
-expects is explained in the man pages of the Modifier class.
+Since the `Modifier` class wraps a `SequenceData` object the accessors to data
+contained within work similarly to the `SequenceData` accessors described above.
+What type of conditions the `Modifier` class expects/supports is usually
+described in the man pages of the Modifier class.
 
 ```{r modifier1_functions,include=FALSE}
 names(mi) # matches the transcript names as returned by a TxDb object
 bamfiles(mi)
-ranges(mi) # generate from a TxDb object
+ranges(mi) # generated from a TxDb object
 sequences(mi)
 seqinfo(mi)
 sequenceData(mi) # returns the SequenceData 
@@ -211,8 +213,10 @@ sequenceData(mi) # returns the SequenceData
 
 ### Settings
 
-The behavior of a `Modifier` class can be fine tuned, if the option is provided.
-The `settings()` function is a getter/setter for arguments used in the analysis.
+The behavior of a `Modifier` class can be fine tuned using settings. The
+`settings()` function is a getter/setter for arguments used in the analysis and
+my differ between different `Modifier` classes depending on the particular 
+strategy and whether they are implemented as flexible settings.
 
 ```{r settings}
 settings(mi)
@@ -249,17 +253,20 @@ msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
 ```
 
 The creation of the `ModifierSet` will itself trigger the creation of a
-`Modifier` object each containing data from one sample set. This step is 
-parallelized using the functions from the `BiocParallel` package. If a 
-`Modifier` class itself uses the functionallity, it is switched off unless
-`internalBP = TRUE` is set.
+`Modifier` object each containing data from one sample set. This step is
+parallelized using the functions from the `BiocParallel` package. If a
+`Modifier` class itself uses parallel computing for its analysis, it is switched
+off unless `internalBP = TRUE` is set. In this case each `Modifier` object is 
+created in sequence, allowing parallel computing during of the creation of each
+object.
 
 ```{r modifierset2}
 names(msi)
 msi[[1]]
 ```
 
-Again accessors remain mostly the same.
+Again accessors remain mostly the same as described above for the `Modifier` 
+class returning a list of results, one element for each `Modifier` object.
 
 ```{r modifierset1_functions,include=FALSE}
 bamfiles(msi)
@@ -271,7 +278,7 @@ seqinfo(msi)
 # Analysis of detected modifications
 
 Found modifications can be retrieved from a `Modifier` or `ModifierSet` object
-via the `modifications()` function. The function returns a `GRanges` and
+via the `modifications()` function. The function returns a `GRanges` or
 `GRangesList` object, respectively, which contains the coordinates of the
 modifications with respect to the genome used. For example if a transcript
 starts at position 100 and contains a modified nucleotide at position 50, the
@@ -283,10 +290,10 @@ mod[[1]]
 ```
 
 To retrieve the coordinates with respect to the transcript boundaries, use the
-optional argument `perTranscript = TRUE`. In this example this will yield the
-same coordinates, since a custom genome was used for mapping of the example,
-which does not contain transcripts on the negative strand and per transcript
-chromosomes.
+optional argument `perTranscript = TRUE`. In the example provided here, this
+will yield the same coordinates, since a custom genome was used for mapping of
+the example, which does not contain transcripts on the negative strand and per
+transcript chromosomes.
 
 ```{r results2}
 mod <- modifications(msi, perTranscript = TRUE)
@@ -295,8 +302,8 @@ mod[[1]]
 
 ## Compairing results
 
-To compare results between samples, a `ModifierSet` is required as well as a
-definition of positions to compare. To construct a set of positions, we will use
+To compare results between samples, a `ModifierSet` as well as a definition of
+positions to compare are required. To construct a set of positions, we will use
 the intersection of all modifications found as an example.
 
 ```{r coord}
@@ -307,7 +314,7 @@ coord$sd <- NULL
 compareByCoord(msi,coord)
 ```
 
-The result can also by plotted using `plotCompareByCoord`, which accepts an
+The result can also be plotted using `plotCompareByCoord`, which accepts an
 optional argument `alias` to allow transcript ids to be converted to other 
 identifiers. For this step it is probably helpful to construct a `TxDb` object
 right at the beginning and use it for constructing the `Modifier`/`ModifierSet`
@@ -348,8 +355,8 @@ plotData(msi[1:2], "2", from = 10L, to = 45L, showSequenceData = TRUE, alias = a
 
 Since the detection of modifications from high throughput sequencing data relies
 usually on thresholds for calling modifications, there is considerable interest
-in analyzing the performance of the method based on scores chosen and samples
-available. To analyse the performance the function `plotROC()` is implemented,
+in analyzing the performance of the method based on scores chosen and available
+samples. To analyse the performance, the function `plotROC()` is implemented,
 which is a wrapper around the functionality of the `ROCR` package
 [@Sing.2005](#References).
 
@@ -386,9 +393,8 @@ Features, which might be added in the future:
 - interaction with our packages for data aggregation (for example meta gene 
 aggregation)
 - interaction with our packages for downstream analysis for visualization
-- adapter for using machine learning models for modification detection
 
-We welcome contribution of any sort.
+We welcome contributions of any sort.
 
 # Sessioninfo
 
