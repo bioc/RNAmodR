@@ -1,6 +1,5 @@
 #' @include RNAmodR.R
 #' @import Gviz
-#' @importFrom biovizBase getBioColor
 #' @importFrom Biostrings subseq
 NULL
 

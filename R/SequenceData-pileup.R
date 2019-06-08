@@ -268,6 +268,7 @@ setMethod("aggregateData",
 
 # data visualization -----------------------------------------------------------
 
+#' @importFrom biovizBase getBioColor
 RNAMODR_PLOT_BASES_COLOURS <- 
   c("G" = biovizBase::getBioColor("RNA_BASES_N")[["G"]],
     "A" = biovizBase::getBioColor("RNA_BASES_N")[["A"]],

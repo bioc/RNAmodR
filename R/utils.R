@@ -147,9 +147,9 @@ NULL
 # splits x along x$which_label. However, x$which_label is restructured to reflect 
 # length GRanges elements in a GRangesList. This is helpful to split data along
 # transcripts instead of exons
-#' @importFrom IRanges splitAsList
+#' @importFrom S4Vectors splitAsList
 .splitPileupAsList_transcript <- function(x, grl, drop = FALSE){
-  ans <- IRanges::splitAsList(x, x$which_label, drop)
+  ans <- S4Vectors::splitAsList(x, x$which_label, drop)
   names(ans) <- vapply(strsplit(names(ans),"\\."),"[[",character(1),1)
   ugrl <- unlist(grl)
   f_order <- paste0(seqnames(ugrl),":",start(ugrl),"-",end(ugrl))
