@@ -9,7 +9,7 @@ output:
     toc_float: true
     df_print: paged
 vignette: >
-  %\VignetteIndexEntry{RNAmodR - creationg classes}
+  %\VignetteIndexEntry{RNAmodR - creating new classes for a new detection strategy}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 bibliography: references.bib
