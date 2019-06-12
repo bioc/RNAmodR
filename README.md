@@ -45,6 +45,7 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 # The following initializes usage of Bioc devel
 BiocManager::install(version='devel')
 BiocManager::install("RNAmodR")
+library(RNAmodR.Data)
 ```
 
 # Introduction
