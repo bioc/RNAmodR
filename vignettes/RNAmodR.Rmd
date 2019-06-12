@@ -78,7 +78,7 @@ be coerced to a `BamFileList`, or named `BamFileList`. The names must be either
 "treated" or "control" describing the condition the data file belongs to. 
 Multiple files can be given per condition and are used as replicates.
 
-```{r example_files, include=FALSE}
+```{r example_files, message=FALSE, results='hide'}
 annotation <- GFF3File(RNAmodR.Data.example.gff3())
 sequences <- RNAmodR.Data.example.fasta()
 files <- c(Treated = RNAmodR.Data.example.bam.1(),
@@ -102,7 +102,7 @@ data per transcript alongside the annotation information and the sequence. The
 additional data stored within the `SequenceData` can be accessed by several
 functions.
 
-```{r seqdata_functions,include=FALSE}
+```{r seqdata_functions, message=FALSE, results='hide'}
 names(seqdata) # matches the transcript names as returned by a TxDb object
 colnames(seqdata) # returns a CharacterList of all column names
 bamfiles(seqdata)
@@ -141,7 +141,7 @@ sdf
 The `SequenceDataFrame` objects retains some accessor functions from the 
 `SequenceData` class.
 
-```{r seqdata2_functions,include=FALSE}
+```{r seqdata2_functions, message=FALSE, results='hide'}
 names(sdf) # this returns the columns names of the data
 ranges(sdf)
 sequences(sdf)
@@ -202,7 +202,7 @@ contained within work similarly to the `SequenceData` accessors described above.
 What type of conditions the `Modifier` class expects/supports is usually
 described in the man pages of the Modifier class.
 
-```{r modifier1_functions,include=FALSE}
+```{r modifier1_functions, message=FALSE, results='hide'}
 names(mi) # matches the transcript names as returned by a TxDb object
 bamfiles(mi)
 ranges(mi) # generated from a TxDb object
@@ -237,7 +237,7 @@ corresponding name. Each entry in the character vector/`BamFileList` is a
 replicate (Alternatively a `ModifierSet` can also be created from a `list` of
 `Modifier` objects, if they are of the same type).
 
-```{r, include=FALSE}
+```{r message=TRUE, message=FALSE, results='hide'}
 sequences <- RNAmodR.Data.example.AAS.fasta()
 annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
 files <- list("SampleSet1" = c(treated = RNAmodR.Data.example.wt.1(),
@@ -268,7 +268,7 @@ msi[[1]]
 Again accessors remain mostly the same as described above for the `Modifier` 
 class returning a list of results, one element for each `Modifier` object.
 
-```{r modifierset1_functions,include=FALSE}
+```{r modifierset1_functions, message=FALSE, results='hide'}
 bamfiles(msi)
 ranges(msi) # generate from a TxDb object
 sequences(msi)
