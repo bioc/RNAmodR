@@ -41,7 +41,7 @@ NULL
 #' \code{mod} of \code{coord}. To disable subsetting based on type, set 
 #' \code{type = NA}.}
 #' \item{\code{flanking}:} {a single integer value to select how many flanking
-#' position should be included in the subset (default = \code{flanking = 0L}).}
+#' position should be included in the subset (default: \code{flanking = 0L}).}
 #' \item{\code{merge}:} {\code{TRUE} or \code{FALSE}: Should the 
 #' overlapping selections be merged? This is particular important, if flanking
 #' value \code{!= 0L} are set. (default: \code{merge = TRUE}).}
