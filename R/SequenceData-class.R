@@ -129,6 +129,10 @@ sequenceDataClass <- function(dataType){
   ans
 }
 
+setMethod("classNameForDisplay", "SequenceData",
+          function(x) class(x)
+)
+
 #' @rdname SequenceData-functions
 setMethod("show", "SequenceData",
   function(object){
@@ -193,6 +197,24 @@ S4Vectors::setValidity2(Class = "SequenceData", .valid.SequenceData)
 
 # coercion ---------------------------------------------------------------------
 
+coerceSequenceDataToCompressedSplitDataFrameList <- function(className){
+  setMethod("coerce",
+    signature = c(from = className, to = "CompressedSplitDataFrameList"),
+    function(from, to, strict = TRUE){
+      if (strict) {
+        from <- from
+        {
+          value <- new("CompressedSplitDataFrameList")
+          for (what in c("elementType", "elementMetadata", 
+                         "metadata", "unlistData", "partitioning"
+          )) slot(value, what) <- slot(from, what)
+          value@unlistData <- as(value@unlistData,"DataFrame")
+          value
+        }
+      } else from
+    })
+}
+
 coerceToSequenceData <- function(className) {
   function(from) {
     if(is.list(from)) {
@@ -217,45 +239,22 @@ coerceToSequenceData <- function(className) {
 
 setSequenceDataCoercions <- function(type) {
   className <- sequenceDataClass(type)
+  coerceSequenceDataToCompressedSplitDataFrameList(className)
   setAs("ANY", className, coerceToSequenceData(className))
   setAs("list", className, coerceToSequenceData(className))
 }
 
 # internals --------------------------------------------------------------------
 
-#' @importClassesFrom IRanges PartitioningByEnd
-#' @importFrom IRanges PartitioningByEnd
-setMethod("extractROWS", "SequenceData",
-  function(x, i){
-    i <- normalizeSingleBracketSubscript(i, x, as.NSBS = TRUE)
-    ans_eltNROWS <- extractROWS(width(IRanges::PartitioningByEnd(x)), i)
-    ans_breakpoints <- suppressWarnings(cumsum(ans_eltNROWS))
-    nbreakpoints <- length(ans_breakpoints)
-    if (nbreakpoints != 0L && is.na(ans_breakpoints[[nbreakpoints]])){
-      stop("Subsetting operation on ", class(x), " object 'x' ",
-           "produces a result that is too big to be ",
-           "represented as a CompressedList object. ",
-           "This is not implemented, yet.")
-    }
-    idx_on_unlisted_x <- 
-      IRanges::IRanges(end = extractROWS(end(IRanges::PartitioningByEnd(x)), i),
-                       width = ans_eltNROWS)
-    ans_unlistData <- extractROWS(unlist(x,use.names = FALSE),
-                                  idx_on_unlisted_x)
-    ans_partitioning <- new("PartitioningByEnd", end = ans_breakpoints,
-                            NAMES = extractROWS(names(x), i))
-    ans_elementMetadata <- extractROWS(x@elementMetadata, i)
-    initialize(x, minQuality = x@minQuality, unlistData = ans_unlistData,
-               partitioning = ans_partitioning, 
-               elementMetadata = ans_elementMetadata)
-  }
-)
+
+
+# Accessors --------------------------------------------------------------------
 
 setMethod("rownames", "SequenceData",
-          function (x){
-            ans <- rownames(unlist(x,use.names = FALSE), do.NULL = TRUE)
-            relist(ans,x)
-          }
+  function (x){
+    ans <- rownames(unlist(x,use.names = FALSE), do.NULL = TRUE)
+    relist(ans,x)
+  }
 )
 
 # Concatenation ----------------------------------------------------------------
