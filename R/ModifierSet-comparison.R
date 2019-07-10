@@ -326,6 +326,7 @@ setMethod("compareByCoord",
 }
 
 #' @importFrom ggplot2 ggplot geom_raster
+#' @importFrom colorRamps matlab.like
 #' @importFrom reshape2 melt
 .plot_compare_ModifierSet_by_GRanges <- function(x, coord, normalize,  ...){
   args <- .norm_compare_plot_args(list(...))

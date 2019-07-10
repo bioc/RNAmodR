@@ -231,7 +231,6 @@ NULL
 }
 
 #' @importFrom graphics par abline title legend plot.new
-#' @importFrom colorRamps matlab.like
 #' @importFrom ROCR prediction performance
 .plot_ROCR <- function(data, prediction.args, performance.args, plot.args,
                        score){

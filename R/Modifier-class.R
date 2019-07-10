@@ -337,7 +337,6 @@ S4Vectors::setValidity2(Class = "Modifier", .valid_Modifier)
 }
 
 #' @rdname Modifier-functions
-#' @importFrom BiocGenerics path
 setMethod(
   f = "show",
   signature = signature(object = "Modifier"),

@@ -65,10 +65,10 @@ NULL
 
 #' @import methods
 #' @import assertive
-#' @import XVector
 #' @import S4Vectors
 #' @import GenomicRanges
-#' @importFrom BiocGenerics which conditions
+#' @import BiocGenerics
+#' @import XVector
 #' @importFrom Biostrings DNAString RNAString DNAStringSet RNAStringSet getSeq
 #' @importFrom Modstrings ModRNAString ModRNAStringSet combineIntoModstrings
 #' shortName fullName

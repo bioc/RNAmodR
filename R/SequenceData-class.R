@@ -825,6 +825,11 @@ setMethod(f = "seqinfo",
 setMethod(f = "sequences", 
           signature = signature(x = "SequenceData"),
           definition = function(x){relist(sequences(unlist(x)),x)})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "dataType",
+          signature = signature(x = "SequenceData"),
+          definition = function(x){dataType(unlist(x))})
 
 # dummy functions --------------------------------------------------------------
 # this needs to be implemented by each subclass

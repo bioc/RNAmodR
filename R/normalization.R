@@ -3,8 +3,7 @@ NULL
 
 # Annotation -------------------------------------------------------------------
 
-#' @importFrom rtracklayer GFF3File 
-#' @importFrom BiocGenerics path
+#' @importFrom rtracklayer GFF3File
 .norm_gff <- function(x, className, .xname = assertive::get_name_in_parent(x)){
   if(!is(x,"GFF3File")){
     x <- try(rtracklayer::GFF3File(x), silent = TRUE)
@@ -22,7 +21,6 @@ NULL
 }
 
 #' @importFrom GenomicFeatures makeTxDbFromGFF
-#' @importFrom BiocGenerics path
 # Returns a TxDb or a GRangesList object
 .norm_annotation <- function(annotation, className, 
                   .annotationname = assertive::get_name_in_parent(annotation)){
@@ -63,7 +61,6 @@ NULL
 # Sequences --------------------------------------------------------------------
 
 #' @importFrom Rsamtools FaFile
-#' @importFrom BiocGenerics path
 # Either return a FaFile or BSgenome object
 .norm_sequences <- function(seq, className){
   if(!is(seq,"FaFile") && !is(seq,"BSgenome")){
@@ -92,7 +89,6 @@ NULL
 SAMPLE_TYPES <- c("treated","control")
 
 #' @importFrom Rsamtools BamFileList
-#' @importFrom BiocGenerics path
 .norm_bamfiles <- function(x, className, 
                            .xname = assertive::get_name_in_parent(x)){
   if(is.list(x)){

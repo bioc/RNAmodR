@@ -166,7 +166,6 @@ setMethod(f = "relistToClass",
 }
 
 #' @importFrom Rsamtools BamFileList 
-#' @importFrom BiocGenerics path
 .contains_only_bamfiles <- function(x){
   x <- unname(x)
   classNames <- vapply(x, function(z){class(z)[[1]]},character(1))

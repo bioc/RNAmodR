@@ -256,6 +256,11 @@ setMethod(
   f = "seqinfo", 
   signature = signature(x = "SequenceDataFrame"),
   definition = function(x){x@seqinfo})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "dataType",
+          signature = signature(x = "SequenceDataFrame"),
+          definition = function(x){gsub("SequenceDataFrame","",class(x))})
 
 # internals --------------------------------------------------------------------
 

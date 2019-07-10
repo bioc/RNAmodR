@@ -13,6 +13,7 @@
 \alias{conditions,SequenceDataFrame-method}
 \alias{bamfiles,SequenceDataFrame-method}
 \alias{seqinfo,SequenceDataFrame-method}
+\alias{dataType,SequenceDataFrame-method}
 \alias{show,SequenceData-method}
 \alias{getData,SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{bamfiles,SequenceData-method}
@@ -21,6 +22,7 @@
 \alias{replicates,SequenceData-method}
 \alias{seqinfo,SequenceData-method}
 \alias{sequences,SequenceData-method}
+\alias{dataType,SequenceData-method}
 \alias{show,SequenceDataSet-method}
 \alias{seqinfo,SequenceDataSet-method}
 \alias{names,SequenceDataSet-method}
@@ -56,6 +58,8 @@ replicates(x)
 
 \S4method{seqinfo}{SequenceDataFrame}(x)
 
+\S4method{dataType}{SequenceDataFrame}(x)
+
 \S4method{show}{SequenceData}(object)
 
 
@@ -73,6 +77,8 @@ replicates(x)
 \S4method{seqinfo}{SequenceData}(x)
 
 \S4method{sequences}{SequenceData}(x)
+
+\S4method{dataType}{SequenceData}(x)
 
 \S4method{show}{SequenceDataSet}(object)
 

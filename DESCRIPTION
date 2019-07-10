@@ -1,7 +1,7 @@
 Package: RNAmodR
 Type: Package
 Title: Detection of post-transcriptional modifications in high throughput sequencing data
-Version: 0.99.29
+Version: 0.99.30
 Date: 2019-06-11
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
@@ -17,7 +17,7 @@ Description: RNAmodR provides classes and workflows for loading/aggregation data
     modifications through analysis of specific patterns. In addition, utilities
     are provided to validate and visualize the results. The RNAmodR package
     provides a core functionality from which specific analysis strategies can
-    be easily implemented as seperate package.
+    be easily implemented as a seperate package.
 biocViews: 
     Software, Infrastructure, WorkflowStep, Visualization, Sequencing
 License: Artistic-2.0
@@ -37,12 +37,12 @@ Imports:
     grid,
     matrixStats,
     assertive,
-    XVector,
     BiocGenerics,
+    XVector,
+    Biostrings,
     BiocParallel,
     GenomicFeatures,
     GenomicAlignments,
-    Biostrings,
     GenomeInfoDb,
     rtracklayer,
     Rsamtools,
@@ -55,7 +55,6 @@ Imports:
     reshape2,
     stringi,
     stringr,
-    dplyr,
     ROCR
 Suggests:
     BiocStyle,
