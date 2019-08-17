@@ -109,7 +109,7 @@ NULL
 #' @rdname SequenceDataFrame-class
 #' @export
 setClass(Class = "SequenceDataFrame",
-         contains = c("VIRTUAL","DataFrame"),
+         contains = c("VIRTUAL","DFrame"),
          slots = c(ranges = "GRanges",
                    sequence = "XString",
                    condition = "factor",

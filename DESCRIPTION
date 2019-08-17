@@ -1,7 +1,7 @@
 Package: RNAmodR
 Type: Package
 Title: Detection of post-transcriptional modifications in high throughput sequencing data
-Version: 0.99.30
+Version: 0.99.31
 Date: 2019-06-11
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
@@ -26,7 +26,7 @@ LazyData: false
 Depends:
     R (>= 3.6),
     IRanges (>= 2.19.7),  
-    S4Vectors (>= 0.23.10),
+    S4Vectors (>= 0.23.18),
     GenomicRanges,
     Modstrings
 Imports:
