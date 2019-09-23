@@ -58,7 +58,7 @@ NULL
 #' @rdname ProtectedEndSequenceData-class
 #' @export
 setClass(Class = "ProtectedEndSequenceDataFrame",
-         contains = "SequenceDataFrame")
+         contains = "SequenceDFrame")
 #' @rdname ProtectedEndSequenceData-class
 #' @export
 ProtectedEndSequenceDataFrame <- function(df, ranges, sequence, replicate,

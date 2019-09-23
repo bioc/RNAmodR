@@ -3,7 +3,7 @@
 NULL
 
 #' @name CoverageSequenceData-class
-#' @aliases CoverageSequenceData
+#' @aliases CoverageSequenceData CoverageSequenceDataFrame
 #' 
 #' @title CoverageSequenceData
 #' 
@@ -46,7 +46,7 @@ NULL
 #' @rdname CoverageSequenceData-class
 #' @export
 setClass(Class = "CoverageSequenceDataFrame",
-         contains = "SequenceDataFrame")
+         contains = "SequenceDFrame")
 #' @rdname CoverageSequenceData-class
 #' @export
 CoverageSequenceDataFrame <- function(df, ranges, sequence, replicate,

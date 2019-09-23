@@ -49,7 +49,7 @@ NULL
 #' @rdname EndSequenceData-class
 #' @export
 setClass(Class = "End5SequenceDataFrame",
-         contains = "SequenceDataFrame")
+         contains = "SequenceDFrame")
 #' @rdname EndSequenceData-class
 #' @export
 End5SequenceDataFrame <- function(df, ranges, sequence, replicate,
@@ -70,7 +70,7 @@ setClass(Class = "End5SequenceData",
 #' @rdname EndSequenceData-class
 #' @export
 setClass(Class = "End3SequenceDataFrame",
-         contains = "SequenceDataFrame")
+         contains = "SequenceDFrame")
 #' @rdname EndSequenceData-class
 #' @export
 End3SequenceDataFrame <- function(df, ranges, sequence, replicate, condition,
@@ -98,7 +98,7 @@ EndSequenceDataFrame <- function(df, ranges, sequence, replicate, condition,
 #' @rdname EndSequenceData-class
 #' @export
 setClass(Class = "EndSequenceDataFrame",
-         contains = "SequenceDataFrame")
+         contains = "SequenceDFrame")
 #' @rdname EndSequenceData-class
 #' @export
 setClass(Class = "EndSequenceData",

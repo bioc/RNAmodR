@@ -4,8 +4,8 @@
 \name{CoverageSequenceData-class}
 \alias{CoverageSequenceData-class}
 \alias{CoverageSequenceData}
-\alias{CoverageSequenceDataFrame-class}
 \alias{CoverageSequenceDataFrame}
+\alias{CoverageSequenceDataFrame-class}
 \alias{getData,CoverageSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{aggregateData,CoverageSequenceData-method}
 \alias{getDataTrack,CoverageSequenceData-method}

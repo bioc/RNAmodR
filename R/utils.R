@@ -1,6 +1,12 @@
 #' @include RNAmodR.R
 NULL
 
+# gets the first non virtual class which x extends from
+.get_first_class_extends <- function(x){
+  e <- extends(class(x))
+  e[e != class(x) & vapply(e,function(z){!isVirtualClass(z)},logical(1))][[1L]]
+}
+
 # seqnames related functions
 .rebase_seqnames <- function(gr, seqnames){
   GenomicRanges::GRanges(seqnames = seqnames,

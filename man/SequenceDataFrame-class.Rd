@@ -6,6 +6,7 @@
 \alias{SequenceDataFrame}
 \alias{cbind,SequenceDataFrame-method}
 \alias{[,SequenceDataFrame,ANY,ANY,ANY-method}
+\alias{SequenceDFrame-class}
 \title{The SequenceDataFrame class}
 \usage{
 \S4method{cbind}{SequenceDataFrame}(..., deparse.level = 1)
@@ -30,7 +31,12 @@ used to store the unlisted data within a
 \code{SequenceData} and \code{SequenceDataFrame} class must be implemented.
 
 The \code{SequenceDataFrame} class is derived from the
-\code{\link[S4Vectors:DataFrame-class]{DataFrame}} class.
+\code{\link[S4Vectors:DataFrame-class]{DataFrame}} class. To follow the 
+functionallity in the \code{S4Vectors} package, \code{SequenceDataFrame} 
+implements the concept, whereas \code{SequenceDFrame} is the implementation
+for in-memory data representation from which some specific 
+\code{*SequenceDataFrame} class derive from, e.g. 
+\code{\link[=CoverageSequenceData-class]{CoverageSequenceData}}.
 
 Subsetting of a \code{SequenceDataFrame} returns a \code{SequenceDataFrame} or 
 \code{DataFrame}, if it is subset by a column or row, respectively. The 

@@ -55,13 +55,25 @@ already implemented, which are:
  * `NormEnd3SequenceData`
 
 If these cannot be reused, a new class can be implemented quite easily. First
-the class and a constructor has to defined. The only value, which has to be 
-provided, is a default `minQuality` integer value.
+the DataFrame class, the Data class and a constructor has to defined. The only
+value, which has to be provided, is a default `minQuality` integer value and 
+some basic information.
 
 ```{r}
+setClass(Class = "ExampleSequenceDataFrame",
+         contains = "SequenceDFrame")
+ExampleSequenceDataFrame <- function(df, ranges, sequence, replicate,
+                                      condition, bamfiles, seqinfo){
+  RNAmodR:::.SequenceDataFrame("Example",df, ranges, sequence, replicate,
+                               condition, bamfiles, seqinfo)
+}
 setClass(Class = "ExampleSequenceData",
          contains = "SequenceData",
-         prototype = list(minQuality = 5L))
+         slots = c(unlistData = "ExampleSequenceDataFrame"),
+         prototype = list(unlistData = ExampleSequenceDataFrame(),
+                          unlistType = "ExampleSequenceDataFrame",
+                          minQuality = 5L,
+                          dataDescription = "Example data"))
 ExampleSequenceData <- function(bamfiles, annotation, sequences, seqinfo, ...){
   RNAmodR:::SequenceData("Example", bamfiles = bamfiles, 
                          annotation = annotation, sequences = sequences,

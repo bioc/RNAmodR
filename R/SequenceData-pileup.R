@@ -48,7 +48,7 @@ NULL
 #' @rdname PileupSequenceData-class
 #' @export
 setClass(Class = "PileupSequenceDataFrame",
-         contains = "SequenceDataFrame")
+         contains = "SequenceDFrame")
 #' @rdname PileupSequenceData-class
 #' @export
 PileupSequenceDataFrame <- function(df, ranges, sequence, replicate, condition,

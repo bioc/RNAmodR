@@ -53,7 +53,7 @@ NULL
 #' @rdname NormEndSequenceData-class
 #' @export
 setClass(Class = "NormEnd5SequenceDataFrame",
-         contains = "SequenceDataFrame")
+         contains = "SequenceDFrame")
 #' @rdname NormEndSequenceData-class
 #' @export
 NormEnd5SequenceDataFrame <- function(df, ranges, sequence, replicate,
@@ -74,7 +74,7 @@ setClass(Class = "NormEnd5SequenceData",
 #' @rdname NormEndSequenceData-class
 #' @export
 setClass(Class = "NormEnd3SequenceDataFrame",
-         contains = "SequenceDataFrame")
+         contains = "SequenceDFrame")
 #' @rdname NormEndSequenceData-class
 #' @export
 NormEnd3SequenceDataFrame <- function(df, ranges, sequence, replicate,

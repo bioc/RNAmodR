@@ -56,7 +56,12 @@ NULL
 #' \code{SequenceData} and \code{SequenceDataFrame} class must be implemented.
 #' 
 #' The \code{SequenceDataFrame} class is derived from the
-#' \code{\link[S4Vectors:DataFrame-class]{DataFrame}} class.
+#' \code{\link[S4Vectors:DataFrame-class]{DataFrame}} class. To follow the 
+#' functionallity in the \code{S4Vectors} package, \code{SequenceDataFrame} 
+#' implements the concept, whereas \code{SequenceDFrame} is the implementation
+#' for in-memory data representation from which some specific 
+#' \code{*SequenceDataFrame} class derive from, e.g. 
+#' \code{\link[=CoverageSequenceData-class]{CoverageSequenceData}}.
 #' 
 #' Subsetting of a \code{SequenceDataFrame} returns a \code{SequenceDataFrame} or 
 #' \code{DataFrame}, if it is subset by a column or row, respectively. The 
@@ -104,12 +109,14 @@ NULL
 #' e5sd <- relist(sdf,e5sd)
 NULL
 
-# SequenceDataFrame ------------------------------------------------------------
+################################################################################
+# SequenceDataFrame (virtual, concept)
+################################################################################
 
 #' @rdname SequenceDataFrame-class
 #' @export
 setClass(Class = "SequenceDataFrame",
-         contains = c("VIRTUAL","DFrame"),
+         contains = c("VIRTUAL","DataFrame"),
          slots = c(ranges = "GRanges",
                    sequence = "XString",
                    condition = "factor",
@@ -125,6 +132,241 @@ setClass(Class = "SequenceDataFrame",
 
 setMethod("relistToClass", "SequenceDataFrame",
           function(x) gsub("DataFrame","Data",class(x))
+)
+
+# show -------------------------------------------------------------------------
+
+#' @rdname SequenceData-functions
+setMethod("show", "SequenceDataFrame",
+          function(object){
+            callNextMethod(object)
+            cat("\ncontaining a ")
+            show(object@ranges)
+            cat("\nand a ")
+            show(object@sequence)
+          })
+
+# accessors --------------------------------------------------------------------
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "sequences", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@sequence})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "ranges", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@ranges})
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "replicates", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@replicate})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "conditions", 
+  signature = signature(object = "SequenceDataFrame"),
+  definition = function(object){object@condition})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "bamfiles", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@bamfiles})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "seqinfo", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@seqinfo})
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "dataType",
+          signature = signature(x = "SequenceDataFrame"),
+          definition = function(x){gsub("SequenceDataFrame","",class(x))})
+
+# internals for SequenceDataFrame ----------------------------------------------
+
+#' @importClassesFrom IRanges PartitioningByEnd
+#' @importFrom IRanges PartitioningByEnd
+setMethod(
+  "extractROWS", "SequenceDataFrame",
+  function(x, i){
+    i <- normalizeSingleBracketSubscript(i, x, exact = FALSE, 
+                                         allow.NAs = TRUE, as.NSBS = TRUE)
+    start <- which(start(PartitioningByWidth(ranges(x))) == i@subscript[[1L]])
+    end <- which(end(PartitioningByWidth(ranges(x))) == i@subscript[[2L]])
+    x_ranges <- extractROWS(ranges(x), seq.int(start,end))
+    x_sequences <- extractROWS(sequences(x), i)
+    # save the other slots, in case they are deleted from the result by calling
+    # callNextMethod()
+    cl <- class(x)
+    x_condition <- conditions(x)
+    x_replicate <- replicates(x)
+    x_bamfiles <- bamfiles(x)
+    x_seqinfo <- seqinfo(x)
+    x <- callNextMethod()
+    if(!is(x,"SequenceDataFrame")){
+      x <- new(cl,
+               x,
+               ranges = x_ranges,
+               sequence = x_sequences,
+               condition = x_condition,
+               replicate = x_replicate,
+               bamfiles = x_bamfiles,
+               seqinfo = x_seqinfo)
+    } else {
+      slot(x, "ranges", check = FALSE) <- x_ranges
+      slot(x, "sequence", check = FALSE) <- x_sequences
+      validObject(x)
+    }
+    x
+  }
+)
+
+setMethod(
+  "bindROWS", "SequenceDataFrame",
+  function (x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, 
+            check = TRUE) 
+  {
+    objects <- S4Vectors:::prepare_objects_to_bind(x, objects)
+    all_objects <- c(list(x), objects)
+    ans_ranges <- unlist(GenomicRanges::GRangesList(lapply(all_objects,ranges)))
+    ans_sequence <- do.call(xscat,lapply(all_objects,sequences))
+    BiocGenerics:::replaceSlots(callNextMethod(),
+                                ranges = ans_ranges,
+                                sequence = ans_sequence,
+                                check = check)
+  }
+)
+
+#' @rdname SequenceDataFrame-class
+#' @export
+setMethod(
+  "cbind", "SequenceDataFrame",
+  function(...){
+    args <- list(...)
+    if(length(args) == 1L){
+      return(args[[1L]])
+    }
+    # input checks
+    classes <- lapply(args,class)
+    if(length(unique(classes)) != 1L){
+      stop("Inputs must be of the same SequenceDataFrame type.")
+    }
+    className <- unique(classes)
+    lengths <- vapply(args,function(a){sum(lengths(a))},integer(1))
+    if(length(unique(lengths)) != 1L){
+      stop("Inputs must have the same length.")
+    }
+    .check_ranges(args)
+    .check_sequences(args)
+    #
+    data <- do.call(cbind,
+                    lapply(args,function(a){
+                      as(a, .get_first_class_extends(a))
+                    }))
+    ranges <- ranges(args[[1L]])
+    sequences <- sequences(args[[1L]])
+    colnames <- IRanges::CharacterList(strsplit(colnames(data),"\\."))
+    colnames_conditions <- colnames %in% c("treated","control")
+    colnames_replicates <- 
+      !is.na(suppressWarnings(IRanges::IntegerList(colnames)))
+    colnames_f <- !(colnames_conditions | colnames_replicates)
+    conditionsFmultiplier <- length(unique(vapply(colnames[colnames_f],
+                                                  paste,character(1),
+                                                  collapse=".")))
+    condition <- unlist(lapply(args,conditions))
+    condition_steps <- seq.int(1,length(condition),by=conditionsFmultiplier)
+    replicate <- .get_replicate_number(condition[condition_steps])
+    replicate <- rep(replicate, each = conditionsFmultiplier)
+    colnames[colnames_conditions] <- IRanges::CharacterList(condition)
+    colnames[colnames_replicates] <- IRanges::CharacterList(replicate)
+    colnames(data) <- vapply(colnames,paste,character(1),collapse = ".")
+    bamfiles <- do.call(c,lapply(args,bamfiles))
+    seqinfo <- seqinfo(args[[1L]])
+    .SequenceDataFrame(class = gsub("SequenceDataFrame","",className),
+                       df = data,
+                       ranges = ranges,
+                       sequence = sequences,
+                       replicate = replicate,
+                       condition = condition,
+                       bamfiles = bamfiles,
+                       seqinfo = seqinfo)
+  }
+)
+
+#' @importFrom stats setNames
+#' @rdname SequenceDataFrame-class
+#' @export
+setMethod(
+  "[", "SequenceDataFrame",
+  function(x, i, j, ..., drop = TRUE){
+    if (!isTRUEorFALSE(drop)){
+      stop("'drop' must be TRUE or FALSE")
+    }
+    if (length(list(...)) > 0L){
+      warning("parameters in '...' not supported")
+    }
+    classDG <- .get_first_class_extends(x)
+    ## We do list-style subsetting when [ was called with no ','.
+    ## NOTE: matrix-style subsetting by logical matrix not supported.
+    list_style_subsetting <- (nargs() - !missing(drop)) < 3L
+    if (list_style_subsetting || !missing(j)) {
+      if (list_style_subsetting) {
+        if (!missing(drop))
+          warning("'drop' argument ignored by list-style subsetting")
+        if (missing(i))
+          return(x)
+        j <- i
+      }
+      xstub <- stats::setNames(seq_along(x), names(x))
+      ia <- interaction(conditions(x), replicates(x))
+      if(is.character(j)){
+        j <- normalizeSingleBracketSubscript(j, xstub)
+        j <- unique(as.integer(ia)[j])
+      } else {
+        conditionsFmultiplier <- length(ia) / length(unique(ia))
+        j <- normalizeSingleBracketSubscript(j, xstub[seq_len(length(ia)/conditionsFmultiplier)])
+      }
+      j2 <- which(!is.na(match(as.integer(ia), j)))
+      x <- initialize(x,
+                      as(x,classDG)[, j2, drop = FALSE],
+                      ranges = x@ranges,
+                      sequence = x@sequence,
+                      replicate = factor(x@replicate[j2]),
+                      condition = factor(x@condition[j2]),
+                      bamfiles = x@bamfiles[j],
+                      seqinfo = x@seqinfo)
+      if (anyDuplicated(names(x))){
+        names(x) <- make.unique(names(x))
+      }
+      if (list_style_subsetting){
+        return(x)
+      }
+    }
+    if (!missing(i)){
+      x <- extractROWS(as(x,classDG), i)
+    } else {
+      return(x) # early exit if subset is column-only
+    }
+    if (missing(drop)){
+      drop <- TRUE
+    }  
+    if (drop) {
+      ## one row left
+      if (nrow(x) == 1L){
+        return(as(x, "list"))
+      }
+    }
+    x
+  }
 )
 
 # constructor ------------------------------------------------------------------
@@ -185,11 +427,7 @@ sequenceDataFrameClass <- function(dataType){
       replicate = replicate,
       bamfiles = bamfiles,
       seqinfo = seqinfo,
-      rownames = df@rownames,
-      nrows = df@nrows,
-      listData = df@listData,
-      elementMetadata = df@elementMetadata,
-      metadata = df@metadata)
+      df)
 }
 
 .valid_SequenceDataFrame <-  function(x){
@@ -205,220 +443,11 @@ sequenceDataFrameClass <- function(dataType){
 
 S4Vectors::setValidity2(Class = "SequenceDataFrame", .valid_SequenceDataFrame)
 
-# show -------------------------------------------------------------------------
-
-#' @rdname SequenceData-functions
-setMethod("show", "SequenceDataFrame",
-          function(object){
-            callNextMethod(object)
-            cat("\ncontaining a ")
-            show(object@ranges)
-            cat("\nand a ")
-            show(object@sequence)
-          })
-
-# accessors --------------------------------------------------------------------
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(
-  f = "sequences", 
-  signature = signature(x = "SequenceDataFrame"),
-  definition = function(x){x@sequence})
-#' @rdname SequenceData-functions
-#' @export
-setMethod(
-  f = "ranges", 
-  signature = signature(x = "SequenceDataFrame"),
-  definition = function(x){x@ranges})
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(
-  f = "replicates", 
-  signature = signature(x = "SequenceDataFrame"),
-  definition = function(x){x@replicate})
-#' @rdname SequenceData-functions
-#' @export
-setMethod(
-  f = "conditions", 
-  signature = signature(object = "SequenceDataFrame"),
-  definition = function(object){object@condition})
-#' @rdname SequenceData-functions
-#' @export
-setMethod(
-  f = "bamfiles", 
-  signature = signature(x = "SequenceDataFrame"),
-  definition = function(x){x@bamfiles})
-#' @rdname SequenceData-functions
-#' @export
-setMethod(
-  f = "seqinfo", 
-  signature = signature(x = "SequenceDataFrame"),
-  definition = function(x){x@seqinfo})
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "dataType",
-          signature = signature(x = "SequenceDataFrame"),
-          definition = function(x){gsub("SequenceDataFrame","",class(x))})
-
-# internals --------------------------------------------------------------------
-
-#' @importClassesFrom IRanges PartitioningByEnd
-#' @importFrom IRanges PartitioningByEnd
-setMethod(
-  "extractROWS", "SequenceDataFrame",
-  function(x, i){
-    i <- normalizeSingleBracketSubscript(i, x, exact = FALSE, 
-                                         allow.NAs = TRUE, as.NSBS = TRUE)
-    start <- which(start(PartitioningByWidth(ranges(x))) == i@subscript[[1L]])
-    end <- which(end(PartitioningByWidth(ranges(x))) == i@subscript[[2L]])
-    slot(x, "listData", check = FALSE) <- lapply(as.list(x), extractROWS, i)
-    slot(x, "nrows", check = FALSE) <- length(i)
-    slot(x, "ranges", check = FALSE) <- extractROWS(ranges(x),
-                                                    seq.int(start,end))
-    slot(x, "sequence", check = FALSE) <- extractROWS(sequences(x), i)
-    if (!is.null(rownames(x))) {
-      slot(x, "rownames", check = FALSE) <- extractROWS(rownames(x), i)
-    }
-    validObject(x)
-    x
-  }
-)
-
-setMethod(
-  "bindROWS", "SequenceDataFrame",
-  function (x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, 
-            check = TRUE) 
-  {
-    objects <- S4Vectors:::prepare_objects_to_bind(x, objects)
-    all_objects <- c(list(x), objects)
-    ans_ranges <- unlist(GenomicRanges::GRangesList(lapply(all_objects,ranges)))
-    ans_sequence <- do.call(xscat,lapply(all_objects,sequences))
-    BiocGenerics:::replaceSlots(callNextMethod(),
-                                ranges = ans_ranges,
-                                sequence = ans_sequence,
-                                check = check)
-  }
-)
+################################################################################
+# SequenceDFrame (Virtual, implementation, type independent)
+################################################################################
 
 #' @rdname SequenceDataFrame-class
 #' @export
-setMethod(
-  "cbind", "SequenceDataFrame",
-  function(...){
-    args <- list(...)
-    if(length(args) == 1L){
-      return(args[[1L]])
-    }
-    # input checks
-    classes <- lapply(args,class)
-    if(length(unique(classes)) != 1L){
-      stop("Inputs must be of the same SequenceDataFrame type.")
-    }
-    className <- unique(classes)
-    lengths <- vapply(args,function(a){sum(lengths(a))},integer(1))
-    if(length(unique(lengths)) != 1L){
-      stop("Inputs must have the same length.")
-    }
-    .check_ranges(args)
-    .check_sequences(args)
-    #
-    data <- do.call(cbind,
-                    lapply(args,function(a){
-                      as(a, "DataFrame")
-                    }))
-    ranges <- ranges(args[[1L]])
-    sequences <- sequences(args[[1L]])
-    colnames <- IRanges::CharacterList(strsplit(colnames(data),"\\."))
-    colnames_conditions <- colnames %in% c("treated","control")
-    colnames_replicates <- !is.na(suppressWarnings(IntegerList(colnames)))
-    colnames_f <- !(colnames_conditions | colnames_replicates)
-    conditionsFmultiplier <- length(unique(vapply(colnames[colnames_f],
-                                                  paste,character(1),
-                                                  collapse=".")))
-    condition <- unlist(lapply(args,conditions))
-    condition_steps <- seq.int(1,length(condition),by=conditionsFmultiplier)
-    replicate <- .get_replicate_number(condition[condition_steps])
-    replicate <- rep(replicate, each = conditionsFmultiplier)
-    colnames[colnames_conditions] <- IRanges::CharacterList(condition)
-    colnames[colnames_replicates] <- IRanges::CharacterList(replicate)
-    colnames(data) <- vapply(colnames,paste,character(1),collapse = ".")
-    bamfiles <- do.call(c,lapply(args,bamfiles))
-    seqinfo <- seqinfo(args[[1L]])
-    .SequenceDataFrame(class = gsub("SequenceDataFrame","",className),
-                       df = data,
-                       ranges = ranges,
-                       sequence = sequences,
-                       replicate = replicate,
-                       condition = condition,
-                       bamfiles = bamfiles,
-                       seqinfo = seqinfo)
-  }
-)
-
-#' @importFrom stats setNames
-#' @rdname SequenceDataFrame-class
-#' @export
-setMethod(
-  "[", "SequenceDataFrame",
-  function(x, i, j, ..., drop = TRUE){
-    if (!isTRUEorFALSE(drop)){
-      stop("'drop' must be TRUE or FALSE")
-    }
-    if (length(list(...)) > 0L){
-      warning("parameters in '...' not supported")
-    }
-    ## We do list-style subsetting when [ was called with no ','.
-    ## NOTE: matrix-style subsetting by logical matrix not supported.
-    list_style_subsetting <- (nargs() - !missing(drop)) < 3L
-    if (list_style_subsetting || !missing(j)) {
-      if (list_style_subsetting) {
-        if (!missing(drop))
-          warning("'drop' argument ignored by list-style subsetting")
-        if (missing(i))
-          return(x)
-        j <- i
-      }
-      xstub <- stats::setNames(seq_along(x), names(x))
-      ia <- interaction(conditions(x), replicates(x))
-      if(is.character(j)){
-        j <- normalizeSingleBracketSubscript(j, xstub)
-        j <- unique(as.integer(ia)[j])
-      } else {
-        conditionsFmultiplier <- length(ia) / length(unique(ia))
-        j <- normalizeSingleBracketSubscript(j, xstub[seq_len(length(ia)/conditionsFmultiplier)])
-      }
-      j2 <- which(!is.na(match(as.integer(ia), j)))
-      x <- initialize(x,
-                      as(x,"DataFrame")[, j2, drop = FALSE],
-                      ranges = x@ranges,
-                      sequence = x@sequence,
-                      replicate = factor(x@replicate[j2]),
-                      condition = factor(x@condition[j2]),
-                      bamfiles = x@bamfiles[j],
-                      seqinfo = x@seqinfo)
-      if (anyDuplicated(names(x))){
-        names(x) <- make.unique(names(x))
-      }
-      if (list_style_subsetting){
-        return(x)
-      }
-    }
-    if (!missing(i)){
-      x <- extractROWS(as(x,"DataFrame"), i)
-    } else {
-      return(x) # early exit if subset is column-only
-    }
-    if (missing(drop)){
-      drop <- TRUE
-    }  
-    if (drop) {
-      ## one row left
-      if (nrow(x) == 1L){
-        return(as(x, "list"))
-      }
-    }
-    x
-  }
-)
+setClass(Class = "SequenceDFrame",
+         contains = c("VIRTUAL","SequenceDataFrame","DFrame"))
