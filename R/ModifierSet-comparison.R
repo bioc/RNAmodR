@@ -111,6 +111,7 @@ NULL
                    "'perTranscript' must be a single logical value.",
                    "'sequenceData' must be a single logical value."),
   stringsAsFactors = FALSE)
+
 .norm_compare_args <- function(input, data, x){
   if(is(x,"ModifierSet")){
     compareType <- mainScore(x)
@@ -122,15 +123,19 @@ NULL
   sequenceData <- FALSE
   args <- .norm_settings(input, .compare_settings, compareType, allTypes,
                          perTranscript, sequenceData)
-  colnames <- unique(unlist(colnames(data[[1]])))
-  if(!is.na(args[["compareType"]]) && !(args[["compareType"]] %in% colnames)){
-    stop("'compareType' must be a character and a valid colname in the ",
+  if(args[["sequenceData"]] && is.null(input[["allTypes"]]) & 
+     is.null(input[["compareType"]])){
+    args[["allTypes"]] <- TRUE
+  }
+  colnames <- colnames(unlist(data[[1]]))
+  if(args[["allTypes"]]){
+    args[["compareType"]] <- colnames
+  }
+  if(!anyNA(args[["compareType"]]) && !(args[["compareType"]] %in% colnames)){
+    stop("'compareType' must be a character and a valid colnames in the ",
          "aggregated data of 'x'.", call. = FALSE)
   }
-  if(allTypes){
-    args[["compareType"]] <- names(data[[1]][[1]])
-  }
-  if(is.na(args[["compareType"]][1L]) & args[["sequenceData"]] & 
+  if(anyNA(args[["compareType"]]) & args[["sequenceData"]] & 
      !args[["allTypes"]]){
     stop("'compareType' must be set if 'sequenceData = TRUE' and ",
          "'allTypes = FALSE'", call. = FALSE)
@@ -173,7 +178,7 @@ NULL
     f <- match(start(coord),relist(data$positions,partitioning_data))
     ff <- !is.na(f)
     f <- f[ff]
-    f <- f + start(IRanges::PartitioningByEnd(f)) - 1L
+    f <- f + start(IRanges::PartitioningByEnd(partitioning_data)) - 1L
     f <- unlist(f)
     if(!is.null(unlisted_coord$Activity)){
       data$Activity <- ""
