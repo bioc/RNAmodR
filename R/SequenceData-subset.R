@@ -41,8 +41,10 @@ NULL
 .norm_subset_args <- function(input,x){
   name <- NA_character_
   if(is(x,"Modifier") || is(x,"ModifierSet")){
+    seqtype <- seqtype(x)
     type <- modType(x)
   } else {
+    seqtype <- NA_character_
     type <- NA_character_
   }
   merge <- TRUE
@@ -53,8 +55,9 @@ NULL
   args <- .norm_settings(input, .subset_settings, name, type, merge, flanking,
                          perTranscript, sequenceData, rawData)
   if(all(!is.na(args[["type"]]))){
-    if(any(!.is_valid_modType(args[["type"]]))){
-      stop("'type' must be one or more elements of shortName(ModRNAString()).",
+    if(any(!.is_valid_modType(args[["type"]], seqtype))){
+      stop("'type' must be one or more elements of 'shortName(ModRNAString())'",
+           " or 'shortName(ModDNAString())'.",
            call. = FALSE)
     }
   }

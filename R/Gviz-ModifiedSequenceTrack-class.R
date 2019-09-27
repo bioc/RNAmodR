@@ -197,3 +197,56 @@ ModRNASequenceTrack <- function(sequence, chromosome, genome, ...){
                                       .get_ModRNA_bio_color(),
                                       ...)
 }
+
+################################################################################
+## Gviz + ModDNAString #########################################################
+################################################################################
+
+#' @name ModDNASequenceTrack
+#' @aliases ModDNASequenceTrack-class
+#' 
+#' @title ModDNASequenceTrack
+#' 
+#' @description 
+#' A \code{Gviz} compatible 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}} for showing modified 
+#' DNA sequences.
+#' 
+#' @export
+setClass("ModDNASequenceTrack",
+         contains = "ModifiedSequenceTrack",
+         representation = representation(sequence = "ModDNAStringSet",
+                                         chromosome = "character",
+                                         genome = "character"),
+         prototype = prototype(seqType = "ModDNAString",
+                               sequence = ModDNAStringSet(),
+                               name = "Sequence",
+                               chromosome = "chr0",
+                               genome = "all")
+)
+
+#' @rdname ModDNASequenceTrack
+#' 
+#' @param sequence A \code{character} vector or \code{ModDNAString} object of 
+#' length one. The sequence to display. See 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
+#' @param chromosome,genome,... See 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
+#' 
+#' @return a \code{ModDNASequenceTrack} object
+#'   
+#' @export
+#' 
+#' @examples
+#' seq <- ModDNAStringSet(c(chr1 = paste0(alphabet(ModDNAString()),collapse = "")))
+#' st <- ModDNASequenceTrack(seq)
+#' Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
+ModDNASequenceTrack <- function(sequence, chromosome, genome, ...){
+  .stringSet_to_ModifiedSequenceTrack("ModDNASequenceTrack",
+                                      "ModDNAStringSet",
+                                      sequence,
+                                      chromosome,
+                                      genome,
+                                      .get_ModDNA_bio_color(),
+                                      ...)
+}

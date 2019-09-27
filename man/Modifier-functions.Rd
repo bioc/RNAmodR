@@ -23,9 +23,10 @@
 \alias{names,Modifier-method}
 \alias{ranges,Modifier-method}
 \alias{replicates,Modifier-method}
+\alias{seqinfo,Modifier-method}
+\alias{seqtype,Modifier-method}
 \alias{sequenceData,Modifier-method}
 \alias{sequences,Modifier-method}
-\alias{seqinfo,Modifier-method}
 \alias{validAggregate,Modifier-method}
 \alias{validModification,Modifier-method}
 \alias{show,ModifierSet-method}
@@ -39,6 +40,7 @@
 \alias{ranges,ModifierSet-method}
 \alias{replicates,ModifierSet-method}
 \alias{seqinfo,ModifierSet-method}
+\alias{seqtype,ModifierSet-method}
 \alias{sequences,ModifierSet-method}
 \title{Modifier/ModifierSet functions}
 \usage{
@@ -80,11 +82,13 @@ validModification(x)
 
 \S4method{replicates}{Modifier}(x)
 
+\S4method{seqinfo}{Modifier}(x)
+
+\S4method{seqtype}{Modifier}(x)
+
 \S4method{sequenceData}{Modifier}(x)
 
 \S4method{sequences}{Modifier}(x, modified = FALSE)
-
-\S4method{seqinfo}{Modifier}(x)
 
 \S4method{validAggregate}{Modifier}(x)
 
@@ -112,6 +116,8 @@ validModification(x)
 
 \S4method{seqinfo}{ModifierSet}(x)
 
+\S4method{seqtype}{ModifierSet}(x)
+
 \S4method{sequences}{ModifierSet}(x, modified = FALSE)
 }
 \arguments{
@@ -120,8 +126,9 @@ validModification(x)
 \item{...}{Additional arguments.}
 
 \item{modified}{For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
-the sequences be returned as a \code{ModRNAString} with the found
-modifications added on top of the \code{RNAString}? See
+the sequences be returned as a \code{ModRNAString}/\code{ModDNAString} with
+the found modifications added on top of the \code{RNAString}/
+\code{DNAString}? See 
 \code{\link[Modstrings:separate]{combineIntoModstrings}}.}
 
 \item{perTranscript}{\code{TRUE} or \code{FALSE}: Should the positions shown
@@ -131,6 +138,10 @@ per transcript? (default: \code{perTranscript = FALSE})}
 \itemize{
 \item{\code{modifierType}:} {a character vector with the appropriate class
 Name of a \code{\link[=Modifier-class]{Modifier}}.}
+\item{\code{modType}:} {a character vector with the modifications detected by
+the \code{Modifier} class.}
+\item{\code{seqtype}:} {a single character value defining if either
+"RNA" or "DNA" modifications are detected by the \code{Modifier} class.}
 \item{\code{mainScore}:} {a character vector.}
 \item{\code{sequenceData}:} {a \code{SequenceData} object.}
 \item{\code{modifications}:} {a \code{GRanges} or \code{GRangesList} object
@@ -159,7 +170,9 @@ loaded. This potentially invalidates them. To update the data, run the
 data(msi,package="RNAmodR")
 mi <- msi[[1]]
 modifierType(mi) # The class name of the Modifier object
-modifierType(msi) #
+modifierType(msi)
+seqtype(mi)
+modType(mi)
 mainScore(mi)
 sequenceData(mi)
 modifications(mi)

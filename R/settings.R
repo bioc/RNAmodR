@@ -1,10 +1,31 @@
 #' @include RNAmodR.R
 NULL
 
-# Modstrings related helper functions ------------------------------------------
+# Biostrings/Modstrings related helper functions -------------------------------
 
-.is_valid_modType <- function(modType){
+.is_valid_modType <- function(modType, seqtype = NA){
+  if(is.na(seqtype)){
+    return(.is_valid_RNAmodType(modType) | .is_valid_DNAmodType(modType))
+  }
+  if(seqtype == seqtype(RNAString())){
+    .is_valid_RNAmodType(modType)
+  } else if(seqtype == seqtype(DNAString())){
+    .is_valid_DNAmodType(modType)
+  } else {
+    stop("")
+  }
+}
+
+.is_valid_RNAmodType <- function(modType){
   modType %in% Modstrings::shortName(Modstrings::ModRNAString())
+}
+
+.is_valid_DNAmodType <- function(modType){
+  modType %in% Modstrings::shortName(Modstrings::ModDNAString())
+}
+
+.is_valid_nucleotide_seqtype <- function(seqtype){
+  seqtype %in% c(seqtype(RNAString()),seqtype(DNAString()))
 }
 
 # testthat

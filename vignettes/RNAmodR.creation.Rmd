@@ -123,7 +123,7 @@ class, which are then combined to form a `SequenceDataSet`.
 
 ```{r}
 setClass("ModExample",
-         contains = c("Modifier"),
+         contains = c("RNAModifier"),
          prototype = list(mod = "X",
                           score = "score",
                           dataType = "ExampleSequenceData"))

@@ -13,7 +13,7 @@ test_that("Subsetting SequenceData:",{
   expect_error(RNAmodR:::.norm_subset_args(list(type = 1),msi),
                "'type' must be a character with a width > 0L")
   expect_error(RNAmodR:::.norm_subset_args(list(type = "meep"),msi),
-               "'type' must be one or more elements of shortName")
+               "'type' must be one or more elements of 'shortName")
   expect_error(RNAmodR:::.norm_subset_args(list(flanking = 1),msi),
         "'flanking' must be a single integer value equal or higher than 0L")
   expect_error(RNAmodR:::.norm_subset_args(list(rawData = 1),msi),

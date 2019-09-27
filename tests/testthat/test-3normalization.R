@@ -79,11 +79,7 @@ test_that("argument normalization:",{
   seqinfo2 <- seqinfo[c("chr1","chr2","chr3"),]
   expect_equal(seqinfo2,RNAmodR:::.norm_seqnames(bf,grl,fafile,seqinfo2))
   # .norm_mod
-  expect_error(RNAmodR:::.norm_mod(),'argument "mod" is missing')
-  expect_error(RNAmodR:::.norm_mod(""),'argument "className" is missing')
-  expect_error(RNAmodR:::.norm_mod("",""),"Modification '' as defined for  does")
-  expect_error(RNAmodR:::.norm_mod("II",""),"Modification 'II' as defined for  does")
-  expect_equal("I",RNAmodR:::.norm_mod("I",""))
+  expect_error(RNAmodR:::.norm_mod(),'argument "x" is missing')
   # .norm_modifiertype
   expect_error(RNAmodR:::.norm_modifiertype(),'argument "x" is missing')
   expect_error(RNAmodR:::.norm_modifiertype(""),"Empty string")

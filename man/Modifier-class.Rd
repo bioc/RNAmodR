@@ -10,6 +10,8 @@
 \alias{Modifier,character-method}
 \alias{Modifier,list-method}
 \alias{Modifier,BamFileList-method}
+\alias{RNAModifier-class}
+\alias{DNAModifier-class}
 \title{The Modifier class}
 \usage{
 Modifier(className, x, annotation, sequences, seqinfo, ...)
@@ -83,8 +85,13 @@ high throughput sequencing data.
 Each subclass has to implement the following functions:
 
 \itemize{
-\item{\code{\link{aggregateData}}: }{used for specific data aggregation}
-\item{\code{\link{findMod}}: }{used for specific search for modifications}
+\item{Slot \code{nucleotide}: } {Either "RNA" or "DNA". For conveniance the
+subclasses \code{RNAModifier} and \code{DNAModifier} are already available
+and can be inherited from.}
+\item{Function \code{\link{aggregateData}}: }{used for specific data 
+aggregation}
+\item{Function \code{\link{findMod}}: }{used for specific search for 
+modifications}
 }
 
 Optionally the function \code{\link[=Modifier-functions]{settings<-}} can be
@@ -99,9 +106,13 @@ not set to \code{FALSE}.
 \section{Slots}{
 
 \describe{
+\item{\code{nucleotide}}{a \code{character} value, which needs to contain "RNA" or 
+"DNA"}
+
 \item{\code{mod}}{a \code{character} value, which needs to contain one or more
 elements from the alphabet of a
-\code{\link[Modstrings:ModRNAString]{ModRNAString}} class.}
+\code{\link[Modstrings:ModRNAString]{ModRNAString}} or 
+\code{\link[Modstrings:ModDNAString]{ModDNAString}} class.}
 
 \item{\code{score}}{the main score identifier used for visualizations}
 

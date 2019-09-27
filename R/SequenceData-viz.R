@@ -216,15 +216,11 @@ NULL
                        args[["sequence.track.pars"]]))
     track
   }
-  if(!is(seq,"DNAStringSet") && 
-     !is(seq,"RNAStringSet") && 
-     !is(seq,"ModRNAStringSet")){
+  if(!is(seq,"DNAStringSet") &&  !is(seq,"RNAStringSet") && 
+     !is(seq,"ModRNAStringSet") && !is(seq,"ModDNAStringSet")){
     stop("Invalid sequence type '",class(seq),"'. sequences(x) must be a ",
-         "RNA/ModRNA/DNAStringSet.",
+         "RNA/ModRNA/DNA/ModDNA*StringSet.",
          call. = FALSE)
-  }
-  if(is(seq,"DNAStringSet")){
-    seq <- as(seq,"RNAStringSet")
   }
   # reconstruct the chromosomal sequences for plotting
   seq <- .stitch_chromosome(seq, ranges, chromosome)
@@ -232,6 +228,10 @@ NULL
     st <- FUN("RNASequenceTrack","RNAStringSet", seq, args)
   } else if(is(seq,"ModRNAStringSet")){
     st <- FUN("ModRNASequenceTrack","ModRNAStringSet", seq, args)
+  } else if(is(seq,"DNAStringSet")){
+    st <- FUN("SequenceTrack","DNAStringSet", seq, args)
+  } else if(is(seq,"ModDNAStringSet")){
+    st <- FUN("ModDNASequenceTrack","ModDNAStringSet", seq, args)
   } else {
     stop("")
   }

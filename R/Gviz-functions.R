@@ -2,6 +2,15 @@
 #' @include Gviz-ModifiedSequenceTrack-class.R
 NULL
 
+.get_ModDNA_bio_color <- function(){
+  alphabetNames <- alphabet(ModDNAString())
+  alphabet <- rep("#33FF00",length(alphabetNames))
+  names(alphabet) <- alphabetNames
+  dna_color <- getBioColor(type="DNA_BASES_N")
+  alphabet[match(names(dna_color),names(alphabet))] <- dna_color
+  alphabet
+}
+
 .get_ModRNA_bio_color <- function(){
   alphabetNames <- alphabet(ModRNAString())
   alphabet <- rep("#33FF00",length(alphabetNames))

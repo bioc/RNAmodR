@@ -4,7 +4,8 @@ test_that("SequenceData:",{
   expect_error(RNAmodR:::.get_SequenceData_args(),
                'argument "input" is missing, with no default')
   actual <- RNAmodR:::.get_SequenceData_args(list())
-  expect_named(actual,c("minQuality","max_depth","minLength","maxLength"))
+  expect_named(actual,c("minQuality","max_depth","minLength","maxLength",
+                        "seqtype"))
   expect_error(RNAmodR:::.get_SequenceData_args(list(minQuality = 10)),
                "'minQuality' must be integer with a value higher than 1L.")
   expect_error(RNAmodR:::.get_SequenceData_args(list(max_depth = 11)),
@@ -13,6 +14,8 @@ test_that("SequenceData:",{
                "'minLength' must be integer with a value higher than 0L or NA.")
   expect_error(RNAmodR:::.get_SequenceData_args(list(maxLength = 11)),
                "'maxLength' must be integer with a value higher than 1L or NA.")
+  expect_error(RNAmodR:::.get_SequenceData_args(list(seqtype = 11)),
+               "'seqtype' must be either 'RNA' or 'DNA'.")
   # SequenceData using CoverageSequenceData as test case
   library(RNAmodR.Data)
   library(rtracklayer)
@@ -30,6 +33,10 @@ test_that("SequenceData:",{
   expect_equal(lengths(colnames(e5sd)),c(1,1))
   expect_equal(colnames(e5sd)[[1]],colnames(e5sd)[[2]])
   expect_equal(colnames(e5sd)[[1]],c("end5.treated.1"))
+  expect_s4_class(sequences(e5sd),"RNAStringSet")
+  seqtype(e5sd) <- "DNA"
+  expect_s4_class(sequences(e5sd),"DNAStringSet")
+  seqtype(e5sd) <- "RNA"
   ##############################################################################
   skip_on_bioc()
   annotation <- GFF3File(RNAmodR.Data.example.man.gff3())

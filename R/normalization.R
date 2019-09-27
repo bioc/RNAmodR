@@ -254,14 +254,15 @@ SAMPLE_TYPES <- c("treated","control")
   x
 }
 
-.norm_mod <- function(mod, className){
-  f <- .is_valid_modType(mod)
-  if(length(which(f)) != length(mod)){
-    stop("Modification '",mod[!f],"' as defined for ",className," does not ",
-         "exist in the Modstrings dictionary for modified RNA sequences.",
+.norm_mod <- function(x){
+  modType <- modType(x)
+  f <- .is_valid_modType(modType, seqtype(x))
+  if(length(which(f)) != length(modType)){
+    stop("Modification '",modType[!f],"' as defined for ",class(x)," does not ",
+         "exist in the Modstrings dictionary for modified RNA/DNA sequences.",
          call. = FALSE)
   }
-  mod
+  modType
 }
 
 # check data validity ----------------------------------------------------------

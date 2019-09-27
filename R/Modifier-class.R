@@ -23,8 +23,13 @@ invalidMessage <- paste0("Settings were changed after data aggregation or ",
 #' Each subclass has to implement the following functions:
 #'
 #' \itemize{
-#' \item{\code{\link{aggregateData}}: }{used for specific data aggregation}
-#' \item{\code{\link{findMod}}: }{used for specific search for modifications}
+#' \item{Slot \code{nucleotide}: } {Either "RNA" or "DNA". For conveniance the
+#' subclasses \code{RNAModifier} and \code{DNAModifier} are already available
+#' and can be inherited from.}
+#' \item{Function \code{\link{aggregateData}}: }{used for specific data 
+#' aggregation}
+#' \item{Function \code{\link{findMod}}: }{used for specific search for 
+#' modifications}
 #' }
 #'
 #' Optionally the function \code{\link[=Modifier-functions]{settings<-}} can be
@@ -106,9 +111,12 @@ invalidMessage <- paste0("Settings were changed after data aggregation or ",
 #' objects, if \code{x} is not a \code{SequenceData} object or a list of
 #' \code{SequenceData} objects.
 #'
+#' @slot nucleotide a \code{character} value, which needs to contain "RNA" or 
+#' "DNA"
 #' @slot mod a \code{character} value, which needs to contain one or more
 #' elements from the alphabet of a
-#' \code{\link[Modstrings:ModRNAString]{ModRNAString}} class.
+#' \code{\link[Modstrings:ModRNAString]{ModRNAString}} or 
+#' \code{\link[Modstrings:ModDNAString]{ModDNAString}} class.
 #' @slot score the main score identifier used for visualizations
 #' @slot dataType the class name(s) of the \code{SequenceData} class used
 #' @slot bamfiles the input bam files as \code{BamFileList}
@@ -145,8 +153,9 @@ NULL
 #'
 #' @param x,object a \code{Modifier} or \code{ModifierSet} class
 #' @param modified For \code{sequences}: \code{TRUE} or \code{FALSE}: Should
-#' the sequences be returned as a \code{ModRNAString} with the found
-#' modifications added on top of the \code{RNAString}? See
+#' the sequences be returned as a \code{ModRNAString}/\code{ModDNAString} with
+#' the found modifications added on top of the \code{RNAString}/
+#' \code{DNAString}? See 
 #' \code{\link[Modstrings:separate]{combineIntoModstrings}}.
 #' @param perTranscript \code{TRUE} or \code{FALSE}: Should the positions shown
 #' per transcript? (default: \code{perTranscript = FALSE})
@@ -156,6 +165,10 @@ NULL
 #' \itemize{
 #' \item{\code{modifierType}:} {a character vector with the appropriate class
 #' Name of a \code{\link[=Modifier-class]{Modifier}}.}
+#' \item{\code{modType}:} {a character vector with the modifications detected by
+#' the \code{Modifier} class.}
+#' \item{\code{seqtype}:} {a single character value defining if either
+#' "RNA" or "DNA" modifications are detected by the \code{Modifier} class.}
 #' \item{\code{mainScore}:} {a character vector.}
 #' \item{\code{sequenceData}:} {a \code{SequenceData} object.}
 #' \item{\code{modifications}:} {a \code{GRanges} or \code{GRangesList} object
@@ -177,7 +190,9 @@ NULL
 #' data(msi,package="RNAmodR")
 #' mi <- msi[[1]]
 #' modifierType(mi) # The class name of the Modifier object
-#' modifierType(msi) #
+#' modifierType(msi)
+#' seqtype(mi)
+#' modType(mi)
 #' mainScore(mi)
 #' sequenceData(mi)
 #' modifications(mi)
@@ -198,7 +213,8 @@ setClassUnion("list_OR_BamFileList",
 #' @export
 setClass("Modifier",
          contains = c("VIRTUAL"),
-         slots = c(mod = "character", # this have to be populated by subclass
+         slots = c(seqtype = "character", # this have to be populated by subclass,
+                   mod = "character", # this have to be populated by subclass
                    score = "character", # this have to be populated by subclass
                    dataType = "list_OR_character", # this have to be populated by subclass
                    bamfiles = "list_OR_BamFileList",
@@ -265,7 +281,18 @@ setClass("Modifier",
 }
 
 .valid_Modifier <- function(x){
+  if(is.null(x@seqtype)){
+    return("'seqtype' slot not populated.")
+  }
+  if(!.is_valid_nucleotide_seqtype(seqtype(x))){
+    return(paste0("'seqtype' slot must contain the character value '",
+                  seqtype(RNAString()),"' or '",seqtype(DNAString()),"'."))
+  }
   seqdata <- x@data
+  if(seqtype(x) != seqtype(seqdata)){
+    return("'seqtype' does not match seqtype() of SequenceData contained ",
+           "within Modifier object.")
+  }
   if(is.list(x@bamfiles)){
     test <- !vapply(x@bamfiles,is,logical(1),"BamFileList")
     if(any(test)){
@@ -345,7 +372,9 @@ setMethod(
         "with",length(object@data),"elements.\n")
     files <- BiocGenerics::path(object@bamfiles)
     cat("| Input files:\n",paste0("  - ",names(files),": ",files,"\n"))
-    cat("| Modification type(s): ",paste0(object@mod, collapse = " / "),"\n")
+    cat("| Nucleotide - Modification type(s): ",
+        paste0(seqtype(object), collapse = " / ")," - ",
+        paste0(modType(object), collapse = " / "),"\n")
     cat("| Modifications found:",ifelse(length(object@modifications) != 0L,
                                       paste0("yes (",
                                              length(object@modifications),
@@ -377,6 +406,7 @@ setMethod(
 setMethod(f = "bamfiles",
           signature = signature(x = "Modifier"),
           definition = function(x){x@bamfiles})
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "conditions",
@@ -384,6 +414,7 @@ setMethod(f = "conditions",
           definition = function(object){
             object@condition
           })
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "mainScore",
@@ -430,31 +461,37 @@ setMethod(f = "modifications",
               x@modifications
             }
 )
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modifierType",
           signature = signature(x = "Modifier"),
-          definition = function(x){class(x)[[1]]})
+          definition = function(x){class(x)[[1L]]})
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modType",
           signature = signature(x = "Modifier"),
           definition = function(x){x@mod})
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "dataType",
           signature = signature(x = "Modifier"),
           definition = function(x){x@dataType})
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "names",
           signature = signature(x = "Modifier"),
           definition = function(x){names(sequenceData(x))})
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "ranges",
           signature = signature(x = "Modifier"),
           definition = function(x){ranges(sequenceData(x))})
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "replicates",
@@ -462,11 +499,55 @@ setMethod(f = "replicates",
           definition = function(x){
             x@replicate
           })
+
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "seqinfo",
+          signature = signature(x = "Modifier"),
+          definition = function(x){seqinfo(sequenceData(x))}
+)
+
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "seqtype",
+          signature = signature(x = "Modifier"),
+          definition = function(x){x@seqtype}
+)
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "sequenceData",
           signature = signature(x = "Modifier"),
           definition = function(x){x@data})
+
+.get_modified_sequences <- function(x, modified){
+  if(is(x,"Modifier")){
+    seqData <- sequenceData(x)
+  } else if(is(x,"ModifierSet")) {
+    seqData <- sequenceData(x[[1L]])
+  } else {
+    stop("")
+  }
+  if(!modified){
+    return(sequences(seqData))
+  }
+  mod <- .get_modifications_per_transcript(x)
+  mod <- .rebase_seqnames(mod, mod$Parent)
+  mod <- split(mod,factor(mod$Parent, levels = mod$Parent))
+  if(seqtype(x) == seqtype(RNAString())){
+    ans <- ModRNAStringSet(sequences(seqData))
+  } else if(seqtype(x) == seqtype(DNAString())){
+    ans <- ModDNAStringSet(sequences(seqData))
+  } else {
+    stop("")
+  }
+  modSeqList <- ans[names(ans) %in% names(mod)]
+  mod <- mod[match(names(mod),names(modSeqList))]
+  ans[names(ans) %in% names(mod)] <-
+    Modstrings::combineIntoModstrings(modSeqList, mod)
+  ans
+}
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "sequences",
@@ -477,32 +558,17 @@ setMethod(f = "sequences",
                 stop("'modified' has to be a single logical value.",
                      call. = FALSE)
               }
-              if(!modified){
-                return(sequences(sequenceData(x)))
-              }
-              mod <- .get_modifications_per_transcript(x)
-              mod <- .rebase_seqnames(mod, mod$Parent)
-              mod <- split(mod,factor(mod$Parent, levels = mod$Parent))
-              ans <- ModRNAStringSet(sequences(sequenceData(x)))
-              modSeqList <- ans[names(ans) %in% names(mod)]
-              mod <- mod[match(names(mod),names(modSeqList))]
-              ans[names(ans) %in% names(mod)] <-
-                Modstrings::combineIntoModstrings(modSeqList, mod)
-              ans
+              .get_modified_sequences(x, modified)
             }
 )
-#' @rdname Modifier-functions
-#' @export
-setMethod(f = "seqinfo",
-          signature = signature(x = "Modifier"),
-          definition = function(x){seqinfo(sequenceData(x))}
-)
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "validAggregate",
           signature = signature(x = "Modifier"),
           definition = function(x) x@aggregateValidForCurrentArguments
 )
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "validModification",
@@ -635,7 +701,7 @@ setReplaceMethod(f = "settings",
   replicate <- replicates[m]
   # create Modifier object
   new(className,
-      mod = .norm_mod(proto@mod, className),
+      mod = .norm_mod(proto),
       bamfiles = bamfiles,
       condition = condition,
       replicate = replicate,
@@ -695,7 +761,7 @@ setReplaceMethod(f = "settings",
   proto <- new(className)
   # short cut for creating an empty object
   if(is.null(x)){
-    return(new2(className, mod = .norm_mod(proto@mod, className)))
+    return(new2(className, mod = .norm_mod(proto)))
   }
   bamfiles <- .norm_bamfiles(x, className) # check bam files
   # settings
@@ -709,7 +775,8 @@ setReplaceMethod(f = "settings",
   # get SequenceData
   data <- .load_SequenceData(dataType(proto), bamfiles = bamfiles,
                              annotation = annotation, sequences = sequences,
-                             seqinfo = seqinfo, args = settings(proto))
+                             seqinfo = seqinfo,
+                             args = list(settings(proto),seqtype(proto)))
   .new_ModFromSequenceData(className, data, ...)
 }
 
@@ -723,8 +790,15 @@ setReplaceMethod(f = "settings",
   ans <- aggregate(ans)
   # search for modifications
   if(settings(ans,"find.mod")){
-    f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% ans@mod)
-    modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
+    if(seqtype(ans) == seqtype(RNAString())){
+      f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% modType(ans))
+      modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
+    } else if(seqtype(ans) == seqtype(DNAString())){
+      f <- which(Modstrings::shortName(Modstrings::ModDNAString()) %in% modType(ans))
+      modName <- Modstrings::fullName(Modstrings::ModDNAString())[f]
+    } else {
+      stop("")
+    }
     message("Starting to search for '", paste(tools::toTitleCase(modName),
                                               collapse = "', '"),
             "' ... ", appendLF = FALSE)
@@ -1013,3 +1087,17 @@ setMethod(f = "findMod",
                    '",class(x),"'.",call. = FALSE)
             }
 )
+
+# RNAModifier and DNAModifier --------------------------------------------------
+
+#' @rdname Modifier-class
+#' @export
+setClass("RNAModifier",
+         contains = c("VIRTUAL","Modifier"),
+         prototype = list(seqtype = seqtype(RNAString())))
+
+#' @rdname Modifier-class
+#' @export
+setClass("DNAModifier",
+         contains = c("VIRTUAL","Modifier"),
+         prototype = list(seqtype = seqtype(DNAString())))

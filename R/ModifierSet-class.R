@@ -338,7 +338,8 @@ setMethod(
   signature = signature(object = "ModifierSet"),
   definition = function(object) {
     callNextMethod()
-    cat("| Modification type(s): ",paste0(object[[1]]@mod, collapse = " / "))
+    cat("| Modification type(s): ",
+        paste0(modType(object[[1]]),collapse = " / "))
     mf <- lapply(seq_along(object),
                  function(i){
                    o <- object[[i]]
@@ -399,6 +400,7 @@ setMethod(f = "bamfiles",
             S4Vectors::SimpleList(lapply(x, bamfiles))
           }
 )
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "conditions", 
@@ -407,12 +409,13 @@ setMethod(f = "conditions",
             ans <- S4Vectors::SimpleList(lapply(object,conditions))
             ans
           })
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "mainScore", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) mainScore(new(elementType(x)))
-)
+          definition = function(x) mainScore(new(elementType(x))))
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modifications", 
@@ -421,32 +424,33 @@ setMethod(f = "modifications",
             GenomicRanges::GRangesList(lapply(x,modifications,perTranscript))
           }
 )
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modifierType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) modifierType(new(elementType(x)))
-)
+          definition = function(x) modifierType(new(elementType(x))))
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "modType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x) modType(new(elementType(x)))
-)
+          definition = function(x) modType(new(elementType(x))))
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "dataType", 
           signature = signature(x = "ModifierSet"),
-          definition = function(x){dataType(x[[1]])}
-)
+          definition = function(x){dataType(x[[1L]])})
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "ranges", 
           signature = signature(x = "ModifierSet"),
           definition = function(x){
             ranges(x[[1]])
-          }
-)
+          })
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "replicates", 
@@ -455,6 +459,7 @@ setMethod(f = "replicates",
             ans <- S4Vectors::SimpleList(lapply(x,replicates))
             ans
           })
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "seqinfo", 
@@ -463,6 +468,13 @@ setMethod(f = "seqinfo",
             S4Vectors::SimpleList(lapply(x, seqinfo))
           }
 )
+
+#' @rdname Modifier-functions
+#' @export
+setMethod(f = "seqtype", 
+          signature = signature(x = "ModifierSet"),
+          definition = function(x){seqtype(x[[1L]])})
+
 #' @rdname Modifier-functions
 #' @export
 setMethod(f = "sequences", 
@@ -473,18 +485,7 @@ setMethod(f = "sequences",
                 stop("'modified' has to be a single logical value.",
                      call. = FALSE)
               }
-              if(!modified){
-                return(sequences(sequenceData(x[[1]])))
-              }
-              mod <- .get_modifications_per_transcript(x)
-              mod <- .rebase_seqnames(mod, mod$Parent)
-              mod <- split(mod,factor(mod$Parent, levels = mod$Parent))
-              ans <- ModRNAStringSet(sequences(sequenceData(x[[1]])))
-              modSeqList <- ans[names(ans) %in% names(mod)]
-              mod <- mod[match(names(mod),names(modSeqList))]
-              ans[names(ans) %in% names(mod)] <- 
-                Modstrings::combineIntoModstrings(modSeqList, mod)
-              ans
+              .get_modified_sequences(x, modified)
             }
 )
 

@@ -16,10 +16,12 @@ NULL
 #' \code{SequenceDataList} or a \code{SequenceDataFrame} object.
 #' @param bamfiles a \code{BamFileList}.
 #' @param grl a \code{GRangesList} from \code{exonsBy(..., by = "tx")}
-#' @param sequences a \code{XStringSet} of type \code{RNAStringSet} or 
-#' \code{ModRNAStringSet}
+#' @param sequences a \code{XStringSet} of type \code{RNAStringSet}, 
+#' \code{ModRNAStringSet}, \code{DNAStringSet} or 
+#' \code{ModDNAStringSet}
 #' @param param a \code{\link[Rsamtools:ScanBamParam-class]{ScanBamParam}} 
 #' object
+#' @param value a new \code{seqtype}, either "RNA" or "DNA"
 #' @param args a list of addition arguments
 #' 
 #' @return 
@@ -151,9 +153,23 @@ setMethod("show", "SequenceDataFrame",
 #' @rdname SequenceData-functions
 #' @export
 setMethod(
-  f = "sequences", 
+  f = "conditions", 
+  signature = signature(object = "SequenceDataFrame"),
+  definition = function(object){object@condition})
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "bamfiles", 
   signature = signature(x = "SequenceDataFrame"),
-  definition = function(x){x@sequence})
+  definition = function(x){x@bamfiles})
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "dataType",
+          signature = signature(x = "SequenceDataFrame"),
+          definition = function(x){gsub("SequenceDataFrame","",class(x))})
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(
@@ -167,29 +183,48 @@ setMethod(
   f = "replicates", 
   signature = signature(x = "SequenceDataFrame"),
   definition = function(x){x@replicate})
-#' @rdname SequenceData-functions
-#' @export
-setMethod(
-  f = "conditions", 
-  signature = signature(object = "SequenceDataFrame"),
-  definition = function(object){object@condition})
-#' @rdname SequenceData-functions
-#' @export
-setMethod(
-  f = "bamfiles", 
-  signature = signature(x = "SequenceDataFrame"),
-  definition = function(x){x@bamfiles})
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(
   f = "seqinfo", 
   signature = signature(x = "SequenceDataFrame"),
   definition = function(x){x@seqinfo})
+
 #' @rdname SequenceData-functions
 #' @export
-setMethod(f = "dataType",
-          signature = signature(x = "SequenceDataFrame"),
-          definition = function(x){gsub("SequenceDataFrame","",class(x))})
+setMethod(
+  f = "seqinfo", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@seqinfo})
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "seqtype", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){seqtype(sequences(x))})
+
+#' @rdname SequenceData-functions
+#' @export
+setReplaceMethod(
+  f = "seqtype", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x, value){
+    if(!(value %in% c(seqtype(DNAString()),seqtype(RNAString())))){
+      stop("Invalid new seqtype.")
+    }
+    seqtype(x@sequence) <- value
+    x
+  }
+)
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(
+  f = "sequences", 
+  signature = signature(x = "SequenceDataFrame"),
+  definition = function(x){x@sequence})
 
 # internals for SequenceDataFrame ----------------------------------------------
 
@@ -436,6 +471,9 @@ sequenceDataFrameClass <- function(dataType){
   }
   if(nrow(x) != length(sequences(x))){
     return("data length and sequence length do not match.")
+  }
+  if(!is(sequences(x),"RNAString") && !is(sequences(x),"DNAString")){
+    stop("")
   }
   S4Vectors:::.valid.DataFrame(x)
   NULL

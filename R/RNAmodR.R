@@ -70,8 +70,9 @@ NULL
 #' @import BiocGenerics
 #' @import XVector
 #' @importFrom Biostrings DNAString RNAString DNAStringSet RNAStringSet getSeq
-#' @importFrom Modstrings ModRNAString ModRNAStringSet combineIntoModstrings
-#' shortName fullName
+#' seqtype seqtype<-
+#' @importFrom Modstrings ModRNAString ModRNAStringSet ModDNAString 
+#' ModDNAStringSet combineIntoModstrings shortName fullName
 #' @importClassesFrom IRanges IntegerList CharacterList LogicalList IRanges
 #' SplitDataFrameList PartitioningByEnd PartitioningByWidth
 #' @importFrom IRanges IntegerList CharacterList LogicalList IRanges

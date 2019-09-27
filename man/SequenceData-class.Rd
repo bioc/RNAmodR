@@ -153,7 +153,8 @@ Subsetting of a \code{SequenceDataFrame} returns a \code{SequenceDataFrame} or
 
 \describe{
 \item{\code{sequencesType}}{a \code{character} value for the class name of
-\code{sequences}. Either \code{RNAStringSet} or \code{ModRNAStringSet}.}
+\code{sequences}. Either \code{RNAStringSet}, \code{ModRNAStringSet},
+\code{DNAStringSet} or \code{ModDNAStringSet}.}
 
 \item{\code{minQuality}}{a \code{integer} value describing a threshold of the minimum
 quality of reads to be used.}

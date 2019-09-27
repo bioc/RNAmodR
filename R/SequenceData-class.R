@@ -89,7 +89,8 @@ NULL
 #' description of this argument.
 #' 
 #' @slot sequencesType a \code{character} value for the class name of 
-#' \code{sequences}. Either \code{RNAStringSet} or \code{ModRNAStringSet}.
+#' \code{sequences}. Either \code{RNAStringSet}, \code{ModRNAStringSet}, 
+#' \code{DNAStringSet} or \code{ModDNAStringSet}.
 #' @slot minQuality a \code{integer} value describing a threshold of the minimum
 #' quality of reads to be used.
 #' 
@@ -98,12 +99,10 @@ NULL
 
 setClass("SequenceData",
          contains = c("VIRTUAL", "CompressedSplitDataFrameList"),
-         slots = c(sequencesType = "character",
-                   minQuality = "integer",
+         slots = c(minQuality = "integer",
                    unlistData = "SequenceDataFrame",
                    unlistType = "character",
-                   dataDescription = "character"),
-         prototype = list(sequencesType = "RNAStringSet"))
+                   dataDescription = "character"))
 
 setMethod(
   f = "initialize",
@@ -111,9 +110,6 @@ setMethod(
   definition = function(.Object, ...){
     if(!assertive::is_a_non_empty_string(.Object@dataDescription)){
       stop("'dataDescription' must be a single non empty character value.")
-    }
-    if(!(.Object@sequencesType %in% c("RNAStringSet","ModRNAStringSet"))){
-      stop("'sequencesType' must be either 'RNAStringSet' or 'ModRNAStringSet'")
     }
     callNextMethod(.Object, ...)
   }
@@ -469,9 +465,6 @@ setMethod("unlist", "SequenceData",
   if(!assertive::is_a_non_empty_string(proto@dataDescription)){
     stop("'dataDescription' must be a single non empty character value.")
   }
-  if(!(proto@sequencesType %in% c("RNAStringSet","ModRNAStringSet"))){
-    stop("'sequencesType' must be either 'RNAStringSet' or 'ModRNAStringSet'")
-  }
   if(is.null(minQuality)){
     stop("Minimum quality is not set for '", className ,"'.",
          call. = FALSE)
@@ -508,7 +501,6 @@ setMethod("unlist", "SequenceData",
   rownames(data) <- IRanges::CharacterList(positions)
   data <- .order_read_data_by_strand(data, ranges)
   # order sequences
-  sequences <- as(sequences, proto@sequencesType)
   sequences <- sequences[match(names(ranges), names(sequences))]
   # basic checks
   names(data) <- names(ranges)
@@ -540,16 +532,20 @@ setMethod("unlist", "SequenceData",
 .SequenceData_settings <- data.frame(
   variable = c("max_depth",
                "minLength",
-               "maxLength"),
+               "maxLength",
+               "seqtype"),
   testFUN = c(".not_integer_bigger_than_10",
               ".not_integer_bigger_equal_than_zero_nor_na",
-              ".not_integer_bigger_equal_than_one_nor_na"),
+              ".not_integer_bigger_equal_than_one_nor_na",
+              ".is_valid_nucleotide_seqtype"),
   errorValue = c(TRUE,
                  TRUE,
-                 TRUE),
+                 TRUE,
+                 FALSE),
   errorMessage = c("'max_depth' must be integer with a value higher than 10L.",
                    "'minLength' must be integer with a value higher than 0L or NA.",
-                   "'maxLength' must be integer with a value higher than 1L or NA."),
+                   "'maxLength' must be integer with a value higher than 1L or NA.",
+                   paste0("'seqtype' must be either '",seqtype(RNAString()) ,"' or '",seqtype(DNAString()) ,"'.")),
   stringsAsFactors = FALSE)
 
 .get_SequenceData_args <- function(input){
@@ -557,8 +553,9 @@ setMethod("unlist", "SequenceData",
   max_depth <- 10000L # the default is 250, which is to small
   minLength <- NA_integer_
   maxLength <- NA_integer_
+  seqtype <- seqtype(RNAString()) 
   args <- .norm_settings(input, .SequenceData_settings, max_depth, minLength,
-                         maxLength)
+                         maxLength, seqtype)
   if(!is.na(args[["minLength"]]) && !is.na(args[["maxLength"]])){
     if(args[["minLength"]] > args[["maxLength"]]){
       stop("'minLength' must be smaller or equal to 'maxLength'.",
@@ -596,7 +593,7 @@ setMethod("unlist", "SequenceData",
       stop("No overlap between bamfiles, annotation and seqinfo.")
     }
   }
-  sequences <- .load_transcript_sequences(sequences, grl)
+  sequences <- .load_sequences(sequences, grl, args)
   # create the class
   .SequenceData(className, bamfiles, grl, sequences, seqinfo, args)
 }
@@ -643,11 +640,12 @@ setMethod("unlist", "SequenceData",
 #' @importFrom Biostrings xscat
 # load the transcript sequence per transcript aka. one sequence per GRangesList
 # element
-.load_transcript_sequences <- function(sequences, grl){
+.load_sequences <- function(sequences, grl, args){
   seq <- Biostrings::getSeq(sequences, unlist(grl))
   seq <- relist(unlist(seq),IRanges::PartitioningByWidth(sum(width(grl))))
   names(seq) <- names(grl)
-  as(seq,"RNAStringSet")
+  seqtype(seq) <- args[["seqtype"]]
+  seq
 }
 
 # remove any elements, which are not in the seqinfo
@@ -788,11 +786,13 @@ setMethod("getData",
 setMethod(f = "bamfiles", 
           signature = signature(x = "SequenceData"),
           definition = function(x){bamfiles(unlist(x))})
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "conditions", 
           signature = signature(object = "SequenceData"),
           definition = function(object){conditions(unlist(object))})
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(
@@ -810,21 +810,41 @@ setMethod(
       names(partitioning_relist) <- names(x)
       relist(unlisted_ranges, partitioning_relist)
     })
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "replicates", 
           signature = signature(x = "SequenceData"),
           definition = function(x){replicates(unlist(x))})
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "seqinfo", 
           signature = signature(x = "SequenceData"),
           definition = function(x){seqinfo(unlist(x))})
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "sequences", 
           signature = signature(x = "SequenceData"),
           definition = function(x){relist(sequences(unlist(x)),x)})
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "seqtype", 
+          signature = signature(x = "SequenceData"),
+          definition = function(x){seqtype(unlist(x))})
+
+#' @rdname SequenceData-functions
+#' @export
+setReplaceMethod(f = "seqtype", 
+                 signature = signature(x = "SequenceData"),
+                 definition = function(x, value){
+                   unlisted_x <- unlist(x)
+                   seqtype(unlisted_x) <- value
+                   relist(unlisted_x,x)
+                 })
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "dataType",

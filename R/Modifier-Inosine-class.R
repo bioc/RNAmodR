@@ -143,7 +143,7 @@ NULL
 #' @rdname ModInosine
 #' @export
 setClass("ModInosine",
-         contains = c("Modifier"),
+         contains = c("RNAModifier"),
          prototype = list(mod = "I",
                           score = "score",
                           dataType = "PileupSequenceData"))

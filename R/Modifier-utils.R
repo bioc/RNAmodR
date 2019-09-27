@@ -17,7 +17,8 @@ setMethod(f = "constructModRanges",
             if(!.is_valid_modType(modType)){
               stop("Modification '",modType,"' not found in the short name ",
                    "alphabet from the Modstrings package. ",
-                   "'shortName(ModRNAString())'",call. = FALSE)
+                   "'shortName(ModRNAString())' or 'shortName(ModDNAString())'",
+                   call. = FALSE)
             }
             positions <- as.integer(rownames(data))
             scores <- do.call(scoreFun,

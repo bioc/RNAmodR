@@ -161,10 +161,11 @@ sdf[1:3,]
 Whereas, the `SequenceData` classes are used to hold the data, `Modifier`
 classes are used to detect certain features within high throughput sequencing
 data to assign the presence of specific modifications for an established
-pattern. The `Modifier` class is virtual and can be addapted to individual
+pattern. The `Modifier` class (and it nucleotide specific subclasses 
+`RNAModifier` and `DNAModifier`) is virtual and can be addapted to individual
 methods. For example mapped reads can be analyzed using the `ModInosine`
 class to reveal the presence of I by detecting a A to G conversion in normal 
-RNA-Seq data. Therefore, `ModInosine` inherits from `Modifier`.
+RNA-Seq data. Therefore, `ModInosine` inherits from `RNAModifier`.
 
 To fix the data processing and detection strategy, for each type of sequencing
 method a `Modifier` class can be developed alongside to detect modifications.

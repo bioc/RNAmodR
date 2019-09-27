@@ -244,43 +244,12 @@ setAs("ANY", "SequenceDataSet",
 
 #' @rdname SequenceData-functions
 #' @export
-setMethod(f = "seqinfo", 
-          signature = signature(x = "SequenceDataSet"),
-          definition = function(x){
-            seqinfo(x[[1]])
-          })
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "names", 
-          signature = signature(x = "SequenceDataSet"),
-          definition = function(x){
-            names(x[[1]])
-          })
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "sequences", 
-          signature = signature(x = "SequenceDataSet"),
-          definition = function(x){
-            sequences(x[[1]])
-          })
-
-#' @rdname SequenceData-functions
-#' @export
-setMethod(f = "ranges", 
-          signature = signature(x = "SequenceDataSet"),
-          definition = function(x){
-            ranges(x[[1]])
-          })
-
-#' @rdname SequenceData-functions
-#' @export
 setMethod(f = "bamfiles", 
           signature = signature(x = "SequenceDataSet"),
           definition = function(x){
-            bamfiles(x[[1]])
+            bamfiles(x[[1L]])
           })
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "conditions", 
@@ -296,6 +265,23 @@ setMethod(f = "conditions",
                      }))
             ans[[1L]]
           })
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "names", 
+          signature = signature(x = "SequenceDataSet"),
+          definition = function(x){
+            names(x[[1L]])
+          })
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "ranges", 
+          signature = signature(x = "SequenceDataSet"),
+          definition = function(x){
+            ranges(x[[1L]])
+          })
+
 #' @rdname SequenceData-functions
 #' @export
 setMethod(f = "replicates", 
@@ -310,6 +296,36 @@ setMethod(f = "replicates",
                        replicates(o)[m]
                      }))
             ans[[1L]]
+          })
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "seqinfo", 
+          signature = signature(x = "SequenceDataSet"),
+          definition = function(x){
+            seqinfo(x[[1L]])
+          })
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "seqtype", 
+          signature = signature(x = "SequenceDataSet"),
+          definition = function(x){seqtype(x[[1L]])})
+
+#' @rdname SequenceData-functions
+#' @export
+setReplaceMethod(f = "seqtype", 
+                 signature = signature(x = "SequenceDataSet"),
+                 definition = function(x, value){
+                   as(lapply(x,`seqtype<-`,value),"SequenceDataSet")
+                 })
+
+#' @rdname SequenceData-functions
+#' @export
+setMethod(f = "sequences", 
+          signature = signature(x = "SequenceDataSet"),
+          definition = function(x){
+            sequences(x[[1L]])
           })
 
 # aggregate --------------------------------------------------------------------

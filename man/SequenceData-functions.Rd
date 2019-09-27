@@ -7,13 +7,15 @@
 \alias{SequenceData-functions}
 \alias{replicates}
 \alias{show,SequenceDataFrame-method}
-\alias{sequences,SequenceDataFrame-method}
-\alias{ranges,SequenceDataFrame-method}
-\alias{replicates,SequenceDataFrame-method}
 \alias{conditions,SequenceDataFrame-method}
 \alias{bamfiles,SequenceDataFrame-method}
-\alias{seqinfo,SequenceDataFrame-method}
 \alias{dataType,SequenceDataFrame-method}
+\alias{ranges,SequenceDataFrame-method}
+\alias{replicates,SequenceDataFrame-method}
+\alias{seqinfo,SequenceDataFrame-method}
+\alias{seqtype,SequenceDataFrame-method}
+\alias{seqtype<-,SequenceDataFrame-method}
+\alias{sequences,SequenceDataFrame-method}
 \alias{show,SequenceData-method}
 \alias{getData,SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam-method}
 \alias{bamfiles,SequenceData-method}
@@ -22,15 +24,19 @@
 \alias{replicates,SequenceData-method}
 \alias{seqinfo,SequenceData-method}
 \alias{sequences,SequenceData-method}
+\alias{seqtype,SequenceData-method}
+\alias{seqtype<-,SequenceData-method}
 \alias{dataType,SequenceData-method}
 \alias{show,SequenceDataSet-method}
-\alias{seqinfo,SequenceDataSet-method}
-\alias{names,SequenceDataSet-method}
-\alias{sequences,SequenceDataSet-method}
-\alias{ranges,SequenceDataSet-method}
 \alias{bamfiles,SequenceDataSet-method}
 \alias{conditions,SequenceDataSet-method}
+\alias{names,SequenceDataSet-method}
+\alias{ranges,SequenceDataSet-method}
 \alias{replicates,SequenceDataSet-method}
+\alias{seqinfo,SequenceDataSet-method}
+\alias{seqtype,SequenceDataSet-method}
+\alias{seqtype<-,SequenceDataSet-method}
+\alias{sequences,SequenceDataSet-method}
 \alias{show,SequenceDataList-method}
 \alias{bamfiles,SequenceDataList-method}
 \alias{conditions,SequenceDataList-method}
@@ -38,6 +44,8 @@
 \alias{ranges,SequenceDataList-method}
 \alias{replicates,SequenceDataList-method}
 \alias{seqinfo,SequenceDataList-method}
+\alias{seqtype,SequenceDataList-method}
+\alias{seqtype<-,SequenceDataList-method}
 \alias{sequences,SequenceDataList-method}
 \title{SequenceData/SequenceDataSet/SequenceDataList/SequenceDataFrame 
 functions}
@@ -46,19 +54,25 @@ replicates(x)
 
 \S4method{show}{SequenceDataFrame}(object)
 
-\S4method{sequences}{SequenceDataFrame}(x)
+\S4method{conditions}{SequenceDataFrame}(object)
+
+\S4method{bamfiles}{SequenceDataFrame}(x)
+
+\S4method{dataType}{SequenceDataFrame}(x)
 
 \S4method{ranges}{SequenceDataFrame}(x)
 
 \S4method{replicates}{SequenceDataFrame}(x)
 
-\S4method{conditions}{SequenceDataFrame}(object)
-
-\S4method{bamfiles}{SequenceDataFrame}(x)
+\S4method{seqinfo}{SequenceDataFrame}(x)
 
 \S4method{seqinfo}{SequenceDataFrame}(x)
 
-\S4method{dataType}{SequenceDataFrame}(x)
+\S4method{seqtype}{SequenceDataFrame}(x)
+
+\S4method{seqtype}{SequenceDataFrame}(x) <- value
+
+\S4method{sequences}{SequenceDataFrame}(x)
 
 \S4method{show}{SequenceData}(object)
 
@@ -78,23 +92,31 @@ replicates(x)
 
 \S4method{sequences}{SequenceData}(x)
 
+\S4method{seqtype}{SequenceData}(x)
+
+\S4method{seqtype}{SequenceData}(x) <- value
+
 \S4method{dataType}{SequenceData}(x)
 
 \S4method{show}{SequenceDataSet}(object)
-
-\S4method{seqinfo}{SequenceDataSet}(x)
-
-\S4method{names}{SequenceDataSet}(x)
-
-\S4method{sequences}{SequenceDataSet}(x)
-
-\S4method{ranges}{SequenceDataSet}(x)
 
 \S4method{bamfiles}{SequenceDataSet}(x)
 
 \S4method{conditions}{SequenceDataSet}(object)
 
+\S4method{names}{SequenceDataSet}(x)
+
+\S4method{ranges}{SequenceDataSet}(x)
+
 \S4method{replicates}{SequenceDataSet}(x)
+
+\S4method{seqinfo}{SequenceDataSet}(x)
+
+\S4method{seqtype}{SequenceDataSet}(x)
+
+\S4method{seqtype}{SequenceDataSet}(x) <- value
+
+\S4method{sequences}{SequenceDataSet}(x)
 
 \S4method{show}{SequenceDataList}(object)
 
@@ -110,18 +132,25 @@ replicates(x)
 
 \S4method{seqinfo}{SequenceDataList}(x)
 
+\S4method{seqtype}{SequenceDataList}(x)
+
+\S4method{seqtype}{SequenceDataList}(x) <- value
+
 \S4method{sequences}{SequenceDataList}(x)
 }
 \arguments{
 \item{x, object}{a \code{SequenceData}, \code{SequenceDataSet}, 
 \code{SequenceDataList} or a \code{SequenceDataFrame} object.}
 
+\item{value}{a new \code{seqtype}, either "RNA" or "DNA"}
+
 \item{bamfiles}{a \code{BamFileList}.}
 
 \item{grl}{a \code{GRangesList} from \code{exonsBy(..., by = "tx")}}
 
-\item{sequences}{a \code{XStringSet} of type \code{RNAStringSet} or 
-\code{ModRNAStringSet}}
+\item{sequences}{a \code{XStringSet} of type \code{RNAStringSet}, 
+\code{ModRNAStringSet}, \code{DNAStringSet} or 
+\code{ModDNAStringSet}}
 
 \item{param}{a \code{\link[Rsamtools:ScanBamParam-class]{ScanBamParam}} 
 object}
