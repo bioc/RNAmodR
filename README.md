@@ -51,25 +51,33 @@ library(RNAmodR)
 # Introduction
 
 `RNAmodR` implements classes and a workflow to detect post-transcriptional RNA
-modifications in high throughput sequencing data. It is easily adaptable to new
-methods and can help during the phase of initial method development as well as
-more complex screenings.
+modifications in high throughput sequencing data. It can be easily adapted for
+new methods and can help during the phase of initial method development as well
+as more complex screenings.
 
-Briefly, from the `SequenceData`, specific subclasses are derived for accessing
-specific aspects of aligned reads, e.g. 5’-end positions or pileup data. With
-this a `Modifier` class can be used to detect specific patterns for individual
-types of modifications. The `SequenceData` classes can be shared by different
-`Modifier` classes allowing easy adaptation to new methods.
+Briefly, from the `SequenceData` and `SequenceDataFrame` classes, specific 
+subclasses are derived for accessing specific aspects of aligned reads, e.g. 
+5’-end positions or pileup data. With these, a `Modifier` class can be used to 
+detect specific patterns for individual types of modifications. The 
+`SequenceData` classes can be shared by different `Modifier` classes enabling 
+easy adaptation to new methods and benefiting from other efforts in method
+development.
 
 Whereas, the `SequenceData` classes are used to hold the data, `Modifier`
 classes are used to detect certain features within high throughput sequencing
 data to assign the presence of specific modifications for an established
-pattern. The `Modifier` class is virtual and can be addapted to individual
-methods. To fix the data processing and detection strategy, for each type of 
-sequencing method a `Modifier` class can be developed alongside to detect 
-modifications.
+pattern. The `Modifier` class is virtual and can be adapted for individual
+methods, whereas the type of nucleotide under investigation is specified by
+inheriting from the virtual `RNAModifier` and `DNAModifier` classes. To fixate 
+the data processing and detection strategy, for each type of sequencing method 
+a `Modifier` class can be developed alongside to detect  modifications.
 
-For further details have a look at the vignette.
+For further details have a look at the vignette or the additional packages for
+implementation examples:
+- [RNAmodR.RiboMethSeq](https://doi.org/doi:10.18129/B9.bioc.RNAmodR.RiboMethSeq)
+- [RNAmodR.AlkAnilineSeq](https://doi.org/doi:10.18129/B9.bioc.RNAmodR.AlkAnilineSeq)
+- [RNAmodR.ML](https://doi.org/doi:10.18129/B9.bioc.RNAmodR.ML) for classes 
+fascilitating machine learning approaches
 
 # Literature
 
