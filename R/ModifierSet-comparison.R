@@ -24,8 +24,7 @@ NULL
 #'   to match the transcript name. The \code{GRangesList} object is
 #'   unlisted and only non duplicated entries are retained.
 #' @param name Only for \code{compare}: the transcript name
-#' @param from Only for \code{compare}: start position
-#' @param to Only for \code{compare}: end position
+#' @param pos Only for \code{compare}: pos for comparison
 #' @param normalize either a single logical or character value. If it is a 
 #' character, it must match one of the names in the \code{ModifierSet}.
 #' @param ... optional parameters:
@@ -228,6 +227,17 @@ NULL
   data
 }
 
+#' @rdname compareByCoord
+#' @export
+setMethod("compare",
+          signature = c("ModifierSet"),
+          function(x, name, pos = 1L, normalize, ...){
+            coord <- .construct_coord_from_name_from_to(x, name, pos)
+            ans <- .compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
+            ans$mod <- NULL
+            ans
+          }
+)
 
 #' @rdname compareByCoord
 #' @export
@@ -334,8 +344,12 @@ setMethod("compareByCoord",
 #' @importFrom colorRamps matlab.like
 #' @importFrom reshape2 melt
 .plot_compare_ModifierSet_by_GRanges <- function(x, coord, normalize,  ...){
-  args <- .norm_compare_plot_args(list(...))
   data <- .compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
+  .plot_compare_ModifierSet(x, data, normalize, ...)
+}
+
+.plot_compare_ModifierSet <- function(x, data, normalize, ...){
+  args <- .norm_compare_plot_args(list(...))
   data$labels <- .create_position_labels(data$positions, data$mod,
                                          data$Activity)
   # melt data an plot
@@ -375,6 +389,17 @@ setMethod("compareByCoord",
     ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0),
                    axis.text.x.top = ggplot2::element_text(angle = 30,vjust = 0.5))
 }
+
+
+#' @rdname compareByCoord
+#' @export
+setMethod("plotCompare",
+          signature = c("ModifierSet"),
+          function(x, name, pos = 1L, normalize, ...){
+            data <- compare(x, name, pos, normalize, ...)
+            .plot_compare_ModifierSet(x, data, normalize, ...)
+          }
+)
 
 #' @rdname compareByCoord
 #' @export

@@ -112,6 +112,15 @@ NULL
 
 #' @rdname subsetByCoord
 #' @export
+setMethod("subset",
+          signature = c(x = "Modifier"),
+          function(x, name, pos = 1L, ...){
+            coord <- .construct_coord_from_name_from_to(x, name, pos)
+            .subset_Modifier_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
 setMethod("subsetByCoord",
           signature = c(x = "Modifier", coord = "GRanges"),
           function(x, coord, ...){
@@ -124,6 +133,16 @@ setMethod("subsetByCoord",
           signature = c(x = "Modifier", coord = "GRangesList"),
           function(x, coord, ...){
             .subset_Modifier_by_GRangesList(x, coord, ...)
+          }
+)
+
+#' @rdname subsetByCoord
+#' @export
+setMethod("subset",
+          signature = c(x = "ModifierSet"),
+          function(x, name, pos = 1L, ...){
+            coord <- .construct_coord_from_name_from_to(x, name, pos)
+            .subset_ModifierSet_by_GRangesList(x, coord, ...)
           }
 )
 #' @rdname subsetByCoord

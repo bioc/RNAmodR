@@ -5,19 +5,23 @@
 \name{subsetByCoord}
 \alias{subsetByCoord}
 \alias{labelByCoord}
+\alias{subset,Modifier-method}
 \alias{subsetByCoord,Modifier,GRanges-method}
 \alias{subsetByCoord,Modifier,GRangesList-method}
+\alias{subset,ModifierSet-method}
 \alias{subsetByCoord,ModifierSet,GRanges-method}
 \alias{subsetByCoord,ModifierSet,GRangesList-method}
 \alias{labelByCoord,Modifier,GRanges-method}
 \alias{labelByCoord,Modifier,GRangesList-method}
 \alias{labelByCoord,ModifierSet,GRanges-method}
 \alias{labelByCoord,ModifierSet,GRangesList-method}
-\alias{subsetByCoord,SplitDataFrameList,GRanges-method}
+\alias{subset,SequenceData-method}
 \alias{subsetByCoord,SequenceData,GRanges-method}
 \alias{subsetByCoord,SequenceData,GRangesList-method}
+\alias{subset,SequenceDataSet-method}
 \alias{subsetByCoord,SequenceDataSet,GRanges-method}
 \alias{subsetByCoord,SequenceDataSet,GRangesList-method}
+\alias{subset,SequenceDataList-method}
 \alias{subsetByCoord,SequenceDataList,GRanges-method}
 \alias{subsetByCoord,SequenceDataList,GRangesList-method}
 \alias{labelByCoord,SplitDataFrameList,GRanges-method}
@@ -34,9 +38,13 @@ subsetByCoord(x, coord, ...)
 
 labelByCoord(x, coord, ...)
 
+\S4method{subset}{Modifier}(x, name, pos = 1L, ...)
+
 \S4method{subsetByCoord}{Modifier,GRanges}(x, coord, ...)
 
 \S4method{subsetByCoord}{Modifier,GRangesList}(x, coord, ...)
+
+\S4method{subset}{ModifierSet}(x, name, pos = 1L, ...)
 
 \S4method{subsetByCoord}{ModifierSet,GRanges}(x, coord, ...)
 
@@ -50,15 +58,19 @@ labelByCoord(x, coord, ...)
 
 \S4method{labelByCoord}{ModifierSet,GRangesList}(x, coord, ...)
 
-\S4method{subsetByCoord}{SplitDataFrameList,GRanges}(x, coord, ...)
+\S4method{subset}{SequenceData}(x, name, pos = 1L, ...)
 
 \S4method{subsetByCoord}{SequenceData,GRanges}(x, coord, ...)
 
 \S4method{subsetByCoord}{SequenceData,GRangesList}(x, coord, ...)
 
+\S4method{subset}{SequenceDataSet}(x, name, pos = 1L, ...)
+
 \S4method{subsetByCoord}{SequenceDataSet,GRanges}(x, coord, ...)
 
 \S4method{subsetByCoord}{SequenceDataSet,GRangesList}(x, coord, ...)
+
+\S4method{subset}{SequenceDataList}(x, name, pos = 1L, ...)
 
 \S4method{subsetByCoord}{SequenceDataList,GRanges}(x, coord, ...)
 
