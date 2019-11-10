@@ -30,7 +30,7 @@ NULL
 
 .get_viz_from_to_coord <- function(ranges, coord, window.size){
   window.size <- .norm_viz_windows.size(window.size)
-  start <- start(coord) - window.size
+  start <- start(coord) - window.size + 1L
   end <- end(coord) + window.size
   pos.min <- as.integer(min(start(ranges[[as.character(coord$Parent)]])))
   pos.max <- as.integer(max(end(ranges[[as.character(coord$Parent)]])))

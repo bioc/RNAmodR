@@ -202,7 +202,7 @@ setGeneric(
 setGeneric( 
   name = "compare",
   signature = "x",
-  def = function(x, name, from = 1L, to = 30L, ...)
+  def = function(x, name, pos = 1L, ...)
     standardGeneric("compare")
 ) 
 #' @rdname compareByCoord
@@ -218,7 +218,7 @@ setGeneric(
 setGeneric( 
   name = "plotCompare",
   signature = "x",
-  def = function(x, name, from = 1L, to = 30L, normalize, ...)
+  def = function(x, name, pos = 1L, normalize, ...)
     standardGeneric("plotCompare")
 ) 
 #' @rdname compareByCoord

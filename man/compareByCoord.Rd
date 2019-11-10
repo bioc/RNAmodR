@@ -6,8 +6,10 @@
 \alias{compareByCoord}
 \alias{plotCompare}
 \alias{plotCompareByCoord}
+\alias{compare,ModifierSet-method}
 \alias{compareByCoord,ModifierSet,GRanges-method}
 \alias{compareByCoord,ModifierSet,GRangesList-method}
+\alias{plotCompare,ModifierSet-method}
 \alias{plotCompareByCoord,ModifierSet,GRanges-method}
 \alias{plotCompareByCoord,ModifierSet,GRangesList-method}
 \title{Comparison of Samples}
@@ -20,10 +22,15 @@ plotCompare(x, name, from = 1L, to = 30L, normalize, ...)
 
 plotCompareByCoord(x, coord, normalize, ...)
 
+\S4method{compare}{ModifierSet}(x, name, pos = 1L, normalize, ...)
+
 \S4method{compareByCoord}{ModifierSet,GRanges}(x, coord, normalize, ...)
 
 \S4method{compareByCoord}{ModifierSet,GRangesList}(x, coord, normalize,
   ...)
+
+\S4method{plotCompare}{ModifierSet}(x, name, from = 1L, to = 30L,
+  normalize, ...)
 
 \S4method{plotCompareByCoord}{ModifierSet,GRanges}(x, coord, normalize,
   ...)

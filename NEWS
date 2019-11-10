@@ -1,2 +1,5 @@
 Changes in version 0.99.0 (2019-04-29)
 + Submitted to Bioconductor
+
+Changes in version 1.1.1 (2019-11-10)
++ added missing implementation for compare and subset functions

@@ -93,7 +93,7 @@ test_that("Visualization:",{
   actual <- RNAmodR:::.get_viz_from_to_coord(ranges, coord, 15L)
   expect_type(actual,"list")
   expect_named(actual,c("from","to"))
-  expect_equal(actual,list(from = 1565L, to = 1595L))
+  expect_equal(actual,list(from = 1566L, to = 1595L))
   # .get_viz_from_to
   expect_error(RNAmodR:::.get_viz_from_to(ranges, "2"),
                'argument "from" is missing, with no default')

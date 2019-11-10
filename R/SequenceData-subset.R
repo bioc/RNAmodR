@@ -265,12 +265,37 @@ NULL
   ans
 }
 
-#' @rdname subsetByCoord
-#' @export
+.construct_coord_from_name_from_to <- function(x, name, pos){
+  if(!assertive::is_a_string(name)){
+    stop("'name' must be a single character value.")
+  }
+  if(!is.integer(pos)){
+    stop("'from' and 'to' must be integer and have the same length.")
+  }
+  coord <- GenomicRanges::GRanges(seqnames = seq_len(pos),
+                                  ranges = IRanges::IRanges(pos, pos),
+                                  Parent = name)
+  if(is(x,"Modifier") || is(x,"ModifierSet")){
+    S4Vectors::mcols(coord)$mod <- modType(x)[1L]
+  }
+  coord <- GenomicRanges::GRangesList(coord)
+  names(coord) <- name
+  coord
+}
+
 setMethod("subsetByCoord",
           signature = c(x = "SplitDataFrameList", coord = "GRanges"),
           function(x, coord, ...){
             .subset_SplitDataFrameList_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("subset",
+          signature = c(x = "SequenceData"),
+          function(x, name, pos = 1L, ...){
+            coord <- .construct_coord_from_name_from_to(x, name, pos)
+            .subset_SequenceData_by_GRangesList(x, coord, ...)
           }
 )
 #' @rdname subsetByCoord
@@ -291,6 +316,15 @@ setMethod("subsetByCoord",
 )
 #' @rdname subsetByCoord
 #' @export
+setMethod("subset",
+          signature = c(x = "SequenceDataSet"),
+          function(x, name, pos = 1L, ...){
+            coord <- .construct_coord_from_name_from_to(x, name, pos)
+            .subset_SequenceDataSet_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
 setMethod("subsetByCoord",
           signature = c(x = "SequenceDataSet", coord = "GRanges"),
           function(x, coord, ...){
@@ -303,6 +337,15 @@ setMethod("subsetByCoord",
           signature = c(x = "SequenceDataSet", coord = "GRangesList"),
           function(x, coord, ...){
             .subset_SequenceDataSet_by_GRangesList(x, coord, ...)
+          }
+)
+#' @rdname subsetByCoord
+#' @export
+setMethod("subset",
+          signature = c(x = "SequenceDataList"),
+          function(x, name, pos = 1L, ...){
+            coord <- .construct_coord_from_name_from_to(x, name, pos)
+            .subset_SequenceDataList_by_GRangesList(x, coord, ...)
           }
 )
 #' @rdname subsetByCoord
