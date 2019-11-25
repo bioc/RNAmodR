@@ -5,7 +5,6 @@
 \name{subsetByCoord}
 \alias{subsetByCoord}
 \alias{labelByCoord}
-\alias{subset,Modifier-method}
 \alias{subsetByCoord,Modifier,GRanges-method}
 \alias{subsetByCoord,Modifier,GRangesList-method}
 \alias{subset,ModifierSet-method}
@@ -15,6 +14,7 @@
 \alias{labelByCoord,Modifier,GRangesList-method}
 \alias{labelByCoord,ModifierSet,GRanges-method}
 \alias{labelByCoord,ModifierSet,GRangesList-method}
+\alias{subsetByCoord,SplitDataFrameList,GRanges-method}
 \alias{subset,SequenceData-method}
 \alias{subsetByCoord,SequenceData,GRanges-method}
 \alias{subsetByCoord,SequenceData,GRangesList-method}
@@ -24,7 +24,6 @@
 \alias{subset,SequenceDataList-method}
 \alias{subsetByCoord,SequenceDataList,GRanges-method}
 \alias{subsetByCoord,SequenceDataList,GRangesList-method}
-\alias{labelByCoord,SplitDataFrameList,GRanges-method}
 \alias{labelByCoord,SequenceData,GRanges-method}
 \alias{labelByCoord,SequenceData,GRangesList-method}
 \alias{labelByCoord,SequenceDataSet,GRanges-method}
@@ -37,8 +36,6 @@
 subsetByCoord(x, coord, ...)
 
 labelByCoord(x, coord, ...)
-
-\S4method{subset}{Modifier}(x, name, pos = 1L, ...)
 
 \S4method{subsetByCoord}{Modifier,GRanges}(x, coord, ...)
 
@@ -58,6 +55,8 @@ labelByCoord(x, coord, ...)
 
 \S4method{labelByCoord}{ModifierSet,GRangesList}(x, coord, ...)
 
+\S4method{subsetByCoord}{SplitDataFrameList,GRanges}(x, coord, ...)
+
 \S4method{subset}{SequenceData}(x, name, pos = 1L, ...)
 
 \S4method{subsetByCoord}{SequenceData,GRanges}(x, coord, ...)
@@ -75,8 +74,6 @@ labelByCoord(x, coord, ...)
 \S4method{subsetByCoord}{SequenceDataList,GRanges}(x, coord, ...)
 
 \S4method{subsetByCoord}{SequenceDataList,GRangesList}(x, coord, ...)
-
-\S4method{labelByCoord}{SplitDataFrameList,GRanges}(x, coord, ...)
 
 \S4method{labelByCoord}{SequenceData,GRanges}(x, coord, ...)
 
@@ -98,9 +95,8 @@ labelByCoord(x, coord, ...)
 a \code{GRangesList} object. For both types the 'Parent' column is expected to
 match the transcript name.}
 
-\item{...}{optional parameters:
+\item{...}{Optional parameters:
 \itemize{
-\item{\code{name}:} {Limit results to one specific transcript.}
 \item{\code{type}:} {the modification type used for subsetting. By default 
 this is derived from the \code{modType(x)}, but it can be overwritten using 
 \code{type}. It must be a valid shortName for a modification according to
@@ -117,16 +113,20 @@ value \code{!= 0L} are set. (default: \code{merge = TRUE}).}
 positions labeled per transcript and not per chromosome?
 (default: \code{perTranscript = FALSE}).}
 }}
+
+\item{name}{Optional: Limit results to one specific transcript.}
+
+\item{pos}{Optional: Limit results to a specific position.}
 }
 \value{
 If 'x' is a
 \itemize{
 \item{\code{\link[=SequenceData-class]{SequenceData}} or 
-\code{\link[=Modifier-class]{Modifier}}} {a \code{SplitDataFrameList}
+\code{\link[=Modifier-class]{Modifier}}:} {a \code{SplitDataFrameList}
 with elments per transcript.}
 \item{\code{\link[=SequenceDataSet-class]{SequenceDataSet}},
 \code{\link[=SequenceDataList-class]{SequenceDataList}} or
-\code{\link[=ModifierSet-class]{ModifierSet}}} {a \code{SimpleList} of
+\code{\link[=ModifierSet-class]{ModifierSet}}:} {a \code{SimpleList} of
 \code{SplitDataFrameList} with elments per transcript.}
 }
 }

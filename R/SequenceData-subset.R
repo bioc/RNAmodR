@@ -283,6 +283,8 @@ NULL
   coord
 }
 
+#' @rdname subsetByCoord
+#' @export
 setMethod("subsetByCoord",
           signature = c(x = "SplitDataFrameList", coord = "GRanges"),
           function(x, coord, ...){
@@ -448,8 +450,7 @@ setMethod("subsetByCoord",
   .keep_one_labels_column(ans)
 }
 
-#' @rdname subsetByCoord
-#' @export
+#' @keywords internal
 setMethod("labelByCoord",
           signature = c(x = "SplitDataFrameList", coord = "GRanges"),
           function(x, coord, ...){

@@ -14,11 +14,11 @@
 \alias{plotCompareByCoord,ModifierSet,GRangesList-method}
 \title{Comparison of Samples}
 \usage{
-compare(x, name, from = 1L, to = 30L, ...)
+compare(x, name, pos = 1L, ...)
 
 compareByCoord(x, coord, ...)
 
-plotCompare(x, name, from = 1L, to = 30L, normalize, ...)
+plotCompare(x, name, pos = 1L, normalize, ...)
 
 plotCompareByCoord(x, coord, normalize, ...)
 
@@ -29,8 +29,7 @@ plotCompareByCoord(x, coord, normalize, ...)
 \S4method{compareByCoord}{ModifierSet,GRangesList}(x, coord, normalize,
   ...)
 
-\S4method{plotCompare}{ModifierSet}(x, name, from = 1L, to = 30L,
-  normalize, ...)
+\S4method{plotCompare}{ModifierSet}(x, name, pos = 1L, normalize, ...)
 
 \S4method{plotCompareByCoord}{ModifierSet,GRanges}(x, coord, normalize,
   ...)
@@ -43,9 +42,7 @@ plotCompareByCoord(x, coord, normalize, ...)
 
 \item{name}{Only for \code{compare}: the transcript name}
 
-\item{from}{Only for \code{compare}: start position}
-
-\item{to}{Only for \code{compare}: end position}
+\item{pos}{Only for \code{compare}: pos for comparison}
 
 \item{...}{optional parameters:
 \itemize{

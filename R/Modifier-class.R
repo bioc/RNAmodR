@@ -791,11 +791,9 @@ setReplaceMethod(f = "settings",
   # search for modifications
   if(settings(ans,"find.mod")){
     if(seqtype(ans) == seqtype(RNAString())){
-      f <- which(Modstrings::shortName(Modstrings::ModRNAString()) %in% modType(ans))
-      modName <- Modstrings::fullName(Modstrings::ModRNAString())[f]
+      modName <- .get_modification_full_name(ans,seqtype(ans))
     } else if(seqtype(ans) == seqtype(DNAString())){
-      f <- which(Modstrings::shortName(Modstrings::ModDNAString()) %in% modType(ans))
-      modName <- Modstrings::fullName(Modstrings::ModDNAString())[f]
+      modName <- .get_modification_full_name(ans,seqtype(ans))
     } else {
       stop("")
     }

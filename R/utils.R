@@ -1,6 +1,14 @@
 #' @include RNAmodR.R
 NULL
 
+.get_modification_full_name <- function(x, type = c("RNA","DNA")){
+  type <- match.arg(type)
+  className <- paste0("Mod",type)
+  f <- which(Modstrings::shortName(Biostrings:::XString(className,"")) %in% modType(x))
+  modName <- Modstrings::fullName(Biostrings:::XString(className,""))[f]
+  modName
+}
+
 # gets the first non virtual class which x extends from
 .get_first_class_extends <- function(x){
   e <- extends(class(x))

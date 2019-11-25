@@ -31,9 +31,10 @@ NULL
 #' @param coord coordinates of position to subset to. Either a \code{GRanges} or
 #' a \code{GRangesList} object. For both types the 'Parent' column is expected to
 #' match the transcript name.
-#' @param ... optional parameters:
+#' @param name Optional: Limit results to one specific transcript.
+#' @param pos Optional: Limit results to a specific position.
+#' @param ... Optional parameters:
 #' \itemize{
-#' \item{\code{name}:} {Limit results to one specific transcript.}
 #' \item{\code{type}:} {the modification type used for subsetting. By default 
 #' this is derived from the \code{modType(x)}, but it can be overwritten using 
 #' \code{type}. It must be a valid shortName for a modification according to
@@ -55,11 +56,11 @@ NULL
 #' If 'x' is a
 #' \itemize{
 #' \item{\code{\link[=SequenceData-class]{SequenceData}} or 
-#' \code{\link[=Modifier-class]{Modifier}}} {a \code{SplitDataFrameList}
+#' \code{\link[=Modifier-class]{Modifier}}:} {a \code{SplitDataFrameList}
 #' with elments per transcript.}
 #' \item{\code{\link[=SequenceDataSet-class]{SequenceDataSet}},
 #' \code{\link[=SequenceDataList-class]{SequenceDataList}} or
-#' \code{\link[=ModifierSet-class]{ModifierSet}}} {a \code{SimpleList} of
+#' \code{\link[=ModifierSet-class]{ModifierSet}}:} {a \code{SimpleList} of
 #' \code{SplitDataFrameList} with elments per transcript.}
 #' }
 #' 
@@ -110,8 +111,7 @@ NULL
   }
 }
 
-#' @rdname subsetByCoord
-#' @export
+#' @keywords internal
 setMethod("subset",
           signature = c(x = "Modifier"),
           function(x, name, pos = 1L, ...){
