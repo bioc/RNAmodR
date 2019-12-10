@@ -16,23 +16,59 @@
 \usage{
 Modifier(className, x, annotation, sequences, seqinfo, ...)
 
-\S4method{Modifier}{SequenceData}(className, x, annotation = NULL,
-  sequences = NULL, seqinfo = NULL, ...)
+\S4method{Modifier}{SequenceData}(
+  className,
+  x,
+  annotation = NULL,
+  sequences = NULL,
+  seqinfo = NULL,
+  ...
+)
 
-\S4method{Modifier}{SequenceDataSet}(className, x, annotation = NULL,
-  sequences = NULL, seqinfo = NULL, ...)
+\S4method{Modifier}{SequenceDataSet}(
+  className,
+  x,
+  annotation = NULL,
+  sequences = NULL,
+  seqinfo = NULL,
+  ...
+)
 
-\S4method{Modifier}{SequenceDataList}(className, x, annotation = NULL,
-  sequences = NULL, seqinfo = NULL, ...)
+\S4method{Modifier}{SequenceDataList}(
+  className,
+  x,
+  annotation = NULL,
+  sequences = NULL,
+  seqinfo = NULL,
+  ...
+)
 
-\S4method{Modifier}{character}(className, x, annotation = NULL,
-  sequences = NULL, seqinfo = NULL, ...)
+\S4method{Modifier}{character}(
+  className,
+  x,
+  annotation = NULL,
+  sequences = NULL,
+  seqinfo = NULL,
+  ...
+)
 
-\S4method{Modifier}{list}(className, x, annotation = NULL,
-  sequences = NULL, seqinfo = NULL, ...)
+\S4method{Modifier}{list}(
+  className,
+  x,
+  annotation = NULL,
+  sequences = NULL,
+  seqinfo = NULL,
+  ...
+)
 
-\S4method{Modifier}{BamFileList}(className, x, annotation = NULL,
-  sequences = NULL, seqinfo = NULL, ...)
+\S4method{Modifier}{BamFileList}(
+  className,
+  x,
+  annotation = NULL,
+  sequences = NULL,
+  seqinfo = NULL,
+  ...
+)
 }
 \arguments{
 \item{className}{The name of the class which should be constructed.}

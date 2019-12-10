@@ -19,29 +19,37 @@
 \alias{getDataTrack,NormEnd3SequenceData-method}
 \title{NormEnd5SequenceData/NormEnd3SequenceData}
 \usage{
-NormEnd5SequenceDataFrame(df, ranges, sequence, replicate, condition,
-  bamfiles, seqinfo)
+NormEnd5SequenceDataFrame(
+  df,
+  ranges,
+  sequence,
+  replicate,
+  condition,
+  bamfiles,
+  seqinfo
+)
 
-NormEnd3SequenceDataFrame(df, ranges, sequence, replicate, condition,
-  bamfiles, seqinfo)
+NormEnd3SequenceDataFrame(
+  df,
+  ranges,
+  sequence,
+  replicate,
+  condition,
+  bamfiles,
+  seqinfo
+)
 
 NormEnd5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 NormEnd3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
+\S4method{getData}{NormEnd5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x, bamfiles, grl, sequences, param, args)
 
-  \S4method{getData}{NormEnd5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
-  bamfiles, grl, sequences, param, args)
+\S4method{getData}{NormEnd3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x, bamfiles, grl, sequences, param, args)
 
+\S4method{aggregateData}{NormEnd5SequenceData}(x, condition = c("Both", "Treated", "Control"))
 
-  \S4method{getData}{NormEnd3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
-  bamfiles, grl, sequences, param, args)
-
-\S4method{aggregateData}{NormEnd5SequenceData}(x, condition = c("Both",
-  "Treated", "Control"))
-
-\S4method{aggregateData}{NormEnd3SequenceData}(x, condition = c("Both",
-  "Treated", "Control"))
+\S4method{aggregateData}{NormEnd3SequenceData}(x, condition = c("Both", "Treated", "Control"))
 
 \S4method{getDataTrack}{NormEnd5SequenceData}(x, name, ...)
 

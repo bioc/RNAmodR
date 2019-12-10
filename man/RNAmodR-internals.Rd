@@ -2,7 +2,6 @@
 % Please edit documentation in R/RNAmodR.R,
 %   R/Gviz-ModifiedSequenceTrack-class.R, R/Gviz-functions.R,
 %   R/SequenceDataSet-class.R, R/SequenceDataList-class.R
-\docType{methods}
 \name{RNAmodR-internals}
 \alias{RNAmodR-internals}
 \alias{.getData}

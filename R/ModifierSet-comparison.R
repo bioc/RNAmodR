@@ -151,7 +151,7 @@ NULL
 }
 
 .assemble_data_per_compare_type <- function(data, coord, sampleNames, alias, 
-                                            modType, normalize){
+                                            modType){
   data <- do.call(cbind,data)
   colnames(data) <- sampleNames
   if(!is(data,"CompressedSplitDataFrameList")){
@@ -194,8 +194,6 @@ NULL
     m <- match(data$names,as.character(alias$tx_id))
     data$names <- as.character(alias$name)[m[!is.na(m)]]
   }
-  #
-  data <- .normlize_data_against_one_sample(data, normalize)
   data
 }
 
@@ -219,8 +217,11 @@ NULL
                           })
                  })
   names(data) <- compareTypes
+  # assamble data
   data <- lapply(data, .assemble_data_per_compare_type, coord, sampleNames,
-                 args[["alias"]], modType, normalize)
+                 args[["alias"]], modType)
+  # normalize data
+  data <- lapply(data, .normlize_data_against_one_sample, normalize)
   if(length(data) == 1L){
     return(data[[1L]])
   }
@@ -360,6 +361,7 @@ setMethod("compareByCoord",
   data <- reshape2::melt(as.data.frame(data), id.vars = c("names","labels"))
   data$variable <- .create_sample_labels(data$variable)
   # adjust limits
+  limits <- NA
   if(!missing(normalize) && normalize != FALSE){
     max <- max(max(data$value),abs(min(data$value)))
     max <- max(max,0.5)
@@ -369,6 +371,10 @@ setMethod("compareByCoord",
     limits <- c(0,ceiling(max(data$value)))
   }
   if(all(!is.na(args[["limits"]]))){
+    if(limits[1L] < args[["limits"]][1L] || limits[2L] > args[["limits"]][2L]){
+      warning("Default limits for value data modified. This set some values ",
+              "out of bounds.", call. = FALSE)
+    }
     limits <- args[["limits"]]
   }
   # plot

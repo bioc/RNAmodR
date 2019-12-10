@@ -25,14 +25,35 @@
 \alias{getDataTrack,End3SequenceData-method}
 \title{End5SequenceData/End3SequenceData/EndSequenceData}
 \usage{
-End5SequenceDataFrame(df, ranges, sequence, replicate, condition, bamfiles,
-  seqinfo)
+End5SequenceDataFrame(
+  df,
+  ranges,
+  sequence,
+  replicate,
+  condition,
+  bamfiles,
+  seqinfo
+)
 
-End3SequenceDataFrame(df, ranges, sequence, replicate, condition, bamfiles,
-  seqinfo)
+End3SequenceDataFrame(
+  df,
+  ranges,
+  sequence,
+  replicate,
+  condition,
+  bamfiles,
+  seqinfo
+)
 
-EndSequenceDataFrame(df, ranges, sequence, replicate, condition, bamfiles,
-  seqinfo)
+EndSequenceDataFrame(
+  df,
+  ranges,
+  sequence,
+  replicate,
+  condition,
+  bamfiles,
+  seqinfo
+)
 
 End5SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
@@ -40,26 +61,17 @@ End3SequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
 EndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
+\S4method{getData}{End5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x, bamfiles, grl, sequences, param, args)
 
-  \S4method{getData}{End5SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
-  bamfiles, grl, sequences, param, args)
+\S4method{getData}{End3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x, bamfiles, grl, sequences, param, args)
 
+\S4method{getData}{EndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x, bamfiles, grl, sequences, param, args)
 
-  \S4method{getData}{End3SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
-  bamfiles, grl, sequences, param, args)
+\S4method{aggregateData}{End5SequenceData}(x, condition = c("Both", "Treated", "Control"))
 
+\S4method{aggregateData}{End3SequenceData}(x, condition = c("Both", "Treated", "Control"))
 
-  \S4method{getData}{EndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
-  bamfiles, grl, sequences, param, args)
-
-\S4method{aggregateData}{End5SequenceData}(x, condition = c("Both",
-  "Treated", "Control"))
-
-\S4method{aggregateData}{End3SequenceData}(x, condition = c("Both",
-  "Treated", "Control"))
-
-\S4method{aggregateData}{EndSequenceData}(x, condition = c("Both",
-  "Treated", "Control"))
+\S4method{aggregateData}{EndSequenceData}(x, condition = c("Both", "Treated", "Control"))
 
 \S4method{getDataTrack}{EndSequenceData}(x, name, ...)
 

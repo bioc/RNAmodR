@@ -2,7 +2,6 @@
 % Please edit documentation in R/AllGenerics.R, R/SequenceDataFrame-class.R,
 %   R/SequenceData-class.R, R/SequenceDataSet-class.R,
 %   R/SequenceDataList-class.R
-\docType{methods}
 \name{SequenceData-functions}
 \alias{SequenceData-functions}
 \alias{replicates}
@@ -76,9 +75,7 @@ replicates(x)
 
 \S4method{show}{SequenceData}(object)
 
-
-  \S4method{getData}{SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
-  bamfiles, grl, sequences, param, args)
+\S4method{getData}{SequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x, bamfiles, grl, sequences, param, args)
 
 \S4method{bamfiles}{SequenceData}(x)
 

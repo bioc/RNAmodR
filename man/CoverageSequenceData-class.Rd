@@ -11,17 +11,21 @@
 \alias{getDataTrack,CoverageSequenceData-method}
 \title{CoverageSequenceData}
 \usage{
-CoverageSequenceDataFrame(df, ranges, sequence, replicate, condition,
-  bamfiles, seqinfo)
+CoverageSequenceDataFrame(
+  df,
+  ranges,
+  sequence,
+  replicate,
+  condition,
+  bamfiles,
+  seqinfo
+)
 
 CoverageSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
+\S4method{getData}{CoverageSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x, bamfiles, grl, sequences, param, args)
 
-  \S4method{getData}{CoverageSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
-  bamfiles, grl, sequences, param, args)
-
-\S4method{aggregateData}{CoverageSequenceData}(x, condition = c("Both",
-  "Treated", "Control"))
+\S4method{aggregateData}{CoverageSequenceData}(x, condition = c("Both", "Treated", "Control"))
 
 \S4method{getDataTrack}{CoverageSequenceData}(x, name, ...)
 }

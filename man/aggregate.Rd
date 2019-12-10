@@ -2,7 +2,6 @@
 % Please edit documentation in R/AllGenerics.R, R/SequenceData-class.R,
 %   R/SequenceDataSet-class.R, R/SequenceDataList-class.R, R/Modifier-class.R,
 %   R/ModifierSet-class.R
-\docType{methods}
 \name{aggregate}
 \alias{aggregate}
 \alias{aggregateData}
