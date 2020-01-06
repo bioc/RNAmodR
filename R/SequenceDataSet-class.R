@@ -70,7 +70,9 @@ setMethod("show", "SequenceDataSet",
                     lapply(ranges_mcols, function(x) 
                       showAsCell(tail(x, ntail))),
                     optional = TRUE))))
-              rownames(out) <- .rownames(nms, nr, nhead, ntail) 
+              rownames(out) <- make_rownames_for_DataTable_display (nms, nr, 
+                                                                    nhead,
+                                                                    ntail) 
             }
             classinfo <-
               matrix(unlist(lapply(ranges_mcols, function(x) {
