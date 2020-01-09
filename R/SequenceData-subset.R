@@ -450,13 +450,14 @@ setMethod("subsetByCoord",
   .keep_one_labels_column(ans)
 }
 
-#' @keywords internal
+#' @rdname RNAmodR-internals
 setMethod("labelByCoord",
           signature = c(x = "SplitDataFrameList", coord = "GRanges"),
           function(x, coord, ...){
             .label_SplitDataFrameList_by_GRangesList(x, coord, ...)
           }
 )
+
 #' @rdname subsetByCoord
 #' @export
 setMethod("labelByCoord",

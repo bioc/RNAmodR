@@ -103,7 +103,7 @@ NULL
 #' The following datasets are contained in the RNAmodR package. They are used
 #' in the man page examples.
 #' @docType data
-#' @usage msi
+#' @usage data(msi)
 #' @format 
 #' \itemize{
 #' \item{msi} {a \code{ModSetInosine} instance}
@@ -121,24 +121,34 @@ NULL
 #' @keywords datasets
 "msi"
 #' @rdname RNAmodR-datasets
+#' @usage data(sds)
 "sds"
 #' @rdname RNAmodR-datasets
+#' @usage data(sdl)
 "sdl"
 #' @rdname RNAmodR-datasets
+#' @usage data(psd)
 "psd"
 #' @rdname RNAmodR-datasets
+#' @usage data(e5sd)
 "e5sd"
 #' @rdname RNAmodR-datasets
+#' @usage data(e3sd)
 "e3sd"
 #' @rdname RNAmodR-datasets
+#' @usage data(esd)
 "esd"
 #' @rdname RNAmodR-datasets
+#' @usage data(csd)
 "csd"
 #' @rdname RNAmodR-datasets
+#' @usage data(ne3sd)
 "ne3sd"
 #' @rdname RNAmodR-datasets
+#' @usage data(ne5sd)
 "ne5sd"
 #' @rdname RNAmodR-datasets
+#' @usage data(pesd)
 "pesd"
 
 #' @name RNAmodR-development

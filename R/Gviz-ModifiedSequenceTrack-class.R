@@ -66,6 +66,8 @@ setMethod("show", "ModifiedSequenceTrack",
                name = modSeqTrackType,
                ...))
   }
+  
+  
   if(!is(sequence, seqType)){
     stop("Argument sequence must be of class '",seqType,"'",
          call. = FALSE)

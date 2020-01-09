@@ -111,7 +111,7 @@ NULL
   }
 }
 
-#' @keywords internal
+#' @rdname RNAmodR-internals
 setMethod("subset",
           signature = c(x = "Modifier"),
           function(x, name, pos = 1L, ...){

@@ -29,27 +29,27 @@
 \item{pesd} {a \code{ProtectedEndSequenceData} instance}
 }}
 \usage{
-msi
+data(msi)
 
-sds
+data(sds)
 
-sdl
+data(sdl)
 
-psd
+data(psd)
 
-e5sd
+data(e5sd)
 
-e3sd
+data(e3sd)
 
-esd
+data(esd)
 
-csd
+data(csd)
 
-ne3sd
+data(ne3sd)
 
-ne5sd
+data(ne5sd)
 
-pesd
+data(pesd)
 }
 \description{
 The following datasets are contained in the RNAmodR package. They are used
