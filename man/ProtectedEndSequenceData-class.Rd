@@ -11,17 +11,21 @@
 \alias{getDataTrack,ProtectedEndSequenceData-method}
 \title{ProtectedEndSequenceData}
 \usage{
-ProtectedEndSequenceDataFrame(df, ranges, sequence, replicate, condition,
-  bamfiles, seqinfo)
+ProtectedEndSequenceDataFrame(
+  df,
+  ranges,
+  sequence,
+  replicate,
+  condition,
+  bamfiles,
+  seqinfo
+)
 
 ProtectedEndSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
+\S4method{getData}{ProtectedEndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x, bamfiles, grl, sequences, param, args)
 
-  \S4method{getData}{ProtectedEndSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
-  bamfiles, grl, sequences, param, args)
-
-\S4method{aggregateData}{ProtectedEndSequenceData}(x,
-  condition = c("Both", "Treated", "Control"))
+\S4method{aggregateData}{ProtectedEndSequenceData}(x, condition = c("Both", "Treated", "Control"))
 
 \S4method{getDataTrack}{ProtectedEndSequenceData}(x, name, ...)
 }

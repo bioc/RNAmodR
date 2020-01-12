@@ -13,17 +13,21 @@
 \alias{pileupToCoverage,PileupSequenceData-method}
 \title{PileupSequenceData}
 \usage{
-PileupSequenceDataFrame(df, ranges, sequence, replicate, condition,
-  bamfiles, seqinfo)
+PileupSequenceDataFrame(
+  df,
+  ranges,
+  sequence,
+  replicate,
+  condition,
+  bamfiles,
+  seqinfo
+)
 
 PileupSequenceData(bamfiles, annotation, sequences, seqinfo, ...)
 
+\S4method{getData}{PileupSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x, bamfiles, grl, sequences, param, args)
 
-  \S4method{getData}{PileupSequenceData,BamFileList,GRangesList,XStringSet,ScanBamParam}(x,
-  bamfiles, grl, sequences, param, args)
-
-\S4method{aggregateData}{PileupSequenceData}(x, condition = c("Both",
-  "Treated", "Control"))
+\S4method{aggregateData}{PileupSequenceData}(x, condition = c("Both", "Treated", "Control"))
 
 \S4method{getDataTrack}{PileupSequenceData}(x, name, ...)
 

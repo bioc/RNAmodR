@@ -2,7 +2,6 @@
 % Please edit documentation in R/AllGenerics.R, R/Modifier-viz.R,
 %   R/ModifierSet-viz.R, R/SequenceData-viz.R, R/SequenceDataList-viz.R,
 %   R/SequenceDataSet-viz.R
-\docType{methods}
 \name{plotData}
 \alias{plotData}
 \alias{plotDataByCoord}
@@ -31,48 +30,80 @@ plotDataByCoord(x, coord, type, window.size = 15L, ...)
 
 getDataTrack(x, name, ...)
 
-\S4method{plotDataByCoord}{Modifier,GRanges}(x, coord, type = NA,
-  window.size = 15L, ...)
+\S4method{plotDataByCoord}{Modifier,GRanges}(x, coord, type = NA, window.size = 15L, ...)
 
-\S4method{plotData}{Modifier}(x, name, from, to, type = NA,
-  showSequenceData = FALSE, showSequence = TRUE,
-  showAnnotation = FALSE, ...)
+\S4method{plotData}{Modifier}(
+  x,
+  name,
+  from,
+  to,
+  type = NA,
+  showSequenceData = FALSE,
+  showSequence = TRUE,
+  showAnnotation = FALSE,
+  ...
+)
 
 \S4method{getDataTrack}{Modifier}(x, name = name, ...)
 
-\S4method{plotDataByCoord}{ModifierSet,GRanges}(x, coord, type = NA,
-  window.size = 15L, ...)
+\S4method{plotDataByCoord}{ModifierSet,GRanges}(x, coord, type = NA, window.size = 15L, ...)
 
-\S4method{plotData}{ModifierSet}(x, name, from, to, type = NA,
-  showSequenceData = FALSE, showSequence = TRUE,
-  showAnnotation = FALSE, ...)
+\S4method{plotData}{ModifierSet}(
+  x,
+  name,
+  from,
+  to,
+  type = NA,
+  showSequenceData = FALSE,
+  showSequence = TRUE,
+  showAnnotation = FALSE,
+  ...
+)
 
-\S4method{plotDataByCoord}{SequenceData,GRanges}(x, coord, type = NA,
-  window.size = 15L, ...)
+\S4method{plotDataByCoord}{SequenceData,GRanges}(x, coord, type = NA, window.size = 15L, ...)
 
-\S4method{plotData}{SequenceData}(x, name, from, to,
-  perTranscript = FALSE, showSequence = TRUE, showAnnotation = FALSE,
-  ...)
+\S4method{plotData}{SequenceData}(
+  x,
+  name,
+  from,
+  to,
+  perTranscript = FALSE,
+  showSequence = TRUE,
+  showAnnotation = FALSE,
+  ...
+)
 
 \S4method{getDataTrack}{SequenceData}(x, name = name, ...)
 
 \S4method{getDataTrack}{SequenceDataList}(x, name = name, ...)
 
-\S4method{plotDataByCoord}{SequenceDataList,GRanges}(x, coord, type = NA,
-  window.size = 15L, ...)
+\S4method{plotDataByCoord}{SequenceDataList,GRanges}(x, coord, type = NA, window.size = 15L, ...)
 
-\S4method{plotData}{SequenceDataList}(x, name, from, to,
-  perTranscript = FALSE, showSequence = TRUE, showAnnotation = FALSE,
-  ...)
+\S4method{plotData}{SequenceDataList}(
+  x,
+  name,
+  from,
+  to,
+  perTranscript = FALSE,
+  showSequence = TRUE,
+  showAnnotation = FALSE,
+  ...
+)
 
 \S4method{getDataTrack}{SequenceDataSet}(x, name = name, ...)
 
-\S4method{plotDataByCoord}{SequenceDataSet,GRanges}(x, coord, type = NA,
-  window.size = 15L, ...)
+\S4method{plotDataByCoord}{SequenceDataSet,GRanges}(x, coord, type = NA, window.size = 15L, ...)
 
-\S4method{plotData}{SequenceDataSet}(x, name, from, to,
-  perTranscript = FALSE, showSequence = TRUE, showAnnotation = FALSE,
-  ...)
+\S4method{plotData}{SequenceDataSet}(
+  x,
+  name,
+  from,
+  to,
+  perTranscript = FALSE,
+  showSequence = TRUE,
+  showAnnotation = FALSE,
+  ...
+)
 }
 \arguments{
 \item{x}{a \code{SequenceData}, \code{SequenceDataSet},

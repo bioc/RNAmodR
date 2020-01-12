@@ -12,17 +12,34 @@
 \usage{
 ModifierSet(className, x, annotation, sequences, seqinfo, ...)
 
-\S4method{ModifierSet}{list}(className, x, annotation = NULL,
-  sequences = NULL, seqinfo = NULL, ...)
+\S4method{ModifierSet}{list}(
+  className,
+  x,
+  annotation = NULL,
+  sequences = NULL,
+  seqinfo = NULL,
+  ...
+)
 
-\S4method{ModifierSet}{character}(className, x, annotation = NULL,
-  sequences = NULL, seqinfo = NULL, ...)
+\S4method{ModifierSet}{character}(
+  className,
+  x,
+  annotation = NULL,
+  sequences = NULL,
+  seqinfo = NULL,
+  ...
+)
 
-\S4method{ModifierSet}{BamFileList}(className, x, annotation = NULL,
-  sequences = NULL, seqinfo = NULL, ...)
+\S4method{ModifierSet}{BamFileList}(
+  className,
+  x,
+  annotation = NULL,
+  sequences = NULL,
+  seqinfo = NULL,
+  ...
+)
 
-\S4method{ModifierSet}{Modifier}(className, x, annotation, sequences,
-  seqinfo, ...)
+\S4method{ModifierSet}{Modifier}(className, x, annotation, sequences, seqinfo, ...)
 }
 \arguments{
 \item{className}{The name of the class which should be constructed.}

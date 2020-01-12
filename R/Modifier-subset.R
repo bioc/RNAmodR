@@ -31,6 +31,8 @@ NULL
 #' @param coord coordinates of position to subset to. Either a \code{GRanges} or
 #' a \code{GRangesList} object. For both types the 'Parent' column is expected to
 #' match the transcript name.
+#' @param name Optional: Limit results to one specific transcript.
+#' @param pos Optional: Limit results to a specific position.
 #' @param ... optional parameters:
 #' \itemize{
 #' \item{\code{name}:} {Limit results to one specific transcript.}

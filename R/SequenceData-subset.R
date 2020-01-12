@@ -283,6 +283,8 @@ NULL
   coord
 }
 
+#' @rdname subsetByCoord
+#' @export
 setMethod("subsetByCoord",
           signature = c(x = "SplitDataFrameList", coord = "GRanges"),
           function(x, coord, ...){

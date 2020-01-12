@@ -3,7 +3,6 @@
 \docType{package}
 \name{RNAmodR}
 \alias{RNAmodR}
-\alias{RNAmodR-package}
 \title{RNAmodR}
 \description{
 Post-transcriptional modifications can be found abundantly in rRNA and tRNA
