@@ -82,6 +82,7 @@ Collate:
     'Modifier-roc.R'
     'Modifier-subset.R'
     'Modifier-viz.R'
+    'ModifierSet-RangedSE.R'
     'ModifierSet-comparison.R'
     'ModifierSet-viz.R'
     'RNAmodR-external-functions.R'
