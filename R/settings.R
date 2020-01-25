@@ -135,15 +135,14 @@ NULL
 }
 
 .test_setting <- function(xname, settings, defaults, input){
+  if(!is.list(input)){
+    input <- as.list(input)
+  }
   test <- settings$variable == xname
   FUN <- as.character(settings[test,"testFUN"])
   default <- defaults[[xname]]
-  if(is.list(input)){
-    input <- input[[xname]]
-  } else {
-    input <- input[xname]
-  }
-  if(is.null(input) || is.na(input)){
+  input <- input[[xname]]
+  if(is.null(input)){
     return(default)
   }
   FUN <- get(FUN)
