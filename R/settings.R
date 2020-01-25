@@ -138,8 +138,12 @@ NULL
   test <- settings$variable == xname
   FUN <- as.character(settings[test,"testFUN"])
   default <- defaults[[xname]]
-  input <- input[[xname]]
-  if(is.null(input)){
+  if(is.list(input)){
+    input <- input[[xname]]
+  } else {
+    input <- input[xname]
+  }
+  if(is.null(input) || is.na(input)){
     return(default)
   }
   FUN <- get(FUN)
@@ -150,9 +154,6 @@ NULL
 }
 
 .norm_settings <- function(input, settings, ...){
-  if(!is.list(input) || is.null(names(input))){
-    stop("Input must be a named list.", call. = FALSE)
-  }
   if(!all(c("variable","testFUN","errorValue","errorMessage") %in% colnames(settings))){
     stop("Invalid columns in settings test definition.", call. = FALSE)
   }
