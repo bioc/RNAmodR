@@ -150,6 +150,9 @@ NULL
 }
 
 .norm_settings <- function(input, settings, ...){
+  if(!is.list(input) || is.null(names(input))){
+    stop("Input must be a named list.", call. = FALSE)
+  }
   if(!all(c("variable","testFUN","errorValue","errorMessage") %in% colnames(settings))){
     stop("Invalid columns in settings test definition.", call. = FALSE)
   }

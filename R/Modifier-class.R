@@ -661,7 +661,7 @@ setReplaceMethod(f = "settings",
                  signature = signature(x = "Modifier"),
                  definition = function(x, value){
                    if(is.null(names(value)) && length(value) > 0L){
-                     stop("'value' has to be a named.")
+                     stop("'value' has to be a named.", call. = FALSE)
                    }
                    if(!is.list(value)){
                      value <- as.list(value)
