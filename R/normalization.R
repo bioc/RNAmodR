@@ -223,7 +223,6 @@ SAMPLE_TYPES <- c("treated","control")
 
 # Modifiertype -----------------------------------------------------------------
 
-#'@importFrom stringr str_locate
 # check if a class of type x exists
 .norm_modifiertype <- function(x){
   if(x == ""){
@@ -240,13 +239,14 @@ SAMPLE_TYPES <- c("treated","control")
   if(!("Modifier" %in% extends(class))){
     stop("Class '",x,"' does not extend the 'Modifier' class.")
   }
-  nameId <- stringr::str_locate(class@className,"Mod")
-  if(any(is.na(nameId)) || nrow(nameId) == 0L){
+  nameId <- gregexpr("Mod",class@className)[[1]]
+  if(any(nameId < 0L) || length(nameId) == 0L){
     stop("Invalid class name of Modifier class: the string 'Mod' must be ",
          "present once at the front of the class name.",
          call. = FALSE)
   }
-  if(nrow(nameId) > 1L || nameId[,"start"] != 1L || nameId[,"end"] != 3L){
+  if(length(nameId) > 1L || nameId[1L] != 1L || 
+     attr(nameId,"match.length")[1L] != 3L){
     stop("Invalid class name of Modifier class: the string 'Mod' can only be ",
          "present once at the front of the class name.",
          call. = FALSE)

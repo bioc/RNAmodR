@@ -145,7 +145,7 @@ RNAMODR_PLOT_SEQ_COVERAGE_NAMES <- c("means" = "mean(coverage)")
 
 .clean_mcols_coverage <- function(seqdata){
   d <- mcols(seqdata@unlistData)
-  d <- d[,!stringr::str_detect(colnames(d),"sds."),drop=FALSE]
+  d <- d[,!grepl("sds.",colnames(d)),drop=FALSE]
   mcols(seqdata@unlistData) <- d
   seqdata
 }
@@ -163,7 +163,7 @@ setMethod(
     seqdata <- unlist(seqdata)
     conditions <- unique(conditions(x))
     if("control" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(range = d,
                                     group = "means",
@@ -177,7 +177,7 @@ setMethod(
       track <- list("Coverage" = dt.control)
     }
     if("treated" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(range = d,
                                     group = "means",

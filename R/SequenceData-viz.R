@@ -160,7 +160,6 @@ NULL
   at
 }
 
-#' @importFrom stringi stri_rand_strings
 .stitch_chromosome <- function(seq, ranges, chromosome){
   ranges <- ranges[seqnames(ranges) == chromosome]
   ranges <- ranges[!vapply(ranges,function(r){length(r) == 0L},logical(1))]
@@ -196,8 +195,7 @@ NULL
   }
   # get N sequence for gaps
   FUN <- match.fun(class(seq))
-  N <- FUN(stringi::stri_rand_strings(length(gaps), width(gaps),
-                                      pattern = "[N]"))
+  N <- FUN(rep(paste(rep("N",width(gaps)),collapse = ""),length(gaps)))
   seq <- relist(unlist(seq),
                 IRanges::PartitioningByWidth(width(unlisted_ranges)))
   # assemble result

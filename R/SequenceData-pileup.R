@@ -268,12 +268,10 @@ setMethod("aggregateData",
 
 # data visualization -----------------------------------------------------------
 
-#' @importFrom biovizBase getBioColor
-RNAMODR_PLOT_BASES_COLOURS <- 
-  c("G" = biovizBase::getBioColor("RNA_BASES_N")[["G"]],
-    "A" = biovizBase::getBioColor("RNA_BASES_N")[["A"]],
-    "U" = biovizBase::getBioColor("RNA_BASES_N")[["U"]],
-    "C" = biovizBase::getBioColor("RNA_BASES_N")[["C"]])
+RNAMODR_PLOT_BASES_COLOURS <- c("G" = "#D7191C",
+                                "A" = "#ABD9E9",
+                                "U" = "#2C7BB6",
+                                "C" = "#FDAE61")
 RNAMODR_PLOT_SEQ_PILEUP_NAMES <- c("bases" = "Bases called [%]")
 
 .norm_viz_pileup_args <- function(input){
@@ -297,13 +295,13 @@ RNAMODR_PLOT_SEQ_PILEUP_NAMES <- c("bases" = "Bases called [%]")
 
 .clean_mcols_pileup <- function(seqdata, colour.bases){
   d <- mcols(seqdata@unlistData)
-  d <- d[,!stringr::str_detect(colnames(d),"\\.\\."),drop=FALSE]
-  d <- d[,!stringr::str_detect(colnames(d),"sds."),drop=FALSE]
+  d <- d[,!grepl("\\.\\.",colnames(d)),drop=FALSE]
+  d <- d[,!grepl("sds.",colnames(d)),drop=FALSE]
   conditions <- c("control","treated")
   for(con in conditions){
-    f <- stringr::str_detect(colnames(d),con)
+    f <- grepl(con,colnames(d))
     if(any(f)){
-      f <- f & stringr::str_detect(colnames(d),"means")
+      f <- f & grepl("means",colnames(d))
       colnames(d)[f] <- gsub("means.","",colnames(d)[f])
       d[,f] <- DataFrame(as.data.frame(d[,f]) / rowSums(as.data.frame(d[,f])) * 100)
       colnames(d)[f][colnames(d[,f]) == paste0(con,".T")] <- paste0(con,".U")
@@ -330,7 +328,7 @@ setMethod(
     seqdata <- unlist(seqdata)
     conditions_u <- unique(conditions(x))
     if("control" %in% conditions_u){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub("control.","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(range = d,
                                     groups = colnames(mcols(d)),
@@ -346,7 +344,7 @@ setMethod(
       track <- list("Pileup" = dt.control)
     }
     if("treated" %in% conditions_u){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub("treated.","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(range = d,
                                     groups = colnames(mcols(d)),

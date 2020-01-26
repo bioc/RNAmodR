@@ -345,7 +345,7 @@ RNAMODR_PLOT_SEQ_NORMEND_NAMES <-
 
 .clean_mcols_normend <- function(seqdata){
   d <- mcols(seqdata@unlistData)
-  d <- d[,stringr::str_detect(colnames(d),"means"),drop=FALSE]
+  d <- d[,grepl("means",colnames(d)),drop=FALSE]
   
   mcols(seqdata@unlistData) <- d
   seqdata
@@ -365,7 +365,7 @@ setMethod(
     seqdata <- unlist(seqdata)
     conditions_u <- unique(conditions(x))
     if("control" %in% conditions_u){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.tx <- Gviz::DataTrack(
         range = d[,"means.tx"],
@@ -377,7 +377,7 @@ setMethod(
       Gviz::displayPars(dt.control.tx)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.control.tx)$col.axis <- "#000000"
       Gviz::displayPars(dt.control.tx) <- args
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.ol <- Gviz::DataTrack(
         range = d[,"means.ol"],
@@ -393,7 +393,7 @@ setMethod(
                      "NormEnd5ol" = dt.control.ol)
     }
     if("treated" %in% conditions_u){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated.tx <- Gviz::DataTrack(
         range = d[,"means.tx"],
@@ -442,7 +442,7 @@ setMethod(
     seqdata <- unlist(seqdata)
     conditions_u <- unique(conditions(x))
     if("control" %in% conditions_u){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl(colnames(mcols(seqdata)),"control")]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.tx <- Gviz::DataTrack(
         range = d[,"means.tx"],
@@ -454,7 +454,7 @@ setMethod(
       Gviz::displayPars(dt.control.tx)$fontcolor.title <- "#000000"
       Gviz::displayPars(dt.control.tx)$col.axis <- "#000000"
       Gviz::displayPars(dt.control.tx) <- args
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.ol <- Gviz::DataTrack(
         range = d[,"means.ol"],
@@ -470,7 +470,7 @@ setMethod(
                      "NormEnd3ol" = dt.control.ol)
     }
     if("treated" %in% conditions_u){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated.tx <- Gviz::DataTrack(
         range = d[,"means.tx"],

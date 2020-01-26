@@ -1,7 +1,7 @@
 Package: RNAmodR
 Type: Package
 Title: Detection of post-transcriptional modifications in high throughput sequencing data
-Version: 1.1.6
+Version: 1.1.7
 Date: 2020-01-25
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
@@ -32,9 +32,7 @@ Depends:
 Imports:
     methods,
     stats,
-    graphics,
     grDevices, 
-    grid,
     matrixStats,
     assertive,
     BiocGenerics,
@@ -49,12 +47,11 @@ Imports:
     BSgenome,
     RColorBrewer,
     colorRamps,
-    biovizBase,
     ggplot2,
+    grid,
     Gviz,
     reshape2,
-    stringi,
-    stringr,
+    graphics,
     ROCR
 Suggests:
     BiocStyle,

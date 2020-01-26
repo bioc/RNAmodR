@@ -100,9 +100,8 @@ setMethod(f = "relistToClass",
 
 # contructor -------------------------------------------------------------------
 
-#' @importFrom stringr str_detect
 .norm_classname_ModifierSet <- function(classname){
-  if(stringr::str_detect(classname,"ModSet")){
+  if(grepl("ModSet",classname)){
     ans <- classname
   } else {
     ans <- gsub("Mod","ModSet",classname)

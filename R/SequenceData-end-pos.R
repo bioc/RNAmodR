@@ -338,7 +338,7 @@ RNAMODR_PLOT_SEQ_END_NAMES <- c("end5" = "mean(5'-ends)",
 
 .clean_mcols_end <- function(seqdata){
   d <- mcols(seqdata@unlistData)
-  d <- d[,stringr::str_detect(colnames(d),"means"),drop=FALSE]
+  d <- d[,grepl("means",colnames(d)),drop=FALSE]
   mcols(seqdata@unlistData) <- d
   seqdata
 }
@@ -357,7 +357,7 @@ setMethod(
     seqdata <- unlist(seqdata)
     conditions <- unique(conditions(x))
     if("control" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(range = d,
                                     group = "means",
@@ -371,7 +371,7 @@ setMethod(
       track <- list("End" = dt.control)
     }
     if("treated" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(range = d,
                                     group = "means",
@@ -406,7 +406,7 @@ setMethod(
     seqdata <- unlist(seqdata)
     conditions <- unique(conditions(x))
     if("control" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(range = d,
                                     group = "means",
@@ -420,7 +420,7 @@ setMethod(
       track <- list("End5" = dt.control)
     }
     if("treated" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(range = d,
                                     group = "means",
@@ -455,7 +455,7 @@ setMethod(
     seqdata <- unlist(seqdata)
     conditions <- unique(conditions(x))
     if("control" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(range = d,
                                     group = "means",
@@ -469,7 +469,7 @@ setMethod(
       track <- list("End3" = dt.control)
     }
     if("treated" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(range = d,
                                     group = "means",

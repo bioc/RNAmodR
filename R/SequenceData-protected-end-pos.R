@@ -139,7 +139,7 @@ setMethod(
     seqdata <- unlist(seqdata)
     conditions <- unique(conditions(x))
     if("control" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"control")]
+      d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(
         range = d,
@@ -154,7 +154,7 @@ setMethod(
       track <- list("ProtectedEnd" = dt.control)
     }
     if("treated" %in% conditions){
-      d <- seqdata[,stringr::str_detect(colnames(mcols(seqdata)),"treated")]
+      d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(
         range = d,
