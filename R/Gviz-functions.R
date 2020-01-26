@@ -23,7 +23,12 @@ NULL
 }
 
 .get_RNA_bio_color <- function(){
-  alphabet <- getBioColor(type = "RNA_ALPHABET")
+  alphabet <- c("A" = "#FFBF80", "C" = "#FF8000", "G" = "#FFFF99",
+                "U" = "#FFFF33", "M" = "#B2FF8C", "R" = "#33FF00",
+                "W" = "#A6EDFF", "S" = "#1AB2FF", "Y" = "#CCBFFF",
+                "K" = "#664CFF", "V" = "#FF99BF", "H" = "#E61A33",
+                "D" = "#FFBF80", "B" = "#FF8000", "N" = "#FFFF99",
+                "-" = "#FFFF33", "+" = "#B2FF8C", "." = "#33FF00" )
   names(alphabet)[names(alphabet) == "T"] <- "U"
   base_alphabet <- c("A" = "#ABD9E9", "U" = "#2C7BB6", "G" = "#D7191C",
                      "C" = "#FDAE61", "N" = "#FFFFBF")
