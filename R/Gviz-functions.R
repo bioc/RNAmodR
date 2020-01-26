@@ -6,7 +6,8 @@ NULL
   alphabetNames <- alphabet(ModDNAString())
   alphabet <- rep("#33FF00",length(alphabetNames))
   names(alphabet) <- alphabetNames
-  dna_color <- getBioColor(type="DNA_BASES_N")
+  dna_color <- c("A" = "#ABD9E9", "T" = "#2C7BB6", "G" = "#D7191C",
+                 "C" = "#FDAE61", "N" = "#FFFFBF")
   alphabet[match(names(dna_color),names(alphabet))] <- dna_color
   alphabet
 }
@@ -15,7 +16,8 @@ NULL
   alphabetNames <- alphabet(ModRNAString())
   alphabet <- rep("#33FF00",length(alphabetNames))
   names(alphabet) <- alphabetNames
-  rna_color <- getBioColor(type="RNA_BASES_N")
+  rna_color <- c("A" = "#ABD9E9", "U" = "#2C7BB6", "G" = "#D7191C",
+                 "C" = "#FDAE61", "N" = "#FFFFBF")
   alphabet[match(names(rna_color),names(alphabet))] <- rna_color
   alphabet
 }
@@ -23,7 +25,8 @@ NULL
 .get_RNA_bio_color <- function(){
   alphabet <- getBioColor(type = "RNA_ALPHABET")
   names(alphabet)[names(alphabet) == "T"] <- "U"
-  base_alphabet <- getBioColor(type = "RNA_BASES_N")
+  base_alphabet <- c("A" = "#ABD9E9", "U" = "#2C7BB6", "G" = "#D7191C",
+                     "C" = "#FDAE61", "N" = "#FFFFBF")
   alphabet[match(names(base_alphabet),names(alphabet))] <- base_alphabet
   alphabet
 }
