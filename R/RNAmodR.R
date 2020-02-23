@@ -68,7 +68,6 @@ NULL
 #' @import S4Vectors
 #' @import GenomicRanges
 #' @import BiocGenerics
-#' @import XVector
 #' @importFrom Biostrings DNAString RNAString DNAStringSet RNAStringSet getSeq
 #' seqtype seqtype<-
 #' @importFrom Modstrings ModRNAString ModRNAStringSet ModDNAString 

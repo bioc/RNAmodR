@@ -167,11 +167,19 @@ test_that("Visualization:",{
   actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd)["1"],
                                               ranges(psd)["1"],
                                               "chr1", args)
-  expect_s4_class(actual,"RNASequenceTrack")
+  expect_s4_class(actual,"SequenceRNAStringSetTrack")
   actual <- RNAmodR:::.get_viz_sequence_track(sequences(psd)["1"],
                                               ranges(psd)["1"],
                                               "chr1", args)
-  expect_s4_class(actual,"RNASequenceTrack")
+  expect_s4_class(actual,"SequenceRNAStringSetTrack")
+  actual <- RNAmodR:::.get_viz_sequence_track(as(sequences(psd)["1"],"ModRNAStringSet"),
+                                              ranges(psd)["1"],
+                                              "chr1", args)
+  expect_s4_class(actual,"SequenceModRNAStringSetTrack")
+  actual <- RNAmodR:::.get_viz_sequence_track(as(sequences(psd)["1"],"ModDNAStringSet"),
+                                              ranges(psd)["1"],
+                                              "chr1", args)
+  expect_s4_class(actual,"SequenceModDNAStringSetTrack")
   # .get_data_for_visualization
   expect_error(RNAmodR:::.get_data_for_visualization(),
                'argument "x" is missing, with no default')
@@ -254,24 +262,24 @@ test_that("Visualization:",{
   actual <- plotData(msi[[1]], "2", from = 1L, to = 60L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
-  expect_s4_class(actual[[2]],"RNASequenceTrack")
+  expect_s4_class(actual[[2]],"SequenceRNAStringSetTrack")
   expect_s4_class(actual[[3]],"ImageMap")
   actual2 <- plotDataByCoord(msi[[1]], coord)
   expect_type(actual2,"list")
   expect_s4_class(actual2[[1]],"DataTrack")
-  expect_s4_class(actual2[[2]],"RNASequenceTrack")
+  expect_s4_class(actual2[[2]],"SequenceRNAStringSetTrack")
   expect_s4_class(actual2[[3]],"ImageMap")
   expect_equal(actual,actual2)
   # ModifierSet
   actual <- plotData(msi, "2", from = 1L, to = 60L)
   expect_type(actual,"list")
   expect_s4_class(actual[[1]],"DataTrack")
-  expect_s4_class(actual[[4]],"RNASequenceTrack")
+  expect_s4_class(actual[[4]],"SequenceRNAStringSetTrack")
   expect_s4_class(actual[[5]],"ImageMap")
   actual2 <- plotDataByCoord(msi, coord)
   expect_type(actual2,"list")
   expect_s4_class(actual2[[1]],"DataTrack")
-  expect_s4_class(actual2[[4]],"RNASequenceTrack")
+  expect_s4_class(actual2[[4]],"SequenceRNAStringSetTrack")
   expect_s4_class(actual2[[5]],"ImageMap")
   expect_equal(actual,actual2)
   #############################################################################

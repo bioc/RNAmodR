@@ -1,158 +1,37 @@
 #' @include RNAmodR.R
 #' @import Gviz
-#' @importFrom Biostrings subseq
 NULL
 
-################################################################################
-# Since the DNA alphabet is hardcoded into the SequenceTrack class of Gviz
-# it needs to be reimplmeneted a bit
-################################################################################
+.SequenceTrack <- Gviz:::.SequenceTrack
 
-setClass("ModifiedSequenceTrack",
-         contains = "GdObject",
-         representation = representation(seqType = "character"),
-         prototype = prototype(seqType = "XString")
-)
-
-setMethod("initialize", 
-          signature = signature("ModifiedSequenceTrack"),
-          definition = function(.Object,
-                                sequence,
-                                chromosome = NA,
-                                genome = NA,
-                                ...) {
-            # get sequence sanitized
-            if(is.null(sequence)){
-              sequence <- .Object@sequence
-            }
-            .Object@sequence <- sequence
-            ## the diplay parameter defaults
-            Gviz:::.makeParMapping()
-            .Object <- Gviz:::.updatePars(.Object, "SequenceTrack")
-            if(!missing(chromosome) && 
-               !is.na(chromosome) && 
-               !is.null(chromosome)){
-              .Object@chromosome <- .chrName(names(sequence)[1])[1]
-            }
-            if(missing(genome) || is.na(genome) || is.null(genome)) {
-              genome <- as.character(NA)
-            }
-            .Object@genome <- genome
-            .Object <- callNextMethod(.Object, ...)
-            return(.Object)
-})
-
-#' @rdname RNAmodR-internals
-setMethod("show", "ModifiedSequenceTrack",
-          function(object){
-            cat(.sequenceTrackInfo(object))
-          }
-)
-
-
-# constructor ------------------------------------------------------------------
-
-.stringSet_to_ModifiedSequenceTrack <- function(modSeqTrackType,
-                                                seqType,
-                                                sequence = NA,
-                                                chromosome = NA,
-                                                genome = NA,
-                                                fontcolor,
-                                                ...){
-  if(is.null(sequence)){
-    return(new(modSeqTrackType,
-               chromosome = chromosome,
-               genome = genome,
-               name = modSeqTrackType,
-               ...))
-  }
-  
-  
-  if(!is(sequence, seqType)){
-    stop("Argument sequence must be of class '",seqType,"'",
-         call. = FALSE)
-  }
-  if(is.null(names(sequence))){
-    stop("The sequences in the ",seqType," must be named",
-         call. = FALSE)
-  }
-  if(any(duplicated(names(sequence)))){
-    stop("The sequence names in the ",seqType," must be unique",
-         call. = FALSE)
-  }
-  if(missing(chromosome) || is.na(chromosome) || is.null(chromosome)){
-    chromosome <- names(sequence)[1]
-  }
-  obj <- new(modSeqTrackType,
-             sequence = sequence,
-             chromosome = chromosome,
-             genome = genome,
-             name = modSeqTrackType,
-             ...)
-  displayPars(obj)$fontcolor <- fontcolor
-  return(obj)
+.get_ModDNA_bio_color <- function(){
+  alphabetNames <- alphabet(ModDNAString())
+  alphabet <- rep("#33FF00",length(alphabetNames))
+  names(alphabet) <- alphabetNames
+  dna_color <- c("A" = "#ABD9E9", "T" = "#2C7BB6", "G" = "#D7191C",
+                 "C" = "#FDAE61", "N" = "#FFFFBF")
+  alphabet[match(names(dna_color),names(alphabet))] <- dna_color
+  alphabet
 }
 
-
-################################################################################
-## Gviz + RNAString ############################################################
-################################################################################
-
-#' @name RNASequenceTrack
-#' @aliases RNASequenceTrack-class
-#' 
-#' @title RNASequenceTrack
-#' 
-#' @description
-#' A \code{Gviz} compatible 
-#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}} for showing RNA 
-#' sequences.
-#' 
-#' @export
-setClass("RNASequenceTrack",
-         contains = "ModifiedSequenceTrack",
-         representation = representation(sequence = "RNAStringSet",
-                                         chromosome = "character",
-                                         genome = "character"),
-         prototype = prototype(seqType = "RNAString",
-                               sequence = RNAStringSet(),
-                               name = "Sequence",
-                               chromosome = "chr0",
-                               genome = "all")
-)
-
-#' @rdname RNASequenceTrack
-#' 
-#' @param sequence A \code{character} vector or \code{RNAString} object of 
-#' length one. The sequence to display. See 
-#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
-#' @param chromosome,genome,... See 
-#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
-#' 
-#' @return a \code{RNASequenceTrack} object
-#'   
-#' @export
-#'
-#' @examples
-#' seq <- RNAStringSet(c(chr1 = "AGCUAGCUAGCUAGCUAGCUAGCU"))
-#' st <- RNASequenceTrack(seq)
-#' Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
-RNASequenceTrack <- function(sequence, chromosome, genome, ...){
-  .stringSet_to_ModifiedSequenceTrack("RNASequenceTrack",
-                                      "RNAStringSet",
-                                      sequence,
-                                      chromosome,
-                                      genome,
-                                      .get_RNA_bio_color(),
-                                      ...)
+.get_ModRNA_bio_color <- function(){
+  alphabetNames <- alphabet(ModRNAString())
+  alphabet <- rep("#33FF00",length(alphabetNames))
+  names(alphabet) <- alphabetNames
+  rna_color <- c("A" = "#ABD9E9", "U" = "#2C7BB6", "G" = "#D7191C",
+                 "C" = "#FDAE61", "N" = "#FFFFBF")
+  alphabet[match(names(rna_color),names(alphabet))] <- rna_color
+  alphabet
 }
+
 
 ################################################################################
 ## Gviz + ModRNAString #########################################################
 ################################################################################
 
-#' @name ModRNASequenceTrack
-#' @aliases ModRNASequenceTrack-class
+
+#' @name SequenceModRNAStringSetTrack-class
+#' @aliases ModRNASequenceTrack SequenceModRNAStringSetTrack
 #' 
 #' @title ModRNASequenceTrack
 #' 
@@ -161,51 +40,83 @@ RNASequenceTrack <- function(sequence, chromosome, genome, ...){
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}} for showing modified 
 #' RNA sequences.
 #' 
+#' @slot sequence A \code{ModRNAStringSet} object
+#' 
 #' @export
-setClass("ModRNASequenceTrack",
-         contains = "ModifiedSequenceTrack",
-         representation = representation(sequence = "ModRNAStringSet",
-                                         chromosome = "character",
-                                         genome = "character"),
-         prototype = prototype(seqType = "ModRNAString",
-                               sequence = ModRNAStringSet(),
-                               name = "Sequence",
-                               chromosome = "chr0",
-                               genome = "all")
+setClass("SequenceModRNAStringSetTrack",
+         representation = representation(sequence = "ModRNAStringSet"),
+         contains = "SequenceTrack",
+         prototype = prototype(sequence = ModRNAStringSet(),
+                               dp = DisplayPars(add53 = FALSE,
+                                                background.title = "transparent",
+                                                col = "darkgray",
+                                                complement = FALSE,
+                                                fontcolor = .get_ModRNA_bio_color(),
+                                                fontface = 2,
+                                                fontsize = 10,
+                                                lwd = 2,
+                                                min.width = 2,
+                                                noLetters = FALSE,
+                                                showTitle = FALSE,
+                                                size = NULL)))
+
+setMethod("initialize", "SequenceModRNAStringSetTrack",
+          function(.Object, sequence, ...) {
+              if(missing(sequence) || is.null(sequence))
+                  sequence <- ModRNAStringSet()
+              .Object@sequence <- sequence
+              .Object <- callNextMethod(.Object, ...)
+              return(.Object)
+          }
 )
 
-#' @rdname ModRNASequenceTrack
+
+#' @rdname SequenceModRNAStringSetTrack-class
 #' 
 #' @param sequence A \code{character} vector or \code{ModRNAString} object of 
 #' length one. The sequence to display. See 
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
-#' @param chromosome,genome,... See 
+#' @param chromosome,genome,name,... See 
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
 #' 
-#' @return a \code{ModRNASequenceTrack} object
+#' @return a \code{SequenceModRNAStringSetTrack} object
 #'   
 #' @export
 #' 
 #' @examples
-#' seq <- ModRNAStringSet(c(chr1 = paste0(alphabet(ModRNAString()),collapse = "")))
+#' seq <- ModRNAStringSet(c(chr1 = paste0(alphabet(ModRNAString()),
+#'                                        collapse = "")))
 #' st <- ModRNASequenceTrack(seq)
 #' Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
-ModRNASequenceTrack <- function(sequence, chromosome, genome, ...){
-  .stringSet_to_ModifiedSequenceTrack("ModRNASequenceTrack",
-                                      "ModRNAStringSet",
-                                      sequence,
-                                      chromosome,
-                                      genome,
-                                      .get_ModRNA_bio_color(),
-                                      ...)
+ModRNASequenceTrack <- function(sequence, chromosome, genome,
+                                name = "SequenceTrack", ...){
+  .SequenceTrack("SequenceModRNAStringSetTrack",
+                 seqtype = "ModRNA",
+                 sequence = sequence,
+                 chromosome = chromosome,
+                 genome = genome,
+                 name = name,
+                 ...)
 }
+
+#' @rdname SequenceModRNAStringSetTrack-class
+#' @export
+setMethod("seqnames", "SequenceModRNAStringSetTrack",
+          function(x) as.character(names(x@sequence)))
+#' @rdname SequenceModRNAStringSetTrack-class
+#' @export
+setMethod("seqlevels", "SequenceModRNAStringSetTrack",
+          function(x) seqnames(x)[width(x@sequence)>0])
+setMethod("show", "SequenceModRNAStringSetTrack",
+          function(object) cat(.sequenceTrackInfo(object)))
+
 
 ################################################################################
 ## Gviz + ModDNAString #########################################################
 ################################################################################
 
-#' @name ModDNASequenceTrack
-#' @aliases ModDNASequenceTrack-class
+#' @name SequenceModDNAStringSetTrack-class
+#' @aliases ModDNASequenceTrack SequenceModDNAStringSetTrack
 #' 
 #' @title ModDNASequenceTrack
 #' 
@@ -214,41 +125,72 @@ ModRNASequenceTrack <- function(sequence, chromosome, genome, ...){
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}} for showing modified 
 #' DNA sequences.
 #' 
+#' @slot sequence A \code{ModDNAStringSet} object
+#' 
 #' @export
-setClass("ModDNASequenceTrack",
-         contains = "ModifiedSequenceTrack",
-         representation = representation(sequence = "ModDNAStringSet",
-                                         chromosome = "character",
-                                         genome = "character"),
-         prototype = prototype(seqType = "ModDNAString",
-                               sequence = ModDNAStringSet(),
-                               name = "Sequence",
-                               chromosome = "chr0",
-                               genome = "all")
+setClass("SequenceModDNAStringSetTrack",
+         representation = representation(sequence = "ModDNAStringSet"),
+         contains = "SequenceTrack",
+         prototype = prototype(sequence = ModDNAStringSet(),
+                               dp = DisplayPars(add53 = FALSE,
+                                                background.title = "transparent",
+                                                col = "darkgray",
+                                                complement = FALSE,
+                                                fontcolor = .get_ModDNA_bio_color(),
+                                                fontface = 2,
+                                                fontsize = 10,
+                                                lwd = 2,
+                                                min.width = 2,
+                                                noLetters = FALSE,
+                                                showTitle = FALSE,
+                                                size = NULL)))
+
+setMethod("initialize", "SequenceModDNAStringSetTrack",
+          function(.Object, sequence, ...) {
+              if(missing(sequence) || is.null(sequence))
+                  sequence <- ModDNAStringSet()
+              .Object@sequence <- sequence
+              .Object <- callNextMethod(.Object, ...)
+              return(.Object)
+          }
 )
 
-#' @rdname ModDNASequenceTrack
+
+#' @rdname SequenceModDNAStringSetTrack-class
 #' 
 #' @param sequence A \code{character} vector or \code{ModDNAString} object of 
 #' length one. The sequence to display. See 
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
-#' @param chromosome,genome,... See 
+#' @param chromosome,genome,name,... See 
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
 #' 
-#' @return a \code{ModDNASequenceTrack} object
+#' @return a \code{SequenceModDNAStringSetTrack} object
 #'   
 #' @export
 #' 
 #' @examples
-#' seq <- ModDNAStringSet(c(chr1 = paste0(alphabet(ModDNAString()),collapse = "")))
+#' seq <- ModDNAStringSet(c(chr1 = paste0(alphabet(ModDNAString()),
+#'                                        collapse = "")))
 #' st <- ModDNASequenceTrack(seq)
 #' Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
-ModDNASequenceTrack <- function(sequence, chromosome, genome, ...){
-  .stringSet_to_ModifiedSequenceTrack("ModDNASequenceTrack",
-                                      "ModDNAStringSet",
-                                      sequence,
-                                      chromosome,
-                                      genome,
-                                      .get_ModDNA_bio_color(),
-                                      ...)
+ModDNASequenceTrack <- function(sequence, chromosome, genome,
+                                name = "SequenceTrack", ...){
+  .SequenceTrack("SequenceModDNAStringSetTrack",
+                 seqtype = "ModDNA",
+                 sequence = sequence,
+                 chromosome = chromosome,
+                 genome = genome,
+                 name = name,
+                 ...)
 }
+
+#' @rdname SequenceModDNAStringSetTrack-class
+#' @export
+setMethod("seqnames", "SequenceModDNAStringSetTrack",
+          function(x) as.character(names(x@sequence)))
+#' @rdname SequenceModDNAStringSetTrack-class
+#' @export
+setMethod("seqlevels", "SequenceModDNAStringSetTrack",
+          function(x) seqnames(x)[width(x@sequence)>0])
+setMethod("show", "SequenceModDNAStringSetTrack",
+          function(object) cat(.sequenceTrackInfo(object)))

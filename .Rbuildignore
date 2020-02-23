@@ -4,3 +4,5 @@
 .Rproj
 _pkgdown.yml
 .travis.yml
+^cache*
+

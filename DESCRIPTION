@@ -1,8 +1,8 @@
 Package: RNAmodR
 Type: Package
 Title: Detection of post-transcriptional modifications in high throughput sequencing data
-Version: 1.1.7
-Date: 2020-01-25
+Version: 1.1.8
+Date: 2020-02-23
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
                     email = "felix.gm.ernst@outlook.com", 
@@ -36,7 +36,6 @@ Imports:
     matrixStats,
     assertive,
     BiocGenerics,
-    XVector,
     Biostrings,
     BiocParallel,
     GenomicFeatures,
@@ -49,7 +48,7 @@ Imports:
     colorRamps,
     ggplot2,
     grid,
-    Gviz,
+    Gviz (>= 1.31.0),
     reshape2,
     graphics,
     ROCR
@@ -64,7 +63,6 @@ Collate:
     'RNAmodR.R'
     'AllGenerics.R'
     'Gviz-ModifiedSequenceTrack-class.R'
-    'Gviz-functions.R'
     'settings.R'
     'Modifier-utils.R'
     'SequenceDataFrame-class.R'
