@@ -22,6 +22,8 @@ length one. The sequence to display. See
 
 \item{chromosome, genome, name, ...}{See 
 \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
+
+\item{x}{A \code{SequenceModDNAStringSetTrack} object.}
 }
 \value{
 a \code{SequenceModDNAStringSetTrack} object

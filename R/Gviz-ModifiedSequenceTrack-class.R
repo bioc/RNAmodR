@@ -78,6 +78,7 @@ setMethod("initialize", "SequenceModRNAStringSetTrack",
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
 #' @param chromosome,genome,name,... See 
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
+#' @param x A \code{SequenceModRNAStringSetTrack} object.
 #' 
 #' @return a \code{SequenceModRNAStringSetTrack} object
 #'   
@@ -163,6 +164,7 @@ setMethod("initialize", "SequenceModDNAStringSetTrack",
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
 #' @param chromosome,genome,name,... See 
 #' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
+#' @param x A \code{SequenceModDNAStringSetTrack} object.
 #' 
 #' @return a \code{SequenceModDNAStringSetTrack} object
 #'   
