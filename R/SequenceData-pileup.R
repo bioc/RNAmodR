@@ -331,7 +331,7 @@ setMethod(
       d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub("control.","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(range = d,
-                                    groups = colnames(mcols(d)),
+                                    groups = factor(colnames(mcols(d))),
                                     name = paste0(RNAMODR_PLOT_SEQ_PILEUP_NAMES["bases"],
                                                   "\ncontrol"),
                                     col = colour.bases[order(names(colour.bases))],
@@ -347,7 +347,7 @@ setMethod(
       d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub("treated.","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(range = d,
-                                    groups = colnames(mcols(d)),
+                                    groups = factor(colnames(mcols(d))),
                                     name = paste0(RNAMODR_PLOT_SEQ_PILEUP_NAMES["bases"],
                                                   "\ntreated"),
                                     col = colour.bases[order(names(colour.bases))],

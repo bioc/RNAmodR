@@ -369,7 +369,7 @@ setMethod(
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.tx <- Gviz::DataTrack(
         range = d[,"means.tx"],
-        group = "means",
+        group = factor("means"),
         name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend5tx"],
                       "\ncontrol"),
         type = "histogram")
@@ -381,7 +381,7 @@ setMethod(
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.ol <- Gviz::DataTrack(
         range = d[,"means.ol"],
-        group = "means",
+        group = factor("means"),
         name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend5ol"],
                       "\ncontrol"),
         type = "histogram")
@@ -397,7 +397,7 @@ setMethod(
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated.tx <- Gviz::DataTrack(
         range = d[,"means.tx"],
-        group = "means.tx",
+        group = factor("means.tx"),
         name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend5tx"],
                       "\ntreated"),
         type = "histogram")
@@ -407,7 +407,7 @@ setMethod(
       Gviz::displayPars(dt.treated.tx) <- args
       dt.treated.ol <- Gviz::DataTrack(
         range = d[,"means.ol"],
-        group = "means.ol",
+        group = factor("means.ol"),
         name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend5ol"],
                       "\ntreated"),
         type = "histogram")
@@ -446,7 +446,7 @@ setMethod(
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.tx <- Gviz::DataTrack(
         range = d[,"means.tx"],
-        group = "means",
+        group = factor("means"),
         name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend3tx"],
                       "\ncontrol"),
         type = "histogram")
@@ -458,7 +458,7 @@ setMethod(
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control.ol <- Gviz::DataTrack(
         range = d[,"means.ol"],
-        group = "means",
+        group = factor("means"),
         name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend3ol"],
                       "\ncontrol"),
         type = "histogram")
@@ -474,7 +474,7 @@ setMethod(
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated.tx <- Gviz::DataTrack(
         range = d[,"means.tx"],
-        group = "means.tx",
+        group = factor("means.tx"),
         name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend3tx"],
                       "\ntreated"),
         type = "histogram")
@@ -484,7 +484,7 @@ setMethod(
       Gviz::displayPars(dt.treated.tx) <- args
       dt.treated.ol <- Gviz::DataTrack(
         range = d[,"means.ol"],
-        group = "means.ol",
+        group = factor("means.ol"),
         name = paste0(RNAMODR_PLOT_SEQ_NORMEND_NAMES["normend3ol"],
                       "\ntreated"),
         type = "histogram")

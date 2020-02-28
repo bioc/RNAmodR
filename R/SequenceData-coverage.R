@@ -166,7 +166,7 @@ setMethod(
       d <- seqdata[,grepl("control",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(range = d,
-                                    group = "means",
+                                    group = factor("means"),
                                     name = paste0(RNAMODR_PLOT_SEQ_COVERAGE_NAMES["means"],
                                                   "\ncontrol"),
                                     type = "histogram")
@@ -180,7 +180,7 @@ setMethod(
       d <- seqdata[,grepl("treated",colnames(mcols(seqdata)))]
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(range = d,
-                                    group = "means",
+                                    group = factor("means"),
                                     name = paste0(RNAMODR_PLOT_SEQ_COVERAGE_NAMES["means"],
                                                   "\ntreated"),
                                     type = "histogram")

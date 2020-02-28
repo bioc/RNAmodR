@@ -50,7 +50,7 @@ setMethod(
     data <- unlist(data)
     lim <- c(min(mcols(data)$score), max(mcols(data)$score))
     dtscore <- Gviz::DataTrack(range = data[,"score"],
-                               groups = "score",
+                               groups = factor("score"),
                                name = RNAMODR_I_PLOT_DATA_NAMES["score"],
                                col = args[["colour"]]["score"],
                                type = "histogram",

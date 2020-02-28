@@ -143,7 +143,7 @@ setMethod(
       colnames(mcols(d)) <- gsub(".control","",colnames(mcols(d)))
       dt.control <- Gviz::DataTrack(
         range = d,
-        group = "means",
+        group = factor("means"),
         name = paste0(RNAMODR_PLOT_SEQ_PROTEND_NAMES["protend"],
                       "\ncontrol"),
         type = "histogram")
@@ -158,7 +158,7 @@ setMethod(
       colnames(mcols(d)) <- gsub(".treated","",colnames(mcols(d)))
       dt.treated <- Gviz::DataTrack(
         range = d,
-        group = "means",
+        group = factor("means"),
         name = paste0(RNAMODR_PLOT_SEQ_PROTEND_NAMES["protend"],
                       "\ntreated"),
         type = "histogram")
