@@ -26,7 +26,7 @@ emerging sequencing techniques.
 
 # Installation
 
-The current version of the RNAmodR package is available from Bioconductor.
+The current version of the `RNAmodR` package is available from Bioconductor.
 
 ```
 if (!requireNamespace("BiocManager", quietly = TRUE))
