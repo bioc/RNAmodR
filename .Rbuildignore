@@ -1,8 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^docs*
-.Rproj
-_pkgdown.yml
-.travis.yml
-^cache*
-
+^.travis.yml$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
