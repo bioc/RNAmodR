@@ -7,7 +7,7 @@ can be detected classically via several strategies. However, difficulties arise
 if the identity and the position of the modified nucleotides is to be determined
 at the same time. Classically, a primer extension, a form of reverse
 transcription (RT), would allow certain modifications to be accessed by blocks
-during the RT changes or changes in the cDNA sequences. Other modification would
+during the RT or changes in the cDNA sequences. Other modification would
 need to be selectively treated by chemical reactions to influence the outcome of
 the reverse transcription.
 
@@ -56,7 +56,7 @@ classes are used to detect certain features within high throughput sequencing
 data to assign the presence of specific modifications for an established
 pattern. The `Modifier` class is virtual and can be adapted for individual
 methods, whereas the type of nucleotide under investigation is specified by
-inheriting from the virtual `RNAModifier` and `DNAModifier` classes. To fixate 
+inheriting from the virtual `RNAModifier` and `DNAModifier` classes. To fix 
 the data processing and detection strategy, for each type of sequencing method 
 a `Modifier` class can be developed alongside to detect  modifications.
 
