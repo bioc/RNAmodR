@@ -26,7 +26,7 @@ can be detected classically via several strategies. However, difficulties arise
 if the identity and the position of the modified nucleotides is to be determined
 at the same time. Classically, a primer extension, a form of reverse
 transcription (RT), would allow certain modifications to be accessed by blocks
-during the RT changes or changes in the cDNA sequences. Other modification would
+during the RT or changes in the cDNA sequences. Other modification would
 need to be selectively treated by chemical reactions to influence the outcome of
 the reverse transcription.
 
@@ -161,7 +161,7 @@ sdf[1:3,]
 Whereas, the `SequenceData` classes are used to hold the data, `Modifier`
 classes are used to detect certain features within high throughput sequencing
 data to assign the presence of specific modifications for an established
-pattern. The `Modifier` class (and it nucleotide specific subclasses 
+pattern. The `Modifier` class (and its nucleotide specific subclasses 
 `RNAModifier` and `DNAModifier`) is virtual and can be addapted to individual
 methods. For example mapped reads can be analyzed using the `ModInosine`
 class to reveal the presence of I by detecting a A to G conversion in normal 
@@ -186,7 +186,7 @@ they are required to contain data for the same annotation and sequence data.
 
 `Modifier` objects are created with the same arguments as `SequenceData` objects
 and will start loading the necessary `SequenceData` objects from these. In
-addition they will start automatically start to calculate any additional scores 
+addition they will automatically start to calculate any additional scores 
 (aggregation) and then start to search for modifications, if the optional 
 argument `find.mod` is not set to `FALSE`.
 
@@ -255,10 +255,10 @@ msi <- ModSetInosine(files, annotation = annotation, sequences = sequences)
 
 The creation of the `ModifierSet` will itself trigger the creation of a
 `Modifier` object each containing data from one sample set. This step is
-parallelized using the functions from the `BiocParallel` package. If a
+parallelized using the `BiocParallel` package. If a
 `Modifier` class itself uses parallel computing for its analysis, it is switched
 off unless `internalBP = TRUE` is set. In this case each `Modifier` object is 
-created in sequence, allowing parallel computing during of the creation of each
+created in sequence, allowing parallel computing during the creation of each
 object.
 
 ```{r modifierset2}
@@ -282,8 +282,8 @@ Found modifications can be retrieved from a `Modifier` or `ModifierSet` object
 via the `modifications()` function. The function returns a `GRanges` or
 `GRangesList` object, respectively, which contains the coordinates of the
 modifications with respect to the genome used. For example if a transcript
-starts at position 100 and contains a modified nucleotide at position 50, the
-returned coordinate will 149.
+starts at position 100 and contains a modified nucleotide at position 50 of the transcript, the
+returned coordinate will 150.
 
 ```{r results1}
 mod <- modifications(msi)
