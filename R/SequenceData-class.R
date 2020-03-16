@@ -97,6 +97,8 @@ NULL
 #' @return A SequenceData object
 NULL
 
+#' @name RNAmodR-development
+#' @export
 setClass("SequenceData",
          contains = c("VIRTUAL", "CompressedSplitDataFrameList"),
          slots = c(minQuality = "integer",
