@@ -294,13 +294,15 @@ setMethod(
   signature = signature(x = "Modifier"),
   definition = function(x, coord, score = NULL, prediction.args = list(), 
                         performance.args = list(), plot.args = list()){
-    coord <- .norm_coord(coord, modType(x))
-    data <- .get_prediction_data_Modifier(x, coord, score)
-    .plot_ROCR(data,
-               .norm_prediction_args(prediction.args),
-               .norm_performance_args(performance.args, x),
-               .norm_plot_args(plot.args),
-               score)
+    message("Doesn't work for not, because the S3 dispatch to 'prediction' ",
+            "'performance' from the 'ROCR' package is not working right now.")
+    # coord <- .norm_coord(coord, modType(x))
+    # data <- .get_prediction_data_Modifier(x, coord, score)
+    # .plot_ROCR(data,
+    #            .norm_prediction_args(prediction.args),
+    #            .norm_performance_args(performance.args, x),
+    #            .norm_plot_args(plot.args),
+    #            score)
   }
 )
 
@@ -311,12 +313,14 @@ setMethod(
   signature = signature(x = "ModifierSet"),
   definition = function(x, coord, score = NULL, prediction.args = list(), 
                         performance.args = list(), plot.args = list()){
-    coord <- .norm_coord(coord, modType(x))
-    data <- .get_prediction_data_ModifierSet(x, coord, score)
-    .plot_ROCR(data,
-               .norm_prediction_args(prediction.args),
-               .norm_performance_args(performance.args, x),
-               .norm_plot_args(plot.args),
-               score)
+    message("Doesn't work for not, because the S3 dispatch to 'prediction' ",
+            "'performance' from the 'ROCR' package is not working right now.")
+    # coord <- .norm_coord(coord, modType(x))
+    # data <- .get_prediction_data_ModifierSet(x, coord, score)
+    # .plot_ROCR(data,
+    #            .norm_prediction_args(prediction.args),
+    #            .norm_performance_args(performance.args, x),
+    #            .norm_plot_args(plot.args),
+    #            score)
   }
 )
