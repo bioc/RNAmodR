@@ -173,6 +173,39 @@ NULL
   if(is.null(plot.args[["spread.estimate"]])){
     plot.args[["spread.estimate"]] <- "none"
   }
+  if(is.null(plot.args[["spread.scale"]])){
+    plot.args[["spread.scale"]] <- 1
+  }
+  if(is.null(plot.args[["show.spread.at"]])){
+    plot.args[["show.spread.at"]] <- c()
+  }
+  if(is.null(plot.args[["colorize"]])){
+    plot.args[["colorize"]] <- FALSE
+  }
+  if(is.null(plot.args[["colorize.palette"]])){
+    plot.args[["colorize.palette"]] <- rev(rainbow(256,start=0, end=4/6))
+  }
+  if(is.null(plot.args[["colorkey"]])){
+    plot.args[["colorkey"]] <- plot.args[["colorize"]] 
+  }
+  if(is.null(plot.args[["colorkey.relwidth"]])){
+    plot.args[["colorkey.relwidth"]] <- 0.25
+  }
+  if(is.null(plot.args[["colorkey.pos"]])){
+    plot.args[["colorkey.pos"]] <- "right"
+  }
+  if(is.null(plot.args[["print.cutoffs.at"]])){
+    plot.args[["print.cutoffs.at"]] <- c()
+  }
+  if(is.null(plot.args[["cutoff.label.function"]])){
+    plot.args[["cutoff.label.function"]] <- function(x) { round(x,2) }
+  }
+  if(is.null(plot.args[["downsampling"]])){
+    plot.args[["downsampling"]] <- 0
+  }
+  if(is.null(plot.args[["add"]])){
+    plot.args[["add"]] <- FALSE
+  }
   return(plot.args)
 }
 
@@ -261,7 +294,9 @@ NULL
                                           prediction.args))
       perf <- do.call(ROCR::performance, c(list(prediction.obj = pred),
                                            performance.args))
-      tmp <- try(do.call("plot", c(list(x = perf), plot.args)),silent = TRUE)
+      tmp <- try(do.call(ROCR:::.plot.performance,
+                         c(list(perf = perf), plot.args)),
+                 silent = TRUE)
       if(is(tmp,"try-error")){
         stop("Error during plotting of performance object: ",tmp)
       }
@@ -294,15 +329,13 @@ setMethod(
   signature = signature(x = "Modifier"),
   definition = function(x, coord, score = NULL, prediction.args = list(), 
                         performance.args = list(), plot.args = list()){
-    message("Doesn't work for not, because the S3 dispatch to 'prediction' ",
-            "'performance' from the 'ROCR' package is not working right now.")
-    # coord <- .norm_coord(coord, modType(x))
-    # data <- .get_prediction_data_Modifier(x, coord, score)
-    # .plot_ROCR(data,
-    #            .norm_prediction_args(prediction.args),
-    #            .norm_performance_args(performance.args, x),
-    #            .norm_plot_args(plot.args),
-    #            score)
+    coord <- .norm_coord(coord, modType(x))
+    data <- .get_prediction_data_Modifier(x, coord, score)
+    .plot_ROCR(data,
+               .norm_prediction_args(prediction.args),
+               .norm_performance_args(performance.args, x),
+               .norm_plot_args(plot.args),
+               score)
   }
 )
 
@@ -313,14 +346,12 @@ setMethod(
   signature = signature(x = "ModifierSet"),
   definition = function(x, coord, score = NULL, prediction.args = list(), 
                         performance.args = list(), plot.args = list()){
-    message("Doesn't work for not, because the S3 dispatch to 'prediction' ",
-            "'performance' from the 'ROCR' package is not working right now.")
-    # coord <- .norm_coord(coord, modType(x))
-    # data <- .get_prediction_data_ModifierSet(x, coord, score)
-    # .plot_ROCR(data,
-    #            .norm_prediction_args(prediction.args),
-    #            .norm_performance_args(performance.args, x),
-    #            .norm_plot_args(plot.args),
-    #            score)
+    coord <- .norm_coord(coord, modType(x))
+    data <- .get_prediction_data_ModifierSet(x, coord, score)
+    .plot_ROCR(data,
+               .norm_prediction_args(prediction.args),
+               .norm_performance_args(performance.args, x),
+               .norm_plot_args(plot.args),
+               score)
   }
 )
