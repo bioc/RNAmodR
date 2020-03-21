@@ -163,6 +163,7 @@ NULL
   args
 }
 
+#' @importFrom grDevices rainbow
 .readjust_plot_args <- function(plot.args, performance.args){
   if(performance.args[["measure"]] %in% .rocr_exclusive_functions){
     plot.args[["colorize"]] <- NULL
@@ -183,7 +184,8 @@ NULL
     plot.args[["colorize"]] <- FALSE
   }
   if(is.null(plot.args[["colorize.palette"]])){
-    plot.args[["colorize.palette"]] <- rev(rainbow(256,start=0, end=4/6))
+    plot.args[["colorize.palette"]] <- rev(grDevices::rainbow(256, start = 0,
+                                                              end = 4/6))
   }
   if(is.null(plot.args[["colorkey"]])){
     plot.args[["colorkey"]] <- plot.args[["colorize"]] 
