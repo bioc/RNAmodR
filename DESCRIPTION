@@ -1,8 +1,8 @@
 Package: RNAmodR
 Type: Package
 Title: Detection of post-transcriptional modifications in high throughput sequencing data
-Version: 1.1.13
-Date: 2020-03-19
+Version: 1.1.14
+Date: 2020-03-24
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
                     email = "felix.gm.ernst@outlook.com", 
@@ -25,8 +25,8 @@ Encoding: UTF-8
 LazyData: false
 Depends:
     R (>= 3.6),
-    IRanges (>= 2.19.7),  
-    S4Vectors (>= 0.25.8),
+    IRanges (>= 2.21.6),
+    S4Vectors (>= 0.25.14),
     GenomicRanges,
     Modstrings
 Imports:
@@ -36,7 +36,7 @@ Imports:
     matrixStats,
     assertive,
     BiocGenerics,
-    Biostrings,
+    Biostrings (>= 2.55.7),
     BiocParallel,
     GenomicFeatures,
     GenomicAlignments,
