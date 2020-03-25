@@ -352,7 +352,7 @@ setMethod("bindROWS", "SequenceData",
             }
             .check_bamfiles(all_objects)
             callNextMethod(x, objects, use.names = use.names, 
-                           ignore.mcols = ignore.mcols, check = FALSE)
+                           ignore.mcols = ignore.mcols, check = check)
           }
 )
 

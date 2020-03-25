@@ -272,12 +272,22 @@ setMethod(
   {
     objects <- S4Vectors:::prepare_objects_to_bind(x, objects)
     all_objects <- c(list(x), objects)
+
+    ## Call bindROWS() method for DataFrame objects.
+    ## Note that the resulting 'ans' might temporarily be an invalid
+    ## SequenceDataFrame object (data length and ranges width won't match)
+    ## until we update its 'ranges' and 'sequence' slots below.
+    ## So we must use 'check=FALSE' to skip validation.
+    ans <- callNextMethod(x, objects, use.names = use.names,
+                                      ignore.mcols = ignore.mcols,
+                                      check = FALSE)
+
+    ## Take care of the 'ranges' and 'sequence' slots.
     ans_ranges <- unlist(GenomicRanges::GRangesList(lapply(all_objects,ranges)))
     ans_sequence <- do.call(xscat,lapply(all_objects,sequences))
-    BiocGenerics:::replaceSlots(callNextMethod(),
-                                ranges = ans_ranges,
-                                sequence = ans_sequence,
-                                check = check)
+    BiocGenerics:::replaceSlots(ans, ranges = ans_ranges,
+                                     sequence = ans_sequence,
+                                     check = check)
   }
 )
 
