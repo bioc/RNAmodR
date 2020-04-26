@@ -87,11 +87,12 @@ Collate:
     'SequenceData-pileup.R'
     'SequenceData-viz.R'
     'SequenceData-protected-end-pos.R'
+    'SequenceData-stats.R'
     'SequenceData-subset.R'
     'SequenceDataList-viz.R'
     'SequenceDataSet-viz.R'
     'utils-bam.R'
     'utils.R'
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 BugReports: https://github.com/FelixErnst/RNAmodR/issues
 URL: https://github.com/FelixErnst/RNAmodR

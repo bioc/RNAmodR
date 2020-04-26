@@ -105,7 +105,7 @@ setSequenceDataCoercions("Coverage")
 #' @importFrom GenomicAlignments coverage
 .get_position_data_of_transcript_coverage <- function(bamFile, grl, param,
                                                       args = list()){
-  data <- .load_bam_alignment_data(bamFile, param, grl, args)
+  data <- .load_bam_alignment_data(bamFile, param, args)
   .get_coverage_from_GA(data, grl)
 }
 

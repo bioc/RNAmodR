@@ -1,4 +1,13 @@
 
+.test_stats_Modifier <- function(stats){
+  expect_s4_class(stats,"SimpleDFrameList")
+  expect_equal(colnames(stats[[1L]]),c("seqnames","seqlength","mapped",
+                                       "unmapped","used","used_distro"))
+  expect_s4_class(stats[[1L]]$used,"IntegerList")
+  expect_s4_class(stats[[1L]]$used_distro,"SimpleList")
+  expect_s4_class(stats[[1L]]$used_distro[[1L]],"IntegerList")
+}
+
 context("Modifier/ModifierSet")
 test_that("Modifier/ModifierSet:",{
   data(msi,package = "RNAmodR")
@@ -144,4 +153,7 @@ test_that("Modifier/ModifierSet:",{
   expect_equal(msi,msi2)
   expect_equivalent(msi,aggregate(msi))
   expect_equivalent(msi,modify(msi))
+  stats <- stats(msi)
+  expect_s4_class(stats,"SimpleList")
+  .test_stats_Modifier(stats[[1L]])
 })
