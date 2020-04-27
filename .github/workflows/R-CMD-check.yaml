@@ -38,11 +38,11 @@ jobs:
         run: |
           install.packages(c('remotes', 'BiocManager'))
           remotes::install_github('r-hub/sysreqs')
+          BiocManager::install()
         shell: Rscript {0}
         
       - name: Query dependencies
         run: |
-          options(install.packages.check.source = "no")
           saveRDS(remotes::dev_package_deps(dependencies = TRUE, repos = c(BiocManager::repositories(),getOption('repos'))), "depends.Rds", version = 2)
         shell: Rscript {0}
 
