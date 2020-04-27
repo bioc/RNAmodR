@@ -64,7 +64,7 @@ jobs:
         
       - name: Install R dependencies
         run: |
-          remotes::install_deps(dependencies = TRUE, repos = c(BiocManager::repositories(),getOption('repos')), Ncpu = 2L, type = "binary")
+          BiocManager::install(remotes::dev_package_deps(dependencies = TRUE, repos = c(BiocManager::repositories(),getOption('repos')))$package)
           remotes::install_cran("rcmdcheck")
           remotes::install_cran("covr")
           remotes::install_cran("magick")
