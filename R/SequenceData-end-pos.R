@@ -175,7 +175,7 @@ setSequenceDataCoercions("End")
                                                   args = list()){
   type <- match.arg(type)
   strands_u <- .get_strand_u_GRangesList(grl)
-  data <- .load_bam_alignment_data(bamFile, param, grl, args)
+  data <- .load_bam_alignment_data(bamFile, param, args)
   # get hits
   hits <- GenomicAlignments::findOverlaps(data, grl)
   # summarize pos of reads based on type

@@ -407,6 +407,7 @@ setMethod("unlist", "SequenceData",
 # or mergeing DataFrames into one
 .norm_postprocess_read_data <- function(data){
   if(is(data[[1L]],"IntegerList") || is(data[[1L]],"NumericList")){
+    m_data <- lapply(lapply(data, metadata),"[[","stats")
     data <- lapply(data, unlist)
     if(length(unique(lengths(data))) != 1L){
       stop("Data is of unequal length and cannot be coerced to a DataFrame.",
@@ -414,6 +415,7 @@ setMethod("unlist", "SequenceData",
     }
     data <- S4Vectors::DataFrame(data)
   } else if(is(data[[1L]],"DataFrameList")) {
+    m_data <- lapply(lapply(data, metadata),"$","stats")
     data <- lapply(data, unlist, use.names = FALSE)
     ncols <- unique(unlist(lapply(data, ncol)))
     if(length(ncols) != 1L){
@@ -427,6 +429,7 @@ setMethod("unlist", "SequenceData",
   } else {
     stop("")
   }
+  metadata(data) <- list(stats = m_data) 
   data
 }
 
@@ -461,13 +464,13 @@ setMethod("unlist", "SequenceData",
     args <- as.list(args)
   }
   proto <- new(className)
-  minQuality <- .norm_min_quality(args, proto@minQuality)
+  proto@minQuality <- .norm_min_quality(args, proto@minQuality)
   condition <- factor(names(bamfiles))
   replicate <- .get_replicate_number(condition)
   if(!assertive::is_a_non_empty_string(proto@dataDescription)){
     stop("'dataDescription' must be a single non empty character value.")
   }
-  if(is.null(minQuality)){
+  if(is.null(proto@minQuality)){
     stop("Minimum quality is not set for '", className ,"'.",
          call. = FALSE)
   }
@@ -523,9 +526,10 @@ setMethod("unlist", "SequenceData",
                        bamfiles = bamfiles,
                        seqinfo = seqinfo)
   ans <- new(className, 
-             minQuality = minQuality,
+             minQuality = proto@minQuality,
              unlistData = unlist_data,
              partitioning = IRanges::PartitioningByEnd(data),
+             metadata = metadata(unlist_data),
              ...)
   message("OK")
   ans

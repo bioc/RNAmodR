@@ -29,7 +29,7 @@ NULL
 }
 
 #' @importFrom GenomicAlignments readGAlignments
-.load_bam_alignment_data <- function(bamFile, param, grl, args){
+.load_bam_alignment_data <- function(bamFile, param, args){
   data <- GenomicAlignments::readGAlignments(bamFile, param = param)
   if(length(data) == 0L){
     stop("No reads found in data.", call. = FALSE)

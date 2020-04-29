@@ -28,7 +28,8 @@ Depends:
     IRanges (>= 2.21.6),
     S4Vectors (>= 0.25.14),
     GenomicRanges,
-    Modstrings
+    Modstrings,
+    GenomeInfoDbData
 Imports:
     methods,
     stats,
@@ -87,11 +88,12 @@ Collate:
     'SequenceData-pileup.R'
     'SequenceData-viz.R'
     'SequenceData-protected-end-pos.R'
+    'SequenceData-stats.R'
     'SequenceData-subset.R'
     'SequenceDataList-viz.R'
     'SequenceDataSet-viz.R'
     'utils-bam.R'
     'utils.R'
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 BugReports: https://github.com/FelixErnst/RNAmodR/issues
 URL: https://github.com/FelixErnst/RNAmodR

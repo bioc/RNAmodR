@@ -72,6 +72,13 @@ setGeneric(
   name = "sequenceData",
   def = function(x) standardGeneric("sequenceData")
 )
+#' @rdname stats
+#' @export
+setGeneric( 
+  name = "stats",
+  signature = c("x","file"),
+  def = function(x, file, ...) standardGeneric("stats")
+)
 #' @rdname Modifier-functions
 #' @export
 setGeneric( 

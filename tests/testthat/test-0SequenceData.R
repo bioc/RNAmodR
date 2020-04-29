@@ -1,6 +1,17 @@
 
+.test_stats_SequenceData <- function(stats){
+  expect_s4_class(stats,"SimpleDFrameList")
+  expect_equal(colnames(stats[[1L]]),c("seqnames","seqlength","mapped",
+                                       "unmapped","used","used_distro"))
+  expect_s4_class(stats[[1L]]$used,"IntegerList")
+  expect_s4_class(stats[[1L]]$used_distro,"SimpleList")
+  expect_s4_class(stats[[1L]]$used_distro[[1L]],"IntegerList")
+}
+
 context("SequenceData")
 test_that("SequenceData:",{
+  
+  
   expect_error(RNAmodR:::.get_SequenceData_args(),
                'argument "input" is missing, with no default')
   actual <- RNAmodR:::.get_SequenceData_args(list())
@@ -37,6 +48,7 @@ test_that("SequenceData:",{
   seqtype(e5sd) <- "DNA"
   expect_s4_class(sequences(e5sd),"DNAStringSet")
   seqtype(e5sd) <- "RNA"
+  .test_stats_SequenceData(stats(e5sd,BamFileList(files)))
   ##############################################################################
   skip_on_bioc()
   annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
@@ -106,6 +118,7 @@ test_that("SequenceData:",{
   expect_equal(lengths(colnames(e3sd)),c(2,2))
   expect_equal(colnames(e3sd)[[1]],colnames(e3sd)[[2]])
   expect_equal(colnames(e3sd)[[1]],c("end3.control.1","end3.treated.1"))
+  .test_stats_SequenceData(stats(e3sd,BamFileList(files)))
   #############################################################################
   actual <- aggregate(e3sd)
   expect_false(any(lengths(rownames(actual)) == 0L))
@@ -150,6 +163,7 @@ test_that("SequenceData:",{
   expect_equal(lengths(colnames(esd)),c(2,2))
   expect_equal(colnames(esd)[[1]],colnames(esd)[[2]])
   expect_equal(colnames(esd)[[1]],c("end.control.1","end.treated.1"))
+  .test_stats_SequenceData(stats(esd,BamFileList(files)))
   ##############################################################################
   actual <- aggregate(esd)
   expect_false(any(lengths(rownames(actual)) == 0L))
@@ -199,6 +213,7 @@ test_that("SequenceData:",{
                                       "normend5.treated.1.ends",
                                       "normend5.treated.1.norm.tx",
                                       "normend5.treated.1.norm.ol"))
+  .test_stats_SequenceData(stats(ne5sd,BamFileList(files)))
   ##############################################################################
   actual <- aggregate(ne5sd)
   expect_false(any(lengths(rownames(actual)) == 0L))
@@ -256,6 +271,7 @@ test_that("SequenceData:",{
                                       "normend3.treated.1.ends",
                                       "normend3.treated.1.norm.tx",
                                       "normend3.treated.1.norm.ol"))
+  .test_stats_SequenceData(stats(ne3sd,BamFileList(files)))
   ##############################################################################
   actual <- aggregate(ne3sd)
   expect_false(any(lengths(rownames(actual)) == 0L))
@@ -308,6 +324,7 @@ test_that("SequenceData:",{
   expect_equal(lengths(colnames(csd)),c(2,2))
   expect_equal(colnames(csd)[[1]],colnames(csd)[[2]])
   expect_equal(colnames(csd)[[1]],c("coverage.control.1","coverage.treated.1"))
+  .test_stats_SequenceData(stats(csd,BamFileList(files)))
   ##############################################################################
   actual <- aggregate(csd)
   expect_false(any(lengths(rownames(actual)) == 0L))
@@ -356,6 +373,7 @@ test_that("SequenceData:",{
                                     "pileup.control.1.C","pileup.treated.1.-",
                                     "pileup.treated.1.G","pileup.treated.1.A",
                                     "pileup.treated.1.T","pileup.treated.1.C"))
+  .test_stats_SequenceData(stats(psd,BamFileList(files)))
   ##############################################################################
   actual <- aggregate(psd)
   expect_false(any(lengths(rownames(actual)) == 0L))
@@ -417,6 +435,7 @@ test_that("SequenceData:",{
   expect_equal(colnames(pesd)[[1]],colnames(pesd)[[2]])
   expect_equal(colnames(pesd)[[1]],c("protectedend.control.1",
                                      "protectedend.treated.1"))
+  .test_stats_SequenceData(stats(pesd,BamFileList(files)))
   ##############################################################################
   actual <- aggregate(pesd)
   expect_false(any(lengths(rownames(actual)) == 0L))
