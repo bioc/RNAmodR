@@ -367,13 +367,55 @@ In addition, the use of found modifications sites as an input for `plotROC` is
 strongly discouraged, since defeats the purpose of the test. Therefore, please 
 regard this aspect of the next chunk as proof of concept as well.
 
-```{r plot6, fig.cap="TPR vs. FPR plot.", fig.asp=1}
+```{r plot5, fig.cap="TPR vs. FPR plot.", fig.asp=1}
 plotROC(msi, coord)
 ```
 
 Please have a look at `?plotROC` for additional details. Most of the
 functionality from the `ROCR` package is available via additional arguments,
 thus the output of `plotROC` can be heavily customized.
+
+# Additional informations
+
+To have a look at metadata of reads for an analysis with `RNAmodR` the function
+`stats()` can be used. It can be used with a bunch of object types: 
+`SequenceData`, `SequenceDataList`, `SequenceDataSet`, `Modifier` or 
+`ModifierSet`. For `SequenceData*` objects, the `BamFile` to be analyzed must
+be provided as well, which automatically done for `Modifier*` objects. For 
+more details have a look at `?stats`.
+
+```{r}
+stats <- stats(msi)
+stats
+stats[["SampleSet1"]]
+stats[["SampleSet1"]][["treated"]]
+```
+
+The data returned by `stats()` is a `DataFrame`, which can be wrapped as a
+`DataFrameList` or a `SimpleList` depending on the input type. Analysis of the
+data must be manually done and can be used to produced output like the following
+plot for distribution of lengths for reads analyzed.
+
+```{r plot6, echo=FALSE, fig.cap="Distribution of lengths for reads used in the analysis", fig.asp=1}
+plotData <- lapply(stats,function(set){
+  ans <- lapply(lapply(lapply(set,"[[","used_distro"),"[[","chr1"),"[[","1")
+  names <- unique(unlist(lapply(ans,names), use.names = FALSE))
+  ans <- lapply(ans,function(a){
+    a[names[!(names %in% names(a))]] <- 0
+    a <- a/matrixStats::colMaxs(as.matrix(a))
+    a
+  })
+  ans <- reshape2::melt(data.frame(c(list(length = as.integer(names)),ans)),
+                        id.vars = "length")
+  ans
+})
+plotData <- Reduce("rbind",Map(function(pd,group){pd$group <- group;pd},
+                               plotData,names(plotData)))
+ggplot2::ggplot(plotData) + 
+  ggplot2::geom_bar(mapping = ggplot2::aes(x = length, y = value, fill = group), 
+           stat = "identity",
+           position = "dodge")
+```
 
 # Further development
 
