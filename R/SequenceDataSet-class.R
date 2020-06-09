@@ -85,9 +85,9 @@ setMethod("show", "SequenceDataSet",
             print(out, quote = FALSE, right = TRUE)
           })
 
-# vertical_slot_names ----------------------------------------------------------
+# parallel_slot_names ----------------------------------------------------------
 #' @rdname RNAmodR-internals
-setMethod("vertical_slot_names", "SequenceDataSet",
+setMethod("parallel_slot_names", "SequenceDataSet",
           function(x) c("listData", callNextMethod())
 )
 
