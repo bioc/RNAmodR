@@ -64,6 +64,8 @@ jobs:
         
       - name: Install R dependencies
         run: |
+          BiocManager::install(c("GenomeInfoDbData","htmltools"))
+          BiocManager::install(c("rtracklayer","GenomicFeatures"))
           BiocManager::install(remotes::dev_package_deps(dependencies = TRUE, repos = c(BiocManager::repositories(),getOption('repos')))$package)
           remotes::install_cran("rcmdcheck")
           remotes::install_cran("covr")

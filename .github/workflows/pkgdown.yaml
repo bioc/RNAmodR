@@ -26,6 +26,7 @@ jobs:
         run: |
           install.packages(c('remotes', 'BiocManager'))
           remotes::install_github('r-hub/sysreqs')
+          BiocManager::install()
         shell: Rscript {0}
         
       - name: Query dependencies
@@ -49,6 +50,8 @@ jobs:
         
       - name: Install R dependencies
         run: |
+          BiocManager::install(c("GenomeInfoDbData","htmltools"))
+          BiocManager::install(c("rtracklayer","GenomicFeatures"))
           remotes::install_deps(dependencies = TRUE, repos = c(getOption('repos'), BiocManager::repositories()), Ncpu = 2L)
           remotes::install_cran("pkgdown")
           remotes::install_cran("magick")
