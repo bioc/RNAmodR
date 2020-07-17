@@ -94,6 +94,6 @@ Collate:
     'SequenceDataSet-viz.R'
     'utils-bam.R'
     'utils.R'
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 BugReports: https://github.com/FelixErnst/RNAmodR/issues
 URL: https://github.com/FelixErnst/RNAmodR
