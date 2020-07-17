@@ -70,9 +70,9 @@ setMethod("show", "SequenceDataSet",
                     lapply(ranges_mcols, function(x) 
                       showAsCell(tail(x, ntail))),
                     optional = TRUE))))
-              rownames(out) <- make_rownames_for_DataTable_display (nms, nr, 
-                                                                    nhead,
-                                                                    ntail) 
+              rownames(out) <- make_rownames_for_RectangularData_display(
+                                                 nms, nr,
+                                                 nhead, ntail)
             }
             classinfo <-
               matrix(unlist(lapply(ranges_mcols, function(x) {
@@ -85,9 +85,9 @@ setMethod("show", "SequenceDataSet",
             print(out, quote = FALSE, right = TRUE)
           })
 
-# vertical_slot_names ----------------------------------------------------------
+# parallel_slot_names ----------------------------------------------------------
 #' @rdname RNAmodR-internals
-setMethod("vertical_slot_names", "SequenceDataSet",
+setMethod("parallel_slot_names", "SequenceDataSet",
           function(x) c("listData", callNextMethod())
 )
 

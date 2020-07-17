@@ -4,19 +4,19 @@
 \name{RNAmodR-internals}
 \alias{RNAmodR-internals}
 \alias{.getData}
-\alias{vertical_slot_names,SequenceDataSet-method}
+\alias{parallel_slot_names,SequenceDataSet-method}
 \alias{getListElement,SequenceDataSet-method}
-\alias{vertical_slot_names,SequenceDataList-method}
+\alias{parallel_slot_names,SequenceDataList-method}
 \alias{getListElement,SequenceDataList-method}
 \alias{subset,Modifier-method}
 \alias{labelByCoord,SplitDataFrameList,GRanges-method}
 \title{RNAmodR internal functions}
 \usage{
-\S4method{vertical_slot_names}{SequenceDataSet}(x)
+\S4method{parallel_slot_names}{SequenceDataSet}(x)
 
 \S4method{getListElement}{SequenceDataSet}(x, i, exact = TRUE)
 
-\S4method{vertical_slot_names}{SequenceDataList}(x)
+\S4method{parallel_slot_names}{SequenceDataList}(x)
 
 \S4method{getListElement}{SequenceDataList}(x, i, exact = TRUE)
 
