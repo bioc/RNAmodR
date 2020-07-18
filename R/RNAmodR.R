@@ -64,7 +64,6 @@
 NULL
 
 #' @import methods
-#' @import assertive
 #' @import S4Vectors
 #' @import GenomicRanges
 #' @import BiocGenerics

@@ -67,7 +67,7 @@ NULL
 NULL
 
 .norm_show_argument <- function(show_arg, default = FALSE){
-  if(missing(show_arg) || !assertive::is_a_bool(show_arg)){
+  if(missing(show_arg) || !.is_a_bool(show_arg)){
     show_arg <- default
   }
   show_arg

@@ -110,7 +110,7 @@ setMethod(
   f = "initialize",
   signature = signature(.Object = "SequenceData"),
   definition = function(.Object, ...){
-    if(!assertive::is_a_non_empty_string(.Object@dataDescription)){
+    if(!.is_non_empty_string(.Object@dataDescription)){
       stop("'dataDescription' must be a single non empty character value.")
     }
     callNextMethod(.Object, ...)
@@ -467,7 +467,7 @@ setMethod("unlist", "SequenceData",
   proto@minQuality <- .norm_min_quality(args, proto@minQuality)
   condition <- factor(names(bamfiles))
   replicate <- .get_replicate_number(condition)
-  if(!assertive::is_a_non_empty_string(proto@dataDescription)){
+  if(!.is_non_empty_string(proto@dataDescription)){
     stop("'dataDescription' must be a single non empty character value.")
   }
   if(is.null(proto@minQuality)){
