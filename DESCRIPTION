@@ -46,7 +46,6 @@ Imports:
     RColorBrewer,
     colorRamps,
     ggplot2,
-    grid,
     Gviz (>= 1.31.0),
     reshape2,
     graphics,
