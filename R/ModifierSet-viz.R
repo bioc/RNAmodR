@@ -128,7 +128,7 @@ setMethod(
                         showSequence = TRUE, showAnnotation = FALSE, ...) {
     # get plotting arguments
     args <- .norm_viz_args_ModifierSet(list(...), x)
-    if(!assertive::is_a_string(name)){
+    if(!.is_a_string(name)){
       stop("'Name' must be a character.", call. = FALSE)
     }
     chromosome <- .norm_viz_chromosome(ranges(x), name)

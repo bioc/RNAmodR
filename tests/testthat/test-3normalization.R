@@ -35,7 +35,7 @@ test_that("argument normalization:",{
   # .norm_sequences
   expect_error(RNAmodR:::.norm_sequences(),'argument "seq" is missing')
   expect_error(RNAmodR:::.norm_sequences(""),
-               "Some or all of the files specified by")
+               "sequence files don't exist or cannot be accessed")
   actual <- RNAmodR:::.norm_sequences(fasta)
   expect_s4_class(actual,"FaFile")
   fafile <- actual

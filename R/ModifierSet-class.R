@@ -133,7 +133,7 @@ setMethod(f = "relistToClass",
 
 .ModifierSet_settings <- data.frame(
   variable = c("internalBP"),
-  testFUN = c("assertive::is_a_bool"),
+  testFUN = c(".is_a_bool"),
   errorValue = c(FALSE),
   errorMessage = c("'internalBP' must be TRUE or FALSE."),
   stringsAsFactors = FALSE)
@@ -480,7 +480,7 @@ setMethod(f = "sequences",
           signature = signature(x = "ModifierSet"),
           definition = 
             function(x, modified = FALSE){
-              if(!assertive::is_a_bool(modified)){
+              if(!.is_a_bool(modified)){
                 stop("'modified' has to be a single logical value.",
                      call. = FALSE)
               }

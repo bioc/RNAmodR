@@ -4,7 +4,7 @@ NULL
 # Annotation -------------------------------------------------------------------
 
 #' @importFrom rtracklayer GFF3File
-.norm_gff <- function(x, className, .xname = assertive::get_name_in_parent(x)){
+.norm_gff <- function(x, className, .xname = .get_name_in_parent(x)){
   if(!is(x,"GFF3File")){
     x <- try(rtracklayer::GFF3File(x), silent = TRUE)
     if (is(x, "try-error")){
@@ -23,14 +23,19 @@ NULL
 #' @importFrom GenomicFeatures makeTxDbFromGFF
 # Returns a TxDb or a GRangesList object
 .norm_annotation <- function(annotation, className, 
-                  .annotationname = assertive::get_name_in_parent(annotation)){
+                  .annotationname = .get_name_in_parent(annotation)){
   if(!is(annotation,"GRangesList")){
     if(!is(annotation,"GFFFile") && !is(annotation,"TxDb")){
       annotation <- .norm_gff(annotation, className, .annotationname)
     } else if(is(annotation,"GFFFile")) {
-      assertive::assert_all_are_existing_files(c(BiocGenerics::path(annotation)))
+      if(!.all_are_existing_files(c(BiocGenerics::path(annotation)))){
+        stop("annotation files don't exist or cannot be accessed.",
+             call. = FALSE)
+      }
     } else if(is(annotation,"TxDb")) {
-      assertive::assert_all_are_true(validObject(annotation))
+      if(!all(validObject(annotation))){
+        stop(".")
+      }
     } else {
       stop("Something went wrong. Unrecognized annotation input during ",
            "creation of class '",className,"'.",
@@ -71,11 +76,19 @@ NULL
            call. = FALSE)
     }
     seq <- tmp
-    assertive::assert_all_are_existing_files(c(BiocGenerics::path(seq)))
+    if(!.all_are_existing_files(c(BiocGenerics::path(seq)))){
+      stop("sequence files don't exist or cannot be accessed.",
+           call. = FALSE)
+    }
   } else if(is(seq,"FaFile")) {
-    assertive::assert_all_are_existing_files(c(BiocGenerics::path(seq)))
+    if(!.all_are_existing_files(c(BiocGenerics::path(seq)))){
+      stop("sequence files don't exist or cannot be accessed.",
+           call. = FALSE)
+    }
   } else if(is(seq,"BSgenome")) {
-    assertive::assert_all_are_true(validObject(seq))
+    if(!all(validObject(seq))){
+      stop(".")
+    }
   } else {
     stop("Something went wrong. Unrecognized sequence input during creation of",
          " class '",className,"'.",
@@ -90,7 +103,7 @@ SAMPLE_TYPES <- c("treated","control")
 
 #' @importFrom Rsamtools BamFileList
 .norm_bamfiles <- function(x, className, 
-                           .xname = assertive::get_name_in_parent(x)){
+                           .xname = .get_name_in_parent(x)){
   if(is.list(x)){
     if(!is.character(x[[1]]) && !is(x[[1]],"BamFile")){
       ans <- lapply(x, .norm_bamfiles, className, .xname)

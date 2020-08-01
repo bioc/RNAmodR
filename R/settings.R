@@ -118,17 +118,10 @@ NULL
 }
 
 
-# test import from assertive ---------------------------------------------------
-
-.is_a_bool <- assertive::is_a_bool
-.is_numeric_string <- assertive::is_numeric_string
-.is_a_string <- assertive::is_a_string
-.is_a_non_empty_string <- assertive::is_a_non_empty_string
-
 # testing settings -------------------------------------------------------------
 
 .get_name_in_parent_list <- function(...){
-  xnames <- assertive::get_name_in_parent(list(...))
+  xnames <- .get_name_in_parent(list(...))
   xnames <- gsub("list\\(","",gsub("\\)","",xnames))
   xnames <- strsplit(xnames,", ")[[1]]
   xnames

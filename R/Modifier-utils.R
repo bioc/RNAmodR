@@ -10,10 +10,21 @@ setMethod(f = "constructModRanges",
             if(nrow(data) == 0L) {
               return(GenomicRanges::GRanges()) 
             }
-            assertive::assert_is_a_non_empty_string(modType)
-            assertive::assert_is_closure_function(scoreFun)
-            assertive::assert_is_a_non_empty_string(source)
-            assertive::assert_is_a_non_empty_string(type)
+            if(!.is_non_empty_string(modType)){
+              stop("'modType' must be single non empty character value.",
+                   call. = FALSE)
+            }
+            if(!.is_function(scoreFun)){
+              stop("'scoreFun' must be a function.", call. = FALSE)
+            }
+            if(!.is_non_empty_string(source)){
+              stop("'source' must be single non empty character value.",
+                   call. = FALSE)
+            }
+            if(!.is_non_empty_string(type)){
+              stop("'type' must be single non empty character value.",
+                   call. = FALSE)
+            }
             if(!.is_valid_modType(modType)){
               stop("Modification '",modType,"' not found in the short name ",
                    "alphabet from the Modstrings package. ",

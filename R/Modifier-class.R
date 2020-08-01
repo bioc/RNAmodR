@@ -302,10 +302,10 @@ setClass("Modifier",
   if(is(seqdata,"SequenceData")){
     seqdata <- list(seqdata)
   }
-  if(!assertive::is_a_bool(x@aggregateValidForCurrentArguments)){
+  if(!.is_a_bool(x@aggregateValidForCurrentArguments)){
     return("Invalid slot: 'aggregateValidForCurrentArguments'")
   }
-  if(!assertive::is_a_bool(x@aggregateValidForCurrentArguments)){
+  if(!.is_a_bool(x@aggregateValidForCurrentArguments)){
     return("Invalid slot: 'modificationsValidForCurrentArguments'")
   }
   if(hasAggregateData(x)){
@@ -448,8 +448,9 @@ setMethod(f = "modifications",
           signature = signature(x = "Modifier"),
           definition =
             function(x, perTranscript = FALSE){
-              if(!assertive::is_a_bool(perTranscript)){
-                stop("'perTranscript' has to be a single logical value.")
+              if(!.is_a_bool(perTranscript)){
+                stop("'perTranscript' has to be a single logical value.",
+                     call. = FALSE)
               }
               valid <- c(validAggregate(x), validModification(x))
               if(!all(valid)){
@@ -554,7 +555,7 @@ setMethod(f = "sequences",
           signature = signature(x = "Modifier"),
           definition =
             function(x, modified = FALSE){
-              if(!assertive::is_a_bool(modified)){
+              if(!.is_a_bool(modified)){
                 stop("'modified' has to be a single logical value.",
                      call. = FALSE)
               }
@@ -648,8 +649,9 @@ setMethod(f = "settings",
             if(missing(name) || is.null(name)){
               return(x@settings)
             }
-            if(!assertive::is_a_string(name)){
-              stop("'name' must be a single character value.")
+            if(!.is_a_string(name)){
+              stop("'name' must be a single character value.",
+                   call. = FALSE)
             }
             x@settings[[name]]
           }
@@ -975,7 +977,10 @@ setMethod(f = "aggregate",
           signature = signature(x = "Modifier"),
           definition =
             function(x, force = FALSE){
-              assertive::assert_is_a_bool(force)
+              if(!.is_a_bool(force)){
+                stop("'force' has to be TRUE or FALSE.",
+                     call. = FALSE)
+              }
               if(!hasAggregateData(x) || force){
                 x@aggregate <- .check_aggregate_modifier(aggregateData(x), x)
                 x@aggregateValidForCurrentArguments <- TRUE
@@ -1065,7 +1070,10 @@ setMethod(f = "modify",
           signature = signature(x = "Modifier"),
           definition =
             function(x, force = FALSE){
-              assertive::assert_is_a_bool(force)
+              if(!.is_a_bool(force)){
+                stop("'force' has to be TRUE or FALSE.",
+                     call. = FALSE)
+              }
               if(!validAggregate(x) | force){
                 x <- aggregate(x, force = TRUE)
               }

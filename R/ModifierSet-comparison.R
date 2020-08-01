@@ -97,7 +97,7 @@ NULL
                "allTypes",
                "perTranscript",
                "sequenceData"),
-  testFUN = c(".is_a_non_empty_string",
+  testFUN = c(".is_non_empty_string",
               ".is_a_bool",
               ".is_a_bool",
               ".is_a_bool"),
@@ -263,7 +263,10 @@ setMethod("compareByCoord",
     colnames <- colnames(data)
     colnames <- colnames[!(colnames %in% c("positions","names","mod","Activity"))]
     if(is.character(normalize)){
-      assertive::assert_is_a_string(normalize)
+      if(!.is_non_empty_string(normalize)){
+        stop("'normalize' must be single non empty character value.",
+             call. = FALSE)
+      }
       if(!(normalize %in% colnames)){
         stop("Data column '",normalize,"' not found in data. Available columns",
              " are '",paste(colnames, collapse = "','"),"'.",
@@ -272,7 +275,10 @@ setMethod("compareByCoord",
       data[,colnames] <- as.data.frame(data[,colnames,drop = FALSE]) - 
         data[,normalize]
     } else if(is.logical(normalize)){
-      assertive::assert_is_a_bool(normalize)
+      if(!.is_a_bool(normalize)){
+        stop("'normalize' has to be TRUE or FALSE.",
+             call. = FALSE)
+      }
       if(normalize){
         data[,colnames] <- as.data.frame(data[,colnames,drop = FALSE]) - 
           apply(data[,colnames],1,max)

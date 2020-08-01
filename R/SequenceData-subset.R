@@ -266,11 +266,11 @@ NULL
 }
 
 .construct_coord_from_name_from_to <- function(x, name, pos){
-  if(!assertive::is_a_string(name)){
-    stop("'name' must be a single character value.")
+  if(!.is_a_string(name)){
+    stop("'name' must be a single character value.", call. = FALSE)
   }
   if(!is.integer(pos)){
-    stop("'from' and 'to' must be integer and have the same length.")
+    stop("'from' and 'to' must be integer and have the same length.", call. = FALSE)
   }
   coord <- GenomicRanges::GRanges(seqnames = seq_len(pos),
                                   ranges = IRanges::IRanges(pos, pos),

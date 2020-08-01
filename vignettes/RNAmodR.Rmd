@@ -238,7 +238,7 @@ corresponding name. Each entry in the character vector/`BamFileList` is a
 replicate (Alternatively a `ModifierSet` can also be created from a `list` of
 `Modifier` objects, if they are of the same type).
 
-```{r message=TRUE, message=FALSE, results='hide'}
+```{r message=FALSE}
 sequences <- RNAmodR.Data.example.AAS.fasta()
 annotation <- GFF3File(RNAmodR.Data.example.AAS.gff3())
 files <- list("SampleSet1" = c(treated = RNAmodR.Data.example.wt.1(),

@@ -1,8 +1,8 @@
 Package: RNAmodR
 Type: Package
 Title: Detection of post-transcriptional modifications in high throughput sequencing data
-Version: 1.2.1
-Date: 2020-04-29
+Version: 1.2.2
+Date: 2020-08-01
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
                     email = "felix.gm.ernst@outlook.com", 
@@ -28,14 +28,12 @@ Depends:
     IRanges (>= 2.21.6),
     S4Vectors (>= 0.25.14),
     GenomicRanges,
-    Modstrings,
-    GenomeInfoDbData
+    Modstrings
 Imports:
     methods,
     stats,
     grDevices, 
     matrixStats,
-    assertive,
     BiocGenerics,
     Biostrings (>= 2.55.7),
     BiocParallel,
@@ -48,7 +46,6 @@ Imports:
     RColorBrewer,
     colorRamps,
     ggplot2,
-    grid,
     Gviz (>= 1.31.0),
     reshape2,
     graphics,
@@ -94,6 +91,6 @@ Collate:
     'SequenceDataSet-viz.R'
     'utils-bam.R'
     'utils.R'
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 BugReports: https://github.com/FelixErnst/RNAmodR/issues
 URL: https://github.com/FelixErnst/RNAmodR
