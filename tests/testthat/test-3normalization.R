@@ -27,6 +27,8 @@ test_that("argument normalization:",{
                "Elements of 'annotation' GRangesList")
   expect_error(RNAmodR:::.norm_annotation_GRangesList(grl[c(1,1)]),
                "Names of elements in 'annotation' GRangesList must be unique")
+  expect_error(RNAmodR:::.norm_annotation_GRangesList(pc(grl,grl)),
+               "'annotation' GRangesList must contain only non-overlapping")
   grl2 <- grl
   GenomicRanges::strand(grl2@unlistData) <- c("*","+")
   expect_error(RNAmodR:::.norm_annotation_GRangesList(grl2),

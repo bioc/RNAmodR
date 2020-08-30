@@ -1,8 +1,8 @@
 Package: RNAmodR
 Type: Package
 Title: Detection of post-transcriptional modifications in high throughput sequencing data
-Version: 1.2.2
-Date: 2020-08-01
+Version: 1.2.3
+Date: 2020-08-30
 Authors@R: c(person("Felix G.M.", 
                     "Ernst", 
                     email = "felix.gm.ernst@outlook.com", 
