@@ -159,7 +159,7 @@ jobs:
           ## https://github.com/r-lib/remotes/issues/296
           ## Ideally, all dependencies should get installed in the first pass.
 
-          remotes::install_cran(c("RCurl","dbplyr","RSQLite"))
+          remotes::install_cran(c("RCurl","dbplyr","RSQLite","shiny"))
           ## Temporary for now due to https://github.com/ropensci/RefManageR/issues/79
           remotes::install_github("ropensci/bibtex")
           remotes::install_github("ropensci/RefManageR")
