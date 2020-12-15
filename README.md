@@ -2,7 +2,6 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/FelixErnst/RNAmodR/workflows/R-CMD-check/badge.svg)](https://github.com/FelixErnst/RNAmodR/actions/)
-[![Build Status](https://travis-ci.com/FelixErnst/RNAmodR.svg?branch=master)](https://travis-ci.com/FelixErnst/RNAmodR)
 [![BioC Build](https://bioconductor.org/shields/build/devel/bioc/RNAmodR.svg)](http://bioconductor.org/checkResults/devel/bioc-LATEST/RNAmodR/)
 [![codecov](https://codecov.io/gh/FelixErnst/RNAmodR/branch/master/graph/badge.svg)](https://codecov.io/gh/FelixErnst/RNAmodR)
 [![BioC Years](https://bioconductor.org/shields/years-in-bioc/RNAmodR.svg)](https://doi.org/doi:10.18129/B9.bioc.RNAmodR)
