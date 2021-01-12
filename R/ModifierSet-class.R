@@ -503,35 +503,48 @@ setMethod(f = "settings",
 #' @rdname settings
 #' @export
 setReplaceMethod(f = "settings", 
-                 signature = signature(x = "ModifierSet"),
-                 definition = function(x, value){
-                   for(i in seq_along(x)){
-                     settings(x[[i]]) <- value
-                   }
-                   x
-                 })
+    signature = signature(x = "ModifierSet"),
+    definition = function(x, value){
+        for(i in seq_along(x)){
+            settings(x[[i]]) <- value
+        }
+        x
+    }
+)
 
 # aggregate/modify -------------------------------------------------------------
 
 #' @rdname aggregate
+#' @importFrom BiocParallel bpparam bpisup bpstart bpstop bpmapply bplapply
 #' @export
 setMethod(f = "aggregate", 
-          signature = signature(x = "ModifierSet"),
-          definition = 
-            function(x, force = FALSE){
-              ans <- BiocParallel::bplapply(x,aggregate,force)
-              ans <- RNAmodR::ModifierSet(class(x),ans)
-              ans
-            }
+    signature = signature(x = "ModifierSet"),
+    definition = 
+    function(x, force = FALSE){
+        BPPARAM <- bpparam()
+        if (!(bpisup(BPPARAM) || is(BPPARAM, "MulticoreParam"))) {
+            bpstart(BPPARAM)
+            on.exit(bpstop(BPPARAM), add = TRUE)
+        }
+        ans <- BiocParallel::bplapply(x,aggregate,force,BPPARAM=BPPARAM)
+        ans <- RNAmodR::ModifierSet(class(x),ans)
+        ans
+    }
 )
 #' @rdname modify
+#' @importFrom BiocParallel bpparam bpisup bpstart bpstop bpmapply bplapply
 #' @export
 setMethod(f = "modify", 
-          signature = signature(x = "ModifierSet"),
-          definition = 
-            function(x, force = FALSE){
-              ans <- BiocParallel::bplapply(x,modify,force)
-              ans <- RNAmodR::ModifierSet(class(x),ans)
-              ans
-            }
+    signature = signature(x = "ModifierSet"),
+    definition = 
+    function(x, force = FALSE){
+        BPPARAM <- bpparam()
+        if (!(bpisup(BPPARAM) || is(BPPARAM, "MulticoreParam"))) {
+            bpstart(BPPARAM)
+            on.exit(bpstop(BPPARAM), add = TRUE)
+        }
+        ans <- BiocParallel::bplapply(x,modify,force,BPPARAM=BPPARAM)
+        ans <- RNAmodR::ModifierSet(class(x),ans)
+        ans
+    }
 )

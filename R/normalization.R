@@ -51,6 +51,10 @@ NULL
 }
 
 .norm_annotation_GRangesList <- function(annotation){
+  annotation <- annotation[lengths(annotation)!= 0]
+  if(length(annotation) == 0L){
+    stop("'annotation' has a length == 0L.")
+  }
   if(is.null(names(annotation))){
     stop("Elements of 'annotation' GRangesList must be named.")
   }

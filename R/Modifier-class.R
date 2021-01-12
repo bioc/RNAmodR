@@ -643,37 +643,51 @@ NULL
 
 #' @rdname settings
 #' @export
-setMethod(f = "settings",
-          signature = signature(x = "Modifier"),
-          definition = function(x, name){
-            if(missing(name) || is.null(name)){
-              return(x@settings)
-            }
-            if(!.is_a_string(name)){
-              stop("'name' must be a single character value.",
-                   call. = FALSE)
-            }
-            x@settings[[name]]
-          }
+setMethod(f = "settings", signature = signature(x = "Modifier"),
+    definition = function(x, name){
+        if(missing(name) || is.null(name)){
+            return(x@settings)
+        }
+        if(!.is_a_string(name)){
+            stop("'name' must be a single character value.",
+                 call. = FALSE)
+        }
+        x@settings[[name]]
+    }
 )
+
+.add_settings_value <- function(x, value, names){
+    if(is.null(names)){
+        names <- names(value)
+    } else {
+        names <- names[names %in% names(value)]
+    }
+    if(length(names) != 0L){
+        value <- value[names]
+        x@settings[names(value)] <- unname(value)
+    }
+    x
+}
 
 #' @rdname settings
 #' @export
 setReplaceMethod(f = "settings",
-                 signature = signature(x = "Modifier"),
-                 definition = function(x, value){
-                   if(is.null(names(value)) && length(value) > 0L){
-                     stop("'value' has to be a named.", call. = FALSE)
-                   }
-                   if(!is.list(value)){
-                     value <- as.list(value)
-                   }
-                   value <- .norm_Modifier_settings(value)
-                   x@settings[names(value)] <- unname(value)
-                   x@aggregateValidForCurrentArguments <- FALSE
-                   x@modificationsValidForCurrentArguments <- FALSE
-                   x
-                 })
+    signature = signature(x = "Modifier"),
+    definition = function(x, value){
+        if(is.null(names(value)) && length(value) > 0L){
+            stop("'value' has to be a named.", call. = FALSE)
+        }
+        if(!is.list(value)){
+            value <- as.list(value)
+        }
+        names <- names(value)
+        value <- .norm_Modifier_settings(value)
+        x <- .add_settings_value(x, value, names)
+        x@aggregateValidForCurrentArguments <- FALSE
+        x@modificationsValidForCurrentArguments <- FALSE
+        x
+    }
+)
 
 # constructors -----------------------------------------------------------------
 
@@ -710,9 +724,15 @@ setReplaceMethod(f = "settings",
       data = data)
 }
 
+#' @importFrom BiocParallel bpparam bpisup bpstart bpstop bpmapply bplapply
 .load_SequenceData <- function(classes, bamfiles, annotation, sequences,
                                seqinfo, args){
   if(is.list(classes)){
+    BPPARAM <- bpparam()
+    if (!(bpisup(BPPARAM) || is(BPPARAM, "MulticoreParam"))) {
+      bpstart(BPPARAM)
+      on.exit(bpstop(BPPARAM), add = TRUE)
+    }
     if(is.list(bamfiles)){
       if(length(classes) != length(bamfiles)){
         stop("'x' has invalid length. '",paste(classes, collapse = "' and '"),
@@ -730,13 +750,15 @@ setReplaceMethod(f = "settings",
              call. = FALSE)
       }
       bamfiles <- bamfiles[match(class,names(bamfiles))]
-      data <- BiocParallel::bpmapply(.load_SequenceData, classes, bamfiles,
-                                     MoreArgs = list(annotation, sequences,
-                                                     seqinfo, args),
-                                     SIMPLIFY = FALSE)
+      data <- bpmapply(.load_SequenceData, classes, bamfiles,
+                       MoreArgs = list(annotation, sequences,
+                                       seqinfo, args),
+                       SIMPLIFY = FALSE,
+                       BPPARAM = BPPARAM)
     } else {
-      data <- BiocParallel::bplapply(classes, .load_SequenceData, bamfiles,
-                                     annotation, sequences, seqinfo, args)
+      data <- bplapply(classes, .load_SequenceData, bamfiles,
+                       annotation, sequences, seqinfo, args,
+                       BPPARAM = BPPARAM)
     }
     data <- as(data,"SequenceDataList")
   } else if(is.character(classes)){
@@ -767,6 +789,7 @@ setReplaceMethod(f = "settings",
   }
   bamfiles <- .norm_bamfiles(x, className) # check bam files
   # settings
+  settings(proto) <- list()
   settings(proto) <- list(...)
   #
   annotation <- .norm_annotation(annotation, className)
@@ -786,6 +809,7 @@ setReplaceMethod(f = "settings",
   # create Modifier object
   ans <- .Modifier(className, x)
   # settings
+  settings(ans) <- list()
   settings(ans) <- list(...)
   # aggregate data
   message("Aggregating data and calculating scores ... ", appendLF = FALSE)

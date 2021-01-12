@@ -176,13 +176,15 @@ ModInosine <- function(x, annotation, sequences, seqinfo, ...){
 #' @rdname ModInosine-functions
 #' @export
 setReplaceMethod(f = "settings", 
-                 signature = signature(x = "ModInosine"),
-                 definition = function(x, value){
-                   x <- callNextMethod()
-                   value <- .norm_ModInosine_settings(value)
-                   x@settings[names(value)] <- unname(value)
-                   x
-                 })
+    signature = signature(x = "ModInosine"),
+    definition = function(x, value){
+        x <- callNextMethod()
+        names <- names(value)
+        value <- .norm_ModInosine_settings(value)
+        x <- .add_settings_value(x, value, names)
+        x
+    }
+)
 
 # functions --------------------------------------------------------------------
 
