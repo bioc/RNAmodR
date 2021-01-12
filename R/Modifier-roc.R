@@ -239,6 +239,7 @@ NULL
                    colnames(d) <- c("labels","predictions")
                    d <- unlist(d)
                    rownames(d) <- NULL
+                   d <- d[!is.na(d$predictions),]
                    d
                  })
   names(data) <- colnames

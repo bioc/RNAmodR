@@ -13,7 +13,7 @@ NULL
     stop("'coord' must contain a metadata column named 'Parent'.",
          call. = FALSE)
   }
-  if(!(coord$Parent %in% names(ranges))){
+  if(!as.logical(coord$Parent %in% names(ranges))){
     stop("Transcript identifier '",coord$Parent,"' not found in data of 'x'.",
          call. = FALSE)
   }
@@ -88,7 +88,7 @@ NULL
 }
 
 .norm_viz_chromosome <- function(ranges, name){
-  if(!(name %in% names(ranges))){
+  if(!as.logical(name %in% names(ranges))){
     stop("Transcript name '",name,"' not found in 'x'", call. = FALSE)
   }
   as.character(unique(unlist(seqnames(ranges[name]),use.names=FALSE)))
@@ -241,7 +241,7 @@ NULL
 
 .get_data_for_visualization <- function(x, name){
   ranges <- ranges(x)
-  if(!(name %in% names(ranges))){
+  if(!as.logical(name %in% names(ranges))){
     stop("Transcript name '",name,"' not found in 'x'", call. = FALSE)
   }
   ranges <- ranges[name]

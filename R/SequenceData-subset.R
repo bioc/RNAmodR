@@ -141,6 +141,7 @@ NULL
   available_pos <- rownames(data)
   positions <- start(ranges(coord))
   f_names <- match(names(positions),names(available_pos))
+  f_names <- f_names[!is.na(f_names)]
   f <- IRanges::LogicalList(Map(function(i,j){!(i %in% j)},
                                 positions,
                                 available_pos[f_names]))
