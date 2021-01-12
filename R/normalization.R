@@ -65,7 +65,7 @@ NULL
     stop("Invalid strand information. Strand must either be '+' or '-'.")
   }
   overlap_counts <- unique(unlist(lapply(annotation,countOverlaps)))
-  if(overlap_counts != 1L){
+  if(any(overlap_counts != 1L)){
     stop("'annotation' GRangesList must contain only non-overlapping elements.")
   }
   annotation
