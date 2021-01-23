@@ -293,6 +293,7 @@ setMethod("compareByCoord",
 
 .norm_compare_plot_args <- function(input){
   limits <- NA
+  layout <- "heatmap"
   if(!is.null(input[["limits"]])){
     limits <- input[["limits"]]
     if(!is.numeric(limits) | length(limits) != 2L){
@@ -300,7 +301,12 @@ setMethod("compareByCoord",
            call. = FALSE)
     }
   }
-  args <- list(limits = limits)
+  if(!is.null(input[["layout"]])){
+    layout <- input[["layout"]]
+    layout <- match.arg(layout,c("heatmap","point"))
+  }
+  args <- list(layout = layout,
+               limits = limits)
   args
 }
 
@@ -347,7 +353,6 @@ setMethod("compareByCoord",
   .plot_compare_ModifierSet_by_GRanges(x, coord, normalize, ...)
 }
 
-#' @importFrom ggplot2 ggplot geom_raster
 #' @importFrom colorRamps matlab.like
 #' @importFrom reshape2 melt
 .plot_compare_ModifierSet_by_GRanges <- function(x, coord, normalize,  ...){
@@ -384,24 +389,53 @@ setMethod("compareByCoord",
     limits <- args[["limits"]]
   }
   # plot
-  ggplot2::ggplot(data) + 
-    ggplot2::geom_raster(mapping = ggplot2::aes_(x = ~variable,
-                                                 y = ~labels,
-                                                 fill = ~value)) +
-    ggplot2::facet_grid(names ~ ., scales = "free", space = "free") +
-    ggplot2::scale_fill_gradientn(name = "Score",
-                                  colours = rev(colorRamps::matlab.like(100)),
-                                  limits = limits) +
-    ggplot2::scale_y_discrete(name = "Positions",
-                              expand = c(0,0)) +
-    ggplot2::scale_x_discrete(name = "Samples",
-                              position = "top",
-                              expand = c(0,0)) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(strip.text.y = ggplot2::element_text(angle = 0),
-                   axis.text.x.top = ggplot2::element_text(angle = 30,hjust = 0))
+  plot_FUN <- switch(args[["layout"]],
+                     heatmap = .get_heatmap_plot_compare,
+                     point = .get_point_plot_compare)
+  do.call(plot_FUN,list(data = data, limits = limits))
 }
 
+#' @importFrom ggplot2 ggplot aes_ geom_raster facet_grid scale_fill_gradientn
+#'   scale_y_discrete scale_x_discrete theme_minimal theme element_text
+.get_heatmap_plot_compare <- function(data, limits){
+  ggplot(data) + 
+    geom_raster(mapping = aes_(x = ~variable,
+                                                 y = ~labels,
+                                                 fill = ~value)) +
+    facet_grid(names ~ ., scales = "free", space = "free") +
+    scale_fill_gradientn(name = "Score",
+                                  colours = rev(colorRamps::matlab.like(100)),
+                                  limits = limits) +
+    scale_y_discrete(name = "Positions",
+                              expand = c(0,0)) +
+    scale_x_discrete(name = "Samples",
+                              position = "top",
+                              expand = c(0,0)) +
+    theme_minimal() +
+    theme(strip.text.y = element_text(angle = 0),
+                   axis.text.x.top = element_text(angle = 30,hjust = 0))
+}
+
+#' @importFrom ggplot2 ggplot aes_ geom_point geom_jitter facet_grid 
+#'   theme_classic theme scale_x_discrete scale_y_continuous scale_fill_brewer 
+#'   element_text
+.get_point_plot_compare <- function(data, limits){
+  data$labels <- factor(data$labels, rev(levels(data$labels)))
+  ggplot(data) + 
+    geom_point(mapping = aes_(x = ~labels,
+                              y = ~value,
+                              fill = ~variable,
+                              group = ~variable),
+               shape = 21) + 
+    facet_grid(. ~ names, space = "free_x", scales = "free_x") +
+    scale_x_discrete(name = "Positions") +
+    scale_y_continuous(name = "Score",
+                       limits = limits) +
+    scale_fill_brewer(name = "Samples", palette = "Set1") +
+    theme_classic() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5),
+          legend.position = "top")
+}
 
 #' @rdname compareByCoord
 #' @export
@@ -413,7 +447,7 @@ setMethod("plotCompare",
           }
 )
 
-#' @rdname compareByCoord
+.get_heatmap_plot_compare#' @rdname compareByCoord
 #' @export
 setMethod("plotCompareByCoord",
           signature = c("ModifierSet","GRanges"),

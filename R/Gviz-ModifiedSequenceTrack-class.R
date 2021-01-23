@@ -1,5 +1,4 @@
 #' @include RNAmodR.R
-#' @import Gviz
 NULL
 
 .SequenceTrack <- Gviz:::.SequenceTrack
@@ -41,6 +40,9 @@ NULL
 #' RNA sequences.
 #' 
 #' @slot sequence A \code{ModRNAStringSet} object
+#' 
+#' @importFrom Gviz SequenceTrack DisplayPars
+#' @importClassesFrom Gviz SequenceTrack DisplayPars
 #' 
 #' @export
 setClass("SequenceModRNAStringSetTrack",
@@ -105,6 +107,7 @@ ModRNASequenceTrack <- function(sequence, chromosome, genome,
 setMethod("seqnames", "SequenceModRNAStringSetTrack",
           function(x) as.character(names(x@sequence)))
 #' @rdname SequenceModRNAStringSetTrack-class
+#' @importFrom GenomeInfoDb seqlevels
 #' @export
 setMethod("seqlevels", "SequenceModRNAStringSetTrack",
           function(x) seqnames(x)[width(x@sequence)>0])
@@ -127,6 +130,10 @@ setMethod("show", "SequenceModRNAStringSetTrack",
 #' DNA sequences.
 #' 
 #' @slot sequence A \code{ModDNAStringSet} object
+#' 
+#' 
+#' @importFrom Gviz SequenceTrack DisplayPars
+#' @importClassesFrom Gviz SequenceTrack DisplayPars
 #' 
 #' @export
 setClass("SequenceModDNAStringSetTrack",
@@ -191,6 +198,7 @@ ModDNASequenceTrack <- function(sequence, chromosome, genome,
 setMethod("seqnames", "SequenceModDNAStringSetTrack",
           function(x) as.character(names(x@sequence)))
 #' @rdname SequenceModDNAStringSetTrack-class
+#' @importFrom GenomeInfoDb seqlevels
 #' @export
 setMethod("seqlevels", "SequenceModDNAStringSetTrack",
           function(x) seqnames(x)[width(x@sequence)>0])

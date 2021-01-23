@@ -205,6 +205,9 @@ NULL
   ans
 }
 
+#' @importFrom Gviz RNASequenceTrack SequenceTrack
+#' @importFrom Biostrings RNAStringSet DNAStringSet
+#' @importFrom Modstrings ModRNAStringSet ModDNAStringSet
 .get_viz_sequence_track <- function(seq, ranges, chromosome, args){
   args <- args[["sequence.track.pars"]]
   FUN <- function(trackClass, seqClass, seq, args){

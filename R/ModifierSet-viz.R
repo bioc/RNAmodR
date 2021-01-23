@@ -30,6 +30,7 @@ NULL
   ans[seq.int(1,n)]
 }
 
+#' @importFrom Gviz displayPars
 .add_viz_colours <- function(dts, colours){
   dts <- Map(
     function(dt, colour){
@@ -70,6 +71,7 @@ NULL
   dts
 }
 
+#' @importFrom Gviz displayPars
 .add_viz_ylim <- function(dts, chromosome, from_to){
   types <- unique(names(dts))
   max <- lapply(
@@ -120,6 +122,7 @@ setMethod(
 )
 
 #' @rdname plotData
+#' @importFrom Gviz plotTracks
 #' @export
 setMethod(
   f = "plotData",

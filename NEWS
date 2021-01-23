@@ -17,3 +17,6 @@ Changes in version 1.5.3 (2021-01-12)
 + bugfix for zero-length annotation
 + bugfix for settings function
 + bugfix for plotting functions
+
+Changes in version 1.5.4 (2021-01-23)
++ add plot type "points" to plotCompare functions

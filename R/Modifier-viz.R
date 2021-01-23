@@ -153,6 +153,7 @@ setMethod(
 )
 
 #' @rdname plotData
+#' @importFrom Gviz plotTracks
 #' @export
 setMethod(
   f = "plotData",
