@@ -233,6 +233,9 @@ setMethod(
 setMethod(
   "extractROWS", "SequenceDataFrame",
   function(x, i){
+    if(length(i) == 0L){
+      return(x)
+    }
     i <- normalizeSingleBracketSubscript(i, x, exact = FALSE, 
                                          allow.NAs = TRUE, as.NSBS = TRUE)
     start <- which(start(PartitioningByWidth(ranges(x))) == i@subscript[[1L]])
