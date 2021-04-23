@@ -231,6 +231,7 @@ test_that("Combining SequenceData:",{
                "Inputs must have the same width.")
   expect_s4_class(c(psd[1],psd[2]),
                   "PileupSequenceData")
+  expect_true(all(all(c(psd[1],psd[2]) == psd)))
   expect_s4_class(cbind(psd[1],psd[1]),
                   "PileupSequenceData")
   expect_s4_class(rbind(psd[1],psd),

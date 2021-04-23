@@ -233,11 +233,14 @@ setMethod(
 setMethod(
   "extractROWS", "SequenceDataFrame",
   function(x, i){
-    if(length(i) == 0L){
+    if(missing(i)){
       return(x)
     }
     i <- normalizeSingleBracketSubscript(i, x, exact = FALSE, 
                                          allow.NAs = TRUE, as.NSBS = TRUE)
+    if(length(i) == 0L){
+      return(do.call(class(x),list()))
+    }
     start <- which(start(PartitioningByWidth(ranges(x))) == i@subscript[[1L]])
     end <- which(end(PartitioningByWidth(ranges(x))) == i@subscript[[2L]])
     x_ranges <- extractROWS(ranges(x), seq.int(start,end))
