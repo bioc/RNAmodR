@@ -249,7 +249,7 @@ setClass("Modifier",
          "required", call. = FALSE)
   }
   elementTypes <- elementTypes[match(elementTypes,dataType(x))]
-  if(is.na(elementTypes) || any(elementTypes != dataType(x))){
+  if(any(is.na(elementTypes)) || any(elementTypes != dataType(x))){
     stop("Type of SequenceData elements does not match the requirements of ",
          class(x),". '",paste(dataType(x), collapse = "','"),"' are ",
          "required", call. = FALSE)
