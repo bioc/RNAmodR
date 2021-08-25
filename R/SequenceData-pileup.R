@@ -143,8 +143,10 @@ setSequenceDataCoercions("Pileup")
   strands_u <- .get_strand_u_GRangesList(grl)
   pileup <- pileup[pileup[,"strand"] == strands_u]
   # sort rev on minus strand
-  pileup[strands_u == "-"] <- 
-    pileup[strands_u == "-"][order(pileup[strands_u == "-","pos"],decreasing = FALSE)]
+  f <- strands_u == "-"
+  if(any(f)){
+    pileup[f] <- pileup[f][order(pileup[f,"pos"],decreasing = FALSE)]
+  }
   pileup <- pileup[,c("-","G","A","T","C")]
   pileup
 }
