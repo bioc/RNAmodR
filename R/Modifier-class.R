@@ -226,7 +226,8 @@ setClass("Modifier",
                    settings = "list",
                    aggregateValidForCurrentArguments = "logical",
                    modificationsValidForCurrentArguments = "logical"),
-         prototype = list(aggregateValidForCurrentArguments = FALSE,
+         prototype = list(aggregate = new("CompressedSplitDFrameList"),
+                          aggregateValidForCurrentArguments = FALSE,
                           modificationsValidForCurrentArguments = FALSE))
 
 # validity ---------------------------------------------------------------------

@@ -189,7 +189,7 @@ setMethod("summary",
 .aggregate_data_frame_percentage_mean_sd <- function(x,condition){
   conditions <- conditions(x)
   f <- .subset_to_condition(conditions, condition)
-  df <- as(unlist(x,use.names=FALSE),"DataFrame")[,f,drop=FALSE]
+  df <- as(unlist(x,use.names=FALSE),"DFrame")[,f,drop=FALSE]
   conditions_u <- unique(conditions[f])
   replicates <- replicates(x)[f]
   # set up some base values

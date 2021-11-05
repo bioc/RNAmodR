@@ -222,7 +222,7 @@ NULL
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]], args[["merge"]])
   if(args[["rawData"]]){
-    data <- relist(as(unlist(x, use.names = FALSE),"DataFrame"),
+    data <- relist(as(unlist(x, use.names = FALSE),"DFrame"),
                    IRanges::PartitioningByWidth(x))
     data <- .norm_sequence_data(data)
   } else {
@@ -403,7 +403,7 @@ setMethod("subsetByCoord",
   # converts everything to a GRangesList
   coord <- .norm_coord(coord, args[["type"]])
   if(args[["rawData"]]){
-    data <- relist(as(unlist(x, use.names = FALSE),"DataFrame"),
+    data <- relist(as(unlist(x, use.names = FALSE),"DFrame"),
                    IRanges::PartitioningByWidth(x))
   } else {
     data <- aggregate(x)

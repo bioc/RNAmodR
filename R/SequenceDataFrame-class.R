@@ -228,49 +228,6 @@ setMethod(
 
 # internals for SequenceDataFrame ----------------------------------------------
 
-#' @importClassesFrom IRanges PartitioningByEnd
-#' @importFrom IRanges PartitioningByEnd
-setMethod(
-  "extractROWS", "SequenceDataFrame",
-  function(x, i){
-    if(missing(i)){
-      return(x)
-    }
-    i <- normalizeSingleBracketSubscript(i, x, exact = FALSE, 
-                                         allow.NAs = TRUE, as.NSBS = TRUE)
-    if(length(i) == 0L){
-      return(do.call(class(x),list()))
-    }
-    start <- which(start(PartitioningByWidth(ranges(x))) == i@subscript[[1L]])
-    end <- which(end(PartitioningByWidth(ranges(x))) == i@subscript[[2L]])
-    x_ranges <- extractROWS(ranges(x), seq.int(start,end))
-    x_sequences <- extractROWS(sequences(x), i)
-    # save the other slots, in case they are deleted from the result by calling
-    # callNextMethod()
-    cl <- class(x)
-    x_condition <- conditions(x)
-    x_replicate <- replicates(x)
-    x_bamfiles <- bamfiles(x)
-    x_seqinfo <- seqinfo(x)
-    x <- callNextMethod()
-    if(!is(x,"SequenceDataFrame")){
-      x <- new(cl,
-               x,
-               ranges = x_ranges,
-               sequence = x_sequences,
-               condition = x_condition,
-               replicate = x_replicate,
-               bamfiles = x_bamfiles,
-               seqinfo = x_seqinfo)
-    } else {
-      slot(x, "ranges", check = FALSE) <- x_ranges
-      slot(x, "sequence", check = FALSE) <- x_sequences
-      validObject(x)
-    }
-    x
-  }
-)
-
 setMethod(
   "bindROWS", "SequenceDataFrame",
   function (x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, 
@@ -505,3 +462,50 @@ S4Vectors::setValidity2(Class = "SequenceDataFrame", .valid_SequenceDataFrame)
 #' @export
 setClass(Class = "SequenceDFrame",
          contains = c("VIRTUAL","SequenceDataFrame","DFrame"))
+
+# internals for SequenceDFrame -------------------------------------------------
+
+#' @importClassesFrom IRanges PartitioningByEnd
+#' @importFrom IRanges PartitioningByEnd
+setMethod(
+  "extractROWS", "SequenceDFrame",
+  function(x, i){
+    if(missing(i)){
+      return(x)
+    }
+    i <- normalizeSingleBracketSubscript(i, x, exact = FALSE,
+                                         allow.NAs = TRUE, as.NSBS = TRUE)
+    if(length(i) == 0L){
+      return(do.call(class(x),list()))
+    }
+    start <- which(start(PartitioningByWidth(ranges(x))) == i@subscript[[1L]])
+    end <- which(end(PartitioningByWidth(ranges(x))) == i@subscript[[2L]])
+    x_ranges <- extractROWS(ranges(x), seq.int(start,end))
+    x_sequences <- extractROWS(sequences(x), i)
+    # save the other slots, in case they are deleted from the result by calling
+    # callNextMethod()
+    cl <- class(x)
+    x_condition <- conditions(x)
+    x_replicate <- replicates(x)
+    x_bamfiles <- bamfiles(x)
+    x_seqinfo <- seqinfo(x)
+    # call extractROWS() method for DFrame (there's no method for DataFrame!)
+    x <- callNextMethod()
+    if(!is(x,"SequenceDFrame")){
+      x <- new(cl,
+               x,
+               ranges = x_ranges,
+               sequence = x_sequences,
+               condition = x_condition,
+               replicate = x_replicate,
+               bamfiles = x_bamfiles,
+               seqinfo = x_seqinfo)
+    } else {
+      slot(x, "ranges", check = FALSE) <- x_ranges
+      slot(x, "sequence", check = FALSE) <- x_sequences
+      validObject(x)
+    }
+    x
+  }
+)
+
