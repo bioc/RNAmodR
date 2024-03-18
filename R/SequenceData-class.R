@@ -206,7 +206,7 @@ coerceSequenceDataToCompressedSplitDataFrameList <- function(className){
           for (what in c("elementType", "elementMetadata", 
                          "metadata", "unlistData", "partitioning"
           )) slot(value, what) <- slot(from, what)
-          value@unlistData <- as(value@unlistData,"DataFrame")
+          value@unlistData <- as(value@unlistData,"DFrame")
           value
         }
       } else from

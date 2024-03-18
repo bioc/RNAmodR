@@ -271,7 +271,7 @@ setMethod("getData",
 .aggregate_list_data_mean_sd <- function(x, condition){
   conditions <- conditions(x)
   f <- .subset_to_condition(conditions, condition)
-  df <- as(unlist(x,use.names=FALSE),"DataFrame")[,f,drop=FALSE]
+  df <- as(unlist(x,use.names=FALSE),"DFrame")[,f,drop=FALSE]
   conditions_u <- unique(conditions[f])
   # set up some base values. replicates is here the same as the number of
   # columns, since a list per replicate is assumed
