@@ -59,7 +59,7 @@
 #' (51), P. 16785–16790. DOI: 
 #' \href{https://doi.org/10.1002/anie.201810946}{10.1002/anie.201810946}.
 #'
-#' @docType package
+#' @docType _PACKAGE
 #' @name RNAmodR
 NULL
 
