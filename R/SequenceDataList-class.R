@@ -150,6 +150,39 @@ SequenceDataList <- function(...){
 }
 S4Vectors::setValidity2("SequenceDataList", .valid.SequenceDataList)
 
+# unlisting --------------------------------------------------------------------
+# 
+# For DataFrameList dim is deprecated. Therefore additional check included
+setMethod("unlist", "SequenceDataList",
+  function (x, recursive = TRUE, use.names = TRUE) 
+  {
+    if (!isTRUEorFALSE(use.names)) 
+      stop("'use.names' must be TRUE or FALSE")
+    if (length(x) == 0L) {
+      elt_type <- elementType(x)
+      if (isVirtualClass(elt_type)) 
+        return(NULL)
+      return(new(elt_type))
+    }
+    xx <- unname(as.list(x))
+    if(is(xx[[1L]],"DataFrameList")){
+      dmnsn <- dims(xx[[1L]])
+    } else {
+      dmnsn <- dim(xx[[1L]])
+    }
+    if (length(dmnsn) < 2L) {
+      unlisted_x <- do.call(c, xx)
+    }
+    else {
+      unlisted_x <- do.call(rbind, xx)
+    }
+    if (use.names) 
+      unlisted_x <- set_unlisted_names(unlisted_x, x)
+    unlisted_x
+  }
+)
+
+
 # classNameForDisplay ----------------------------------------------------------
 setMethod("classNameForDisplay", "SequenceDataList",
           function(x) "SequenceDataList")
