@@ -80,7 +80,7 @@ test_that("Modifier/ModifierSet:",{
                factor("*", levels = c("+","-","*")))
   expect_true(is.factor(conditions(msi[[1]])))
   expect_equal(conditions(msi[[1]]),
-               factor(rep("treated",ncol(sequenceData(msi[[1]]))[1]/5)))
+               factor(rep("treated",ncols(sequenceData(msi[[1]]))[1]/5)))
   ##############################################################################
   skip_on_bioc()
   # Modifier creation
@@ -135,8 +135,8 @@ test_that("Modifier/ModifierSet:",{
     RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type("abc"),
     "Class 'abc' is not implemented")
   expect_error(
-    RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type("DataFrame"),
-    "Class 'DataFrame' does not extend the 'ModifierSet' class")
+    RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type("DFrame"),
+    "Class 'DFrame' does not extend the 'ModifierSet' class")
   expect_equal(
     RNAmodR:::.get_classname_for_ModifierSet_from_modifier_type("ModInosine"),
     "ModSetInosine")

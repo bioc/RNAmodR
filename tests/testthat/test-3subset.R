@@ -124,10 +124,10 @@ test_that("Subsetting SequenceData:",{
                "'rawData' must be a single logical value")
   actual <- subsetByCoord(sequenceData(msi[[1]]),coord, rawData = TRUE)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
-  expect_equal(unique(ncol(actual)),15)
+  expect_equal(unique(ncols(actual)),15)
   actual <- subsetByCoord(sds,coord, rawData = TRUE)
   expect_s4_class(actual,"CompressedSplitDataFrameList")
-  expect_equal(unique(ncol(actual)),18)
+  expect_equal(unique(ncols(actual)),18)
   expect_equivalent(cbind(subsetByCoord(sds[[1]],coord, rawData = TRUE),
                      subsetByCoord(sds[[2]],coord, rawData = TRUE)),
                     subsetByCoord(sds,coord, rawData = TRUE))
