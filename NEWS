@@ -23,3 +23,6 @@ Changes in version 1.5.4 (2021-01-23)
 
 Changes in version 1.7.1 (2021-07-27)
 + internal bugfix
+
+Changes in version 1.17.1 (2024-03-18)
++ Bugfix due to upstream changes in internal functions
