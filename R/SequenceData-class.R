@@ -621,6 +621,7 @@ setMethod("unlist", "SequenceData",
 }
 
 # load annotation as GRangesList. one element per transcript
+#' @importFrom GenomicFeatures exonsBy
 .load_annotation <- function(annotation){
   if(is(annotation,"TxDb")){
     ranges <- GenomicFeatures::exonsBy(annotation, by = "tx")

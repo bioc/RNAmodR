@@ -20,7 +20,7 @@ NULL
   x
 }
 
-#' @importFrom GenomicFeatures makeTxDbFromGFF
+#' @importFrom txdbmaker makeTxDbFromGFF
 # Returns a TxDb or a GRangesList object
 .norm_annotation <- function(annotation, className, 
                   .annotationname = .get_name_in_parent(annotation)){
