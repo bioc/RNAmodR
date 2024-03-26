@@ -59,6 +59,7 @@ suppressPackageStartupMessages({
   library(rtracklayer)
   library(Rsamtools)
   library(GenomicFeatures)
+  library(txdbmaker)
   library(RNAmodR.Data)
   library(RNAmodR)
 })
@@ -67,6 +68,7 @@ suppressPackageStartupMessages({
 library(rtracklayer)
 library(Rsamtools)
 library(GenomicFeatures)
+library(txdbmaker)
 library(RNAmodR.Data)
 library(RNAmodR)
 ```
