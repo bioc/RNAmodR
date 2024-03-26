@@ -42,7 +42,7 @@ NULL
            call. = FALSE)
     }
     if(!is(annotation,"TxDb")){
-      annotation <- GenomicFeatures::makeTxDbFromGFF(annotation)
+      annotation <- txdbmaker::makeTxDbFromGFF(annotation)
     }
   } else {
     annotation <- .norm_annotation_GRangesList(annotation)
