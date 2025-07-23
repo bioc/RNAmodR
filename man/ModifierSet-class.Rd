@@ -65,7 +65,7 @@ in the BAM files. This is parameter is only required, if \code{x} is not a
 mapped onto. This must match the information contained in the BAM files. This
 is parameter is only required, if \code{x} is not a \code{Modifier} object.}
 
-\item{seqinfo}{An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
+\item{seqinfo}{An optional \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}} 
 argument or character vector, which can be coerced to one, to subset the 
 sequences to be analyzed on a per chromosome basis.}
 

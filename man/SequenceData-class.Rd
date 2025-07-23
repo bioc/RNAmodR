@@ -84,7 +84,7 @@ in the BAM files.}
 \item{sequences}{sequences matching the target sequences the reads were
 mapped onto. This must match the information contained in the BAM files.}
 
-\item{seqinfo}{optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to
+\item{seqinfo}{optional \code{\link[Seqinfo:Seqinfo]{Seqinfo}} to
 subset the transcripts analyzed on a chromosome basis.}
 }
 \value{

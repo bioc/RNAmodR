@@ -70,7 +70,7 @@ NULL
 #' in the BAM files.
 #' @param sequences sequences matching the target sequences the reads were 
 #' mapped onto. This must match the information contained in the BAM files.
-#' @param seqinfo optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
+#' @param seqinfo optional \code{\link[Seqinfo:Seqinfo]{Seqinfo}} to 
 #' subset the transcripts analyzed on a chromosome basis.
 #' @param ... Optional arguments overwriting default values. Not all 
 #' \code{SequenceData} classes use all arguments. The arguments are:
@@ -608,14 +608,15 @@ setMethod("unlist", "SequenceData",
 # also used at other places
 
 # check for multiple seqnames per ranges
+#' @importFrom Seqinfo seqlevelsInUse
 .norm_unique_seqnames <- function(ranges){
-  seqnames_ranges_u <- unique(GenomeInfoDb::seqnames(ranges))
+  seqnames_ranges_u <- unique(Seqinfo::seqnames(ranges))
   f <- lengths(seqnames_ranges_u) != 1L
   if(any(f)){
     message("Found transcript annotation with non unique seqnames. Removing ",
             "them ...")
     ranges <- ranges[!f]
-    GenomeInfoDb::seqlevels(ranges) <- GenomeInfoDb::seqlevelsInUse(ranges)
+    Seqinfo::seqlevels(ranges) <- Seqinfo::seqlevelsInUse(ranges)
   }
   ranges
 }
@@ -657,9 +658,9 @@ setMethod("unlist", "SequenceData",
 
 # remove any elements, which are not in the seqinfo
 .subset_by_seqinfo <- function(grl, seqinfo){
-  grl <- grl[GenomicRanges::seqnames(grl) %in% GenomeInfoDb::seqnames(seqinfo)]
+  grl <- grl[GenomicRanges::seqnames(grl) %in% Seqinfo::seqnames(seqinfo)]
   grl <- grl[width(IRanges::PartitioningByWidth(grl)) != 0L]
-  GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevelsInUse(grl)
+  Seqinfo::seqlevels(grl) <- Seqinfo::seqlevelsInUse(grl)
   grl
 }
 

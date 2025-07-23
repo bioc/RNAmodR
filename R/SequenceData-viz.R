@@ -181,8 +181,8 @@ NULL
     stop("")
   }
   # get gaps in ranges
-  GenomeInfoDb::seqlevels(unlisted_ranges) <- 
-    GenomeInfoDb::seqlevelsInUse(unlisted_ranges)
+  Seqinfo::seqlevels(unlisted_ranges) <- 
+    Seqinfo::seqlevelsInUse(unlisted_ranges)
   gaps <- gaps(unlisted_ranges)
   if(length(gaps) == 0L){
     names(seq) <- chromosome

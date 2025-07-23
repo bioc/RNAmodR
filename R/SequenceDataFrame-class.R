@@ -94,7 +94,7 @@ NULL
 #' condition types.
 #' @slot bamfiles the input bam files as 
 #' \code{\link[Rsamtools:BamFile-class]{BamFileList}}
-#' @slot seqinfo a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
+#' @slot seqinfo a \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}} describing
 #' the avialable/used chromosomes.
 #' 
 #' 
@@ -130,7 +130,7 @@ setClass(Class = "SequenceDataFrame",
                           condition = factor(),
                           replicate = factor(),
                           bamfiles = Rsamtools::BamFileList(),
-                          seqinfo = GenomeInfoDb::Seqinfo()))
+                          seqinfo = Seqinfo::Seqinfo()))
 
 setMethod("relistToClass", "SequenceDataFrame",
           function(x) gsub("DataFrame","Data",class(x))
@@ -411,7 +411,7 @@ sequenceDataFrameClass <- function(dataType){
     bamfiles <- Rsamtools::BamFileList()
   }
   if(missing(seqinfo)){
-    seqinfo <- GenomeInfoDb::Seqinfo()
+    seqinfo <- Seqinfo::Seqinfo()
   }
   # check inputs
   if(!is(df,"DataFrame")){

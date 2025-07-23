@@ -176,7 +176,7 @@ SAMPLE_TYPES <- c("treated","control")
   }
   targets <- lapply(headers,"[[","targets")
   targets <- unique(do.call(c,lapply(unname(targets),names)))
-  seqinfo <- GenomeInfoDb::Seqinfo(targets)
+  seqinfo <- Seqinfo::Seqinfo(targets)
   seqinfo
 }
 
@@ -186,7 +186,7 @@ SAMPLE_TYPES <- c("treated","control")
 # try to coerce the input to a Seqinfo object
 .norm_seqinfo <- function(seqinfo){
   if(!is(seqinfo,"Seqinfo")){
-    tmp <- try(GenomeInfoDb::Seqinfo(seqinfo), silent = TRUE)
+    tmp <- try(Seqinfo::Seqinfo(seqinfo), silent = TRUE)
     if(is(tmp,"try-error")){
       stop("Input is not a Seqinfo object and could not be coerced to ",
            "one.",
@@ -231,9 +231,9 @@ SAMPLE_TYPES <- c("treated","control")
     seq_seqnames <- BSgenome::seqnames(sequences)
   }
   seq_seqnames <- 
-    seq_seqnames[seq_seqnames %in% GenomeInfoDb::seqlevels(annotation)]
+    seq_seqnames[seq_seqnames %in% Seqinfo::seqlevels(annotation)]
   seq_seqnames <- 
-    seq_seqnames[seq_seqnames %in% GenomeInfoDb::seqnames(seqinfo)]
+    seq_seqnames[seq_seqnames %in% Seqinfo::seqnames(seqinfo)]
   if( length(seqnames) == 0L ) {
     stop("No intersection between chromosome names in fasta, ",
          "annotation and seqinfo data.", 

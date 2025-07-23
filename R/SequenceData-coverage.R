@@ -74,7 +74,7 @@ setSequenceDataCoercions("Coverage")
 
 # CoverageSequenceData ---------------------------------------------------------
 
-#' @importFrom GenomeInfoDb seqlevels
+#' @importFrom Seqinfo seqlevels
 .process_coverage_data <- function(coverage, grl){
   coverage <- coverage[seqlevels(grl)]
   coverage <- as(coverage,"IntegerList")

@@ -94,7 +94,7 @@ mapped onto. This must match the information contained in the BAM files.
 TThis parameter is only required if \code{x} is not a \code{SequenceData}
 object or a list of \code{SequenceData} objects.}
 
-\item{seqinfo}{An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}}
+\item{seqinfo}{An optional \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}}
 argument or character vector, which can be coerced to one, to subset the
 sequences to be analyzed on a per chromosome basis.}
 
