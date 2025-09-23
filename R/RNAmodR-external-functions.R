@@ -3,7 +3,6 @@ NULL
 
 # for validation
 .valid.SimpleSplitDataFrameList <- IRanges:::.valid.SimpleSplitDataFrameList
-.valid.DataFrame <- S4Vectors:::.valid.DataFrame
 
 # Gviz
 .sequenceTrackInfo <- Gviz:::.sequenceTrackInfo

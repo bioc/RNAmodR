@@ -140,14 +140,19 @@ SequenceDataList <- function(...){
   NULL
 }
 .valid.SequenceDataSet <- function(x){
+  valid_elements <- unlist(lapply(x,validObject))
+  valid_elements <- valid_elements[valid_elements != TRUE]
   c(.valid.SequenceDataSet.listData(x),
-    unlist(lapply(x,validObject)))
+    valid_elements)
 }
 
 .valid.SequenceDataList <- function(x){
+  valid_elements <- unlist(lapply(x,validObject))
+  valid_elements <- valid_elements[valid_elements != TRUE]
   c(.valid.SequenceDataList.listData(x),
-    unlist(lapply(x,validObject)))
+    valid_elements)
 }
+S4Vectors::setValidity2("SequenceDataSet", .valid.SequenceDataSet)
 S4Vectors::setValidity2("SequenceDataList", .valid.SequenceDataList)
 
 # unlisting --------------------------------------------------------------------

@@ -395,13 +395,14 @@ setMethod("compareByCoord",
   do.call(plot_FUN,list(data = data, limits = limits))
 }
 
-#' @importFrom ggplot2 ggplot aes_ geom_raster facet_grid scale_fill_gradientn
+#' @importFrom ggplot2 ggplot aes geom_raster facet_grid scale_fill_gradientn
 #'   scale_y_discrete scale_x_discrete theme_minimal theme element_text
+#' @importFrom ggplot2 .data
 .get_heatmap_plot_compare <- function(data, limits){
   ggplot(data) + 
-    geom_raster(mapping = aes_(x = ~variable,
-                                                 y = ~labels,
-                                                 fill = ~value)) +
+    geom_raster(mapping = aes(x = .data$variable,
+                              y = .data$labels,
+                              fill = .data$value)) +
     facet_grid(names ~ ., scales = "free", space = "free") +
     scale_fill_gradientn(name = "Score",
                                   colours = rev(colorRamps::matlab.like(100)),
@@ -416,16 +417,17 @@ setMethod("compareByCoord",
                    axis.text.x.top = element_text(angle = 30,hjust = 0))
 }
 
-#' @importFrom ggplot2 ggplot aes_ geom_point geom_jitter facet_grid 
+#' @importFrom ggplot2 ggplot aes geom_point geom_jitter facet_grid 
 #'   theme_classic theme scale_x_discrete scale_y_continuous scale_fill_brewer 
 #'   element_text
+#' @importFrom ggplot2 .data
 .get_point_plot_compare <- function(data, limits){
   data$labels <- factor(data$labels, rev(levels(data$labels)))
   ggplot(data) + 
-    geom_point(mapping = aes_(x = ~labels,
-                              y = ~value,
-                              fill = ~variable,
-                              group = ~variable),
+    geom_point(mapping = aes(x = .data$labels,
+                             y = .data$value,
+                             fill = .data$variable,
+                             group = .data$variable),
                shape = 21) + 
     facet_grid(. ~ names, space = "free_x", scales = "free_x") +
     scale_x_discrete(name = "Positions") +
