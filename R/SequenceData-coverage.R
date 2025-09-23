@@ -32,7 +32,7 @@ NULL
 #' @return a \code{CoverageSequenceData} object
 #' 
 #' @examples
-#' # Construction of a CoverageSequenceData objectobject
+#' # Construction of a CoverageSequenceData object
 #' library(RNAmodR.Data)
 #' library(rtracklayer)
 #' annotation <- GFF3File(RNAmodR.Data.example.man.gff3())
@@ -74,7 +74,7 @@ setSequenceDataCoercions("Coverage")
 
 # CoverageSequenceData ---------------------------------------------------------
 
-#' @importFrom GenomeInfoDb seqlevels
+#' @importFrom Seqinfo seqlevels
 .process_coverage_data <- function(coverage, grl){
   coverage <- coverage[seqlevels(grl)]
   coverage <- as(coverage,"IntegerList")

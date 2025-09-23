@@ -43,5 +43,6 @@ RNA sequences.
 seq <- ModRNAStringSet(c(chr1 = paste0(alphabet(ModRNAString()),
                                        collapse = "")))
 st <- ModRNASequenceTrack(seq)
+pdf.options(encoding=Encoding(as.character(seq)))
 Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
 }

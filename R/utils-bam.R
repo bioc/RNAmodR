@@ -6,7 +6,7 @@ NULL
 # return parameters to be used by scanBam
 # ranges a GRanges object containing the ranges for search in the BAM file
 # quality quality argument used for scanBamParam
-#' @importFrom GenomeInfoDb seqnames
+#' @importFrom Seqinfo seqnames
 #' @importFrom Rsamtools ScanBamParam
 .assemble_scanBamParam <- function(grl,
                                    quality,

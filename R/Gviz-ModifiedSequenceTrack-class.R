@@ -90,6 +90,7 @@ setMethod("initialize", "SequenceModRNAStringSetTrack",
 #' seq <- ModRNAStringSet(c(chr1 = paste0(alphabet(ModRNAString()),
 #'                                        collapse = "")))
 #' st <- ModRNASequenceTrack(seq)
+#' pdf.options(encoding=Encoding(as.character(seq)))
 #' Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
 ModRNASequenceTrack <- function(sequence, chromosome, genome,
                                 name = "SequenceTrack", ...){
@@ -107,7 +108,7 @@ ModRNASequenceTrack <- function(sequence, chromosome, genome,
 setMethod("seqnames", "SequenceModRNAStringSetTrack",
           function(x) as.character(names(x@sequence)))
 #' @rdname SequenceModRNAStringSetTrack-class
-#' @importFrom GenomeInfoDb seqlevels
+#' @importFrom Seqinfo seqlevels
 #' @export
 setMethod("seqlevels", "SequenceModRNAStringSetTrack",
           function(x) seqnames(x)[width(x@sequence)>0])
@@ -198,7 +199,7 @@ ModDNASequenceTrack <- function(sequence, chromosome, genome,
 setMethod("seqnames", "SequenceModDNAStringSetTrack",
           function(x) as.character(names(x@sequence)))
 #' @rdname SequenceModDNAStringSetTrack-class
-#' @importFrom GenomeInfoDb seqlevels
+#' @importFrom Seqinfo seqlevels
 #' @export
 setMethod("seqlevels", "SequenceModDNAStringSetTrack",
           function(x) seqnames(x)[width(x@sequence)>0])

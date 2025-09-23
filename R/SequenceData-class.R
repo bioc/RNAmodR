@@ -609,13 +609,13 @@ setMethod("unlist", "SequenceData",
 
 # check for multiple seqnames per ranges
 .norm_unique_seqnames <- function(ranges){
-  seqnames_ranges_u <- unique(GenomeInfoDb::seqnames(ranges))
+  seqnames_ranges_u <- unique(Seqinfo::seqnames(ranges))
   f <- lengths(seqnames_ranges_u) != 1L
   if(any(f)){
     message("Found transcript annotation with non unique seqnames. Removing ",
             "them ...")
     ranges <- ranges[!f]
-    GenomeInfoDb::seqlevels(ranges) <- GenomeInfoDb::seqlevelsInUse(ranges)
+    Seqinfo::seqlevels(ranges) <- Seqinfo::seqlevelsInUse(ranges)
   }
   ranges
 }
@@ -657,9 +657,9 @@ setMethod("unlist", "SequenceData",
 
 # remove any elements, which are not in the seqinfo
 .subset_by_seqinfo <- function(grl, seqinfo){
-  grl <- grl[GenomicRanges::seqnames(grl) %in% GenomeInfoDb::seqnames(seqinfo)]
+  grl <- grl[GenomicRanges::seqnames(grl) %in% Seqinfo::seqnames(seqinfo)]
   grl <- grl[width(IRanges::PartitioningByWidth(grl)) != 0L]
-  GenomeInfoDb::seqlevels(grl) <- GenomeInfoDb::seqlevelsInUse(grl)
+  Seqinfo::seqlevels(grl) <- Seqinfo::seqlevelsInUse(grl)
   grl
 }
 
