@@ -29,19 +29,19 @@ NULL
 #' character, it must match one of the names in the \code{ModifierSet}.
 #' @param ... optional parameters:
 #' \itemize{
-#' \item{\code{alias}} {a data.frame with two columns, \code{tx_id} and 
-#' \code{name}, to convert transcipt ids to another identifier}
-#' \item{\code{name}} {Limit results to one specific gene or transcript}
-#' \item{\code{sequenceData}} {TRUE or FALSE? Should the aggregate of 
+#' \item \code{alias}: a data.frame with two columns, \code{tx_id} and 
+#' \code{name}, to convert transcipt ids to another identifier
+#' \item \code{name}: Limit results to one specific gene or transcript
+#' \item \code{sequenceData}: TRUE or FALSE? Should the aggregate of 
 #' sequenceData be used for the comparison instead of the aggregate data if each
-#' \code{Modifier} element? (default: \code{sequenceData = FALSE})}
-#' \item{\code{compareType}} {a valid score type to use for the comparison. If
+#' \code{Modifier} element? (default: \code{sequenceData = FALSE})
+#' \item \code{compareType}: a valid score type to use for the comparison. If
 #' \code{sequenceData = FALSE} this defaults to \code{mainScore(x)}, whereas
 #' if \code{sequenceData = TRUE} all columns will be used by setting 
-#' \code{allTypes = TRUE}.}
-#' \item{\code{allTypes}} {TRUE or FALSE? Should all available score be 
-#' compared? (default: \code{allTypes = sequenceData})}
-#' \item{...} {passed on to \code{\link{subsetByCoord}}}
+#' \code{allTypes = TRUE}.
+#' \item \code{allTypes}: TRUE or FALSE? Should all available score be 
+#' compared? (default: \code{allTypes = sequenceData})
+#' \item \code{...}: passed on to \code{\link{subsetByCoord}}
 #' }
 #' 
 #' @return \code{compareByCoord} returns a

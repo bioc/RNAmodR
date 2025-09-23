@@ -46,15 +46,15 @@ populating the source column of the result.}
 }
 \value{
 \itemize{
-\item{\code{getData}:} {returns a list with elements per BamFile in 
+\item \code{getData}: returns a list with elements per BamFile in 
 \code{bamfiles}. Elements can be 
 \code{\link[IRanges:AtomicList-class]{IntegerList}}, 
 \code{\link[IRanges:AtomicList-class]{NumericList}} or a
 \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}}. The
 data in the elements must be order by increasing positions numbers. However, 
-names and rownames will be discarded.}
-\item{\code{constructModRanges}:} {returns a \code{GRanges} object with
-genomic coordinates of modified nucleotides in the associated transcripts.}
+names and rownames will be discarded.
+\item \code{constructModRanges}: returns a \code{GRanges} object with
+genomic coordinates of modified nucleotides in the associated transcripts.
 }
 }
 \description{

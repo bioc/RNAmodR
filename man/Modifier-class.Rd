@@ -75,14 +75,14 @@ Modifier(className, x, annotation, sequences, seqinfo, ...)
 
 \item{x}{the input which can be of the following types
 \itemize{
-\item{\code{SequenceData}:} {a single \code{SequenceData} or a list
+\item \code{SequenceData}: a single \code{SequenceData} or a list
 containing only \code{SequenceData} objects. The input will just be used to
 file the \code{data} slot of the \code{Modifier} and must match the
-requirements of specific \code{Modifier} class.}
-\item{\code{BamFileList}:} {a named \code{BamFileList}}
-\item{\code{character}:} {a \code{character} vector, which must be coercible
+requirements of specific \code{Modifier} class.
+\item \code{BamFileList}: a named \code{BamFileList}
+\item \code{character}: a \code{character} vector, which must be coercible
 to a named \code{BamFileList} referencing existing bam files. Valid names are
-\code{control} and \code{treated} to define conditions and replicates}
+\code{control} and \code{treated} to define conditions and replicates
 }}
 
 \item{annotation}{annotation data, which must match the information contained
@@ -94,16 +94,16 @@ mapped onto. This must match the information contained in the BAM files.
 TThis parameter is only required if \code{x} is not a \code{SequenceData}
 object or a list of \code{SequenceData} objects.}
 
-\item{seqinfo}{An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}}
+\item{seqinfo}{An optional \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}}
 argument or character vector, which can be coerced to one, to subset the
 sequences to be analyzed on a per chromosome basis.}
 
 \item{...}{Additional otpional parameters:
 \itemize{
-\item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for
+\item \code{find.mod}: \code{TRUE} or \code{FALSE}: should the search for
 for modifications be triggered upon construction? If not the search can be
-started by calling the \code{modify()} function.}
-\item{additional parameters depending on the specific \code{Modifier} class}
+started by calling the \code{modify()} function.
+\item additional parameters depending on the specific \code{Modifier} class
 }
 All additional options must be named and will be passed to the
 \code{\link[=settings]{settings}} function and onto the \code{SequenceData}
@@ -121,13 +121,13 @@ high throughput sequencing data.
 Each subclass has to implement the following functions:
 
 \itemize{
-\item{Slot \code{nucleotide}: } {Either "RNA" or "DNA". For conveniance the
+\item Slot \code{nucleotide}: Either "RNA" or "DNA". For conveniance the
 subclasses \code{RNAModifier} and \code{DNAModifier} are already available
-and can be inherited from.}
-\item{Function \code{\link{aggregateData}}: }{used for specific data 
-aggregation}
-\item{Function \code{\link{findMod}}: }{used for specific search for 
-modifications}
+and can be inherited from.
+\item Function \code{\link{aggregateData}}: used for specific data 
+aggregation
+\item Function \code{\link{findMod}}: used for specific search for 
+modifications
 }
 
 Optionally the function \code{\link[=Modifier-functions]{settings<-}} can be
@@ -191,12 +191,12 @@ which match the structure in \code{dataType()}.
 follow this structure:
 
 \itemize{
-\item{a single \code{character}:} {a \code{SequenceData} is
-constructed/expected.}
-\item{a \code{character} vector:} {a \code{SequenceDataSet} is
-constructed/expected.}
-\item{a \code{list} of \code{character} vectors:} {a \code{SequenceDataList}
-is constructed/expected.}
+\item a single \code{character}: a \code{SequenceData} is
+constructed/expected.
+\item a \code{character} vector: a \code{SequenceDataSet} is
+constructed/expected.
+\item a \code{list} of \code{character} vectors: a \code{SequenceDataList}
+is constructed/expected.
 }
 
 The cases for a \code{SequenceData} or \code{SequenceDataSet} are straight

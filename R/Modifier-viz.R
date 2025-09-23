@@ -44,16 +44,16 @@ NULL
 #' per transcript? (default: \code{perTranscript = FALSE})
 #' @param ... optional parameters:
 #' \itemize{
-#' \item{\code{modified.seq}} {\code{TRUE} or \code{FALSE}. Should the sequence 
+#' \item \code{modified.seq}: \code{TRUE} or \code{FALSE}. Should the sequence 
 #' shown with modified nucleotide positions? (default: 
-#' \code{modified.seq = FALSE})}
-#' \item{\code{additional.mod}} {other modifications, which should be shown
+#' \code{modified.seq = FALSE})
+#' \item \code{additional.mod}: other modifications, which should be shown
 #' in the annotation and sequence track. The must be a \code{GRanges} compatible
-#' with \code{\link[Modstrings:separate]{combineIntoModstrings}}.}
-#' \item{\code{annotation.track.pars}} {Parameters passed onto the 
-#' \code{\link[Gviz:AnnotationTrack-class]{AnnotationTrack}}.}
-#' \item{\code{sequence.track.pars}} {Parameters passed onto the 
-#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.}
+#' with \code{\link[Modstrings:separate]{combineIntoModstrings}}.
+#' \item \code{annotation.track.pars}: Parameters passed onto the 
+#' \code{\link[Gviz:AnnotationTrack-class]{AnnotationTrack}}.
+#' \item \code{sequence.track.pars}: Parameters passed onto the 
+#' \code{\link[Gviz:SequenceTrack-class]{SequenceTrack}}.
 #' }
 #' 
 #' @return a plot send to the active graphic device

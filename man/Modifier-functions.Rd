@@ -135,25 +135,25 @@ per transcript? (default: \code{perTranscript = FALSE})}
 }
 \value{
 \itemize{
-\item{\code{modifierType}:} {a character vector with the appropriate class
-Name of a \code{\link[=Modifier-class]{Modifier}}.}
-\item{\code{modType}:} {a character vector with the modifications detected by
-the \code{Modifier} class.}
-\item{\code{seqtype}:} {a single character value defining if either
-"RNA" or "DNA" modifications are detected by the \code{Modifier} class.}
-\item{\code{mainScore}:} {a character vector.}
-\item{\code{sequenceData}:} {a \code{SequenceData} object.}
-\item{\code{modifications}:} {a \code{GRanges} or \code{GRangesList} object
-describing the found modifications.}
-\item{\code{seqinfo}:} {a \code{Seqinfo} object.}
-\item{\code{sequences}:} {a \code{RNAStingSet} object.}
-\item{\code{ranges}:} {a \code{GRangesList} object with each element per
-transcript.}
-\item{\code{bamfiles}:} {a \code{BamFileList} object.}
-\item{\code{validAggregate}:} {\code{TRUE} or \code{FALSE}. Checks if current
-settings are the same for which the data was aggregate}
-\item{\code{validModification}:} {\code{TRUE} or \code{FALSE}. Checks if 
-current settings are the same for which modification were found}
+\item \code{modifierType}: a character vector with the appropriate class
+Name of a \code{\link[=Modifier-class]{Modifier}}.
+\item \code{modType}: a character vector with the modifications detected by
+the \code{Modifier} class.
+\item \code{seqtype}: a single character value defining if either
+"RNA" or "DNA" modifications are detected by the \code{Modifier} class.
+\item \code{mainScore}: a character vector.
+\item \code{sequenceData}: a \code{SequenceData} object.
+\item \code{modifications}: a \code{GRanges} or \code{GRangesList} object
+describing the found modifications.
+\item \code{seqinfo}: a \code{Seqinfo} object.
+\item \code{sequences}: a \code{RNAStingSet} object.
+\item \code{ranges}: a \code{GRangesList} object with each element per
+transcript.
+\item \code{bamfiles}: a \code{BamFileList} object.
+\item \code{validAggregate}: \code{TRUE} or \code{FALSE}. Checks if current
+settings are the same for which the data was aggregate
+\item \code{validModification}: \code{TRUE} or \code{FALSE}. Checks if 
+current settings are the same for which modification were found
 }
 }
 \description{

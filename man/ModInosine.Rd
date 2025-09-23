@@ -30,18 +30,18 @@ in the BAM files. This is parameter is only required, if \code{x} is not a
 mapped onto. This must match the information contained in the BAM files. This
 is parameter is only required, if \code{x} is not a \code{Modifier} object.}
 
-\item{seqinfo}{An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
+\item{seqinfo}{An optional \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}} 
 argument or character vector, which can be coerced to one, to subset the 
 sequences to be analyzed on a per chromosome basis.}
 
 \item{...}{Optional arguments overwriting default values, which are
 \itemize{
-\item{minCoverage:} {The minimal coverage at the position as integer value 
-(default: \code{minCoverage = 10L}).}
-\item{minReplicate:} {minimum number of replicates needed for the analysis 
-(default: \code{minReplicate = 1L}).}
-\item{minScore:} {minimum score to identify Inosine positions de novo 
-(default: \code{minScore = 0.4}).}
+\item minCoverage: The minimal coverage at the position as integer value 
+(default: \code{minCoverage = 10L}).
+\item minReplicate: minimum number of replicates needed for the analysis 
+(default: \code{minReplicate = 1L}).
+\item minScore: minimum score to identify Inosine positions de novo 
+(default: \code{minScore = 0.4}).
 }}
 }
 \value{

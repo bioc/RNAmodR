@@ -41,17 +41,17 @@ NULL
 #' @param sequences sequences matching the target sequences the reads were 
 #' mapped onto. This must match the information contained in the BAM files. This
 #' is parameter is only required, if \code{x} is not a \code{Modifier} object.
-#' @param seqinfo An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
+#' @param seqinfo An optional \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}} 
 #' argument or character vector, which can be coerced to one, to subset the 
 #' sequences to be analyzed on a per chromosome basis.
 #' @param ... Optional arguments overwriting default values, which are
 #' \itemize{
-#' \item{minCoverage:} {The minimal coverage at the position as integer value 
-#' (default: \code{minCoverage = 10L}).}
-#' \item{minReplicate:} {minimum number of replicates needed for the analysis 
-#' (default: \code{minReplicate = 1L}).}
-#' \item{minScore:} {minimum score to identify Inosine positions de novo 
-#' (default: \code{minScore = 0.4}).}
+#' \item minCoverage: The minimal coverage at the position as integer value 
+#' (default: \code{minCoverage = 10L}).
+#' \item minReplicate: minimum number of replicates needed for the analysis 
+#' (default: \code{minReplicate = 1L}).
+#' \item minScore: minimum score to identify Inosine positions de novo 
+#' (default: \code{minScore = 0.4}).
 #' }
 #' 
 #' @return a \code{ModInosine} or \code{ModSetInosine} object
@@ -110,21 +110,21 @@ NULL
 #' @details 
 #' \code{ModInosine} specific arguments for \link{plotData}:
 #' \itemize{
-#' \item{\code{colour.bases} - }{a named character vector of \code{length = 4} 
-#' for the colours of the individual bases. The names are expected to be 
-#' \code{c("G","A","U","C")}}
+#'   \item \code{colour.bases} - a named character vector of \code{length = 4} 
+#'   for the colours of the individual bases. The names are expected to be 
+#'   \code{c("G","A","U","C")}
 #' }
 #' 
 #' @return 
 #' \itemize{
-#' \item{\code{settings}} {See \code{\link[=Modifier-functions]{settings}}.}
-#' \item{\code{aggregate}} {See \code{\link{aggregate}}.}
-#' \item{\code{modify}} {See \code{\link{modify}}.}
-#' \item{\code{getDataTrack}} {a list of 
+#' \item \code{settings} See \code{\link[=Modifier-functions]{settings}}.
+#' \item \code{aggregate} See \code{\link{aggregate}}.
+#' \item \code{modify} See \code{\link{modify}}.
+#' \item \code{getDataTrack} a list of 
 #' \code{\link[Gviz:DataTrack-class]{DataTrack}} objects. See 
-#' \code{\link{plotDataByCoord}}.}
-#' \item{\code{plotData}} {See \code{\link{plotDataByCoord}}.}
-#' \item{\code{plotDataByCoord}} {See \code{\link{plotDataByCoord}}.}
+#' \code{\link{plotDataByCoord}}.
+#' \item \code{plotData} See \code{\link{plotDataByCoord}}.
+#' \item \code{plotDataByCoord} See \code{\link{plotDataByCoord}}.
 #' }
 #' 
 #' @examples 

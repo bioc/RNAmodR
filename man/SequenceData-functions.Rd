@@ -156,13 +156,13 @@ object}
 }
 \value{
 \itemize{
-\item{\code{seqinfo}:} {a \code{Seqinfo} object ().}
-\item{\code{sequences}:} {a \code{RNAStingSet} object or a \code{RNAString} 
-object for a \code{SequenceDataFrame}.}
-\item{\code{ranges}:} {a \code{GRangesList} object with each element per 
-transcript or a \code{GRanges} object for a \code{SequenceDataFrame}.}
-\item{\code{bamfiles}:} {a \code{BamFileList} object or a SimpleList of 
-\code{BamFileList} objects for a \code{SequenceDataList}.}
+\item \code{seqinfo}: a \code{Seqinfo} object ().
+\item \code{sequences}: a \code{RNAStingSet} object or a \code{RNAString} 
+object for a \code{SequenceDataFrame}.
+\item \code{ranges}: a \code{GRangesList} object with each element per 
+transcript or a \code{GRanges} object for a \code{SequenceDataFrame}.
+\item \code{bamfiles}: a \code{BamFileList} object or a SimpleList of 
+\code{BamFileList} objects for a \code{SequenceDataList}.
 }
 }
 \description{

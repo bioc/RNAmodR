@@ -20,14 +20,14 @@ NULL
 #' be extended. Currently the following classes are implemented:
 #' 
 #' \itemize{
-#' \item{\code{\link[=CoverageSequenceData-class]{CoverageSequenceData}}} 
-#' \item{\code{\link[=EndSequenceData-class]{End5SequenceData}}, 
+#' \item \code{\link[=CoverageSequenceData-class]{CoverageSequenceData}} 
+#' \item \code{\link[=EndSequenceData-class]{End5SequenceData}}, 
 #' \code{\link[=EndSequenceData-class]{End3SequenceData}}, 
-#' \code{\link[=EndSequenceData-class]{EndSequenceData}}}
-#' \item{\code{\link[=NormEndSequenceData-class]{NormEnd5SequenceData}}, 
-#' \code{\link[=NormEndSequenceData-class]{NormEnd5SequenceData}}}
-#' \item{\code{\link[=PileupSequenceData-class]{PileupSequenceData}}}
-#' \item{\code{\link[=ProtectedEndSequenceData-class]{ProtectedEndSequenceData}}}
+#' \code{\link[=EndSequenceData-class]{EndSequenceData}}
+#' \item \code{\link[=NormEndSequenceData-class]{NormEnd5SequenceData}}, 
+#' \code{\link[=NormEndSequenceData-class]{NormEnd5SequenceData}}
+#' \item \code{\link[=PileupSequenceData-class]{PileupSequenceData}}
+#' \item \code{\link[=ProtectedEndSequenceData-class]{ProtectedEndSequenceData}}
 #' }
 #' 
 #' The annotation and sequence data can be accessed through the functions
@@ -61,29 +61,29 @@ NULL
 #' \code{SequenceData} subclass to be constructed.
 #' @param bamfiles the input which can be of the following types
 #' \itemize{
-#' \item{\code{BamFileList}:} {a named \code{BamFileList}}
-#' \item{\code{character}:} {a \code{character} vector, which must be coercible
+#' \item \code{BamFileList}: a named \code{BamFileList}
+#' \item \code{character}: a \code{character} vector, which must be coercible
 #' to a named \code{BamFileList} referencing existing bam files. Valid names are
-#' \code{control} and \code{treated} to define conditions and replicates}
+#' \code{control} and \code{treated} to define conditions and replicates
 #' }
 #' @param annotation annotation data, which must match the information contained
 #' in the BAM files.
 #' @param sequences sequences matching the target sequences the reads were 
 #' mapped onto. This must match the information contained in the BAM files.
-#' @param seqinfo optional \code{\link[GenomeInfoDb:Seqinfo]{Seqinfo}} to 
+#' @param seqinfo optional \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}} to 
 #' subset the transcripts analyzed on a chromosome basis.
 #' @param ... Optional arguments overwriting default values. Not all 
 #' \code{SequenceData} classes use all arguments. The arguments are:
 #' \itemize{
-#' \item{\code{minLength}} {single integer value setting a threshold for minimum
-#' read length. Shorther reads are discarded (default: \code{minLength = NA}).}
-#' \item{\code{maxLength}} {single integer value setting a threshold for maximum
-#' read length. Longer reads are discarded (default: \code{maxLength = NA}).}
-#' \item{\code{minQuality}} {single integer value setting a threshold for maximum
+#' \item \code{minLength}: single integer value setting a threshold for minimum
+#' read length. Shorther reads are discarded (default: \code{minLength = NA}).
+#' \item \code{maxLength}: single integer value setting a threshold for maximum
+#' read length. Longer reads are discarded (default: \code{maxLength = NA}).
+#' \item \code{minQuality}: single integer value setting a threshold for maximum
 #' read quality. Reads with a lower quality are discarded (default: 
-#' \code{minQuality = 5L}, but this is class dependent).}
-#' \item{\code{max_depth}} {maximum depth for pileup loading (default: 
-#' \code{max_depth = 10000L}).}
+#' \code{minQuality = 5L}, but this is class dependent).
+#' \item \code{max_depth}: maximum depth for pileup loading (default: 
+#' \code{max_depth = 10000L}).
 #' }
 #' @param deparse.level See \code{\link[base:cbind]{base::cbind}} for a 
 #' description of this argument.

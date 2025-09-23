@@ -23,13 +23,13 @@ invalidMessage <- paste0("Settings were changed after data aggregation or ",
 #' Each subclass has to implement the following functions:
 #'
 #' \itemize{
-#' \item{Slot \code{nucleotide}: } {Either "RNA" or "DNA". For conveniance the
+#' \item Slot \code{nucleotide}: Either "RNA" or "DNA". For conveniance the
 #' subclasses \code{RNAModifier} and \code{DNAModifier} are already available
-#' and can be inherited from.}
-#' \item{Function \code{\link{aggregateData}}: }{used for specific data 
-#' aggregation}
-#' \item{Function \code{\link{findMod}}: }{used for specific search for 
-#' modifications}
+#' and can be inherited from.
+#' \item Function \code{\link{aggregateData}}: used for specific data 
+#' aggregation
+#' \item Function \code{\link{findMod}}: used for specific search for 
+#' modifications
 #' }
 #'
 #' Optionally the function \code{\link[=Modifier-functions]{settings<-}} can be
@@ -53,12 +53,12 @@ invalidMessage <- paste0("Settings were changed after data aggregation or ",
 #' follow this structure:
 #'
 #' \itemize{
-#' \item{a single \code{character}:} {a \code{SequenceData} is
-#' constructed/expected.}
-#' \item{a \code{character} vector:} {a \code{SequenceDataSet} is
-#' constructed/expected.}
-#' \item{a \code{list} of \code{character} vectors:} {a \code{SequenceDataList}
-#' is constructed/expected.}
+#' \item a single \code{character}: a \code{SequenceData} is
+#' constructed/expected.
+#' \item a \code{character} vector: a \code{SequenceDataSet} is
+#' constructed/expected.
+#' \item a \code{list} of \code{character} vectors: a \code{SequenceDataList}
+#' is constructed/expected.
 #' }
 #'
 #' The cases for a \code{SequenceData} or \code{SequenceDataSet} are straight
@@ -80,15 +80,16 @@ invalidMessage <- paste0("Settings were changed after data aggregation or ",
 #' @param className The name of the class which should be constructed.
 #' @param x the input which can be of the following types
 #' \itemize{
-#' \item{\code{SequenceData}:} {a single \code{SequenceData} or a list
+#' \item \code{SequenceData}: a single \code{SequenceData} or a list
 #' containing only \code{SequenceData} objects. The input will just be used to
 #' file the \code{data} slot of the \code{Modifier} and must match the
-#' requirements of specific \code{Modifier} class.}
-#' \item{\code{BamFileList}:} {a named \code{BamFileList}}
-#' \item{\code{character}:} {a \code{character} vector, which must be coercible
+#' requirements of specific \code{Modifier} class.
+#' \item \code{BamFileList}: a named \code{BamFileList}
+#' \item \code{character}: a \code{character} vector, which must be coercible
 #' to a named \code{BamFileList} referencing existing bam files. Valid names are
-#' \code{control} and \code{treated} to define conditions and replicates}
+#' \code{control} and \code{treated} to define conditions and replicates
 #' }
+#' 
 #' @param annotation annotation data, which must match the information contained
 #' in the BAM files. This parameter is only required if \code{x} is not a
 #' \code{SequenceData} object or a list of \code{SequenceData} objects.
@@ -96,15 +97,15 @@ invalidMessage <- paste0("Settings were changed after data aggregation or ",
 #'   mapped onto. This must match the information contained in the BAM files.
 #'   TThis parameter is only required if \code{x} is not a \code{SequenceData}
 #'   object or a list of \code{SequenceData} objects.
-#' @param seqinfo An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}}
+#' @param seqinfo An optional \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}}
 #' argument or character vector, which can be coerced to one, to subset the
 #' sequences to be analyzed on a per chromosome basis.
 #' @param ... Additional otpional parameters:
 #' \itemize{
-#' \item{\code{find.mod}:} {\code{TRUE} or \code{FALSE}: should the search for
+#' \item \code{find.mod}: \code{TRUE} or \code{FALSE}: should the search for
 #' for modifications be triggered upon construction? If not the search can be
-#' started by calling the \code{modify()} function.}
-#' \item{additional parameters depending on the specific \code{Modifier} class}
+#' started by calling the \code{modify()} function.
+#' \item additional parameters depending on the specific \code{Modifier} class
 #' }
 #' All additional options must be named and will be passed to the
 #' \code{\link[=settings]{settings}} function and onto the \code{SequenceData}
@@ -163,25 +164,25 @@ NULL
 #'
 #' @return
 #' \itemize{
-#' \item{\code{modifierType}:} {a character vector with the appropriate class
-#' Name of a \code{\link[=Modifier-class]{Modifier}}.}
-#' \item{\code{modType}:} {a character vector with the modifications detected by
-#' the \code{Modifier} class.}
-#' \item{\code{seqtype}:} {a single character value defining if either
-#' "RNA" or "DNA" modifications are detected by the \code{Modifier} class.}
-#' \item{\code{mainScore}:} {a character vector.}
-#' \item{\code{sequenceData}:} {a \code{SequenceData} object.}
-#' \item{\code{modifications}:} {a \code{GRanges} or \code{GRangesList} object
-#' describing the found modifications.}
-#' \item{\code{seqinfo}:} {a \code{Seqinfo} object.}
-#' \item{\code{sequences}:} {a \code{RNAStingSet} object.}
-#' \item{\code{ranges}:} {a \code{GRangesList} object with each element per
-#' transcript.}
-#' \item{\code{bamfiles}:} {a \code{BamFileList} object.}
-#' \item{\code{validAggregate}:} {\code{TRUE} or \code{FALSE}. Checks if current
-#' settings are the same for which the data was aggregate}
-#' \item{\code{validModification}:} {\code{TRUE} or \code{FALSE}. Checks if 
-#' current settings are the same for which modification were found}
+#' \item \code{modifierType}: a character vector with the appropriate class
+#' Name of a \code{\link[=Modifier-class]{Modifier}}.
+#' \item \code{modType}: a character vector with the modifications detected by
+#' the \code{Modifier} class.
+#' \item \code{seqtype}: a single character value defining if either
+#' "RNA" or "DNA" modifications are detected by the \code{Modifier} class.
+#' \item \code{mainScore}: a character vector.
+#' \item \code{sequenceData}: a \code{SequenceData} object.
+#' \item \code{modifications}: a \code{GRanges} or \code{GRangesList} object
+#' describing the found modifications.
+#' \item \code{seqinfo}: a \code{Seqinfo} object.
+#' \item \code{sequences}: a \code{RNAStingSet} object.
+#' \item \code{ranges}: a \code{GRangesList} object with each element per
+#' transcript.
+#' \item \code{bamfiles}: a \code{BamFileList} object.
+#' \item \code{validAggregate}: \code{TRUE} or \code{FALSE}. Checks if current
+#' settings are the same for which the data was aggregate
+#' \item \code{validModification}: \code{TRUE} or \code{FALSE}. Checks if 
+#' current settings are the same for which modification were found
 #' }
 #' 
 #' @seealso \code{\link[=settings]{settings}}
@@ -938,30 +939,30 @@ setMethod("Modifier",
 #'
 #' @return
 #' \itemize{
-#' \item{\code{aggregate}: }{for \code{SequenceData} object the aggregated data
+#' \item \code{aggregate}: for \code{SequenceData} object the aggregated data
 #' is returned as a \code{SplitDataFrameList} with an element per transcript,
 #' whereas for a \code{Modifier} the modified input object is returned,
 #' containing the aggregated data, which can be accessed using
-#' \code{getAggregateData}.}
-#' \item{\code{getAggregateData}: }{only for \code{Modifier}: a
+#' \code{getAggregateData}.
+#' \item \code{getAggregateData}: only for \code{Modifier}: a
 #' \code{SplitDataFrameList} with an element per transcript is returned. If the
 #' aggregated data is not stored in the object, it is generated on the fly, but
-#' does not persist.}
-#' \item{\code{hasAggregateData}: }{TRUE or FALSE. Does the \code{Modifier}
-#' object already contain aggregated data?}
+#' does not persist.
+#' \item \code{hasAggregateData}: TRUE or FALSE. Does the \code{Modifier}
+#' object already contain aggregated data?
 #' }
 #'
 #' @return
 #' If 'x' is a
 #' \itemize{
-#' \item{\code{\link[=SequenceData-class]{SequenceData}}} {a
-#' \code{SplitDataFrameList} with elments per transcript.}
-#' \item{\code{\link[=SequenceDataSet-class]{SequenceDataSet}} or
-#' \code{\link[=SequenceDataList-class]{SequenceDataList}}} {a \code{SimpleList}
-#' with \code{SplitDataFrameList} as elements.}
-#' \item{\code{\link[=Modifier-class]{Modifier}} or
-#' \code{\link[=ModifierSet-class]{ModifierSet}}} {an updated \code{Modifier}
-#' object. The data can be accessed by using the \code{aggregateData} function.}
+#' \item \code{\link[=SequenceData-class]{SequenceData}}: a
+#' \code{SplitDataFrameList} with elments per transcript.
+#' \item \code{\link[=SequenceDataSet-class]{SequenceDataSet}} or
+#' \code{\link[=SequenceDataList-class]{SequenceDataList}}: a \code{SimpleList}
+#' with \code{SplitDataFrameList} as elements.
+#' \item \code{\link[=Modifier-class]{Modifier}} or
+#' \code{\link[=ModifierSet-class]{ModifierSet}}: an updated \code{Modifier}
+#' object. The data can be accessed by using the \code{aggregateData} function.
 #' }
 #'
 #' @examples
@@ -1077,9 +1078,9 @@ setMethod(f = "hasAggregateData",
 #'
 #' @return
 #' \itemize{
-#' \item{\code{modify}: }{the updated \code{Modifier} object.}
-#' \item{\code{modifications}: }{the modifications found as a \code{GRanges}
-#' object.}
+#' \item \code{modify}: the updated \code{Modifier} object.
+#' \item \code{modifications}: the modifications found as a \code{GRanges}
+#' object.
 #' }
 #'
 #' @examples

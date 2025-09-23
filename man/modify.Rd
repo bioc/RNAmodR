@@ -38,9 +38,9 @@ in \code{x}.}
 }
 \value{
 \itemize{
-\item{\code{modify}: }{the updated \code{Modifier} object.}
-\item{\code{modifications}: }{the modifications found as a \code{GRanges}
-object.}
+\item \code{modify}: the updated \code{Modifier} object.
+\item \code{modifications}: the modifications found as a \code{GRanges}
+object.
 }
 }
 \description{

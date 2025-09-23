@@ -67,7 +67,7 @@ condition types.}
 \item{\code{bamfiles}}{the input bam files as 
 \code{\link[Rsamtools:BamFile-class]{BamFileList}}}
 
-\item{\code{seqinfo}}{a \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} describing
+\item{\code{seqinfo}}{a \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}} describing
 the avialable/used chromosomes.}
 }}
 

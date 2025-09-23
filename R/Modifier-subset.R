@@ -35,33 +35,33 @@ NULL
 #' @param pos Optional: Limit results to a specific position.
 #' @param ... Optional parameters:
 #' \itemize{
-#' \item{\code{type}:} {the modification type used for subsetting. By default 
+#' \item \code{type}: the modification type used for subsetting. By default 
 #' this is derived from the \code{modType(x)}, but it can be overwritten using 
 #' \code{type}. It must be a valid shortName for a modification according to
 #' \code{shortName(ModRNAString())} or \code{shortName(ModDNAString())} 
 #' (depending on the type of Modifier class) and of course be present in 
 #' metadata column \code{mod} of \code{coord}. To disable subsetting based on 
-#' type, set \code{type = NA}.}
-#' \item{\code{flanking}:} {a single integer value to select how many flanking
-#' position should be included in the subset (default: \code{flanking = 0L}).}
-#' \item{\code{merge}:} {\code{TRUE} or \code{FALSE}: Should the 
+#' type, set \code{type = NA}.
+#' \item \code{flanking}: a single integer value to select how many flanking
+#' position should be included in the subset (default: \code{flanking = 0L}).
+#' \item \code{merge}: \code{TRUE} or \code{FALSE}: Should the 
 #' overlapping selections be merged? This is particular important, if flanking
-#' value \code{!= 0L} are set. (default: \code{merge = TRUE}).}
-#' \item{\code{perTranscript}:} {\code{TRUE} or \code{FALSE}: Should the 
+#' value \code{!= 0L} are set. (default: \code{merge = TRUE}).
+#' \item \code{perTranscript}: \code{TRUE} or \code{FALSE}: Should the 
 #' positions labeled per transcript and not per chromosome?
-#' (default: \code{perTranscript = FALSE}).}
+#' (default: \code{perTranscript = FALSE}).
 #' }
 #' 
 #' @return 
 #' If 'x' is a
 #' \itemize{
-#' \item{\code{\link[=SequenceData-class]{SequenceData}} or 
-#' \code{\link[=Modifier-class]{Modifier}}:} {a \code{SplitDataFrameList}
-#' with elments per transcript.}
-#' \item{\code{\link[=SequenceDataSet-class]{SequenceDataSet}},
+#' \item \code{\link[=SequenceData-class]{SequenceData}} or 
+#' \code{\link[=Modifier-class]{Modifier}}: a \code{SplitDataFrameList}
+#' with elments per transcript.
+#' \item \code{\link[=SequenceDataSet-class]{SequenceDataSet}},
 #' \code{\link[=SequenceDataList-class]{SequenceDataList}} or
-#' \code{\link[=ModifierSet-class]{ModifierSet}}:} {a \code{SimpleList} of
-#' \code{SplitDataFrameList} with elments per transcript.}
+#' \code{\link[=ModifierSet-class]{ModifierSet}}: a \code{SimpleList} of
+#' \code{SplitDataFrameList} with elments per transcript.
 #' }
 #' 
 #' @examples

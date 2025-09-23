@@ -60,7 +60,7 @@ following naming convention \code{coverage.condition.replicate}.
 and \code{treated} condition separatly.
 }
 \examples{
-# Construction of a CoverageSequenceData objectobject
+# Construction of a CoverageSequenceData object
 library(RNAmodR.Data)
 library(rtracklayer)
 annotation <- GFF3File(RNAmodR.Data.example.man.gff3())

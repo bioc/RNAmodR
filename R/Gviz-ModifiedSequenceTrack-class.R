@@ -90,8 +90,10 @@ setMethod("initialize", "SequenceModRNAStringSetTrack",
 #' seq <- ModRNAStringSet(c(chr1 = paste0(alphabet(ModRNAString()),
 #'                                        collapse = "")))
 #' st <- ModRNASequenceTrack(seq)
-#' pdf.options(encoding=Encoding(as.character(seq)))
+#' # on some system character encoding during printing is not handled correctly
+#' \dontrun{
 #' Gviz::plotTracks(st, chromosome = "chr1",from = 1L, to = 20L)
+#' }
 ModRNASequenceTrack <- function(sequence, chromosome, genome,
                                 name = "SequenceTrack", ...){
   .SequenceTrack("SequenceModRNAStringSetTrack",

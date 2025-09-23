@@ -41,14 +41,14 @@ see also the man pages for the functions mentioned below.}
 }
 \value{
 \itemize{
-\item{\code{settings}} {See \code{\link[=Modifier-functions]{settings}}.}
-\item{\code{aggregate}} {See \code{\link{aggregate}}.}
-\item{\code{modify}} {See \code{\link{modify}}.}
-\item{\code{getDataTrack}} {a list of 
+\item \code{settings} See \code{\link[=Modifier-functions]{settings}}.
+\item \code{aggregate} See \code{\link{aggregate}}.
+\item \code{modify} See \code{\link{modify}}.
+\item \code{getDataTrack} a list of 
 \code{\link[Gviz:DataTrack-class]{DataTrack}} objects. See 
-\code{\link{plotDataByCoord}}.}
-\item{\code{plotData}} {See \code{\link{plotDataByCoord}}.}
-\item{\code{plotDataByCoord}} {See \code{\link{plotDataByCoord}}.}
+\code{\link{plotDataByCoord}}.
+\item \code{plotData} See \code{\link{plotDataByCoord}}.
+\item \code{plotDataByCoord} See \code{\link{plotDataByCoord}}.
 }
 }
 \description{
@@ -61,9 +61,9 @@ Check below for the specifically implemented functions.
 \details{
 \code{ModInosine} specific arguments for \link{plotData}:
 \itemize{
-\item{\code{colour.bases} - }{a named character vector of \code{length = 4} 
-for the colours of the individual bases. The names are expected to be 
-\code{c("G","A","U","C")}}
+  \item \code{colour.bases} - a named character vector of \code{length = 4} 
+  for the colours of the individual bases. The names are expected to be 
+  \code{c("G","A","U","C")}
 }
 }
 \examples{

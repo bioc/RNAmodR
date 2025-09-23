@@ -27,15 +27,15 @@ NULL
 #' @param className The name of the class which should be constructed.
 #' @param x the input which can be of the following types
 #' \itemize{
-#' \item{\code{Modifier}:} {a single \code{Modifier} or a list containg only 
+#' \item \code{Modifier}: a single \code{Modifier} or a list containg only 
 #' \code{Modifier} objects. The input will just be used as elements of the
-#' \code{ModifierSet}}
-#' \item{\code{BamFileList}:} {a named \code{BamFileList} or a list of 
-#' named \code{BamFileList}}
-#' \item{\code{list}:} {a list of one or more types of elements: 
+#' \code{ModifierSet}
+#' \item \code{BamFileList}: a named \code{BamFileList} or a list of 
+#' named \code{BamFileList}
+#' \item \code{list}: a list of one or more types of elements: 
 #' \code{BamFileList}, a named \code{list} or named \code{character} vector. All
 #' elements must be or be coercible to a named \code{BamFileList} referencing 
-#' existing bam files. Valid names are \code{control} and \code{treated}}
+#' existing bam files. Valid names are \code{control} and \code{treated}
 #' }
 #' @param annotation annotation data, which must match the information contained
 #' in the BAM files. This is parameter is only required, if \code{x} is not a 
@@ -43,18 +43,18 @@ NULL
 #' @param sequences sequences matching the target sequences the reads were 
 #' mapped onto. This must match the information contained in the BAM files. This
 #' is parameter is only required, if \code{x} is not a \code{Modifier} object.
-#' @param seqinfo An optional \code{\link[GenomeInfoDb:Seqinfo-class]{Seqinfo}} 
+#' @param seqinfo An optional \code{\link[Seqinfo:Seqinfo-class]{Seqinfo}} 
 #' argument or character vector, which can be coerced to one, to subset the 
 #' sequences to be analyzed on a per chromosome basis.
 #' @param ... Additional otpional parameters:
 #' \itemize{
-#' \item{internalBP} {\code{TRUE} or \code{FALSE}: should parallelization used
+#' \item internalBP: \code{TRUE} or \code{FALSE}: should parallelization used
 #' internally during creation of each \code{Modifier} or should the creation of
 #' the \code{Modifier} objects be parallalized? (default: \code{internalBP =
 #' FALSE}). Setting \code{internalBP} only makes sense, if the
 #' \code{\link{getData}} function for \code{\link{SequenceData}} class, the
 #' \code{\link[=aggregate]{aggregateData}} or the \code{\link[=modify]{findMod}}
-#' function contains parallelized code.}
+#' function contains parallelized code.
 #' }
 #' All other arguments will be passed onto the \code{Modifier} objects.
 #' 

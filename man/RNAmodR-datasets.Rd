@@ -17,17 +17,17 @@
 \title{Example data in the RNAmodR package}
 \format{
 \itemize{
-\item{msi} {a \code{ModSetInosine} instance}
-\item{sds} {a \code{SequenceDataSet} instance}
-\item{sdl} {a \code{SequenceDataList} instance}
-\item{psd} {a \code{PileupSequenceData} instance}
-\item{e5sd} {a \code{End5SequenceData} instance}
-\item{e3sd} {a \code{End3SequenceData} instance}
-\item{esd} {a \code{EndSequenceData} instance}
-\item{csd} {a \code{CoverageSequenceData} instance}
-\item{ne3sd} {a \code{NormEnd3SequenceData} instance}
-\item{ne5sd} {a \code{NormEnd5SequenceData} instance}
-\item{pesd} {a \code{ProtectedEndSequenceData} instance}
+\item msi a \code{ModSetInosine} instance
+\item sds a \code{SequenceDataSet} instance
+\item sdl a \code{SequenceDataList} instance
+\item psd a \code{PileupSequenceData} instance
+\item e5sd a \code{End5SequenceData} instance
+\item e3sd a \code{End3SequenceData} instance
+\item esd a \code{EndSequenceData} instance
+\item csd a \code{CoverageSequenceData} instance
+\item ne3sd a \code{NormEnd3SequenceData} instance
+\item ne5sd a \code{NormEnd5SequenceData} instance
+\item pesd a \code{ProtectedEndSequenceData} instance
 }
 
 An object of class \code{SequenceDataSet} of length 2.

@@ -61,29 +61,29 @@ inside the \code{Modifier} object.}
 }
 \value{
 \itemize{
-\item{\code{aggregate}: }{for \code{SequenceData} object the aggregated data
+\item \code{aggregate}: for \code{SequenceData} object the aggregated data
 is returned as a \code{SplitDataFrameList} with an element per transcript,
 whereas for a \code{Modifier} the modified input object is returned,
 containing the aggregated data, which can be accessed using
-\code{getAggregateData}.}
-\item{\code{getAggregateData}: }{only for \code{Modifier}: a
+\code{getAggregateData}.
+\item \code{getAggregateData}: only for \code{Modifier}: a
 \code{SplitDataFrameList} with an element per transcript is returned. If the
 aggregated data is not stored in the object, it is generated on the fly, but
-does not persist.}
-\item{\code{hasAggregateData}: }{TRUE or FALSE. Does the \code{Modifier}
-object already contain aggregated data?}
+does not persist.
+\item \code{hasAggregateData}: TRUE or FALSE. Does the \code{Modifier}
+object already contain aggregated data?
 }
 
 If 'x' is a
 \itemize{
-\item{\code{\link[=SequenceData-class]{SequenceData}}} {a
-\code{SplitDataFrameList} with elments per transcript.}
-\item{\code{\link[=SequenceDataSet-class]{SequenceDataSet}} or
-\code{\link[=SequenceDataList-class]{SequenceDataList}}} {a \code{SimpleList}
-with \code{SplitDataFrameList} as elements.}
-\item{\code{\link[=Modifier-class]{Modifier}} or
-\code{\link[=ModifierSet-class]{ModifierSet}}} {an updated \code{Modifier}
-object. The data can be accessed by using the \code{aggregateData} function.}
+\item \code{\link[=SequenceData-class]{SequenceData}}: a
+\code{SplitDataFrameList} with elments per transcript.
+\item \code{\link[=SequenceDataSet-class]{SequenceDataSet}} or
+\code{\link[=SequenceDataList-class]{SequenceDataList}}: a \code{SimpleList}
+with \code{SplitDataFrameList} as elements.
+\item \code{\link[=Modifier-class]{Modifier}} or
+\code{\link[=ModifierSet-class]{ModifierSet}}: an updated \code{Modifier}
+object. The data can be accessed by using the \code{aggregateData} function.
 }
 }
 \description{

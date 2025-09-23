@@ -63,9 +63,9 @@ functions.
 
 By default the \code{prediction.args} include three values:
 \itemize{
-\item{\code{measure = "tpr"}}
-\item{\code{x.measure = "fpr"}}
-\item{\code{score = mainScore(x)}}
+\item \code{measure = "tpr"}
+\item \code{x.measure = "fpr"}
+\item \code{score = mainScore(x)}
 }
 The remaining arguments are not predefined.
 }

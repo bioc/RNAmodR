@@ -106,17 +106,17 @@ NULL
 #' @usage data(msi)
 #' @format 
 #' \itemize{
-#' \item{msi} {a \code{ModSetInosine} instance}
-#' \item{sds} {a \code{SequenceDataSet} instance}
-#' \item{sdl} {a \code{SequenceDataList} instance}
-#' \item{psd} {a \code{PileupSequenceData} instance}
-#' \item{e5sd} {a \code{End5SequenceData} instance}
-#' \item{e3sd} {a \code{End3SequenceData} instance}
-#' \item{esd} {a \code{EndSequenceData} instance}
-#' \item{csd} {a \code{CoverageSequenceData} instance}
-#' \item{ne3sd} {a \code{NormEnd3SequenceData} instance}
-#' \item{ne5sd} {a \code{NormEnd5SequenceData} instance}
-#' \item{pesd} {a \code{ProtectedEndSequenceData} instance}
+#' \item msi a \code{ModSetInosine} instance
+#' \item sds a \code{SequenceDataSet} instance
+#' \item sdl a \code{SequenceDataList} instance
+#' \item psd a \code{PileupSequenceData} instance
+#' \item e5sd a \code{End5SequenceData} instance
+#' \item e3sd a \code{End3SequenceData} instance
+#' \item esd a \code{EndSequenceData} instance
+#' \item csd a \code{CoverageSequenceData} instance
+#' \item ne3sd a \code{NormEnd3SequenceData} instance
+#' \item ne5sd a \code{NormEnd5SequenceData} instance
+#' \item pesd a \code{ProtectedEndSequenceData} instance
 #' }
 #' @keywords datasets
 "msi"
@@ -206,15 +206,15 @@ NULL
 #' 
 #' @return 
 #' \itemize{
-#' \item{\code{getData}:} {returns a list with elements per BamFile in 
+#' \item \code{getData}: returns a list with elements per BamFile in 
 #' \code{bamfiles}. Elements can be 
 #' \code{\link[IRanges:AtomicList-class]{IntegerList}}, 
 #' \code{\link[IRanges:AtomicList-class]{NumericList}} or a
 #' \code{\link[IRanges:DataFrameList-class]{CompressedSplitDataFrameList}}. The
 #' data in the elements must be order by increasing positions numbers. However, 
-#' names and rownames will be discarded.}
-#' \item{\code{constructModRanges}:} {returns a \code{GRanges} object with
-#' genomic coordinates of modified nucleotides in the associated transcripts.}
+#' names and rownames will be discarded.
+#' \item \code{constructModRanges}: returns a \code{GRanges} object with
+#' genomic coordinates of modified nucleotides in the associated transcripts.
 #' }
 #' 
 #' @examples 
