@@ -608,6 +608,7 @@ setMethod("unlist", "SequenceData",
 # also used at other places
 
 # check for multiple seqnames per ranges
+#' @importFrom Seqinfo seqlevelsInUse
 .norm_unique_seqnames <- function(ranges){
   seqnames_ranges_u <- unique(Seqinfo::seqnames(ranges))
   f <- lengths(seqnames_ranges_u) != 1L
